@@ -1,5 +1,6 @@
 // Builds a sample quotation PDF (used by the automatic checks to catch layout errors).
 import { readFileSync, writeFileSync } from "node:fs";
+import { buildDeliveryNotePdf } from "../src/lib/pdf/delivery";
 import { buildPurchaseOrderPdf, buildSupplierRfqPdf } from "../src/lib/pdf/purchasing";
 import { buildQuotationPdf } from "../src/lib/pdf/quotation";
 
@@ -47,6 +48,38 @@ const supplier = {
 };
 
 async function main() {
+  if (process.argv[2] === "dn") {
+    const logo = { bytes: new Uint8Array(readFileSync("public/icons/icon-192.png")), type: "png" as const };
+    const bytes = await buildDeliveryNotePdf({
+      company,
+      logo,
+      delivery: {
+        number: "DN-2026-0009",
+        status: "delivered",
+        planned_date: "2026-10-08",
+        dispatched_at: "2026-10-08T05:30:00Z",
+        client_ref: "PO 4500123",
+        quotation_no: "QT-2026-0007-R1",
+        delivery_site: "Geita Gold Mine, main stores, gate 2",
+        contact_name: "Asha Mwakyusa",
+        contact_phone: "+255 700 111 222",
+        vehicle: "T 123 ABC",
+        driver: "Juma Driver",
+        notes: "Deliver before 14:00. Site induction required.",
+        received_by_name: "Asha Mwakyusa",
+        delivered_at: "2026-10-08T11:42:00Z",
+        gps: "GPS -2.87412, 32.23159",
+        pod_notes: "1 drum dented, accepted.",
+      },
+      client: { name: "Geita Gold Mining Ltd", address: "P.O. Box 532, Geita", tin: "100-200-300" },
+      store: "Main store (Dar es Salaam)",
+      lines: lines.slice(0, 5).map((l, i) => ({ ...l, batches: i === 0 ? "B2 (exp 31 Dec 2026), B1 (exp 31 Jan 2027)" : null })),
+      signature: { bytes: new Uint8Array(readFileSync("public/icons/icon-192.png")), type: "png" },
+    });
+    writeFileSync(process.argv[3], bytes);
+    console.log(`ok ${bytes.length} bytes`);
+    return;
+  }
   if (process.argv[2] === "po" || process.argv[2] === "srfq") {
     const logo = { bytes: new Uint8Array(readFileSync("public/icons/icon-192.png")), type: "png" as const };
     const few = lines.slice(0, 6).map((l) => ({ ...l, unit_price: l.unit_price / 2600, line_total: l.line_total / 2600 }));

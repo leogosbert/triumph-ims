@@ -35,13 +35,21 @@ export type DocData = {
   partyLabel: string;
   party: { name: string; lines: (string | null | undefined)[] };
   currency: string;
-  mode: "priced" | "priced-discount" | "unpriced";
+  mode: "priced" | "priced-discount" | "unpriced" | "quantities";
   lines: DocLine[];
   totals?: { rows: [string, number, boolean?][]; grandLabel: string; grand: number };
   blocks: { title: string; body: string | null | undefined }[];
   signature?: string | null;
   watermark?: string | null;
   showBank?: boolean;
+  /** Delivery note sign-off: empty boxes to sign on paper, or the captured signature. */
+  signoff?: {
+    deliveredBy: string | null;
+    receivedBy: string | null;
+    when: string | null;
+    gps: string | null;
+    signature: { bytes: Uint8Array; type: "png" | "jpg" } | null;
+  };
 };
 
 const A4 = { w: 595.28, h: 841.89 };
@@ -144,7 +152,7 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
     text(s, xr - f.widthOfTextAtSize(clean(s), size), yy, o);
   };
 
-  const priced = d.mode !== "unpriced";
+  const priced = d.mode === "priced" || d.mode === "priced-discount";
   const withDisc = d.mode === "priced-discount";
   const cols = priced
     ? withDisc
@@ -164,6 +172,8 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
       right("Unit price", cols.priceR, y, o);
       if (withDisc) right("Disc.", cols.discR, y, o);
       right(`Amount (${d.currency})`, cols.amountR - 4, y, o);
+    } else if (d.mode === "quantities") {
+      right("Checked", cols.amountR - 4, y, o);
     } else {
       right("Your price / unit", cols.amountR - 4, y, o);
     }
@@ -270,6 +280,8 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
       right(pdfMoney(l.unit_price ?? 0, d.currency), cols.priceR, y);
       if (withDisc) right(Number(l.discount_pct ?? 0) > 0 ? `${Number(l.discount_pct)}%` : "", cols.discR, y);
       right(pdfMoney(l.line_total ?? 0, d.currency), cols.amountR - 4, y, { f: bold });
+    } else if (d.mode === "quantities") {
+      page.drawRectangle({ x: cols.amountR - 20, y: y - 3, width: 11, height: 11, borderColor: muted, borderWidth: 0.7 });
     } else {
       page.drawLine({ start: { x: cols.amountR - 90, y: y - 3 }, end: { x: cols.amountR - 4, y: y - 3 }, thickness: 0.5, color: muted });
     }
@@ -310,6 +322,57 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
       y -= 11;
     }
     y -= 8;
+  }
+
+  if (d.signoff) {
+    const so = d.signoff;
+    let sig: PDFImage | null = null;
+    if (so.signature) {
+      try {
+        sig = so.signature.type === "png" ? await pdf.embedPng(so.signature.bytes) : await pdf.embedJpg(so.signature.bytes);
+      } catch {
+        sig = null;
+      }
+    }
+    const boxH = 118;
+    if (y - boxH < 70) newPage(false);
+    const w = (A4.w - 2 * M - 16) / 2;
+    const top = y + 4;
+    const boxes: { x: number; title: string }[] = [
+      { x: M, title: "Delivered by" },
+      { x: M + w + 16, title: "Received in good order by" },
+    ];
+    for (const b of boxes) {
+      page.drawRectangle({ x: b.x, y: top - boxH, width: w, height: boxH, borderColor: rule, borderWidth: 0.8 });
+      text(b.title.toUpperCase(), b.x + 8, top - 14, { f: bold, size: 7.5, color: brand });
+    }
+    // Left: driver
+    text(`Name: ${so.deliveredBy ?? ""}`, M + 8, top - 32, { size: 9 });
+    if (!so.deliveredBy) page.drawLine({ start: { x: M + 40, y: top - 34 }, end: { x: M + w - 10, y: top - 34 }, thickness: 0.5, color: muted });
+    text("Signature:", M + 8, top - 62, { size: 9, color: muted });
+    page.drawLine({ start: { x: M + 58, y: top - 64 }, end: { x: M + w - 10, y: top - 64 }, thickness: 0.5, color: muted });
+    text("Date:", M + 8, top - 92, { size: 9, color: muted });
+    page.drawLine({ start: { x: M + 36, y: top - 94 }, end: { x: M + w - 10, y: top - 94 }, thickness: 0.5, color: muted });
+    // Right: client
+    const rx = M + w + 16;
+    if (so.receivedBy) {
+      text(`Name: ${so.receivedBy}`, rx + 8, top - 32, { size: 9, f: bold });
+      if (sig) {
+        const sh = 46;
+        const sw = Math.min((sig.width / sig.height) * sh, w - 20);
+        page.drawImage(sig, { x: rx + 8, y: top - 84, width: sw, height: (sw / sig.width) * sig.height });
+      }
+      text(so.when ?? "", rx + 8, top - 96, { size: 8.5 });
+      if (so.gps) text(so.gps, rx + 8, top - 108, { size: 7.5, color: muted });
+    } else {
+      text("Name:", rx + 8, top - 32, { size: 9, color: muted });
+      page.drawLine({ start: { x: rx + 40, y: top - 34 }, end: { x: rx + w - 10, y: top - 34 }, thickness: 0.5, color: muted });
+      text("Signature:", rx + 8, top - 62, { size: 9, color: muted });
+      page.drawLine({ start: { x: rx + 58, y: top - 64 }, end: { x: rx + w - 10, y: top - 64 }, thickness: 0.5, color: muted });
+      text("Date / stamp:", rx + 8, top - 92, { size: 9, color: muted });
+      page.drawLine({ start: { x: rx + 66, y: top - 94 }, end: { x: rx + w - 10, y: top - 94 }, thickness: 0.5, color: muted });
+    }
+    y = top - boxH - 16;
   }
 
   if (d.signature) {

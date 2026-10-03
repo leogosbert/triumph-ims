@@ -70,6 +70,7 @@ jobs:
           npx tsx scripts/pdf-sample.ts draft sample-draft.pdf
           npx tsx scripts/pdf-sample.ts po sample-po.pdf
           npx tsx scripts/pdf-sample.ts srfq sample-srfq.pdf
+          npx tsx scripts/pdf-sample.ts dn sample-dn.pdf
       - name: Render page previews
         run: |
           sudo apt-get install -y -qq poppler-utils >/dev/null
@@ -78,11 +79,12 @@ jobs:
           pdftoppm -r 36 -f 1 -l 1 -jpeg -jpegopt quality=40 sample-draft.pdf draft
           pdftoppm -r 40 -f 1 -l 1 -jpeg -jpegopt quality=45 sample-po.pdf po
           pdftoppm -r 36 -f 1 -l 1 -jpeg -jpegopt quality=40 sample-srfq.pdf srfq
+          pdftoppm -r 40 -f 1 -l 1 -jpeg -jpegopt quality=45 sample-dn.pdf dn
           ls -la *.jpg
       - name: Preview page 1
         run: bash scripts/emit-preview.sh page-1.jpg
-      - name: Preview page 2
-        run: bash scripts/emit-preview.sh page-2.jpg
+      - name: Preview delivery note
+        run: bash scripts/emit-preview.sh dn-1.jpg
       - name: Preview PO
         run: bash scripts/emit-preview.sh po-1.jpg
       - name: Preview supplier RFQ

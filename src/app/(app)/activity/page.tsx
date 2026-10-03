@@ -31,6 +31,10 @@ const ENTITY: Record<string, string> = {
   supplier_rfq_suppliers: "supplier on an RFQ",
   purchase_orders: "purchase order",
   po_lines: "PO line",
+  warehouses: "store",
+  goods_receipts: "goods received note",
+  deliveries: "delivery note",
+  delivery_lines: "delivery line",
 };
 
 const LINKS: Record<string, string> = {
@@ -41,6 +45,8 @@ const LINKS: Record<string, string> = {
   quotations: "/quotations/",
   supplier_rfqs: "/supplier-rfqs/",
   purchase_orders: "/purchase-orders/",
+  goods_receipts: "/grns/",
+  deliveries: "/deliveries/",
 };
 
 const FIELD: Record<string, string> = {
@@ -82,6 +88,12 @@ const FIELD: Record<string, string> = {
   total: "total",
   approval_reason: "approval reason",
   review_note: "manager's note",
+  driver_id: "driver",
+  vehicle: "vehicle",
+  received_by_name: "received by",
+  failed_reason: "reason for failure",
+  delivery_site: "delivery site",
+  planned_date: "planned date",
 };
 
 const HIDDEN_FIELDS = new Set(["subtotal", "discount_total", "vat_amount", "line_total", "submitted_at", "approved_at", "sent_at", "decided_at", "submitted_by", "approved_by"]);

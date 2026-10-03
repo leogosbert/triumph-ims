@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { can, type Role } from "@/lib/roles";
 
 type Item = { href: string; label: string; icon: React.ReactNode };
 
@@ -18,31 +19,57 @@ const SUPPLIERS = icon("M1 7h13v10H1zM14 10h4l4 4v3h-8zM5.5 20a2 2 0 1 0 0-4 2 2
 const SALES = icon("M4 4h16v16H4zM8 9h8M8 13h8M8 17h5");
 const MORE = icon("M4 6h16M4 12h16M4 18h16");
 
-export function BottomNav({ showSales, showPurchasing }: { showSales: boolean; showPurchasing: boolean }) {
+const STOCK = icon("M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4");
+const TRUCK = icon("M1 6h13v10H1zM14 9h4l4 4v3h-8zM5.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z");
+
+const SECTIONS: Record<string, string[]> = {
+  "/more": ["/more", "/settings", "/account", "/import", "/activity"],
+  "/sales": ["/sales", "/rfqs", "/quotations", "/clients"],
+  "/purchasing": ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers"],
+  "/stock": ["/stock", "/warehouses", "/receiving", "/grns", "/deliveries"],
+  "/deliveries": ["/deliveries"],
+  "/driver": ["/driver"],
+};
+
+export function BottomNav({ role }: { role: Role }) {
   const pathname = usePathname();
-  const items: Item[] = [
-    { href: "/", label: "Home", icon: HOME },
-    showSales
-      ? { href: "/sales", label: "Sales", icon: SALES }
-      : { href: "/clients", label: "Clients", icon: CLIENTS },
-    { href: "/products", label: "Products", icon: PRODUCTS },
-    ...(showPurchasing ? [{ href: "/purchasing", label: "Purchasing", icon: SUPPLIERS }] : []),
-    { href: "/more", label: "More", icon: MORE },
-  ];
+  let items: Item[];
+  if (role === "driver") {
+    items = [
+      { href: "/driver", label: "Deliveries", icon: TRUCK },
+      { href: "/products", label: "Products", icon: PRODUCTS },
+      { href: "/more", label: "More", icon: MORE },
+    ];
+  } else {
+    items = [
+      { href: "/", label: "Home", icon: HOME },
+      can(role, "seeSales")
+        ? { href: "/sales", label: "Sales", icon: SALES }
+        : role === "warehouse"
+          ? { href: "/deliveries", label: "Deliveries", icon: TRUCK }
+          : { href: "/clients", label: "Clients", icon: CLIENTS },
+      ...(can(role, "seePurchasing") ? [{ href: "/purchasing", label: "Purchasing", icon: SUPPLIERS }] : []),
+      ...(can(role, "seeStock") ? [{ href: "/stock", label: "Stock", icon: STOCK }] : []),
+    ];
+    if (items.length < 4) items.push({ href: "/products", label: "Products", icon: PRODUCTS });
+    items.push({ href: "/more", label: "More", icon: MORE });
+  }
+  const hasDeliveriesTab = items.some((i) => i.href === "/deliveries");
   return (
     <nav className="bottomnav" aria-label="Main">
       {items.map((it) => {
-        const moreSections = ["/more", "/settings", "/account", "/import", "/activity"];
-        const active =
-          it.href === "/"
-            ? pathname === "/"
-            : it.href === "/more"
-              ? moreSections.some((p) => pathname.startsWith(p))
-              : it.href === "/sales"
-                ? ["/sales", "/rfqs", "/quotations", "/clients"].some((p) => pathname.startsWith(p))
-                : it.href === "/purchasing"
-                  ? ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers"].some((p) => pathname.startsWith(p))
-                  : pathname.startsWith(it.href);
+        let paths = SECTIONS[it.href] ?? [it.href];
+        if (it.href === "/stock" && hasDeliveriesTab) paths = paths.filter((p) => p !== "/deliveries");
+        const active = it.href === "/" ? pathname === "/" : paths.some((p) => pathname.startsWith(p));
+        // The driver screen is a plain link so the phone can open it offline.
+        if (it.href === "/driver") {
+          return (
+            <a key={it.href} href={it.href} aria-current={active ? "page" : undefined}>
+              {it.icon}
+              {it.label}
+            </a>
+          );
+        }
         return (
           <Link key={it.href} href={it.href} aria-current={active ? "page" : undefined}>
             {it.icon}

@@ -59,6 +59,8 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
   const canEdit = can(role, "editPurchasing");
   const isDraft = po.status === "draft";
   const editable = canEdit && isDraft;
+  const { data: grnData } = await supabase.from("goods_receipts").select("id, number, received_on").eq("po_id", id).order("created_at");
+  const grns = (grnData ?? []) as { id: string; number: string; received_on: string }[];
   const [{ data: lineData }, { data: quote }, products, names] = await Promise.all([
     supabase
       .from("po_lines")
@@ -205,6 +207,26 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
           </form>
         </section>
       )}
+
+      {(can(role, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status)) || grns.length > 0 ? (
+        <section className="card">
+          <h2>Goods received</h2>
+          {grns.length === 0 && <p className="muted small">Nothing received yet.</p>}
+          <ul className="list">
+            {grns.map((g) => (
+              <li key={g.id} className="row">
+                <Link href={`/grns/${g.id}`}>{g.number}</Link>
+                <span className="small muted">{formatDate(g.received_on)}</span>
+              </li>
+            ))}
+          </ul>
+          {can(role, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status) && (
+            <Link href={`/purchase-orders/${po.id}/receive`} className="btn btn-primary" style={{ marginTop: 8 }}>
+              Receive goods
+            </Link>
+          )}
+        </section>
+      ) : null}
 
       <section className="card" id="lines">
         <h2>Items ({lines.length})</h2>

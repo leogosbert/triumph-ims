@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { displayName, getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -8,7 +9,6 @@ import { can } from "@/lib/roles";
 export const metadata = { title: "Home" };
 
 const COMING = [
-  { title: "Stock & deliveries", sub: "Goods received, stock, delivery notes, proof of delivery", stage: 5 },
   { title: "Invoices & payments", sub: "Invoices, receipts, money owed, profit per order", stage: 6 },
   { title: "Dashboard & alerts", sub: "Control tower, notifications, email", stage: 7 },
 ];
@@ -27,6 +27,7 @@ function greeting() {
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
   const notice = await readNotice(searchParams);
   const { supabase, profile, company, role, isManager, user } = await getAppContext();
+  if (role === "driver") redirect("/driver");
   const firstName = displayName(profile).split(" ")[0];
 
   let checklist: { done: boolean; label: string; href: string }[] = [];
@@ -146,6 +147,24 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
           <Link href="/purchasing" className="tile">
             <div className="tile-title">Purchasing</div>
             <div className="tile-sub">Supplier RFQs, price comparison, purchase orders</div>
+          </Link>
+        )}
+        {can(role, "seeStock") && (
+          <Link href="/stock" className="tile">
+            <div className="tile-title">Stock</div>
+            <div className="tile-sub">What is in the store, batches and expiry dates</div>
+          </Link>
+        )}
+        {can(role, "receiveGoods") && (
+          <Link href="/receiving" className="tile">
+            <div className="tile-title">Receive goods</div>
+            <div className="tile-sub">Purchase orders waiting for delivery, goods received notes</div>
+          </Link>
+        )}
+        {can(role, "seeDeliveries") && (
+          <Link href="/deliveries" className="tile">
+            <div className="tile-title">Deliveries</div>
+            <div className="tile-sub">Delivery notes, drivers, proof of delivery</div>
           </Link>
         )}
         <Link href="/clients" className="tile">

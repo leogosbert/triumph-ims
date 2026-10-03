@@ -46,6 +46,11 @@ export default async function MorePage() {
         <Tile href="/products" title="Products" sub="Search, view and edit the catalogue" />
         {can(role, "seeSales") && <Tile href="/sales" title="Sales" sub="Client RFQs, quotations, approvals" />}
         {can(role, "seePurchasing") && <Tile href="/purchasing" title="Purchasing" sub="Supplier RFQs and purchase orders" />}
+        {can(role, "seeStock") && <Tile href="/stock" title="Stock" sub="Stock on hand, batches, expiry, adjustments" />}
+        {can(role, "receiveGoods") && <Tile href="/receiving" title="Receive goods" sub="Record goods arriving against purchase orders" />}
+        {can(role, "seeDeliveries") && <Tile href="/deliveries" title="Deliveries" sub="Delivery notes and proof of delivery" />}
+        {role === "driver" && <Tile href="/driver" title="My deliveries" sub="Deliveries assigned to you, record proof of delivery" />}
+        {can(role, "manageWarehouses") && <Tile href="/warehouses" title="Stores" sub="Warehouses and store locations" />}
         {can(role, "importData") && (
           <Tile href="/import" title="Import from spreadsheet" sub="Load many records at once from the template" />
         )}

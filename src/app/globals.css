@@ -646,3 +646,18 @@ table.compare td.best { background: var(--ok-bg); color: var(--ok); font-weight:
 table.compare tr.total td { font-weight: 700; border-top: 2px solid var(--text); }
 table.compare .none { color: var(--muted); }
 .supplier-row { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* ---------- Driver app ---------- */
+.sync-bar { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); margin-bottom: 12px; font-size: 0.9rem; font-weight: 600; }
+.sync-bar.on { background: var(--ok-bg); color: var(--ok); }
+.sync-bar.off { background: var(--warn-bg); color: var(--warn); }
+.sync-bar .dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; flex: none; }
+.sync-bar .grow { flex: 1; }
+.delivery-card .drop { margin: 10px 0 4px; font-weight: 600; }
+.delivery-card .lines { margin: 8px 0 12px; }
+.pod-form { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 12px; }
+.pod-form .tabs { margin-bottom: 12px; }
+.sig-wrap { position: relative; }
+.sig-pad { display: block; width: 100%; height: 180px; border: 1px dashed var(--muted); border-radius: 8px; background: #fff; touch-action: none; }
+.sig-clear { position: absolute; top: 6px; right: 6px; }
+.pod-photo { display: block; margin-top: 8px; max-width: 100%; max-height: 220px; border-radius: 8px; border: 1px solid var(--line); }

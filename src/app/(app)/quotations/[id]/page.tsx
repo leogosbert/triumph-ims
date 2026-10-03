@@ -27,6 +27,8 @@ import {
   updateQuoteLine,
 } from "../actions";
 import { createSupplierRfq } from "../../supplier-rfqs/actions";
+import { newDelivery } from "../../deliveries/actions";
+import { DELIVERY_STATUS } from "@/lib/stock";
 
 export const metadata = { title: "Quotation" };
 
@@ -121,6 +123,11 @@ export default async function QuotationPage({
     : [{ data: [] }, { data: [] }];
   const linkedSrfqs = (srfqData ?? []) as { id: string; number: string; status: string }[];
   const linkedPos = (poData ?? []) as unknown as { id: string; number: string; status: string; supplier: { name: string } | null }[];
+  const showDeliveries = q.status === "accepted" && can(role, "seeDeliveries");
+  const { data: dnData } = showDeliveries
+    ? await supabase.from("deliveries").select("id, number, status").eq("quotation_id", id).order("created_at")
+    : { data: [] };
+  const linkedDns = (dnData ?? []) as { id: string; number: string; status: string }[];
   const names = await namesFor(supabase, [q.created_by, q.submitted_by, q.approved_by]);
   const ccy = q.currency as string;
   const today = todayTz();
@@ -293,6 +300,29 @@ export default async function QuotationPage({
               Create purchase order
             </Link>
           </div>
+        </section>
+      )}
+
+      {showDeliveries && (
+        <section className="card" id="deliveries">
+          <h2>Deliveries to the client</h2>
+          {linkedDns.length === 0 && <p className="muted small">No delivery notes yet.</p>}
+          <ul className="list">
+            {linkedDns.map((d) => (
+              <li key={d.id} className="row">
+                <Link href={`/deliveries/${d.id}`}>{d.number}</Link>
+                <StatusBadge map={DELIVERY_STATUS} status={d.status} />
+              </li>
+            ))}
+          </ul>
+          {can(role, "editDeliveries") && (
+            <form action={newDelivery} className="actions">
+              <input type="hidden" name="quotation_id" value={q.id} />
+              <SubmitButton className="btn btn-primary" pendingText="Creating…">
+                Create delivery note
+              </SubmitButton>
+            </form>
+          )}
         </section>
       )}
 

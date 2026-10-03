@@ -10,11 +10,12 @@ export async function companyPeople(supabase: Supabase, companyId: string) {
     .select("user_id, role")
     .eq("company_id", companyId)
     .eq("active", true);
-  const ids = ((members ?? []) as { user_id: string }[]).map((m) => m.user_id);
+  const roleOf = new Map(((members ?? []) as { user_id: string; role: string }[]).map((m) => [m.user_id, m.role]));
+  const ids = [...roleOf.keys()];
   const { data: profiles } = ids.length
     ? await supabase.from("profiles").select("id, full_name, email, phone").in("id", ids)
     : { data: [] };
-  const people = ((profiles ?? []) as Profile[]).map((p) => ({ id: p.id, name: displayName(p) }));
+  const people = ((profiles ?? []) as Profile[]).map((p) => ({ id: p.id, name: displayName(p), role: roleOf.get(p.id) ?? "" }));
   people.sort((a, b) => a.name.localeCompare(b.name));
   return people;
 }

@@ -22,7 +22,7 @@ jobs:
       PGUSER: postgres
       PGPASSWORD: postgres
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run database security tests
         run: bash supabase/tests/run.sh
 
@@ -35,11 +35,20 @@ jobs:
       NEXT_PUBLIC_SITE_URL: https://example.com
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Install
         run: npm install --no-audit --no-fund
       - name: Build (includes type check)
-        run: npm run build
+        run: |
+          set +e
+          npm run build 2>&1 | tee build.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            # Report the end of the log as an annotation so it shows on the check itself.
+            msg=$(tail -n 80 build.log | sed 's/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=Build failed::${msg}"
+          fi
+          exit $status

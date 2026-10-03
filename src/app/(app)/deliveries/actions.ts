@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
+import { kickOutbox } from "@/lib/outbox";
 import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
@@ -35,6 +36,7 @@ export async function newDelivery(form: FormData) {
 }
 
 export async function saveDelivery(form: FormData) {
+  kickOutbox(); // send any alerts this creates right after the response
   const { supabase, company } = await getAppContext();
   const id = str(form, "id");
   const values: Record<string, unknown> = {
@@ -108,6 +110,7 @@ export async function removeDeliveryLine(form: FormData) {
 }
 
 export async function dispatchDelivery(form: FormData) {
+  kickOutbox(); // send any alerts this creates right after the response
   const { supabase } = await getAppContext();
   const id = str(form, "id");
   const { error } = await supabase.rpc("dispatch_delivery", { p_id: id });
@@ -116,6 +119,7 @@ export async function dispatchDelivery(form: FormData) {
 }
 
 export async function failDelivery(form: FormData) {
+  kickOutbox(); // send any alerts this creates right after the response
   const { supabase } = await getAppContext();
   const id = str(form, "id");
   const { error } = await supabase.rpc("fail_delivery", { p_id: id, p_reason: str(form, "reason") });

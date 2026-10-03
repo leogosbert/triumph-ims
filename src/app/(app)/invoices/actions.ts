@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
+import { kickOutbox } from "@/lib/outbox";
 import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
@@ -177,6 +178,7 @@ export async function cancelInvoice(form: FormData) {
 }
 
 export async function recordPayment(form: FormData) {
+  kickOutbox(); // send any alerts this creates right after the response
   const { supabase } = await getAppContext();
   const id = str(form, "invoice_id");
   const amount = toNumber(str(form, "amount"));

@@ -68,6 +68,8 @@ export default async function MorePage() {
         />
         {isManager && <Tile href="/settings/team" title="Team & roles" sub="Invite people, change roles" />}
         {isManager && <Tile href="/activity" title="Activity log" sub="Every change, who made it and when" />}
+        <Tile href="/notifications" title="Notifications" sub="Your alerts, phone notifications and emails" />
+        {isManager && <Tile href="/settings/notifications" title="Alerts setup" sub="Connect phone push and email sending" />}
         <Tile href="/account" title="Your account" sub="Your details, password, sign out" />
       </div>
     </>

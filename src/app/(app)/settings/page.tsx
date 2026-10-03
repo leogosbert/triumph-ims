@@ -33,6 +33,16 @@ export default async function SettingsPage() {
             <div className="tile-sub">Invite people, change roles, switch access off</div>
           </Link>
         )}
+        <Link href="/notifications#settings" className="tile">
+          <div className="tile-title">Your notifications</div>
+          <div className="tile-sub">Phone notifications and alert emails for you</div>
+        </Link>
+        {isManager && (
+          <Link href="/settings/notifications" className="tile">
+            <div className="tile-title">Alerts setup (server)</div>
+            <div className="tile-sub">Connect phone push and email sending</div>
+          </Link>
+        )}
       </div>
     </>
   );

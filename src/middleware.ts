@@ -2,7 +2,8 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/env";
 
-const PUBLIC_PATHS = ["/login", "/auth", "/forgot-password"];
+// /api/outbox is called by the scheduled job and checks its own secret.
+const PUBLIC_PATHS = ["/login", "/auth", "/forgot-password", "/api/outbox"];
 
 /** Keeps the sign-in session fresh and sends signed-out visitors to /login. */
 export async function middleware(request: NextRequest) {

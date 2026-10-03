@@ -5,12 +5,11 @@ import { displayName, getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { AgingChart, BarList, ControlTower, KpiGrid, SalesChart } from "@/components/Dashboard";
+import { loadDashboard } from "@/lib/dashboard";
 
 export const metadata = { title: "Home" };
 
-const COMING = [
-  { title: "Dashboard & alerts", sub: "Control tower, notifications, email", stage: 7 },
-];
 
 function greeting() {
   const h = Number(
@@ -28,6 +27,10 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   const { supabase, profile, company, role, isManager, user } = await getAppContext();
   if (role === "driver") redirect("/driver");
   const firstName = displayName(profile).split(" ")[0];
+  // Check for time-based alerts (at most every 30 minutes; harmless before the Stage 7 update).
+  await supabase.rpc("refresh_alerts", { p_company: company.id });
+  const dash = await loadDashboard(supabase, company.id, role);
+  const base = company.base_currency;
 
   let checklist: { done: boolean; label: string; href: string }[] = [];
   if (isManager) {
@@ -85,6 +88,9 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       </h1>
       <p className="muted">Here&apos;s where {company.name} stands.</p>
 
+      <ControlTower tower={dash.tower} />
+      <KpiGrid kpis={dash.kpis} currency={base} />
+
       {isManager && remaining > 0 && (
         <section className="card">
           <h2>Set up checklist</h2>
@@ -133,6 +139,13 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
           </ul>
         </section>
       )}
+
+      {dash.months && dash.months.some((m) => m.sales > 0) && <SalesChart months={dash.months} currency={base} />}
+      {dash.aging && <AgingChart aging={dash.aging} currency={base} />}
+      {dash.industries && (
+        <BarList title="Sales by industry" sub="This year, before VAT" rows={dash.industries} currency={base} href="/profit" />
+      )}
+      {dash.clients && <BarList title="Top clients" sub="This year, before VAT" rows={dash.clients} currency={base} href="/profit" />}
 
       <h2 style={{ marginTop: 8 }}>Work</h2>
       <div className="grid grid-2">
@@ -200,18 +213,6 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         )}
       </div>
 
-      <h2 style={{ marginTop: 24 }}>Coming next</h2>
-      <div className="grid grid-2">
-        {COMING.map((m) => (
-          <div key={m.title} className="tile soon">
-            <div className="row">
-              <span className="tile-title">{m.title}</span>
-              <span className="badge off">Stage {m.stage}</span>
-            </div>
-            <div className="tile-sub">{m.sub}</div>
-          </div>
-        ))}
-      </div>
     </>
   );
 }

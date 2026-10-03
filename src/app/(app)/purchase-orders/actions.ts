@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
+import { kickOutbox } from "@/lib/outbox";
 import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
@@ -140,6 +141,7 @@ export async function removePoLine(form: FormData) {
 }
 
 export async function submitPo(form: FormData) {
+  kickOutbox(); // send any alerts this creates right after the response
   const { supabase } = await getAppContext();
   const id = str(form, "id");
   const { data, error } = await supabase.rpc("submit_purchase_order", { p_id: id });
@@ -148,6 +150,7 @@ export async function submitPo(form: FormData) {
 }
 
 export async function reviewPo(form: FormData) {
+  kickOutbox(); // send any alerts this creates right after the response
   const { supabase } = await getAppContext();
   const id = str(form, "id");
   const approve = str(form, "decision") === "approve";

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
+import { kickOutbox } from "@/lib/outbox";
 import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
@@ -139,6 +140,7 @@ export async function removeQuoteLine(form: FormData) {
 }
 
 export async function submitQuote(form: FormData) {
+  kickOutbox(); // send any alerts this creates right after the response
   const { supabase } = await getAppContext();
   const id = str(form, "id");
   const { data, error } = await supabase.rpc("submit_quotation", { p_id: id });
@@ -147,6 +149,7 @@ export async function submitQuote(form: FormData) {
 }
 
 export async function reviewQuote(form: FormData) {
+  kickOutbox(); // send any alerts this creates right after the response
   const { supabase } = await getAppContext();
   const id = str(form, "id");
   const approve = str(form, "decision") === "approve";
@@ -164,6 +167,7 @@ export async function markSent(form: FormData) {
 }
 
 export async function recordOutcome(form: FormData) {
+  kickOutbox(); // send any alerts this creates right after the response
   const { supabase } = await getAppContext();
   const id = str(form, "id");
   const accepted = str(form, "outcome") === "accepted";

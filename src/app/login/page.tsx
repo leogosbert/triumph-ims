@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { PasswordInput } from "@/components/PasswordInput";
 import { createClient } from "@/lib/supabase/client";
 
 type Mode = "signin" | "signup";
@@ -122,13 +123,11 @@ export default function LoginPage() {
             <label htmlFor="password">
               Password {mode === "signup" && <span className="hint">· at least 8 characters</span>}
             </label>
-            <input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
               minLength={mode === "signup" ? 8 : undefined}
-              required
             />
           </div>
           <button className="btn btn-primary btn-block" type="submit" disabled={busy}>

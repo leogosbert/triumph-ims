@@ -1,4 +1,5 @@
 import { Notice } from "@/components/Notice";
+import { PasswordInput } from "@/components/PasswordInput";
 import { SubmitButton } from "@/components/SubmitButton";
 import { signOut, switchCompany } from "@/app/actions";
 import { getAppContext } from "@/lib/context";
@@ -45,11 +46,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
         <form action={changePassword}>
           <div className="field">
             <label htmlFor="password">New password</label>
-            <input id="password" name="password" type="password" minLength={8} autoComplete="new-password" required />
+            <PasswordInput id="password" name="password" minLength={8} autoComplete="new-password" />
           </div>
           <div className="field">
             <label htmlFor="confirm">Type it again</label>
-            <input id="confirm" name="confirm" type="password" minLength={8} autoComplete="new-password" required />
+            <PasswordInput id="confirm" name="confirm" minLength={8} autoComplete="new-password" />
           </div>
           <SubmitButton>Change password</SubmitButton>
         </form>

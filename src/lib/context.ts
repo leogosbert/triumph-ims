@@ -60,7 +60,13 @@ export const getAppContext = cache(async () => {
     .eq("user_id", user.id)
     .eq("active", true)
     .order("created_at");
-  if (error) throw new Error(error.message);
+  if (error) {
+    // The database tables don't exist yet: the setup SQL hasn't been run.
+    if (error.code === "PGRST205" || error.code === "42P01" || /does not exist|schema cache/i.test(error.message)) {
+      redirect("/setup-needed");
+    }
+    throw new Error(error.message);
+  }
 
   const memberships = (data ?? []) as unknown as Membership[];
   if (memberships.length === 0) redirect("/welcome");

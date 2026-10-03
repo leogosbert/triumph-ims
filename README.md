@@ -13,9 +13,9 @@ the database itself, and each has its own branding and settings.
 | 0 | Accounts and setup | Done |
 | 1 | Sign-in, company settings and branding, team and roles, activity log | Done |
 | 2 | Clients, suppliers, products (forms and spreadsheet import) | Done |
-| 3 | Client RFQs, quotations with PDF, approvals | **Built, ready to test** |
-| 4 | Supplier RFQs, comparison, purchase orders | Next |
-| 5 | Goods received, stock, deliveries, proof of delivery (offline) | |
+| 3 | Client RFQs, quotations with PDF, approvals | Done |
+| 4 | Supplier RFQs, comparison, purchase orders | **Built, ready to test** |
+| 5 | Goods received, stock, deliveries, proof of delivery (offline) | Next |
 | 6 | Invoices, payments, receivables and payables, profit | |
 | 7 | Dashboard, notifications, email | |
 | 8 | Go-live: security review, backups, data import, training | |
@@ -91,6 +91,22 @@ Run each file **once**, in order, in Supabase → SQL Editor (paste the file's *
 | `supabase/migrations/20261003000200_stage1_grants.sql` | 1 (access fix) |
 | `supabase/migrations/20261004000100_stage2_master_data.sql` | 2 |
 | `supabase/migrations/20261005000100_stage3_quotations.sql` | 3 |
+| `supabase/migrations/20261006000100_stage4_purchasing.sql` | 4 |
+
+## Testing Stage 4
+
+1. **More → Company details → Purchase orders:** check the approval limit (TZS 2,500,000) and add standard PO terms.
+2. Open an **accepted** client quotation, then **Purchasing for this order → Request supplier quotes**. The items are copied.
+3. **Add 2–3 suppliers**, and use **Share PDF** next to each one to send them the request for quotation (WhatsApp or
+   email).
+4. When they reply, use **Enter prices** for each supplier, in their currency (for example a USD supplier with rate
+   2,600, plus freight).
+5. **Compare prices** shows every supplier side by side in TZS, with the cheapest in green. Press **Award & create PO**
+   on the winner.
+6. Check the draft PO (VAT is 0% for foreign suppliers and 18% for Tanzanian ones), then **Submit**. As *Procurement*,
+   a PO above the limit waits for a manager's approval.
+7. **Share PDF** to the supplier, mark it **sent**, then **Supplier confirmed** with their order number. The products'
+   last cost updates, so margins on new quotations use the real price.
 
 ## Testing Stage 3
 
@@ -135,7 +151,7 @@ Every push runs the automatic checks in `.github/workflows/ci.yml`:
 
 - **Database rules:** more than 120 tests prove that each company sees only its own data and each role only what it should.
 - **App build:** compiles and type-checks the whole app.
-- **Quotation PDF sample:** builds a two-page sample quotation, so layout errors are caught.
+- **PDF samples:** builds sample quotation, purchase order and supplier RFQ PDFs, so layout errors are caught.
 
 To run the database tests locally, you need Postgres 16:
 `PGHOST=localhost PGUSER=postgres npm run test:db`.

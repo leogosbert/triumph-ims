@@ -14,8 +14,8 @@ the database itself, and each has its own branding and settings.
 | 1 | Sign-in, company settings and branding, team and roles, activity log | Done |
 | 2 | Clients, suppliers, products (forms and spreadsheet import) | Done |
 | 3 | Client RFQs, quotations with PDF, approvals | Done |
-| 4 | Supplier RFQs, comparison, purchase orders | **Built, ready to test** |
-| 5 | Goods received, stock, deliveries, proof of delivery (offline) | Next |
+| 4 | Supplier RFQs, comparison, purchase orders | Done |
+| 5 | Goods received, stock, deliveries, proof of delivery (offline) | **Built, ready to test** |
 | 6 | Invoices, payments, receivables and payables, profit | |
 | 7 | Dashboard, notifications, email | |
 | 8 | Go-live: security review, backups, data import, training | |
@@ -92,6 +92,24 @@ Run each file **once**, in order, in Supabase → SQL Editor (paste the file's *
 | `supabase/migrations/20261004000100_stage2_master_data.sql` | 2 |
 | `supabase/migrations/20261005000100_stage3_quotations.sql` | 3 |
 | `supabase/migrations/20261006000100_stage4_purchasing.sql` | 4 |
+| `supabase/migrations/20261007000100_stage5_stock_deliveries.sql` | 5 |
+
+## Testing Stage 5
+
+1. **More → Team & roles:** invite a colleague (or a second email of yours) as **Driver**.
+2. **More → Stores:** a *Main store* exists already. Add others (e.g. Geita) if you need them.
+3. **Receive goods:** open a confirmed PO → **Receive goods**. Enter the quantities that arrived, and the batch number
+   and expiry date for chemicals and lubricants. A goods received note (GRN) is created and the stock goes up. Receive
+   part now and the rest later to see *Partially received*.
+4. **Stock:** check the quantities per store and batch. Batches expiring within 90 days are flagged.
+   **Adjust stock** corrects a count (a reason is required and it is logged).
+5. Open the **accepted** quotation → **Create delivery note**. Choose the store, delivery site, driver and vehicle,
+   then **Dispatch**. Stock goes down (oldest expiry first). **Share PDF** prints the delivery note.
+6. On the driver's phone, sign in and open **Deliveries** once while online. Then switch on **airplane mode**,
+   reopen the app, press **Record delivery**, take the receiver's name, signature and a photo, and **Confirm**.
+   It says *waiting to send*. Switch airplane mode off: it sends by itself (or press **Send now**).
+7. Back on the delivery note: status *Delivered*, with signature, photo, GPS and time. **Share PDF** now prints a
+   *Proof of delivery*. Try **Could not deliver** on another one: the goods go back into stock.
 
 ## Testing Stage 4
 

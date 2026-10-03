@@ -10,10 +10,10 @@ the database itself, and each has its own branding and settings.
 
 | Stage | What it adds | Status |
 | --- | --- | --- |
-| 0 | Accounts and setup | In progress |
-| 1 | Sign-in, company settings and branding, team and roles, activity log | **Built, ready to test** |
-| 2 | Clients, suppliers, products (spreadsheet import) | Next |
-| 3 | Client RFQs, quotations with PDF, approvals | |
+| 0 | Accounts and setup | Done |
+| 1 | Sign-in, company settings and branding, team and roles, activity log | Done |
+| 2 | Clients, suppliers, products (forms and spreadsheet import) | **Built, ready to test** |
+| 3 | Client RFQs, quotations with PDF, approvals | Next |
 | 4 | Supplier RFQs, comparison, purchase orders | |
 | 5 | Goods received, stock, deliveries, proof of delivery (offline) | |
 | 6 | Invoices, payments, receivables and payables, profit | |
@@ -80,6 +80,27 @@ After the first `npm install`, commit the generated `package-lock.json` so every
 ### 5. Install on a phone
 
 Open the app address in Chrome (Android) or Safari (iPhone), then use **Add to Home Screen**.
+
+## Database updates per stage
+
+Run each file **once**, in order, in Supabase → SQL Editor (paste the file's *contents*, then Run):
+
+| File | Stage |
+| --- | --- |
+| `supabase/migrations/20261003000100_stage1_foundation.sql` | 1 |
+| `supabase/migrations/20261003000200_stage1_grants.sql` | 1 (access fix) |
+| `supabase/migrations/20261004000100_stage2_master_data.sql` | 2 |
+
+## Testing Stage 2
+
+1. **More → + New client:** add a client. It gets the ID `C-0001` automatically. Add a purchasing contact.
+2. Add a supplier and a product the same way. On the product, set the main supplier and last cost, and check the
+   margin.
+3. **More → Import from spreadsheet:** download the template, fill a few rows on each tab, and import it. Import the
+   same file again: the records are *updated*, not duplicated.
+4. Sign in as the *Sales* test user. Sales **can** add clients and products, but **cannot** see suppliers or costs, or
+   set a credit limit.
+5. **Activity** shows every client, supplier and product change.
 
 ## Testing Stage 1
 

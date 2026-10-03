@@ -12,9 +12,9 @@ the database itself, and each has its own branding and settings.
 | --- | --- | --- |
 | 0 | Accounts and setup | Done |
 | 1 | Sign-in, company settings and branding, team and roles, activity log | Done |
-| 2 | Clients, suppliers, products (forms and spreadsheet import) | **Built, ready to test** |
-| 3 | Client RFQs, quotations with PDF, approvals | Next |
-| 4 | Supplier RFQs, comparison, purchase orders | |
+| 2 | Clients, suppliers, products (forms and spreadsheet import) | Done |
+| 3 | Client RFQs, quotations with PDF, approvals | **Built, ready to test** |
+| 4 | Supplier RFQs, comparison, purchase orders | Next |
 | 5 | Goods received, stock, deliveries, proof of delivery (offline) | |
 | 6 | Invoices, payments, receivables and payables, profit | |
 | 7 | Dashboard, notifications, email | |
@@ -90,6 +90,22 @@ Run each file **once**, in order, in Supabase → SQL Editor (paste the file's *
 | `supabase/migrations/20261003000100_stage1_foundation.sql` | 1 |
 | `supabase/migrations/20261003000200_stage1_grants.sql` | 1 (access fix) |
 | `supabase/migrations/20261004000100_stage2_master_data.sql` | 2 |
+| `supabase/migrations/20261005000100_stage3_quotations.sql` | 3 |
+
+## Testing Stage 3
+
+1. **More → Company details → Quotations:** check the VAT rate (18%), validity (30 days), minimum margin (12%),
+   approval limit (TZS 25,000,000), and add your standard terms.
+2. **Sales → + RFQ:** record a client request (for example 20 drums of hydraulic oil, received by WhatsApp, due Friday)
+   and add the items.
+3. **Create quotation from these items.** Prices come from the catalogue. Adjust prices and discounts, set delivery
+   time, then **Preview PDF**.
+4. **Submit.** As management it is approved straight away. As *Sales* with a margin under 12%, it waits for approval.
+5. As a second manager, open it from **Home → waiting for your approval**, and **Send back** with a note or
+   **Approve**.
+6. **Share PDF** opens the phone's share sheet (WhatsApp, Gmail…). Then mark it **sent** and record the client's
+   answer. Accepting it marks the RFQ as *won*.
+7. **Make a revision** of a sent quotation: it becomes R1, and the old one is marked as replaced.
 
 ## Testing Stage 2
 
@@ -117,8 +133,9 @@ Run each file **once**, in order, in Supabase → SQL Editor (paste the file's *
 
 Every push runs the automatic checks in `.github/workflows/ci.yml`:
 
-- **Database rules:** about 40 tests prove that each company sees only its own data and each role only what it should.
+- **Database rules:** more than 120 tests prove that each company sees only its own data and each role only what it should.
 - **App build:** compiles and type-checks the whole app.
+- **Quotation PDF sample:** builds a two-page sample quotation, so layout errors are caught.
 
 To run the database tests locally, you need Postgres 16:
 `PGHOST=localhost PGUSER=postgres npm run test:db`.

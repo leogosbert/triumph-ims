@@ -292,7 +292,8 @@ export async function buildQuotationPdf(d: QuotePdfData): Promise<Uint8Array> {
     right(v, A4.w - M - 4, y);
     y -= 14;
   }
-  page.drawRectangle({ x: 330, y: y - 8, width: A4.w - M - 330, height: 24, color: dark });
+  y -= 8;
+  page.drawRectangle({ x: 330, y: y - 8, width: A4.w - M - 330, height: 22, color: dark });
   text(`TOTAL ${d.quote.currency}`, 340, y, { f: bold, size: 11, color: rgb(1, 1, 1) });
   right(money(d.quote.total, decimals), A4.w - M - 8, y, { f: bold, size: 12, color: rgb(1, 1, 1) });
   y -= 36;

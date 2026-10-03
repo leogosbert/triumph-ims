@@ -72,7 +72,7 @@ jobs:
         run: |
           sudo apt-get install -y -qq poppler-utils >/dev/null
           pdfinfo sample.pdf | grep Pages
-          pdftoppm -r 48 -jpeg -jpegopt quality=50 sample.pdf page
+          pdftoppm -r 40 -jpeg -jpegopt quality=45 sample.pdf page
           pdftoppm -r 36 -f 1 -l 1 -jpeg -jpegopt quality=40 sample-draft.pdf draft
           ls -la *.jpg
       - name: Preview page 1

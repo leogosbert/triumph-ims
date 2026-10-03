@@ -4,7 +4,7 @@ Phone-first system for a general supply company: clients, suppliers, products, R
 deliveries, invoices and payments. It is built for many companies from day one: each company's data is kept apart by
 the database itself, and each has its own branding and settings.
 
-**Built with:** Next.js (the app) · Supabase (database, sign-in, file storage) · Vercel (hosting).
+**Built with:** Next.js (the app) · Supabase (database, sign-in, file storage) · Netlify (hosting).
 
 ## Stages
 
@@ -28,7 +28,7 @@ the database itself, and each has its own branding and settings.
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://ocewtmyvddszgebbhxak.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `sb_publishable_gP-oEbo7273JYMsQccJABA_EFTmahMx` |
-| `NEXT_PUBLIC_SITE_URL` | `https://ims.triumphsuppliers.co.tz` (use the `….vercel.app` address until the domain is connected) |
+| `NEXT_PUBLIC_SITE_URL` | `https://ims.triumphsuppliers.co.tz` (use the `….netlify.app` address until the domain is connected) |
 
 ### 1. Database (Supabase)
 
@@ -36,8 +36,8 @@ the database itself, and each has its own branding and settings.
 2. Paste the whole of `supabase/migrations/20261003000100_stage1_foundation.sql` and press **Run**. It should finish with
    "Success. No rows returned". Run each migration once, in file-name order. Later stages add new files.
 3. **Authentication → URL Configuration**
-   - **Site URL:** your app address, e.g. `https://triumph-ims.vercel.app`
-   - **Redirect URLs:** add `http://localhost:3000/**`, `https://*.vercel.app/**` and `https://ims.triumphsuppliers.co.tz/**`
+   - **Site URL:** your app address, e.g. `https://triumph-ims.netlify.app`
+   - **Redirect URLs:** add `http://localhost:3000/**`, `https://*.netlify.app/**` and `https://ims.triumphsuppliers.co.tz/**`
 4. **Authentication → Emails → Templates**. Change the link in two templates so email links work on any phone:
    - *Confirm signup*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/`
    - *Reset password*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/account?reset=1`
@@ -55,22 +55,27 @@ npm run dev                    # open http://localhost:3000
 
 After the first `npm install`, commit the generated `package-lock.json` so every build uses the same versions.
 
-### 3. Hosting (Vercel)
+### 3. Hosting (Netlify)
 
-1. **Add New → Project**, and import the `triumph-ims` GitHub repository.
-2. Under **Environment Variables**, add:
+1. In Netlify, choose **Add new project → Import an existing project → GitHub**, and pick `leogosbert/triumph-ims`.
+   Allow Netlify to access the repository if asked.
+2. Netlify reads the build settings from `netlify.toml`, so leave them as they are. You can rename the project to
+   `triumph-ims` so the address becomes `https://triumph-ims.netlify.app`, if that name is free.
+3. Before the first deploy, or under **Project configuration → Environment variables** afterwards, add:
    - `NEXT_PUBLIC_SUPABASE_URL`: from Supabase → Project Settings → API
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: the anon / publishable key (**never** the service_role key)
-   - `NEXT_PUBLIC_SITE_URL`: the Vercel address, e.g. `https://triumph-ims.vercel.app`
-3. Press **Deploy**. Every push to `main` redeploys automatically.
+   - `NEXT_PUBLIC_SITE_URL`: the Netlify address, e.g. `https://triumph-ims.netlify.app`
+4. **Deploy**. If you added the variables after the first deploy, go to **Deploys → Trigger deploy → Deploy project** so
+   they take effect. From then on, every push to `main` redeploys automatically.
 
 ### 4. Your own web address
 
-1. Vercel → your project → **Settings → Domains** → add `ims.triumphsuppliers.co.tz`.
-2. Vercel shows a DNS record to add, usually a **CNAME** named `ims` pointing to a `vercel-dns.com` address. Add exactly
+1. Netlify → your project → **Domain management → Add a domain** → enter `ims.triumphsuppliers.co.tz`.
+2. Netlify shows the DNS record to add, a **CNAME** named `ims` pointing to your `….netlify.app` address. Add exactly
    what it shows in the DNS settings at the company that registered `triumphsuppliers.co.tz`.
-3. When Vercel shows the domain as valid (minutes to a few hours), update `NEXT_PUBLIC_SITE_URL` in Vercel and the
-   **Site URL** in Supabase to `https://ims.triumphsuppliers.co.tz`, then redeploy.
+3. Once the domain is verified, Netlify adds the HTTPS certificate itself (minutes to a few hours). Then update
+   `NEXT_PUBLIC_SITE_URL` in Netlify and the **Site URL** in Supabase to `https://ims.triumphsuppliers.co.tz`, and
+   trigger a new deploy.
 
 ### 5. Install on a phone
 

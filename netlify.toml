@@ -1,0 +1,9 @@
+# Netlify settings. Netlify detects Next.js and adds its Next.js runtime
+# automatically, so server pages, sign-in and middleware all work.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"

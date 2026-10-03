@@ -15,8 +15,8 @@ the database itself, and each has its own branding and settings.
 | 2 | Clients, suppliers, products (forms and spreadsheet import) | Done |
 | 3 | Client RFQs, quotations with PDF, approvals | Done |
 | 4 | Supplier RFQs, comparison, purchase orders | Done |
-| 5 | Goods received, stock, deliveries, proof of delivery (offline) | **Built, ready to test** |
-| 6 | Invoices, payments, receivables and payables, profit | |
+| 5 | Goods received, stock, deliveries, proof of delivery (offline) | Done |
+| 6 | Invoices, payments, receivables and payables, profit | **Built, ready to test** |
 | 7 | Dashboard, notifications, email | |
 | 8 | Go-live: security review, backups, data import, training | |
 
@@ -93,6 +93,26 @@ Run each file **once**, in order, in Supabase → SQL Editor (paste the file's *
 | `supabase/migrations/20261005000100_stage3_quotations.sql` | 3 |
 | `supabase/migrations/20261006000100_stage4_purchasing.sql` | 4 |
 | `supabase/migrations/20261007000100_stage5_stock_deliveries.sql` | 5 |
+| `supabase/migrations/20261008000100_stage6_finance.sql` | 6 |
+
+## Testing Stage 6
+
+1. **More → Company details → Invoices:** set how many days clients have to pay (default 30) and your standard invoice
+   terms. Check your bank details and VRN are filled in (the invoice says *TAX INVOICE* when you have a VRN).
+2. Invite a colleague as **Finance** (or test as management). The bottom menu now has a **Finance** tab.
+3. Open a **delivered** delivery note → **Create invoice**. It bills exactly what was delivered, at the quoted prices.
+   Check it, then **Issue invoice**: it gets its INV- number and due date and can be shared as a PDF.
+4. On a client, set a **credit limit** smaller than what they owe plus a new invoice. Issuing as *Finance* is refused;
+   management can issue it and the override is recorded.
+5. **Record a payment** (part, then the rest). Each payment has a **Receipt** PDF. As management, try **Void** on one.
+6. **Finance → Money owed to us** shows what each client owes by age (current, 1–30, 31–60, 61–90, 90+ days).
+7. On a confirmed purchase order: **Record supplier's invoice**, then pay it (part payments and foreign currency rates
+   work). **Money we owe** shows totals per currency.
+8. Still on the PO: under **Import costs & landed cost**, add duty, clearing and port charges, check the landed cost
+   per unit, then **Use landed cost as product cost**.
+9. On the accepted quotation, **Order costs & profit** shows sales, cost of goods, other costs and gross profit. Add a
+   transport cost and watch the profit change. **Finance → Profit** shows the month by order, client, industry and
+   salesperson.
 
 ## Testing Stage 5
 

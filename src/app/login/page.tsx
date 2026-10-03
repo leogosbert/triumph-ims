@@ -1,0 +1,152 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+
+type Mode = "signin" | "signup";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [mode, setMode] = useState<Mode>("signin");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+
+  // Show messages passed back from the email-confirmation link.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("error")) setError(p.get("error"));
+    if (p.get("msg")) setInfo(p.get("msg"));
+  }, []);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setInfo(null);
+    const form = new FormData(e.currentTarget);
+    const email = String(form.get("email") ?? "").trim().toLowerCase();
+    const password = String(form.get("password") ?? "");
+    const fullName = String(form.get("full_name") ?? "").trim();
+    const supabase = createClient();
+    setBusy(true);
+    try {
+      if (mode === "signin") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setError(
+            /confirm/i.test(error.message)
+              ? "Please confirm your email first. Check your inbox for the link."
+              : "Email or password is not correct.",
+          );
+          return;
+        }
+        router.replace("/");
+        router.refresh();
+        return;
+      }
+
+      if (fullName.length < 2) {
+        setError("Please enter your full name.");
+        return;
+      }
+      if (password.length < 8) {
+        setError("Use a password of at least 8 characters.");
+        return;
+      }
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/`,
+        },
+      });
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setError("An account with this email already exists. Please sign in.");
+        setMode("signin");
+        return;
+      }
+      if (data.session) {
+        router.replace("/");
+        router.refresh();
+        return;
+      }
+      setInfo("Account created. We've sent you an email: open the link in it to confirm, then sign in.");
+      setMode("signin");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="auth-wrap">
+      <div className="auth-card">
+        <div className="brand">
+          <img src="/icons/icon-192.png" alt="" />
+          <div>
+            <h1 style={{ margin: 0 }}>TRIUMPH IMS</h1>
+            <span className="muted small">Supply · Procurement · Stock · Finance</span>
+          </div>
+        </div>
+
+        <div className="tabs" role="group" aria-label="Sign in or create an account">
+          <button type="button" aria-pressed={mode === "signin"} onClick={() => setMode("signin")}>
+            Sign in
+          </button>
+          <button type="button" aria-pressed={mode === "signup"} onClick={() => setMode("signup")}>
+            Create account
+          </button>
+        </div>
+
+        {error && <p className="notice notice-error" role="alert">{error}</p>}
+        {info && <p className="notice notice-ok" role="status">{info}</p>}
+
+        <form onSubmit={onSubmit}>
+          {mode === "signup" && (
+            <div className="field">
+              <label htmlFor="full_name">Full name</label>
+              <input id="full_name" name="full_name" type="text" autoComplete="name" required />
+            </div>
+          )}
+          <div className="field">
+            <label htmlFor="email">Email</label>
+            <input id="email" name="email" type="email" autoComplete="email" inputMode="email" required />
+          </div>
+          <div className="field">
+            <label htmlFor="password">
+              Password {mode === "signup" && <span className="hint">· at least 8 characters</span>}
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              minLength={mode === "signup" ? 8 : undefined}
+              required
+            />
+          </div>
+          <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
+            {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+          </button>
+        </form>
+
+        {mode === "signin" && (
+          <p className="small" style={{ marginTop: 16, textAlign: "center" }}>
+            <Link href="/forgot-password">Forgot your password?</Link>
+          </p>
+        )}
+        {mode === "signup" && (
+          <p className="small muted" style={{ marginTop: 16 }}>
+            Joining a company? Create your account with the same email address your manager invited.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

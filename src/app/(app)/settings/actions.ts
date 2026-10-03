@@ -42,9 +42,19 @@ export async function updateCompany(form: FormData) {
   const poAbove = num("po_approval_above");
   if (!(poAbove >= 0)) redirect(withNotice(back, { error: "PO approval limit must be a number." }));
 
+  const invoiceFields: Record<string, unknown> = {};
+  if (form.has("invoice_due_days")) {
+    const days = num("invoice_due_days");
+    if (!(Number.isInteger(days) && days >= 0 && days <= 365))
+      redirect(withNotice(back, { error: "Payment days must be a whole number (0–365)." }));
+    invoiceFields.invoice_due_days = days;
+    invoiceFields.invoice_terms = optional(form, "invoice_terms");
+  }
+
   const { error } = await supabase
     .from("companies")
     .update({
+      ...invoiceFields,
       vat_rate: vat,
       quote_validity_days: validity,
       quote_min_margin_pct: minMargin,

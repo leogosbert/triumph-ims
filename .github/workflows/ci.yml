@@ -55,7 +55,7 @@ jobs:
           exit $status
 
   pdf:
-    name: Quotation PDF sample
+    name: PDF samples
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -71,6 +71,8 @@ jobs:
           npx tsx scripts/pdf-sample.ts po sample-po.pdf
           npx tsx scripts/pdf-sample.ts srfq sample-srfq.pdf
           npx tsx scripts/pdf-sample.ts dn sample-dn.pdf
+          npx tsx scripts/pdf-sample.ts invoice sample-inv.pdf
+          npx tsx scripts/pdf-sample.ts receipt sample-rct.pdf
       - name: Render page previews
         run: |
           sudo apt-get install -y -qq poppler-utils >/dev/null
@@ -80,12 +82,12 @@ jobs:
           pdftoppm -r 40 -f 1 -l 1 -jpeg -jpegopt quality=45 sample-po.pdf po
           pdftoppm -r 36 -f 1 -l 1 -jpeg -jpegopt quality=40 sample-srfq.pdf srfq
           pdftoppm -r 40 -f 1 -l 1 -jpeg -jpegopt quality=45 sample-dn.pdf dn
+          pdftoppm -r 40 -f 1 -l 1 -jpeg -jpegopt quality=45 sample-inv.pdf inv
+          pdftoppm -r 36 -f 1 -l 1 -jpeg -jpegopt quality=40 sample-rct.pdf rct
           ls -la *.jpg
       - name: Preview page 1
         run: bash scripts/emit-preview.sh page-1.jpg
-      - name: Preview delivery note
-        run: bash scripts/emit-preview.sh dn-1.jpg
-      - name: Preview PO
-        run: bash scripts/emit-preview.sh po-1.jpg
-      - name: Preview supplier RFQ
-        run: bash scripts/emit-preview.sh srfq-1.jpg
+      - name: Preview invoice
+        run: bash scripts/emit-preview.sh inv-1.jpg
+      - name: Preview receipt
+        run: bash scripts/emit-preview.sh rct-1.jpg

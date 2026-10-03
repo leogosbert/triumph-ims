@@ -161,6 +161,19 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
             <Field name="po_terms" label="Standard PO terms" value={c.po_terms} textarea hint="printed on every purchase order" />
           </section>
 
+          {c.invoice_due_days !== undefined && (
+            <section className="card" id="invoicing">
+              <h2>Invoices</h2>
+              <Field
+                name="invoice_due_days"
+                label="Clients pay within (days)"
+                value={String(c.invoice_due_days ?? 30)}
+                hint="sets the due date when an invoice is issued"
+              />
+              <Field name="invoice_terms" label="Standard invoice terms" value={c.invoice_terms ?? null} textarea hint="printed on every invoice" />
+            </section>
+          )}
+
           {isManager && (
             <SubmitButton className="btn btn-primary btn-block">Save company details</SubmitButton>
           )}

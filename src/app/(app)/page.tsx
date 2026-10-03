@@ -9,7 +9,6 @@ import { can } from "@/lib/roles";
 export const metadata = { title: "Home" };
 
 const COMING = [
-  { title: "Invoices & payments", sub: "Invoices, receipts, money owed, profit per order", stage: 6 },
   { title: "Dashboard & alerts", sub: "Control tower, notifications, email", stage: 7 },
 ];
 
@@ -147,6 +146,18 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
           <Link href="/purchasing" className="tile">
             <div className="tile-title">Purchasing</div>
             <div className="tile-sub">Supplier RFQs, price comparison, purchase orders</div>
+          </Link>
+        )}
+        {can(role, "seeFinance") && (
+          <Link href="/finance" className="tile">
+            <div className="tile-title">Finance</div>
+            <div className="tile-sub">Invoices, payments, money owed, supplier bills, profit</div>
+          </Link>
+        )}
+        {!can(role, "seeFinance") && can(role, "seeInvoices") && (
+          <Link href="/invoices" className="tile">
+            <div className="tile-title">Invoices</div>
+            <div className="tile-sub">Invoices to your clients and what they still owe</div>
           </Link>
         )}
         {can(role, "seeStock") && (

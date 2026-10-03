@@ -9,6 +9,9 @@ import { formatDate } from "@/lib/format";
 import { CONTACT_KINDS } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
+import { daysOverdue, INVOICE_STATUS, n, openBase, shownStatus } from "@/lib/finance";
+import { formatMoney } from "@/lib/money";
+import { StatusBadge } from "@/lib/sales";
 import { addContact, removeContact, saveClient, setClientActive } from "../actions";
 
 export const metadata = { title: "Client" };
@@ -46,6 +49,22 @@ export default async function ClientPage({
   const contacts = (contactData ?? []) as Contact[];
   const editable = can(role, "editClients");
   const kindLabel = (k: string) => CONTACT_KINDS.find((c) => c.value === k)?.label ?? k;
+  type Inv = { id: string; number: string; status: string; issue_date: string | null; due_date: string | null; total: number; amount_paid: number; exchange_rate: number; currency: string };
+  const { data: invData } = can(role, "seeInvoices")
+    ? await supabase
+        .from("invoices")
+        .select("id, number, status, issue_date, due_date, total, amount_paid, exchange_rate, currency")
+        .eq("client_id", id)
+        .neq("status", "cancelled")
+        .order("created_at", { ascending: false })
+        .limit(200)
+    : { data: null };
+  const invoices = (invData ?? []) as Inv[];
+  const openInv = invoices.filter((i) => i.status === "issued" || i.status === "partly_paid");
+  const owed = openInv.reduce((s, i) => s + openBase(i), 0);
+  const overdue = openInv.filter((i) => daysOverdue(i.due_date) > 0).reduce((s, i) => s + openBase(i), 0);
+  const limit = n(client.credit_limit);
+  const base = company.base_currency;
 
   return (
     <>
@@ -66,6 +85,44 @@ export default async function ClientPage({
         )}
       </p>
       <Notice {...notice} />
+
+      {invData && (
+        <section className="card" id="account">
+          <h2>Account</h2>
+          <dl className="kv">
+            <dt>Owed to us</dt>
+            <dd>
+              <strong>{formatMoney(owed, base)}</strong>
+            </dd>
+            <dt>Overdue</dt>
+            <dd className={overdue > 0 ? "text-warn" : undefined}>{formatMoney(overdue, base)}</dd>
+            <dt>Credit limit</dt>
+            <dd>{limit > 0 ? formatMoney(limit, base) : "Not set"}</dd>
+            {limit > 0 && (
+              <>
+                <dt>Credit available</dt>
+                <dd className={limit - owed < 0 ? "text-warn" : undefined}>{formatMoney(limit - owed, base)}</dd>
+              </>
+            )}
+          </dl>
+          {invoices.length > 0 && (
+            <ul className="list" style={{ marginTop: 8 }}>
+              {invoices.slice(0, 10).map((i) => (
+                <li key={i.id} className="row">
+                  <Link href={`/invoices/${i.id}`}>
+                    {i.number || "Draft"}
+                    {i.issue_date ? ` · ${formatDate(i.issue_date)}` : ""}
+                  </Link>
+                  <span className="small">
+                    {formatMoney(i.status === "partly_paid" ? n(i.total) - n(i.amount_paid) : i.total, i.currency)}{" "}
+                    <StatusBadge map={INVOICE_STATUS} status={shownStatus(i.status, i.due_date)} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <section className="card" id="contacts">
         <h2>Contacts</h2>

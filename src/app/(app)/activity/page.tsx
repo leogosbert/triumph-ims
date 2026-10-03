@@ -35,6 +35,12 @@ const ENTITY: Record<string, string> = {
   goods_receipts: "goods received note",
   deliveries: "delivery note",
   delivery_lines: "delivery line",
+  invoices: "invoice",
+  invoice_lines: "invoice line",
+  payments: "payment received",
+  supplier_bills: "supplier bill",
+  supplier_payments: "payment to supplier",
+  order_costs: "order cost",
 };
 
 const LINKS: Record<string, string> = {
@@ -47,6 +53,8 @@ const LINKS: Record<string, string> = {
   purchase_orders: "/purchase-orders/",
   goods_receipts: "/grns/",
   deliveries: "/deliveries/",
+  invoices: "/invoices/",
+  supplier_bills: "/bills/",
 };
 
 const FIELD: Record<string, string> = {
@@ -94,6 +102,11 @@ const FIELD: Record<string, string> = {
   failed_reason: "reason for failure",
   delivery_site: "delivery site",
   planned_date: "planned date",
+  amount_paid: "amount paid",
+  due_date: "due date",
+  voided_at: "voided",
+  void_reason: "reason voided",
+  cancelled_reason: "reason cancelled",
 };
 
 const HIDDEN_FIELDS = new Set(["subtotal", "discount_total", "vat_amount", "line_total", "submitted_at", "approved_at", "sent_at", "decided_at", "submitted_by", "approved_by"]);

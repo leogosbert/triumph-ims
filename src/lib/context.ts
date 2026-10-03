@@ -31,6 +31,9 @@ export type Company = {
   quote_terms: string | null;
   po_approval_above: number;
   po_terms: string | null;
+  /** Added in Stage 6; missing until that SQL has been run. */
+  invoice_due_days?: number;
+  invoice_terms?: string | null;
   created_at: string;
   updated_at: string;
 };

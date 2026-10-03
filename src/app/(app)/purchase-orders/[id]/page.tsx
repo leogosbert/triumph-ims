@@ -25,6 +25,9 @@ import {
   submitPo,
   updatePoLine,
 } from "../actions";
+import { OrderCosts, type OrderCost } from "@/components/OrderCosts";
+import { BILL_STATUS, shownStatus } from "@/lib/finance";
+import { applyLandedCost } from "../../finance/actions";
 
 export const metadata = { title: "Purchase order" };
 
@@ -74,6 +77,22 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
     namesFor(supabase, [po.created_by, po.submitted_by, po.approved_by]),
   ]);
   const lines = (lineData ?? []) as unknown as Line[];
+  const showCosts = can(role, "editOrderCosts") && po.status !== "cancelled" && !isDraft;
+  const showBills = can(role, "seeBills") && !["draft", "pending_approval", "cancelled"].includes(po.status);
+  const [{ data: costData }, { data: billData }] = await Promise.all([
+    showCosts
+      ? supabase.from("order_costs").select("id, kind, description, amount, currency, exchange_rate, incurred_on").eq("po_id", id).order("incurred_on")
+      : Promise.resolve({ data: [] }),
+    showBills
+      ? supabase.from("supplier_bills").select("id, number, supplier_invoice_no, status, due_date, total, currency").eq("po_id", id).order("created_at")
+      : Promise.resolve({ data: [] }),
+  ]);
+  const costs = (costData ?? []) as OrderCost[];
+  const poBills = (billData ?? []) as { id: string; number: string; supplier_invoice_no: string | null; status: string; due_date: string | null; total: number; currency: string }[];
+  const extrasBase = costs.reduce((s, c) => s + n(c.amount) * n(c.exchange_rate), 0);
+  const spread = n(po.freight) * n(po.exchange_rate) + extrasBase;
+  const goodsBase = n(po.subtotal) * n(po.exchange_rate);
+  const landedReady = ["confirmed", "partially_received", "received", "closed"].includes(po.status);
   const q = quote as { id: string; number: string; revision: number; client: { name: string } | null } | null;
   const ccy = po.currency as string;
   const today = todayTz();
@@ -227,6 +246,95 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
           )}
         </section>
       ) : null}
+
+      {showBills && (
+        <section className="card" id="bills">
+          <h2>Supplier&apos;s invoices</h2>
+          {poBills.length === 0 && <p className="muted small">No supplier invoice recorded yet.</p>}
+          <ul className="list">
+            {poBills.map((b) => (
+              <li key={b.id} className="row">
+                <Link href={`/bills/${b.id}`}>{b.supplier_invoice_no || b.number}</Link>
+                <span className="small">
+                  {formatMoney(b.total, b.currency)} <StatusBadge map={BILL_STATUS} status={shownStatus(b.status, b.due_date)} />
+                </span>
+              </li>
+            ))}
+          </ul>
+          {can(role, "editBills") && (
+            <Link href={`/bills/new?po=${po.id}`} className="btn" style={{ marginTop: 8 }}>
+              Record supplier&apos;s invoice
+            </Link>
+          )}
+        </section>
+      )}
+
+      {showCosts && (
+        <section className="card" id="costs">
+          <h2>Import costs &amp; landed cost</h2>
+          <p className="muted small">
+            Add duty, clearing, port charges, insurance and other costs for this order. They are shared over the items by value to give the
+            true landed cost per unit.
+          </p>
+          <OrderCosts
+            costs={costs}
+            back={`/purchase-orders/${po.id}#costs`}
+            poId={po.id}
+            base={company.base_currency}
+            canEdit={can(role, "editOrderCosts")}
+          />
+          {n(po.subtotal) > 0 && (
+            <div className="scroll-x" style={{ marginTop: 12 }}>
+              <table className="compare">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price ({company.base_currency})</th>
+                    <th>Landed / unit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lines.map((l) => {
+                    const unitBase = n(l.unit_price) * n(po.exchange_rate);
+                    const landed = (n(l.line_total) * n(po.exchange_rate) + (spread * n(l.line_total)) / n(po.subtotal)) / n(l.quantity);
+                    return (
+                      <tr key={l.id}>
+                        <td>{l.description}</td>
+                        <td>{fmtNum(l.quantity)}</td>
+                        <td>{formatMoney(unitBase, company.base_currency).replace(`${company.base_currency} `, "")}</td>
+                        <td className="best">{formatMoney(landed, company.base_currency).replace(`${company.base_currency} `, "")}</td>
+                      </tr>
+                    );
+                  })}
+                  <tr className="total">
+                    <td>Total landed</td>
+                    <td />
+                    <td>{formatMoney(goodsBase, company.base_currency).replace(`${company.base_currency} `, "")}</td>
+                    <td>{formatMoney(goodsBase + spread, company.base_currency).replace(`${company.base_currency} `, "")}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+          {po.landed_applied_at && (
+            <p className="small muted">
+              Applied {formatDateTime(po.landed_applied_at)}: {formatMoney(po.landed_cost_base, company.base_currency)}.
+            </p>
+          )}
+          {landedReady ? (
+            <form action={applyLandedCost} style={{ marginTop: 8 }}>
+              <input type="hidden" name="po_id" value={po.id} />
+              <SubmitButton className="btn btn-primary" pendingText="Applying…">
+                {po.landed_applied_at ? "Re-apply landed cost" : "Use landed cost as product cost"}
+              </SubmitButton>
+              <p className="hint" style={{ marginTop: 6 }}>Updates each product&apos;s cost, so quotation margins and profit use the real cost.</p>
+            </form>
+          ) : (
+            <p className="hint">The landed cost can be applied once the supplier has confirmed the order.</p>
+          )}
+        </section>
+      )}
 
       <section className="card" id="lines">
         <h2>Items ({lines.length})</h2>

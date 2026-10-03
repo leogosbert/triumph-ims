@@ -1,6 +1,7 @@
 // Builds a sample quotation PDF (used by the automatic checks to catch layout errors).
 import { readFileSync, writeFileSync } from "node:fs";
 import { buildDeliveryNotePdf } from "../src/lib/pdf/delivery";
+import { buildInvoicePdf, buildReceiptPdf } from "../src/lib/pdf/finance";
 import { buildPurchaseOrderPdf, buildSupplierRfqPdf } from "../src/lib/pdf/purchasing";
 import { buildQuotationPdf } from "../src/lib/pdf/quotation";
 
@@ -48,6 +49,63 @@ const supplier = {
 };
 
 async function main() {
+  if (process.argv[2] === "invoice" || process.argv[2] === "receipt") {
+    const logo = { bytes: new Uint8Array(readFileSync("public/icons/icon-192.png")), type: "png" as const };
+    const client = { name: "Geita Gold Mining Ltd", address: "P.O. Box 532, Geita", tin: "100-200-300", vrn: "40-012345-A" };
+    const few = lines.slice(0, 5);
+    const sub = few.reduce((s, l) => s + l.line_total, 0);
+    const vat = Math.round(sub * 0.18);
+    const half = Math.round((sub + vat) / 2);
+    const bytes =
+      process.argv[2] === "invoice"
+        ? await buildInvoicePdf({
+            company,
+            logo,
+            invoice: {
+              number: "INV-2026-0012",
+              status: "partly_paid",
+              issue_date: "2026-10-09",
+              due_date: "2026-11-08",
+              currency: "TZS",
+              client_ref: "PO 4500123",
+              contact_name: "Asha Mwakyusa",
+              quotation_number: "QT-2026-0007-R1",
+              delivery_number: "DN-2026-0009",
+              payment_terms: "Net 30",
+              vat_rate: 18,
+              subtotal: sub,
+              discount_total: few.reduce((s, l) => s + l.quantity * l.unit_price, 0) - sub,
+              vat_amount: vat,
+              total: sub + vat,
+              amount_paid: half,
+              notes: "Goods delivered to Geita main stores on 8 Oct 2026.",
+              terms: "Interest of 1.5% per month may be charged on overdue amounts.",
+              issued_by: "Leo Mboyerwa",
+            },
+            client,
+            lines: few,
+          })
+        : await buildReceiptPdf({
+            company,
+            logo,
+            receipt: {
+              number: "RCT-2026-0004",
+              received_on: "2026-10-20",
+              amount: half,
+              currency: "TZS",
+              method: "Bank transfer",
+              reference: "CRDB FT2629301",
+              invoice_number: "INV-2026-0012",
+              invoice_total: sub + vat,
+              balance_after: sub + vat - half,
+              recorded_by: "Finance Officer",
+            },
+            client,
+          });
+    writeFileSync(process.argv[3], bytes);
+    console.log(`ok ${bytes.length} bytes`);
+    return;
+  }
   if (process.argv[2] === "dn") {
     const logo = { bytes: new Uint8Array(readFileSync("public/icons/icon-192.png")), type: "png" as const };
     const bytes = await buildDeliveryNotePdf({

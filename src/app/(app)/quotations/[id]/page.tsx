@@ -29,6 +29,9 @@ import {
 import { createSupplierRfq } from "../../supplier-rfqs/actions";
 import { newDelivery } from "../../deliveries/actions";
 import { DELIVERY_STATUS } from "@/lib/stock";
+import { OrderCosts, type OrderCost } from "@/components/OrderCosts";
+import { INVOICE_STATUS, shownStatus } from "@/lib/finance";
+import { newInvoice } from "../../invoices/actions";
 
 export const metadata = { title: "Quotation" };
 
@@ -128,6 +131,26 @@ export default async function QuotationPage({
     ? await supabase.from("deliveries").select("id, number, status").eq("quotation_id", id).order("created_at")
     : { data: [] };
   const linkedDns = (dnData ?? []) as { id: string; number: string; status: string }[];
+  const showInvoices = q.status === "accepted" && can(role, "seeInvoices");
+  const showOrderCosts = q.status === "accepted" && (can(role, "seeProfit") || can(role, "editOrderCosts"));
+  const [{ data: invData }, { data: profitData }, { data: ocData }] = await Promise.all([
+    showInvoices
+      ? supabase.from("invoices").select("id, number, status, total, amount_paid, currency, due_date").eq("quotation_id", id).order("created_at")
+      : Promise.resolve({ data: [] }),
+    showOrderCosts && can(role, "seeProfit")
+      ? supabase.from("invoice_profit").select("revenue_base, cost_base, lines_without_cost").eq("quotation_id", id)
+      : Promise.resolve({ data: [] }),
+    showOrderCosts
+      ? supabase.from("order_costs").select("id, kind, description, amount, currency, exchange_rate, incurred_on").eq("quotation_id", id).order("incurred_on")
+      : Promise.resolve({ data: [] }),
+  ]);
+  const linkedInvoices = (invData ?? []) as { id: string; number: string; status: string; total: number; amount_paid: number; currency: string; due_date: string | null }[];
+  const orderProfit = ((profitData ?? []) as { revenue_base: number; cost_base: number; lines_without_cost: number }[]).reduce(
+    (a, r) => ({ rev: a.rev + n(r.revenue_base), cost: a.cost + n(r.cost_base), missing: a.missing + n(r.lines_without_cost) }),
+    { rev: 0, cost: 0, missing: 0 },
+  );
+  const orderCosts = (ocData ?? []) as OrderCost[];
+  const orderExtras = orderCosts.reduce((a, c) => a + n(c.amount) * n(c.exchange_rate), 0);
   const names = await namesFor(supabase, [q.created_by, q.submitted_by, q.approved_by]);
   const ccy = q.currency as string;
   const today = todayTz();
@@ -323,6 +346,73 @@ export default async function QuotationPage({
               </SubmitButton>
             </form>
           )}
+        </section>
+      )}
+
+      {showInvoices && (
+        <section className="card" id="invoices">
+          <h2>Invoices</h2>
+          {linkedInvoices.length === 0 && <p className="muted small">Not invoiced yet.</p>}
+          <ul className="list">
+            {linkedInvoices.map((i) => (
+              <li key={i.id} className="row">
+                <Link href={`/invoices/${i.id}`}>{i.number || "Draft invoice"}</Link>
+                <span className="small">
+                  {formatMoney(i.total, i.currency)} <StatusBadge map={INVOICE_STATUS} status={shownStatus(i.status, i.due_date)} />
+                </span>
+              </li>
+            ))}
+          </ul>
+          {can(role, "editInvoices") && (
+            <form action={newInvoice} className="actions">
+              <input type="hidden" name="quotation_id" value={q.id} />
+              <input type="hidden" name="back" value={`/quotations/${q.id}#invoices`} />
+              <SubmitButton className="btn btn-primary" pendingText="Creating…">
+                {linkedInvoices.some((i) => i.status !== "cancelled") ? "Invoice the rest" : "Create invoice"}
+              </SubmitButton>
+            </form>
+          )}
+          <p className="hint">Usually you invoice each delivery from its delivery note. Use this for advance or whole-order invoices.</p>
+        </section>
+      )}
+
+      {showOrderCosts && (
+        <section className="card" id="profit">
+          <h2>Order costs{can(role, "seeProfit") ? " & profit" : ""}</h2>
+          {can(role, "seeProfit") && (
+            <dl className="kv">
+              <dt>Invoiced (before VAT)</dt>
+              <dd>{formatMoney(orderProfit.rev, company.base_currency)}</dd>
+              <dt>Cost of goods</dt>
+              <dd>{formatMoney(orderProfit.cost, company.base_currency)}</dd>
+              <dt>Other order costs</dt>
+              <dd>{formatMoney(orderExtras, company.base_currency)}</dd>
+              <dt>Gross profit</dt>
+              <dd>
+                <strong>{formatMoney(orderProfit.rev - orderProfit.cost - orderExtras, company.base_currency)}</strong>
+                {orderProfit.rev > 0 && (
+                  <span className="muted">
+                    {" "}
+                    ({(((orderProfit.rev - orderProfit.cost - orderExtras) / orderProfit.rev) * 100).toFixed(1)}%)
+                  </span>
+                )}
+              </dd>
+              {orderProfit.missing > 0 && (
+                <>
+                  <dt>Lines without a cost</dt>
+                  <dd className="text-warn">{orderProfit.missing}</dd>
+                </>
+              )}
+            </dl>
+          )}
+          <p className="muted small">Costs of this order that are not part of the goods: local transport, bank charges, commission…</p>
+          <OrderCosts
+            costs={orderCosts}
+            back={`/quotations/${q.id}#profit`}
+            quotationId={q.id}
+            base={company.base_currency}
+            canEdit={can(role, "editOrderCosts")}
+          />
         </section>
       )}
 

@@ -21,6 +21,7 @@ import {
   saveDelivery,
   updateDeliveryLine,
 } from "../actions";
+import { newInvoice } from "../../invoices/actions";
 
 export const metadata = { title: "Delivery" };
 
@@ -55,6 +56,10 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
       : Promise.resolve({ data: [] }),
   ]);
   const lines = (lineData ?? []) as unknown as Line[];
+  const { data: dnInvoice } =
+    d.status === "delivered" && can(role, "seeInvoices")
+      ? await supabase.from("invoices").select("id, number").eq("delivery_id", id).neq("status", "cancelled").maybeSingle()
+      : { data: null };
   const batches = new Map<string, string[]>();
   for (const m of (moves ?? []) as { product_id: string; batch_no: string; quantity: number }[]) {
     if (!m.batch_no) continue;
@@ -90,6 +95,27 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
         {d.vehicle && <> · {d.vehicle}</>}
       </p>
       <Notice {...notice} />
+
+      {d.status === "delivered" && can(role, "seeInvoices") && (
+        <div className="banner ok small">
+          {dnInvoice ? (
+            <>
+              Invoiced: <Link href={`/invoices/${dnInvoice.id}`}>{dnInvoice.number || "draft invoice"}</Link>
+            </>
+          ) : can(role, "editInvoices") ? (
+            <form action={newInvoice} className="row">
+              <input type="hidden" name="delivery_id" value={d.id} />
+              <input type="hidden" name="back" value={`/deliveries/${d.id}`} />
+              <span>Delivered and ready to invoice.</span>
+              <SubmitButton className="btn btn-small btn-primary" pendingText="…">
+                Create invoice
+              </SubmitButton>
+            </form>
+          ) : (
+            "Delivered, not invoiced yet."
+          )}
+        </div>
+      )}
 
       {d.status === "delivered" && (
         <section className="card" style={{ borderColor: "#b9e0cc" }}>

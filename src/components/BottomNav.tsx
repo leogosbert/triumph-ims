@@ -20,6 +20,7 @@ const SALES = icon("M4 4h16v16H4zM8 9h8M8 13h8M8 17h5");
 const MORE = icon("M4 6h16M4 12h16M4 18h16");
 
 const STOCK = icon("M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4");
+const MONEY = icon("M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 12h.01M18 12h.01");
 const TRUCK = icon("M1 6h13v10H1zM14 9h4l4 4v3h-8zM5.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z");
 
 const SECTIONS: Record<string, string[]> = {
@@ -29,6 +30,7 @@ const SECTIONS: Record<string, string[]> = {
   "/stock": ["/stock", "/warehouses", "/receiving", "/grns", "/deliveries"],
   "/deliveries": ["/deliveries"],
   "/driver": ["/driver"],
+  "/finance": ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit"],
 };
 
 export function BottomNav({ role }: { role: Role }) {
@@ -48,9 +50,10 @@ export function BottomNav({ role }: { role: Role }) {
         : role === "warehouse"
           ? { href: "/deliveries", label: "Deliveries", icon: TRUCK }
           : { href: "/clients", label: "Clients", icon: CLIENTS },
+      ...(can(role, "seeFinance") ? [{ href: "/finance", label: "Finance", icon: MONEY }] : []),
       ...(can(role, "seePurchasing") ? [{ href: "/purchasing", label: "Purchasing", icon: SUPPLIERS }] : []),
       ...(can(role, "seeStock") ? [{ href: "/stock", label: "Stock", icon: STOCK }] : []),
-    ];
+    ].slice(0, 4);
     if (items.length < 4) items.push({ href: "/products", label: "Products", icon: PRODUCTS });
     items.push({ href: "/more", label: "More", icon: MORE });
   }

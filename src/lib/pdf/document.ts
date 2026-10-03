@@ -150,7 +150,7 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
     ? withDisc
       ? { no: M, desc: M + 22, qtyR: 330, unit: 336, priceR: 450, discR: 488, amountR: A4.w - M }
       : { no: M, desc: M + 22, qtyR: 360, unit: 366, priceR: 470, discR: 0, amountR: A4.w - M }
-    : { no: M, desc: M + 22, qtyR: 440, unit: 448, priceR: 0, discR: 0, amountR: A4.w - M };
+    : { no: M, desc: M + 22, qtyR: 392, unit: 400, priceR: 0, discR: 0, amountR: A4.w - M };
   const descWidth = cols.qtyR - 40 - cols.desc;
 
   function tableHeader() {
@@ -219,7 +219,11 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
     }
   }
 
-  const titleSize = d.title.length > 14 ? 17 : 22;
+  // Title on the right, shrunk so it never runs into the company name on the left.
+  const nameEnd = leftX + bold.widthOfTextAtSize(clean(d.company.name), 15) + 18;
+  const room = A4.w - M - nameEnd;
+  let titleSize = 22;
+  while (titleSize > 11 && bold.widthOfTextAtSize(clean(d.title), titleSize) > room) titleSize -= 0.5;
   right(d.title, A4.w - M, y - 2, { f: bold, size: titleSize, color: brand });
   let my = y - 24;
   for (const [k, v] of d.meta) {
@@ -267,7 +271,7 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
       if (withDisc) right(Number(l.discount_pct ?? 0) > 0 ? `${Number(l.discount_pct)}%` : "", cols.discR, y);
       right(pdfMoney(l.line_total ?? 0, d.currency), cols.amountR - 4, y, { f: bold });
     } else {
-      page.drawLine({ start: { x: cols.amountR - 110, y: y - 3 }, end: { x: cols.amountR - 4, y: y - 3 }, thickness: 0.5, color: muted });
+      page.drawLine({ start: { x: cols.amountR - 90, y: y - 3 }, end: { x: cols.amountR - 4, y: y - 3 }, thickness: 0.5, color: muted });
     }
     y -= rowH;
   });

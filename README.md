@@ -100,8 +100,8 @@ Run each file **once**, in order, in Supabase → SQL Editor (paste the file's *
 2. **More → Stores:** a *Main store* exists already. Add others (e.g. Geita) if you need them.
 3. **Receive goods:** open a confirmed PO → **Receive goods**. Enter the quantities that arrived, and the batch number
    and expiry date for chemicals and lubricants. A goods received note (GRN) is created and the stock goes up. Receive
-   part now and the rest later to see *Partially received*.
-4. **Stock:** check the quantities per store and batch. Batches expiring within 90 days are flagged.
+   part now and the rest later to see *Partly received*.
+4. **Stock:** check the quantities per store and batch. Batches expiring within 60 days are flagged.
    **Adjust stock** corrects a count (a reason is required and it is logged).
 5. Open the **accepted** quotation → **Create delivery note**. Choose the store, delivery site, driver and vehicle,
    then **Dispatch**. Stock goes down (oldest expiry first). **Share PDF** prints the delivery note.

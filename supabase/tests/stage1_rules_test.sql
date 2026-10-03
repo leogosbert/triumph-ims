@@ -4,23 +4,23 @@
 \set QUIET on
 set client_min_messages = notice;
 
-create schema tests;
+create schema if not exists tests;
 grant usage on schema tests to authenticated;
 
-create function tests.login(p_email text) returns void language plpgsql as $$
+create or replace function tests.login(p_email text) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims',
     json_build_object('sub', (select id from auth.users where email = p_email),
                       'email', p_email, 'role', 'authenticated')::text, false);
 end $$;
 
-create function tests.check(p_ok boolean, p_label text) returns void language plpgsql as $$
+create or replace function tests.check(p_ok boolean, p_label text) returns void language plpgsql as $$
 begin
   if p_ok is distinct from true then raise exception 'FAILED: %', p_label; end if;
   raise notice 'pass: %', p_label;
 end $$;
 
-create function tests.blocked(p_sql text, p_label text) returns void language plpgsql as $$
+create or replace function tests.blocked(p_sql text, p_label text) returns void language plpgsql as $$
 begin
   execute p_sql;
   raise exception 'FAILED (was allowed): %', p_label;

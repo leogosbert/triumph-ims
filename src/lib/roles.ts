@@ -22,3 +22,21 @@ export const ROLE_HINTS: Record<Role, string> = {
 export function isRole(value: unknown): value is Role {
   return typeof value === "string" && (ROLES as readonly string[]).includes(value);
 }
+
+/** What each role may do. Mirrors the database rules, which are the real guard. */
+const PERMISSIONS = {
+  editClients: ["management", "sales", "finance"],
+  setCreditLimit: ["management", "finance"],
+  seeSuppliers: ["management", "procurement", "finance", "warehouse"],
+  editSuppliers: ["management", "procurement"],
+  editProducts: ["management", "procurement", "sales"],
+  seeCosts: ["management", "procurement", "finance"],
+  editCosts: ["management", "procurement"],
+  importData: ["management"],
+} as const satisfies Record<string, readonly Role[]>;
+
+export type Permission = keyof typeof PERMISSIONS;
+
+export function can(role: Role, permission: Permission): boolean {
+  return (PERMISSIONS[permission] as readonly Role[]).includes(role);
+}

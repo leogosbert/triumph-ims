@@ -16,6 +16,18 @@ export default async function SettingsPage() {
           </div>
         </Link>
         {isManager && (
+          <Link href="/activity" className="tile">
+            <div className="tile-title">Activity log</div>
+            <div className="tile-sub">Every change, who made it and when</div>
+          </Link>
+        )}
+        {isManager && (
+          <Link href="/import" className="tile">
+            <div className="tile-title">Import from spreadsheet</div>
+            <div className="tile-sub">Clients, suppliers and products from the master data template</div>
+          </Link>
+        )}
+        {isManager && (
           <Link href="/settings/team" className="tile">
             <div className="tile-title">Team &amp; roles</div>
             <div className="tile-sub">Invite people, change roles, switch access off</div>

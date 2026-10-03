@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { displayName, requireManager, type Profile } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
 
@@ -17,7 +18,14 @@ const ENTITY: Record<string, string> = {
   companies: "company details",
   memberships: "team member",
   invitations: "invitation",
+  clients: "client",
+  client_contacts: "client contact",
+  suppliers: "supplier",
+  products: "product",
+  product_costs: "product cost",
 };
+
+const LINKS: Record<string, string> = { clients: "/clients/", suppliers: "/suppliers/", products: "/products/" };
 
 const FIELD: Record<string, string> = {
   name: "name",
@@ -41,6 +49,16 @@ const FIELD: Record<string, string> = {
   revoked_at: "cancelled",
   accepted_at: "accepted",
   accepted_by: "accepted by",
+  code: "ID",
+  sku: "SKU",
+  industry: "industry",
+  credit_limit: "credit limit",
+  payment_terms: "payment terms",
+  currency: "currency",
+  selling_price: "selling price",
+  last_cost: "last cost",
+  main_supplier_id: "main supplier",
+  lead_time_days: "lead time (days)",
 };
 
 function show(v: unknown): string {
@@ -67,12 +85,13 @@ function describe(row: LogRow): { title: string; changes: string[] } {
     const changes = Object.entries(d).map(([k, v]) => {
       const c = v as { from?: unknown; to?: unknown };
       const label = FIELD[k] ?? k;
-      if (k === "logo_path" || k === "accepted_by") return `${label} changed`;
+      if (k === "logo_path" || k === "accepted_by" || k === "main_supplier_id") return `${label} changed`;
       return `${label}: ${show(c.from)} → ${show(c.to)}`;
     });
     return { title: `Changed ${thing}`, changes };
   }
-  return { title: `${row.action === "delete" ? "Removed" : "Added"} ${thing}`, changes: [] };
+  const label = typeof d.name === "string" ? ` ${d.name}` : "";
+  return { title: `${row.action === "delete" ? "Removed" : "Added"} ${thing}${label}`, changes: [] };
 }
 
 export default async function ActivityPage() {
@@ -95,7 +114,7 @@ export default async function ActivityPage() {
   return (
     <>
       <h1>Activity</h1>
-      <p className="muted">Every change to company settings and the team, newest first. This record cannot be edited.</p>
+      <p className="muted">Every change to settings, the team, clients, suppliers and products, newest first. This record cannot be edited.</p>
       <section className="card">
         {rows.length === 0 ? (
           <p className="muted">Nothing recorded yet.</p>
@@ -105,7 +124,9 @@ export default async function ActivityPage() {
               const { title, changes } = describe(r);
               return (
                 <li key={r.id} className="log-item">
-                  <div className="what">{title}</div>
+                  <div className="what">
+                    {LINKS[r.entity] && r.entity_id ? <Link href={`${LINKS[r.entity]}${r.entity_id}`}>{title}</Link> : title}
+                  </div>
                   <div className="muted small">
                     {r.actor_id ? names.get(r.actor_id) ?? "Former team member" : "System"} ·{" "}
                     {formatDateTime(r.created_at)}

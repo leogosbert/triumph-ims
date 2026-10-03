@@ -3,7 +3,7 @@ import { brandingUrl, getAppContext } from "@/lib/context";
 import { ROLE_LABELS } from "@/lib/roles";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const { supabase, company, role, isManager } = await getAppContext();
+  const { supabase, company, role } = await getAppContext();
   const logo = brandingUrl(supabase, company.logo_path);
   const initials = company.name
     .split(/\s+/)
@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
       <main className="page">{children}</main>
-      <BottomNav isManager={isManager} />
+      <BottomNav />
     </div>
   );
 }

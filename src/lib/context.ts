@@ -65,7 +65,10 @@ export const getAppContext = cache(async () => {
     if (error.code === "PGRST205" || error.code === "42P01" || /does not exist|schema cache/i.test(error.message)) {
       redirect("/setup-needed");
     }
-    throw new Error(error.message);
+    // Any other database refusal: show the real reason instead of a blank crash.
+    redirect(
+      `/setup-needed?code=${encodeURIComponent(error.code ?? "")}&detail=${encodeURIComponent(error.message ?? "")}`,
+    );
   }
 
   const memberships = (data ?? []) as unknown as Membership[];

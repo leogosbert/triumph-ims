@@ -22,6 +22,14 @@ the database itself, and each has its own branding and settings.
 
 ## First-time setup
 
+**TRIUMPH's values** (safe to share; the publishable key only works within the database security rules):
+
+| Setting | Value |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://ocewtmyvddszgebbhxak.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `sb_publishable_gP-oEbo7273JYMsQccJABA_EFTmahMx` |
+| `NEXT_PUBLIC_SITE_URL` | `https://ims.triumphsuppliers.co.tz` (use the `….vercel.app` address until the domain is connected) |
+
 ### 1. Database (Supabase)
 
 1. In your Supabase project, open **SQL Editor → New query**.
@@ -29,7 +37,7 @@ the database itself, and each has its own branding and settings.
    "Success. No rows returned". Run each migration once, in file-name order. Later stages add new files.
 3. **Authentication → URL Configuration**
    - **Site URL:** your app address, e.g. `https://triumph-ims.vercel.app`
-   - **Redirect URLs:** add `http://localhost:3000/**` and `https://*.vercel.app/**`
+   - **Redirect URLs:** add `http://localhost:3000/**`, `https://*.vercel.app/**` and `https://ims.triumphsuppliers.co.tz/**`
 4. **Authentication → Emails → Templates**. Change the link in two templates so email links work on any phone:
    - *Confirm signup*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/`
    - *Reset password*: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/account?reset=1`
@@ -56,7 +64,15 @@ After the first `npm install`, commit the generated `package-lock.json` so every
    - `NEXT_PUBLIC_SITE_URL`: the Vercel address, e.g. `https://triumph-ims.vercel.app`
 3. Press **Deploy**. Every push to `main` redeploys automatically.
 
-### 4. Install on a phone
+### 4. Your own web address
+
+1. Vercel → your project → **Settings → Domains** → add `ims.triumphsuppliers.co.tz`.
+2. Vercel shows a DNS record to add, usually a **CNAME** named `ims` pointing to a `vercel-dns.com` address. Add exactly
+   what it shows in the DNS settings at the company that registered `triumphsuppliers.co.tz`.
+3. When Vercel shows the domain as valid (minutes to a few hours), update `NEXT_PUBLIC_SITE_URL` in Vercel and the
+   **Site URL** in Supabase to `https://ims.triumphsuppliers.co.tz`, then redeploy.
+
+### 5. Install on a phone
 
 Open the app address in Chrome (Android) or Safari (iPhone), then use **Add to Home Screen**.
 

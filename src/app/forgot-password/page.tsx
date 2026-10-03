@@ -18,7 +18,12 @@ export default function ForgotPasswordPage() {
       redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent("/account?reset=1")}`,
     });
     setBusy(false);
-    if (error) setError(error.message);
+    if (error)
+      setError(
+        /rate limit/i.test(error.message)
+          ? "Too many emails have been sent in the last hour. Please wait a while and try again."
+          : error.message,
+      );
     else setSent(true);
   }
 

@@ -65,7 +65,11 @@ export default function LoginPage() {
         },
       });
       if (error) {
-        setError(error.message);
+        setError(
+          /rate limit/i.test(error.message)
+            ? "Too many emails have been sent in the last hour. Please wait a while and try again, or ask your administrator."
+            : error.message,
+        );
         return;
       }
       if (data.user && data.user.identities && data.user.identities.length === 0) {

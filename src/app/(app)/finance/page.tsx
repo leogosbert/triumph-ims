@@ -147,6 +147,7 @@ export default async function FinancePage() {
         <Tile href="/bills" title="Supplier bills" sub="Record and pay suppliers' invoices" />
         <Tile href="/payables" title="Money we owe" sub="By supplier and currency" />
         {can(role, "seeProfit") && <Tile href="/profit" title="Profit" sub="By order, client, industry, salesperson" />}
+        <Tile href="/rates" title="Exchange rates" sub="Company rates for USD, EUR and other currencies" />
       </div>
     </>
   );

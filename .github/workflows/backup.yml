@@ -1,0 +1,59 @@
+name: Nightly database backup
+
+# Every night at 03:30 Dar es Salaam time (00:30 UTC), and on demand
+# (Actions → Nightly database backup → Run workflow).
+# Needs two repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL    Supabase → Connect → "Session pooler" connection string
+#                      (postgresql://postgres.<ref>:<password>@aws-…pooler.supabase.com:5432/postgres)
+#   BACKUP_PASSPHRASE  a long passphrase; keep a copy somewhere safe offline
+# The backup is encrypted before upload, so it is safe even in a public repository.
+on:
+  schedule:
+    - cron: "30 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: Encrypted backup
+    runs-on: ubuntu-latest
+    env:
+      DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Check settings
+        id: cfg
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$PASSPHRASE" ]; then
+            echo "::warning title=Backup not set up::Add SUPABASE_DB_URL and BACKUP_PASSPHRASE as repository secrets."
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install PostgreSQL 17 client
+        if: steps.cfg.outputs.skip != '1'
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17 >/dev/null
+      - name: Dump and encrypt
+        if: steps.cfg.outputs.skip != '1'
+        run: |
+          set -euo pipefail
+          day=$(date -u +%Y%m%d)
+          mkdir out
+          # 1. All business data and rules (tables, functions, policies).
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" --schema=public --no-owner --no-privileges -f out/public.sql
+          # 2. Sign-in accounts and file records, so people and files can be restored too.
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" --data-only --no-owner --no-privileges \
+            -t auth.users -t auth.identities -t storage.buckets -t storage.objects -f out/auth-storage.sql \
+            || echo "::warning::Could not dump sign-in accounts; business data was still backed up."
+          tar -czf - -C out . | gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PASSPHRASE" \
+            -o "triumph-ims-$day.tar.gz.gpg"
+          ls -la "triumph-ims-$day.tar.gz.gpg"
+          echo "FILE=triumph-ims-$day.tar.gz.gpg" >> "$GITHUB_ENV"
+      - name: Keep for 30 days
+        if: steps.cfg.outputs.skip != '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FILE }}
+          path: ${{ env.FILE }}
+          retention-days: 30

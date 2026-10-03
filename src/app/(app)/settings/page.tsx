@@ -33,6 +33,22 @@ export default async function SettingsPage() {
             <div className="tile-sub">Invite people, change roles, switch access off</div>
           </Link>
         )}
+        {isManager && (
+          <Link href="/settings/go-live" className="tile">
+            <div className="tile-title">Go-live checklist</div>
+            <div className="tile-sub">What is ready and what is left before everyone starts</div>
+          </Link>
+        )}
+        {isManager && (
+          <Link href="/settings/export" className="tile">
+            <div className="tile-title">Export data</div>
+            <div className="tile-sub">Download everything as Excel (CSV) or one backup file</div>
+          </Link>
+        )}
+        <Link href="/rates" className="tile">
+          <div className="tile-title">Exchange rates</div>
+          <div className="tile-sub">Company rates for foreign currencies</div>
+        </Link>
         <Link href="/notifications#settings" className="tile">
           <div className="tile-title">Your notifications</div>
           <div className="tile-sub">Phone notifications and alert emails for you</div>

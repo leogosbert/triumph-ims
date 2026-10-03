@@ -17,8 +17,8 @@ the database itself, and each has its own branding and settings.
 | 4 | Supplier RFQs, comparison, purchase orders | Done |
 | 5 | Goods received, stock, deliveries, proof of delivery (offline) | Done |
 | 6 | Invoices, payments, receivables and payables, profit | Done |
-| 7 | Dashboard, notifications, email | **Built, ready to test** |
-| 8 | Go-live: security review, backups, data import, training | |
+| 7 | Dashboard, notifications, email | Done |
+| 8 | Go-live: security review, backups, data import, training | **Built — follow [GO-LIVE.md](GO-LIVE.md)** |
 
 ## First-time setup
 
@@ -95,6 +95,28 @@ Run each file **once**, in order, in Supabase → SQL Editor (paste the file's *
 | `supabase/migrations/20261007000100_stage5_stock_deliveries.sql` | 5 |
 | `supabase/migrations/20261008000100_stage6_finance.sql` | 6 |
 | `supabase/migrations/20261009000100_stage7_notifications.sql` | 7 |
+| `supabase/migrations/20261010000100_stage8_go_live.sql` | 8 (security fixes – required) |
+
+## Stage 8 — go-live
+
+Everything for going live is in **[GO-LIVE.md](GO-LIVE.md)**: domain, sign-in settings, alerts, clearing test data,
+closing public sign-up, backups, making the code private, loading real data and inviting people. In the app,
+**Settings → Go-live checklist** shows what is done.
+
+New in Stage 8:
+
+- Fixes from an independent security review (delivery confirmation, exchange-rate bypass of approvals and credit
+  limits, status/link shortcuts, open redirect, anonymous access) — all covered by tests.
+- **Exchange rates** (Finance → Exchange rates): company rates used automatically on foreign-currency documents.
+- **Load opening stock** from a spreadsheet (Stock → Load opening stock; template included).
+- **Export data** (Settings → Export data): every table as CSV, or everything as one JSON file.
+- **Help** (More → Help): a short step-by-step guide for each role.
+- **Nightly encrypted database backup** to GitHub (`.github/workflows/backup.yml`).
+- Database-wide security checks run on every change (RLS on every table, no anonymous access, pinned search paths).
+
+**Developers:** new migrations must end with
+`revoke execute on all functions in schema public from public, anon;` (and re-grant the three outbox functions to
+`anon`), because Postgres gives new functions to everyone by default. The Stage 8 test checks this.
 
 ## Testing Stage 7
 

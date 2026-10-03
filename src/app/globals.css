@@ -696,3 +696,5 @@ svg.chart { width: 100%; height: auto; display: block; }
 .barlist li { margin-bottom: 10px; }
 .barlist .bar { height: 8px; background: #edf1f6; border-radius: 4px; overflow: hidden; margin-top: 4px; }
 .barlist .bar span { display: block; height: 100%; background: var(--brand); border-radius: 4px; }
+.help-steps { padding-left: 20px; margin: 8px 0 0; }
+.help-steps li { margin-bottom: 8px; line-height: 1.45; }

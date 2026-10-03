@@ -36,6 +36,7 @@ select public.invite_member(:'cid', 's4@p.test', 'sales');
 select public.invite_member(:'cid', 'w4@p.test', 'warehouse');
 select public.invite_member(:'cid', 'f4@p.test', 'finance');
 insert into public.clients (company_id, name) values (:'cid', 'Mine Ltd') returning id as client \gset
+insert into public.exchange_rates (company_id, currency, rate) values (:'cid', 'USD', 2600);
 insert into public.suppliers (company_id, name, country, currency) values (:'cid', 'Local Lubes', 'Tanzania', 'TZS') returning id as sup_a \gset
 insert into public.suppliers (company_id, name, country, currency) values (:'cid', 'SA Bearings', 'South Africa', 'USD') returning id as sup_b \gset
 insert into public.products (company_id, sku, name, unit, selling_price) values (:'cid', 'OIL', 'Hydraulic oil', 'drum', 1000000) returning id as oil \gset

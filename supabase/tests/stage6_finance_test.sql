@@ -39,6 +39,7 @@ insert into public.suppliers (company_id, name) values (:'cid', 'Local Hardware'
 insert into public.products (company_id, sku, name, unit, selling_price) values (:'cid', 'OIL', 'Hydraulic oil', 'drum', 1000000) returning id as oil \gset
 insert into public.products (company_id, sku, name, unit, selling_price) values (:'cid', 'BRG', 'Bearing', 'pcs', 100000) returning id as brg \gset
 insert into public.product_costs (product_id, company_id, last_cost) values (:'oil', :'cid', 700000);
+insert into public.exchange_rates (company_id, currency, rate) values (:'cid', 'USD', 2600);
 select public.create_quotation(:'cid', :'client', null) as q \gset
 insert into public.quotation_lines (company_id, quotation_id, product_id, description, quantity, unit, unit_price)
 values (:'cid', :'q', :'oil', 'Hydraulic oil', 4, 'drum', 1000000), (:'cid', :'q', :'brg', 'Bearing', 10, 'pcs', 100000);
@@ -130,6 +131,7 @@ select public.create_delivery(:'cid', null, :'q', null) as dn \gset
 select tests.blocked(format('select public.create_invoice(%L, null, null, %L)', :'cid', :'dn'), 'cannot invoice an undelivered delivery note');
 delete from public.delivery_lines where delivery_id = :'dn' and product_id = :'brg';
 select public.dispatch_delivery(:'dn');
+reset role; insert into storage.objects (bucket_id, name) values ('pod', :'cid' || '/' || :'dn' || '/sig.png'); set role authenticated;
 select public.confirm_delivery(:'dn', 'J. Store', :'cid' || '/' || :'dn' || '/sig.png', null, null, null, null, null);
 reset role;
 select tests.login('f6@f.test'); set role authenticated;

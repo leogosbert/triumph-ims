@@ -139,6 +139,7 @@ select tests.check(true, 'driver can upload the signature for their delivery');
 select tests.blocked(format('select public.confirm_delivery(%L, %L, null, null, null, null, null, null)', :'dn', 'Asha'), 'signature required');
 select tests.blocked(format('select public.confirm_delivery(%L, %L, %L, null, null, null, null, null)', :'dn', '', :'cid' || '/' || :'dn' || '/signature.png'), 'receiver name required');
 select tests.blocked(format('select public.confirm_delivery(%L, %L, %L, null, null, null, null, null)', :'dn', 'Asha', 'other/place/sig.png'), 'signature must belong to this delivery');
+reset role; insert into storage.objects (bucket_id, name) values ('pod', :'cid' || '/' || :'dn' || '/signature.png'); set role authenticated;
 select public.confirm_delivery(:'dn', 'Asha Mwakyusa', :'cid' || '/' || :'dn' || '/signature.png', null, -2.87, 32.23, 'All good', now() - interval '2 hours');
 select tests.check((select status from public.deliveries where id = :'dn') = 'delivered', 'driver confirms delivery');
 select tests.check((select delivered_at < now() - interval '1 hour' from public.deliveries where id = :'dn'), 'offline time of delivery kept');

@@ -24,13 +24,13 @@ const MONEY = icon("M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 12h.01M18
 const TRUCK = icon("M1 6h13v10H1zM14 9h4l4 4v3h-8zM5.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z");
 
 const SECTIONS: Record<string, string[]> = {
-  "/more": ["/more", "/settings", "/account", "/import", "/activity"],
+  "/more": ["/more", "/settings", "/account", "/import", "/activity", "/help", "/notifications"],
   "/sales": ["/sales", "/rfqs", "/quotations", "/clients"],
   "/purchasing": ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers"],
   "/stock": ["/stock", "/warehouses", "/receiving", "/grns", "/deliveries"],
   "/deliveries": ["/deliveries"],
   "/driver": ["/driver"],
-  "/finance": ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit"],
+  "/finance": ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates"],
 };
 
 export function BottomNav({ role }: { role: Role }) {

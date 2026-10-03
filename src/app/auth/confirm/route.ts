@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 
 /** Only allow redirects to pages inside this app. */
 function safeNext(next: string | null) {
-  if (!next || !next.startsWith("/") || next.startsWith("//")) return "/";
+  // A single leading "/" followed by ordinary path characters only (no "//", "/\\" or control characters).
+  if (!next || !/^\/(?![\/\\])[A-Za-z0-9\-._~/?=&#%+]*$/.test(next)) return "/";
   return next;
 }
 

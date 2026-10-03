@@ -107,9 +107,14 @@ export default async function StockPage({ searchParams }: { searchParams: Search
             <input type="checkbox" name="view" value="all" defaultChecked={view === "all"} /> Include products with no stock
           </label>
           {can(role, "adjustStock") && (
-            <Link href="/stock/adjust" className="btn btn-small" style={{ marginLeft: "auto" }}>
-              Adjust stock
-            </Link>
+            <>
+              <Link href="/stock/adjust" className="btn btn-small" style={{ marginLeft: "auto" }}>
+                Adjust stock
+              </Link>
+              <Link href="/stock/import" className="btn btn-small">
+                Load opening stock
+              </Link>
+            </>
           )}
         </div>
       </form>

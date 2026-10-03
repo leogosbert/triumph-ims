@@ -121,6 +121,7 @@ reset role;
 select tests.login('d7@n.test'); set role authenticated;
 select tests.check((select count(*) from public.notifications where kind = 'delivery_assigned') = 1, 'driver is told about the delivery');
 select tests.check((select link from public.notifications where kind = 'delivery_assigned') = '/driver', 'driver alert opens the driver screen');
+reset role; insert into storage.objects (bucket_id, name) values ('pod', :'cid' || '/' || :'dn' || '/s.png'); set role authenticated;
 select public.confirm_delivery(:'dn', 'Gate', :'cid' || '/' || :'dn' || '/s.png', null, null, null, null, null);
 reset role;
 
@@ -177,7 +178,7 @@ select tests.blocked('select * from public.app_secrets', 'secrets are not readab
 reset role;
 
 select tests.login('d7@n.test'); set role authenticated;
-insert into public.push_subscriptions (endpoint, p256dh, auth) values ('https://push.example/abc', 'key', 'auth');
+insert into public.push_subscriptions (endpoint, p256dh, auth) values ('https://fcm.googleapis.com/fcm/send/abc', 'key', 'auth');
 reset role;
 select tests.login('s7@n.test'); set role authenticated;
 select tests.check((select count(*) from public.push_subscriptions) = 0, 'push addresses are private');
@@ -197,7 +198,7 @@ select tests.check((select jsonb_array_length(subscriptions) from claimed where 
 select tests.check((select bool_and(not want_email) from claimed where user_id = :'sales_id'), 'email preference respected');
 set role anon;
 select tests.check((select count(*) from public.claim_outbox('correct horse battery staple 42', 1000)) = 0, 'each alert is sent only once');
-select tests.check(public.drop_push_endpoints('correct horse battery staple 42', array['https://push.example/abc']) = 1, 'dead push addresses are removed');
+select tests.check(public.drop_push_endpoints('correct horse battery staple 42', array['https://fcm.googleapis.com/fcm/send/abc']) = 1, 'dead push addresses are removed');
 select tests.check(public.run_all_alerts('correct horse battery staple 42') >= 0, 'scheduled job runs all companies');
 reset role;
 

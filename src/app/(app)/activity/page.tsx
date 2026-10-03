@@ -41,6 +41,7 @@ const ENTITY: Record<string, string> = {
   supplier_bills: "supplier bill",
   supplier_payments: "payment to supplier",
   order_costs: "order cost",
+  exchange_rates: "exchange rate",
 };
 
 const LINKS: Record<string, string> = {

@@ -41,6 +41,7 @@ export async function savePushSubscription(sub: { endpoint: string; keys: { p256
   const { error } = await supabase
     .from("push_subscriptions")
     .insert({ user_id: user.id, endpoint: sub.endpoint, p256dh: sub.keys.p256dh, auth: sub.keys.auth, user_agent: userAgent.slice(0, 300) });
+  if (error && /push_subscriptions_service/.test(error.message)) return { error: "This browser's push service is not supported." };
   return error ? { error: friendlyError(error.message) } : { ok: true };
 }
 

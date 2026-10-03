@@ -29,6 +29,8 @@ export type Company = {
   quote_min_margin_pct: number;
   quote_approval_above: number;
   quote_terms: string | null;
+  po_approval_above: number;
+  po_terms: string | null;
   created_at: string;
   updated_at: string;
 };

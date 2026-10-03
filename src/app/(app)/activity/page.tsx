@@ -27,6 +27,10 @@ const ENTITY: Record<string, string> = {
   rfq_lines: "RFQ item",
   quotations: "quotation",
   quotation_lines: "quotation line",
+  supplier_rfqs: "supplier RFQ",
+  supplier_rfq_suppliers: "supplier on an RFQ",
+  purchase_orders: "purchase order",
+  po_lines: "PO line",
 };
 
 const LINKS: Record<string, string> = {
@@ -35,6 +39,8 @@ const LINKS: Record<string, string> = {
   products: "/products/",
   rfqs: "/rfqs/",
   quotations: "/quotations/",
+  supplier_rfqs: "/supplier-rfqs/",
+  purchase_orders: "/purchase-orders/",
 };
 
 const FIELD: Record<string, string> = {

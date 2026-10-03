@@ -8,7 +8,6 @@ import { can } from "@/lib/roles";
 export const metadata = { title: "Home" };
 
 const COMING = [
-  { title: "Purchasing", sub: "Supplier RFQs, comparison, purchase orders", stage: 4 },
   { title: "Stock & deliveries", sub: "Goods received, stock, delivery notes, proof of delivery", stage: 5 },
   { title: "Invoices & payments", sub: "Invoices, receipts, money owed, profit per order", stage: 6 },
   { title: "Dashboard & alerts", sub: "Control tower, notifications, email", stage: 7 },
@@ -64,6 +63,19 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       .limit(10);
     approvals = (data ?? []) as unknown as Pending[];
   }
+  type PendingPo = { id: string; number: string; total: number; currency: string; supplier: { name: string } | null };
+  let poApprovals: PendingPo[] = [];
+  if (can(role, "approvePOs")) {
+    const { data } = await supabase
+      .from("purchase_orders")
+      .select("id, number, total, currency, supplier:suppliers(name)")
+      .eq("company_id", company.id)
+      .eq("status", "pending_approval")
+      .neq("submitted_by", user.id)
+      .order("submitted_at")
+      .limit(10);
+    poApprovals = (data ?? []) as unknown as PendingPo[];
+  }
 
   return (
     <>
@@ -106,12 +118,34 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         </section>
       )}
 
+      {poApprovals.length > 0 && (
+        <section className="card" style={{ borderColor: "#f0d49a" }}>
+          <h2>Purchase orders waiting for your approval</h2>
+          <ul className="list">
+            {poApprovals.map((p) => (
+              <li key={p.id} className="row">
+                <Link href={`/purchase-orders/${p.id}`}>
+                  {p.supplier?.name ?? "Supplier"} · {p.number}
+                </Link>
+                <span className="small">{formatMoney(p.total, p.currency)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <h2 style={{ marginTop: 8 }}>Work</h2>
       <div className="grid grid-2">
         {can(role, "seeSales") && (
           <Link href="/sales" className="tile">
             <div className="tile-title">Sales</div>
             <div className="tile-sub">Client RFQs, quotations and approvals</div>
+          </Link>
+        )}
+        {can(role, "seePurchasing") && (
+          <Link href="/purchasing" className="tile">
+            <div className="tile-title">Purchasing</div>
+            <div className="tile-sub">Supplier RFQs, price comparison, purchase orders</div>
           </Link>
         )}
         <Link href="/clients" className="tile">

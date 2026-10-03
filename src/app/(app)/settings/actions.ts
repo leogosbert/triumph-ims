@@ -39,6 +39,8 @@ export async function updateCompany(form: FormData) {
     redirect(withNotice(back, { error: "Validity must be a whole number of days (1–365)." }));
   if (!(minMargin >= 0 && minMargin <= 100)) redirect(withNotice(back, { error: "Minimum margin must be between 0 and 100." }));
   if (!(approvalAbove >= 0)) redirect(withNotice(back, { error: "Approval limit must be a number." }));
+  const poAbove = num("po_approval_above");
+  if (!(poAbove >= 0)) redirect(withNotice(back, { error: "PO approval limit must be a number." }));
 
   const { error } = await supabase
     .from("companies")
@@ -48,6 +50,8 @@ export async function updateCompany(form: FormData) {
       quote_min_margin_pct: minMargin,
       quote_approval_above: approvalAbove,
       quote_terms: optional(form, "quote_terms"),
+      po_approval_above: poAbove,
+      po_terms: optional(form, "po_terms"),
       name,
       legal_name: optional(form, "legal_name"),
       tin: optional(form, "tin"),

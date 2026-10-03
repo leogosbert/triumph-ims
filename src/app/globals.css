@@ -635,3 +635,14 @@ fieldset.plain {
 .banner.bad { background: var(--err-bg); color: var(--err); }
 .banner.ok { background: var(--ok-bg); color: var(--ok); }
 .actions-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+
+/* Comparison table */
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -16px; padding: 0 16px; }
+table.compare { border-collapse: collapse; font-size: 0.85rem; min-width: 100%; }
+table.compare th, table.compare td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: right; white-space: nowrap; vertical-align: top; }
+table.compare th:first-child, table.compare td:first-child { text-align: left; white-space: normal; min-width: 150px; position: sticky; left: 0; background: var(--card); }
+table.compare thead th { background: #eef2f7; }
+table.compare td.best { background: var(--ok-bg); color: var(--ok); font-weight: 700; }
+table.compare tr.total td { font-weight: 700; border-top: 2px solid var(--text); }
+table.compare .none { color: var(--muted); }
+.supplier-row { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }

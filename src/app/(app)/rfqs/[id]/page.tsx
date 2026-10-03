@@ -13,6 +13,7 @@ import { companyPeople, namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { QUOTE_STATUS, quoteNo, RECEIVED_VIA, RFQ_STATUS, StatusBadge } from "@/lib/sales";
 import { addRfqLine, cancelRfq, quoteFromRfq, removeRfqLine, saveRfq } from "../actions";
+import { createSupplierRfq } from "../../supplier-rfqs/actions";
 
 export const metadata = { title: "RFQ" };
 
@@ -142,6 +143,18 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
           </form>
         )}
       </section>
+
+      {can(role, "editPurchasing") && ["new", "quoting"].includes(rfq.status) && lines.length > 0 && (
+        <form action={createSupplierRfq} className="card">
+          <input type="hidden" name="rfq_id" value={rfq.id} />
+          <p className="small muted" style={{ marginTop: 0 }}>
+            Need supplier prices before quoting? Send these items to suppliers.
+          </p>
+          <SubmitButton className="btn btn-block" pendingText="Creating…">
+            Request supplier quotes
+          </SubmitButton>
+        </form>
+      )}
 
       {editable && (
         <details className="card">

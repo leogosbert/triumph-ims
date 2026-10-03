@@ -150,6 +150,17 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
             <Field name="quote_terms" label="Standard terms and conditions" value={c.quote_terms} textarea hint="printed on every quotation" />
           </section>
 
+          <section className="card" id="purchasing">
+            <h2>Purchase orders</h2>
+            <Field
+              name="po_approval_above"
+              label={`Approval needed above (${c.base_currency})`}
+              value={Number(c.po_approval_above ?? 2500000).toLocaleString("en-GB")}
+              hint="for POs raised by procurement"
+            />
+            <Field name="po_terms" label="Standard PO terms" value={c.po_terms} textarea hint="printed on every purchase order" />
+          </section>
+
           {isManager && (
             <SubmitButton className="btn btn-primary btn-block">Save company details</SubmitButton>
           )}

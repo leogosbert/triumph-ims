@@ -18,7 +18,7 @@ const SUPPLIERS = icon("M1 7h13v10H1zM14 10h4l4 4v3h-8zM5.5 20a2 2 0 1 0 0-4 2 2
 const SALES = icon("M4 4h16v16H4zM8 9h8M8 13h8M8 17h5");
 const MORE = icon("M4 6h16M4 12h16M4 18h16");
 
-export function BottomNav({ showSuppliers, showSales }: { showSuppliers: boolean; showSales: boolean }) {
+export function BottomNav({ showSales, showPurchasing }: { showSales: boolean; showPurchasing: boolean }) {
   const pathname = usePathname();
   const items: Item[] = [
     { href: "/", label: "Home", icon: HOME },
@@ -26,7 +26,7 @@ export function BottomNav({ showSuppliers, showSales }: { showSuppliers: boolean
       ? { href: "/sales", label: "Sales", icon: SALES }
       : { href: "/clients", label: "Clients", icon: CLIENTS },
     { href: "/products", label: "Products", icon: PRODUCTS },
-    ...(showSuppliers ? [{ href: "/suppliers", label: "Suppliers", icon: SUPPLIERS }] : []),
+    ...(showPurchasing ? [{ href: "/purchasing", label: "Purchasing", icon: SUPPLIERS }] : []),
     { href: "/more", label: "More", icon: MORE },
   ];
   return (
@@ -40,7 +40,9 @@ export function BottomNav({ showSuppliers, showSales }: { showSuppliers: boolean
               ? moreSections.some((p) => pathname.startsWith(p))
               : it.href === "/sales"
                 ? ["/sales", "/rfqs", "/quotations", "/clients"].some((p) => pathname.startsWith(p))
-                : pathname.startsWith(it.href);
+                : it.href === "/purchasing"
+                  ? ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers"].some((p) => pathname.startsWith(p))
+                  : pathname.startsWith(it.href);
         return (
           <Link key={it.href} href={it.href} aria-current={active ? "page" : undefined}>
             {it.icon}

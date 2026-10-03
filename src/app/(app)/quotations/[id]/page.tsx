@@ -10,6 +10,7 @@ import { CURRENCIES, INCOTERMS, PAYMENT_TERMS } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { productOptions } from "@/lib/options";
+import { PO_STATUS, SRFQ_STATUS } from "@/lib/purchasing";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { QUOTE_STATUS, quoteNo, StatusBadge, todayTz } from "@/lib/sales";
@@ -25,6 +26,7 @@ import {
   submitQuote,
   updateQuoteLine,
 } from "../actions";
+import { createSupplierRfq } from "../../supplier-rfqs/actions";
 
 export const metadata = { title: "Quotation" };
 
@@ -110,6 +112,15 @@ export default async function QuotationPage({
   }
 
   const products = editable ? await productOptions(supabase, company.id) : [];
+  const buyer = can(role, "editPurchasing");
+  const [{ data: srfqData }, { data: poData }] = buyer
+    ? await Promise.all([
+        supabase.from("supplier_rfqs").select("id, number, status").eq("quotation_id", id),
+        supabase.from("purchase_orders").select("id, number, status, supplier:suppliers(name)").eq("quotation_id", id),
+      ])
+    : [{ data: [] }, { data: [] }];
+  const linkedSrfqs = (srfqData ?? []) as { id: string; number: string; status: string }[];
+  const linkedPos = (poData ?? []) as unknown as { id: string; number: string; status: string; supplier: { name: string } | null }[];
   const names = await namesFor(supabase, [q.created_by, q.submitted_by, q.approved_by]);
   const ccy = q.currency as string;
   const today = todayTz();
@@ -244,6 +255,44 @@ export default async function QuotationPage({
               </SubmitButton>
             </div>
           </form>
+        </section>
+      )}
+
+      {buyer && ["approved", "sent", "accepted"].includes(q.status) && (
+        <section className="card" id="purchasing">
+          <h2>Purchasing for this order</h2>
+          {linkedSrfqs.length + linkedPos.length === 0 && (
+            <p className="muted small">
+              {q.status === "accepted" ? "The client accepted. Ask suppliers for prices, or order directly." : "You can ask suppliers for prices already."}
+            </p>
+          )}
+          <ul className="list">
+            {linkedSrfqs.map((r) => (
+              <li key={r.id} className="row">
+                <Link href={`/supplier-rfqs/${r.id}`}>Supplier RFQ {r.number}</Link>
+                <StatusBadge map={SRFQ_STATUS} status={r.status} />
+              </li>
+            ))}
+            {linkedPos.map((p) => (
+              <li key={p.id} className="row">
+                <Link href={`/purchase-orders/${p.id}`}>
+                  {p.number} · {p.supplier?.name}
+                </Link>
+                <StatusBadge map={PO_STATUS} status={p.status} />
+              </li>
+            ))}
+          </ul>
+          <div className="actions">
+            <form action={createSupplierRfq}>
+              <input type="hidden" name="quotation_id" value={q.id} />
+              <SubmitButton className="btn btn-primary" pendingText="Creating…">
+                Request supplier quotes
+              </SubmitButton>
+            </form>
+            <Link href={`/purchase-orders/new?quotation=${q.id}`} className="btn">
+              Create purchase order
+            </Link>
+          </div>
         </section>
       )}
 

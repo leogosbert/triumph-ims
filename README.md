@@ -16,8 +16,8 @@ the database itself, and each has its own branding and settings.
 | 3 | Client RFQs, quotations with PDF, approvals | Done |
 | 4 | Supplier RFQs, comparison, purchase orders | Done |
 | 5 | Goods received, stock, deliveries, proof of delivery (offline) | Done |
-| 6 | Invoices, payments, receivables and payables, profit | **Built, ready to test** |
-| 7 | Dashboard, notifications, email | |
+| 6 | Invoices, payments, receivables and payables, profit | Done |
+| 7 | Dashboard, notifications, email | **Built, ready to test** |
 | 8 | Go-live: security review, backups, data import, training | |
 
 ## First-time setup
@@ -94,6 +94,32 @@ Run each file **once**, in order, in Supabase → SQL Editor (paste the file's *
 | `supabase/migrations/20261006000100_stage4_purchasing.sql` | 4 |
 | `supabase/migrations/20261007000100_stage5_stock_deliveries.sql` | 5 |
 | `supabase/migrations/20261008000100_stage6_finance.sql` | 6 |
+| `supabase/migrations/20261009000100_stage7_notifications.sql` | 7 |
+
+## Testing Stage 7
+
+**Setup (once, about 15 minutes).** In the app: **More → Alerts setup** shows each step and its status.
+
+1. Supabase SQL Editor: `select public.set_outbox_secret('…24+ random characters…');`
+2. Netlify → Site configuration → Environment variables:
+   - `OUTBOX_SECRET` – the same text
+   - `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` – from **Generate a key pair** on the Alerts setup page
+   - `RESEND_API_KEY`, `EMAIL_FROM` – from resend.com after verifying your domain (optional; skip for now if you like)
+3. Redeploy. Netlify runs `netlify/functions/outbox-cron.mts` every 5 minutes: it checks alerts and sends push/email.
+
+**Tests**
+
+1. **Home** (as management): the control tower shows *Critical*, *Needs attention* and *In progress*, with KPIs and charts.
+   Every line is a link to the list behind it.
+2. The **bell** at the top shows unread notifications. As Sales, submit a big quotation: the manager's bell shows
+   *Quotation waiting for your approval*. Send it back: the salesperson is told why.
+3. On your phone: **Notifications → Turn on notifications on this device** (iPhone: add to Home Screen first), then
+   **Send me a test**. It should arrive within seconds.
+4. Assign a client RFQ to someone, accept a quotation (procurement is told), receive the goods (the salesperson is told),
+   dispatch a delivery (the driver is told), confirm it (finance is told it's ready to invoice), record a payment.
+5. Time-based alerts: an overdue invoice, a batch expiring within 60 days, stock at or below the reorder level, a late PO.
+   They appear within 30 minutes of someone opening the app, or press **Run the check and send now**.
+6. **Notifications → How you are told**: switch email or phone notifications off for yourself.
 
 ## Testing Stage 6
 

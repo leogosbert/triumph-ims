@@ -24,6 +24,11 @@ export type Company = {
   logo_path: string | null;
   bank_details: string | null;
   document_footer: string | null;
+  vat_rate: number;
+  quote_validity_days: number;
+  quote_min_margin_pct: number;
+  quote_approval_above: number;
+  quote_terms: string | null;
   created_at: string;
   updated_at: string;
 };

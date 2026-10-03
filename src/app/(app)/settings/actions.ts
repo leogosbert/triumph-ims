@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireManager } from "@/lib/context";
+import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { isRole } from "@/lib/roles";
@@ -25,9 +26,28 @@ export async function updateCompany(form: FormData) {
     redirect(withNotice(back, { error: "Currencies must be 3-letter codes, like TZS or USD." }));
   if (!HEX.test(primary) || !HEX.test(accent)) redirect(withNotice(back, { error: "Please pick valid colours." }));
 
+  const num = (k: string) => {
+    const v = toNumber(str(form, k));
+    return v === null || Number.isNaN(v) ? NaN : v;
+  };
+  const vat = num("vat_rate");
+  const validity = num("quote_validity_days");
+  const minMargin = num("quote_min_margin_pct");
+  const approvalAbove = num("quote_approval_above");
+  if (!(vat >= 0 && vat <= 100)) redirect(withNotice(back, { error: "VAT rate must be between 0 and 100." }));
+  if (!(Number.isInteger(validity) && validity >= 1 && validity <= 365))
+    redirect(withNotice(back, { error: "Validity must be a whole number of days (1–365)." }));
+  if (!(minMargin >= 0 && minMargin <= 100)) redirect(withNotice(back, { error: "Minimum margin must be between 0 and 100." }));
+  if (!(approvalAbove >= 0)) redirect(withNotice(back, { error: "Approval limit must be a number." }));
+
   const { error } = await supabase
     .from("companies")
     .update({
+      vat_rate: vat,
+      quote_validity_days: validity,
+      quote_min_margin_pct: minMargin,
+      quote_approval_above: approvalAbove,
+      quote_terms: optional(form, "quote_terms"),
       name,
       legal_name: optional(form, "legal_name"),
       tin: optional(form, "tin"),

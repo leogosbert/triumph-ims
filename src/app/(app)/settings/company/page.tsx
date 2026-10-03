@@ -134,6 +134,22 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
             />
           </section>
 
+          <section className="card" id="quotations">
+            <h2>Quotations</h2>
+            <div className="grid grid-2">
+              <Field name="vat_rate" label="VAT rate %" value={String(c.vat_rate ?? 18)} hint="0 is used automatically for exempt clients" />
+              <Field name="quote_validity_days" label="Quotations valid for (days)" value={String(c.quote_validity_days ?? 30)} />
+              <Field name="quote_min_margin_pct" label="Minimum margin %" value={String(c.quote_min_margin_pct ?? 12)} hint="below this needs approval" />
+              <Field
+                name="quote_approval_above"
+                label={`Approval needed above (${c.base_currency})`}
+                value={Number(c.quote_approval_above ?? 25000000).toLocaleString("en-GB")}
+                hint="incl. VAT"
+              />
+            </div>
+            <Field name="quote_terms" label="Standard terms and conditions" value={c.quote_terms} textarea hint="printed on every quotation" />
+          </section>
+
           {isManager && (
             <SubmitButton className="btn btn-primary btn-block">Save company details</SubmitButton>
           )}

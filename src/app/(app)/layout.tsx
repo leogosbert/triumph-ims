@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
       <main className="page">{children}</main>
-      <BottomNav showSuppliers={can(role, "seeSuppliers")} />
+      <BottomNav showSuppliers={can(role, "seeSuppliers")} showSales={can(role, "seeSales")} />
     </div>
   );
 }

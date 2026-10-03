@@ -33,6 +33,9 @@ const PERMISSIONS = {
   seeCosts: ["management", "procurement", "finance"],
   editCosts: ["management", "procurement"],
   importData: ["management"],
+  seeSales: ["management", "sales", "procurement", "finance"],
+  editSales: ["management", "sales"],
+  approveQuotes: ["management"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

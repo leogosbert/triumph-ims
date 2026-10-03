@@ -53,3 +53,27 @@ jobs:
             echo "::error title=Build failed::${msg}"
           fi
           exit $status
+
+  pdf:
+    name: Quotation PDF sample
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Build sample PDFs
+        run: |
+          npx tsx scripts/pdf-sample.ts approved sample.pdf
+          npx tsx scripts/pdf-sample.ts draft sample-draft.pdf
+      - name: Page previews (for review)
+        run: |
+          sudo apt-get install -y -qq poppler-utils >/dev/null
+          pdfinfo sample.pdf | grep Pages
+          pdftoppm -r 40 -jpeg -jpegopt quality=55 sample.pdf page
+          pdftoppm -r 30 -f 1 -l 1 -jpeg -jpegopt quality=45 sample-draft.pdf draft
+          for f in page-*.jpg draft-*.jpg; do
+            echo "::notice title=preview $f::$(base64 -w0 "$f")"
+          done

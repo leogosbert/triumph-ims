@@ -23,9 +23,19 @@ const ENTITY: Record<string, string> = {
   suppliers: "supplier",
   products: "product",
   product_costs: "product cost",
+  rfqs: "RFQ",
+  rfq_lines: "RFQ item",
+  quotations: "quotation",
+  quotation_lines: "quotation line",
 };
 
-const LINKS: Record<string, string> = { clients: "/clients/", suppliers: "/suppliers/", products: "/products/" };
+const LINKS: Record<string, string> = {
+  clients: "/clients/",
+  suppliers: "/suppliers/",
+  products: "/products/",
+  rfqs: "/rfqs/",
+  quotations: "/quotations/",
+};
 
 const FIELD: Record<string, string> = {
   name: "name",
@@ -59,7 +69,16 @@ const FIELD: Record<string, string> = {
   last_cost: "last cost",
   main_supplier_id: "main supplier",
   lead_time_days: "lead time (days)",
+  status: "status",
+  quantity: "quantity",
+  unit_price: "unit price",
+  discount_pct: "discount %",
+  total: "total",
+  approval_reason: "approval reason",
+  review_note: "manager's note",
 };
+
+const HIDDEN_FIELDS = new Set(["subtotal", "discount_total", "vat_amount", "line_total", "submitted_at", "approved_at", "sent_at", "decided_at", "submitted_by", "approved_by"]);
 
 function show(v: unknown): string {
   if (v === null || v === undefined || v === "") return "(empty)";
@@ -82,7 +101,7 @@ function describe(row: LogRow): { title: string; changes: string[] } {
     return { title: `Created the company ${show(d.name)}`, changes: [] };
   }
   if (row.action === "update") {
-    const changes = Object.entries(d).map(([k, v]) => {
+    const changes = Object.entries(d).filter(([k]) => !HIDDEN_FIELDS.has(k)).map(([k, v]) => {
       const c = v as { from?: unknown; to?: unknown };
       const label = FIELD[k] ?? k;
       if (k === "logo_path" || k === "accepted_by" || k === "main_supplier_id") return `${label} changed`;
@@ -90,7 +109,8 @@ function describe(row: LogRow): { title: string; changes: string[] } {
     });
     return { title: `Changed ${thing}`, changes };
   }
-  const label = typeof d.name === "string" ? ` ${d.name}` : "";
+  const label =
+    typeof d.name === "string" ? ` ${d.name}` : typeof d.number === "string" ? ` ${d.number}` : typeof d.description === "string" ? `: ${d.description}` : "";
   return { title: `${row.action === "delete" ? "Removed" : "Added"} ${thing}${label}`, changes: [] };
 }
 

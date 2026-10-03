@@ -2,12 +2,12 @@ import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { displayName, getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
+import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 
 export const metadata = { title: "Home" };
 
 const COMING = [
-  { title: "RFQs & quotations", sub: "Client requests, priced quotes, PDF, approvals", stage: 3 },
   { title: "Purchasing", sub: "Supplier RFQs, comparison, purchase orders", stage: 4 },
   { title: "Stock & deliveries", sub: "Goods received, stock, delivery notes, proof of delivery", stage: 5 },
   { title: "Invoices & payments", sub: "Invoices, receipts, money owed, profit per order", stage: 6 },
@@ -27,7 +27,7 @@ function greeting() {
 
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
   const notice = await readNotice(searchParams);
-  const { supabase, profile, company, role, isManager } = await getAppContext();
+  const { supabase, profile, company, role, isManager, user } = await getAppContext();
   const firstName = displayName(profile).split(" ")[0];
 
   let checklist: { done: boolean; label: string; href: string }[] = [];
@@ -50,6 +50,20 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     ];
   }
   const remaining = checklist.filter((c) => !c.done).length;
+
+  type Pending = { id: string; number: string; revision: number; total: number; currency: string; client: { name: string } | null };
+  let approvals: Pending[] = [];
+  if (can(role, "approveQuotes")) {
+    const { data } = await supabase
+      .from("quotations")
+      .select("id, number, revision, total, currency, submitted_by, client:clients(name)")
+      .eq("company_id", company.id)
+      .eq("status", "pending_approval")
+      .neq("submitted_by", user.id)
+      .order("submitted_at")
+      .limit(10);
+    approvals = (data ?? []) as unknown as Pending[];
+  }
 
   return (
     <>
@@ -76,8 +90,30 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         </section>
       )}
 
-      <h2 style={{ marginTop: 8 }}>Records</h2>
+      {approvals.length > 0 && (
+        <section className="card" style={{ borderColor: "#f0d49a" }}>
+          <h2>Quotations waiting for your approval</h2>
+          <ul className="list">
+            {approvals.map((q) => (
+              <li key={q.id} className="row">
+                <Link href={`/quotations/${q.id}`}>
+                  {q.client?.name ?? "Client"} · {q.revision > 0 ? `${q.number}-R${q.revision}` : q.number}
+                </Link>
+                <span className="small">{formatMoney(q.total, q.currency)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <h2 style={{ marginTop: 8 }}>Work</h2>
       <div className="grid grid-2">
+        {can(role, "seeSales") && (
+          <Link href="/sales" className="tile">
+            <div className="tile-title">Sales</div>
+            <div className="tile-sub">Client RFQs, quotations and approvals</div>
+          </Link>
+        )}
         <Link href="/clients" className="tile">
           <div className="tile-title">Clients</div>
           <div className="tile-sub">Companies you sell to, their sites and contacts</div>

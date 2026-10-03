@@ -1,6 +1,6 @@
 import { BottomNav } from "@/components/BottomNav";
 import { brandingUrl, getAppContext } from "@/lib/context";
-import { ROLE_LABELS } from "@/lib/roles";
+import { can, ROLE_LABELS } from "@/lib/roles";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { supabase, company, role } = await getAppContext();
@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
       <main className="page">{children}</main>
-      <BottomNav />
+      <BottomNav showSuppliers={can(role, "seeSuppliers")} />
     </div>
   );
 }

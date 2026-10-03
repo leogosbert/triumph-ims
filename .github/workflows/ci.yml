@@ -68,12 +68,16 @@ jobs:
         run: |
           npx tsx scripts/pdf-sample.ts approved sample.pdf
           npx tsx scripts/pdf-sample.ts draft sample-draft.pdf
-      - name: Page previews (for review)
+      - name: Render page previews
         run: |
           sudo apt-get install -y -qq poppler-utils >/dev/null
           pdfinfo sample.pdf | grep Pages
-          pdftoppm -r 40 -jpeg -jpegopt quality=55 sample.pdf page
-          pdftoppm -r 30 -f 1 -l 1 -jpeg -jpegopt quality=45 sample-draft.pdf draft
-          for f in page-*.jpg draft-*.jpg; do
-            echo "::notice title=preview $f::$(base64 -w0 "$f")"
-          done
+          pdftoppm -r 48 -jpeg -jpegopt quality=50 sample.pdf page
+          pdftoppm -r 36 -f 1 -l 1 -jpeg -jpegopt quality=40 sample-draft.pdf draft
+          ls -la *.jpg
+      - name: Preview page 1
+        run: bash scripts/emit-preview.sh page-1.jpg
+      - name: Preview page 2
+        run: bash scripts/emit-preview.sh page-2.jpg
+      - name: Preview draft
+        run: bash scripts/emit-preview.sh draft-1.jpg

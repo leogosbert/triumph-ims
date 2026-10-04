@@ -1,0 +1,333 @@
+/* LeMo Tech platform admin (Stage 11). Classes are prefixed adm- and reuse the global tokens. */
+
+.adm-head {
+  margin-bottom: 10px;
+}
+.adm-head h1 {
+  margin: 0;
+  font-size: 1.55rem;
+}
+.adm-kicker {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f766e;
+  background: rgba(20, 184, 166, 0.14);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+:root[data-theme="dark"] .adm-kicker {
+  color: #5eead4;
+}
+.adm-title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+h2.adm-title {
+  margin-bottom: 8px;
+}
+.page-head h2.adm-title {
+  margin-bottom: 0;
+}
+
+/* Not available */
+.adm-closed {
+  text-align: center;
+  max-width: 460px;
+  margin: 40px auto;
+  padding: 32px 20px;
+}
+.adm-closed h1 {
+  margin: 8px 0;
+}
+.adm-closed-icon {
+  font-size: 2rem;
+}
+
+/* Level badges */
+.badge.adm-lvl-small {
+  background: rgba(20, 184, 166, 0.16);
+  color: #0f766e;
+}
+.badge.adm-lvl-medium {
+  background: var(--info-bg);
+  color: var(--brand-dark);
+}
+.badge.adm-lvl-enterprise {
+  background: var(--brand-dark);
+  color: #fff;
+}
+:root[data-theme="dark"] .badge.adm-lvl-small {
+  color: #5eead4;
+}
+.adm-mini {
+  margin-left: 6px;
+  font-size: 0.7rem;
+  vertical-align: middle;
+}
+
+.adm-stats {
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (min-width: 720px) {
+  .adm-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Bars */
+.adm-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.adm-bars li {
+  display: grid;
+  grid-template-columns: 90px 1fr 48px;
+  align-items: center;
+  gap: 10px;
+}
+.adm-bar-label {
+  font-size: 0.9rem;
+}
+.adm-bar-track {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  min-width: 60px;
+}
+.adm-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #14b8a6;
+}
+.adm-fill-medium {
+  background: var(--brand);
+}
+.adm-fill-enterprise {
+  background: var(--brand-dark);
+}
+.adm-bar-n {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  text-align: right;
+  white-space: nowrap;
+}
+.adm-pct {
+  display: grid;
+  grid-template-columns: minmax(70px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tables */
+.adm-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.86rem;
+}
+.adm-table th,
+.adm-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+.adm-table thead th {
+  background: var(--soft);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.adm-table th.adm-wide {
+  min-width: 160px;
+}
+.adm-table tr.adm-planned td:first-child {
+  color: var(--muted);
+}
+.adm-heat td:not(:first-child),
+.adm-heat th:not(:first-child) {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  min-width: 64px;
+}
+.adm-heat td.adm-zero {
+  color: var(--muted);
+  opacity: 0.6;
+}
+.adm-heat .adm-strong {
+  font-weight: 700;
+}
+.adm-heat tr.adm-total td {
+  font-weight: 700;
+  border-top: 2px solid var(--text);
+}
+
+/* Insights */
+.adm-insights ul {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.adm-insight {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border-left: 4px solid var(--brand);
+  background: var(--info-bg);
+  font-size: 0.92rem;
+}
+.adm-insight-warn {
+  border-left-color: var(--warn);
+  background: var(--warn-bg);
+}
+.adm-insight-ok {
+  border-left-color: #14b8a6;
+  background: rgba(20, 184, 166, 0.1);
+}
+
+/* Lists */
+.adm-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.adm-inactive {
+  opacity: 0.6;
+}
+.adm-sentence {
+  white-space: normal;
+}
+.adm-row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Forms */
+.adm-inline-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.adm-inline-form select {
+  flex: 1;
+  min-width: 160px;
+}
+.adm-grid2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 12px;
+}
+@media (min-width: 560px) {
+  .adm-grid2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.adm-center {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 10px;
+}
+.adm-checks {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.adm-radio {
+  font-weight: 600 !important;
+  margin-bottom: 6px;
+}
+.adm-explain {
+  border-left: 4px solid #14b8a6;
+}
+.adm-danger {
+  border-color: var(--err-line);
+}
+
+.adm-module h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 14px 0 4px;
+}
+.adm-feature-row {
+  align-items: center;
+  gap: 10px;
+}
+.adm-onoff {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+/* Tutorial editor */
+.adm-tutorial ol {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.adm-step {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: var(--soft);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.adm-step-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.adm-step-tools {
+  display: flex;
+  gap: 4px;
+}
+
+/* Feedback */
+.adm-status-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.adm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.adm-feedback {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.adm-feedback li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.adm-feedback li:last-child {
+  border-bottom: 0;
+}

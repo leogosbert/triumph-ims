@@ -1,0 +1,193 @@
+/* Suggestion Box (Stage 11). Classes are prefixed sg- and reuse the global tokens. */
+
+.sg-lead {
+  margin-top: 0;
+}
+
+.badge.sg-st-implemented {
+  background: rgba(20, 184, 166, 0.16);
+  color: #0f766e;
+}
+:root[data-theme="dark"] .badge.sg-st-implemented {
+  color: #5eead4;
+}
+
+.sg-num {
+  font-family: var(--mono);
+  font-size: 0.82em;
+}
+
+.sg-list .side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.sg-empty {
+  text-align: center;
+  padding: 28px 18px;
+}
+.sg-empty p {
+  color: var(--muted);
+  max-width: 420px;
+  margin: 8px auto 14px;
+}
+.sg-empty-icon,
+.sg-hero-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.sg-hero {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(20, 184, 166, 0.35);
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.12), rgba(28, 76, 155, 0.08));
+}
+.sg-hero p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.sg-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.sg-check {
+  align-items: flex-start !important;
+  margin: 4px 0 16px;
+  font-size: 0.92rem;
+}
+.sg-check input {
+  margin-top: 3px;
+  flex: none;
+}
+
+.sg-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 10px 0 0;
+}
+
+/* Progress steps */
+.sg-steps {
+  list-style: none;
+  display: flex;
+  margin: 10px 0 16px;
+  padding: 0;
+  gap: 0;
+}
+.sg-step {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+}
+.sg-step::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+  z-index: 0;
+}
+.sg-step:first-child::before {
+  display: none;
+}
+.sg-dot {
+  position: relative;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--line-strong);
+}
+.sg-step-done .sg-dot {
+  background: #14b8a6;
+  border-color: #14b8a6;
+}
+.sg-step-done::before,
+.sg-step-now::before {
+  background: #14b8a6;
+}
+.sg-step-now {
+  color: var(--text);
+  font-weight: 700;
+}
+.sg-step-now .sg-dot {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px rgba(28, 76, 155, 0.15);
+}
+.sg-step-skip {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.sg-note {
+  border-left: 4px solid #14b8a6;
+}
+.sg-note-ask {
+  border-left-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.sg-decisions {
+  margin-bottom: 0;
+}
+
+/* Comments */
+.sg-comments {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sg-comments li {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-right: 24px;
+}
+.sg-comments li.sg-mine {
+  margin-right: 0;
+  margin-left: 24px;
+  background: rgba(20, 184, 166, 0.08);
+  border-color: rgba(20, 184, 166, 0.3);
+}
+.sg-comments .sg-body {
+  margin-top: 4px;
+}
+.sg-comment-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+}
+.sg-comment-form {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.sg-comment-form textarea {
+  flex: 1;
+  min-width: 0;
+}

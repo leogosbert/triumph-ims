@@ -7,6 +7,22 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.11",
+    date: "2026-10-05",
+    en: [
+      "Business levels: Small, Medium and Enterprise — the app shows what fits your business today and grows with you.",
+      "Growth & recommendations: the app notices when your business grows and suggests features, with the reason and a short tutorial.",
+      "Turn individual features on or off under Settings → Business level & features.",
+      "Suggestion Box: everyone can propose improvements; managers review, assign and track them.",
+    ],
+    sw: [
+      "Viwango vya biashara: Ndogo, Kati na Kubwa — programu inaonyesha kinachofaa biashara yako leo na inakua pamoja nawe.",
+      "Ukuaji na mapendekezo: programu hutambua biashara yako inapokua na kupendekeza vipengele, pamoja na sababu na mafunzo mafupi.",
+      "Washa au zima vipengele kimoja kimoja kwenye Mipangilio → Kiwango cha biashara na vipengele.",
+      "Sanduku la Mapendekezo: kila mtu anaweza kupendekeza maboresho; viongozi huyapitia, kuyakabidhi na kuyafuatilia.",
+    ],
+  },
+  {
     version: "1.10",
     date: "2026-10-04",
     en: [

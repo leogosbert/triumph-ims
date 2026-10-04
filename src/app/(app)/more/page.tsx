@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icon";
 import { ThemePicker } from "@/components/ThemePicker";
 import { getAppContext } from "@/lib/context";
+import { featureForRoute } from "@/lib/features";
 import { APP_VERSION, BUILD_ID } from "@/lib/releases";
 import { can } from "@/lib/roles";
 
@@ -34,9 +35,14 @@ const ICONS: Record<string, IconName> = {
   "/notifications": "bell",
   "/settings/notifications": "settings",
   "/account": "user",
+  "/suggestions": "inbox",
+  "/growth": "activity",
+  "/settings/features": "check",
+  "/admin": "settings",
 };
 
-function Tile({ href, title, sub }: { href: string; title: string; sub: string }) {
+function Tile({ href, title, sub, show = true }: { href: string; title: string; sub: string; show?: boolean }) {
+  if (!show) return null;
   return (
     <Link href={href} className="tile tile-icon">
       <span className="tile-ico" aria-hidden>
@@ -52,10 +58,12 @@ function Tile({ href, title, sub }: { href: string; title: string; sub: string }
 
 export default async function MorePage() {
   await primeLang();
-  const { role, isManager } = await getAppContext();
-  const addClient = can(role, "editClients");
-  const addSupplier = can(role, "editSuppliers");
-  const addProduct = can(role, "editProducts");
+  const { role, isManager, features, isPlatformAdmin } = await getAppContext();
+  // A tile is shown only when its feature is switched on (drivers always keep /driver).
+  const on = (href: string) => (role === "driver" && href === "/driver") || features.on(featureForRoute(href));
+  const addClient = can(role, "editClients") && on("/clients/new");
+  const addSupplier = can(role, "editSuppliers") && on("/suppliers/new");
+  const addProduct = can(role, "editProducts") && on("/products/new");
 
   return (
     <>
@@ -66,12 +74,12 @@ export default async function MorePage() {
           <h2>{tr("Add new records")}</h2>
           <p className="muted small">{tr("Fill in a form directly in the app, one record at a time.")}</p>
           <div className="grid grid-2" style={{ marginBottom: 20 }}>
-            {addClient && <Tile href="/clients/new" title={tr("+ New client")} sub={tr("Company, industry, TIN/VRN, sites, terms")} />}
+            {addClient && <Tile show={on("/clients/new")} href="/clients/new" title={tr("+ New client")} sub={tr("Company, industry, TIN/VRN, sites, terms")} />}
             {addSupplier && (
-              <Tile href="/suppliers/new" title={tr("+ New supplier")} sub={tr("Contact, country, currency, lead time, terms")} />
+              <Tile show={on("/suppliers/new")} href="/suppliers/new" title={tr("+ New supplier")} sub={tr("Contact, country, currency, lead time, terms")} />
             )}
             {addProduct && (
-              <Tile href="/products/new" title={tr("+ New product")} sub={tr("SKU, brand, part number, unit, price, safety")} />
+              <Tile show={on("/products/new")} href="/products/new" title={tr("+ New product")} sub={tr("SKU, brand, part number, unit, price, safety")} />
             )}
           </div>
         </>
@@ -79,21 +87,21 @@ export default async function MorePage() {
 
       <h2>{tr("Records")}</h2>
       <div className="grid grid-2" style={{ marginBottom: 20 }}>
-        <Tile href="/clients" title={tr("Clients")} sub={tr("Search, view and edit clients and their contacts")} />
-        {can(role, "seeSuppliers") && <Tile href="/suppliers" title={tr("Suppliers")} sub={tr("Search, view and edit suppliers")} />}
-        <Tile href="/products" title={tr("Products")} sub={tr("Search, view and edit the catalogue")} />
-        {can(role, "seeSales") && <Tile href="/sales" title={tr("Sales")} sub={tr("Client RFQs, quotations, approvals")} />}
-        {can(role, "seePurchasing") && <Tile href="/purchasing" title={tr("Purchasing")} sub={tr("Supplier RFQs and purchase orders")} />}
-        {can(role, "seeFinance") && <Tile href="/finance" title={tr("Finance")} sub={tr("Invoices, payments, money owed, profit")} />}
-        {!can(role, "seeFinance") && can(role, "seeInvoices") && <Tile href="/invoices" title={tr("Invoices")} sub={tr("Invoices and what clients owe")} />}
-        {!can(role, "seeFinance") && can(role, "seeBills") && <Tile href="/bills" title={tr("Supplier bills")} sub={tr("Suppliers' invoices and payments")} />}
-        {can(role, "seeStock") && <Tile href="/stock" title={tr("Stock")} sub={tr("Stock on hand, batches, expiry, adjustments")} />}
-        {can(role, "receiveGoods") && <Tile href="/receiving" title={tr("Receive goods")} sub={tr("Record goods arriving against purchase orders")} />}
-        {can(role, "seeDeliveries") && <Tile href="/deliveries" title={tr("Deliveries")} sub={tr("Delivery notes and proof of delivery")} />}
-        {role === "driver" && <Tile href="/driver" title={tr("My deliveries")} sub={tr("Deliveries assigned to you, record proof of delivery")} />}
-        {can(role, "manageWarehouses") && <Tile href="/warehouses" title={tr("Stores")} sub={tr("Warehouses and store locations")} />}
+        <Tile show={on("/clients")} href="/clients" title={tr("Clients")} sub={tr("Search, view and edit clients and their contacts")} />
+        {can(role, "seeSuppliers") && <Tile show={on("/suppliers")} href="/suppliers" title={tr("Suppliers")} sub={tr("Search, view and edit suppliers")} />}
+        <Tile show={on("/products")} href="/products" title={tr("Products")} sub={tr("Search, view and edit the catalogue")} />
+        {can(role, "seeSales") && <Tile show={on("/sales")} href="/sales" title={tr("Sales")} sub={tr("Client RFQs, quotations, approvals")} />}
+        {can(role, "seePurchasing") && <Tile show={on("/purchasing")} href="/purchasing" title={tr("Purchasing")} sub={tr("Supplier RFQs and purchase orders")} />}
+        {can(role, "seeFinance") && <Tile show={on("/finance")} href="/finance" title={tr("Finance")} sub={tr("Invoices, payments, money owed, profit")} />}
+        {!can(role, "seeFinance") && can(role, "seeInvoices") && <Tile show={on("/invoices")} href="/invoices" title={tr("Invoices")} sub={tr("Invoices and what clients owe")} />}
+        {!can(role, "seeFinance") && can(role, "seeBills") && <Tile show={on("/bills")} href="/bills" title={tr("Supplier bills")} sub={tr("Suppliers' invoices and payments")} />}
+        {can(role, "seeStock") && <Tile show={on("/stock")} href="/stock" title={tr("Stock")} sub={tr("Stock on hand, batches, expiry, adjustments")} />}
+        {can(role, "receiveGoods") && <Tile show={on("/receiving")} href="/receiving" title={tr("Receive goods")} sub={tr("Record goods arriving against purchase orders")} />}
+        {can(role, "seeDeliveries") && <Tile show={on("/deliveries")} href="/deliveries" title={tr("Deliveries")} sub={tr("Delivery notes and proof of delivery")} />}
+        {role === "driver" && <Tile show={on("/driver")} href="/driver" title={tr("My deliveries")} sub={tr("Deliveries assigned to you, record proof of delivery")} />}
+        {can(role, "manageWarehouses") && <Tile show={on("/warehouses")} href="/warehouses" title={tr("Stores")} sub={tr("Warehouses and store locations")} />}
         {can(role, "importData") && (
-          <Tile href="/import" title={tr("Import from spreadsheet")} sub={tr("Load many records at once from the template")} />
+          <Tile show={on("/import")} href="/import" title={tr("Import from spreadsheet")} sub={tr("Load many records at once from the template")} />
         )}
       </div>
 
@@ -104,13 +112,26 @@ export default async function MorePage() {
           title={tr("Company details & branding")}
           sub={isManager ? tr("Name, TIN, VRN, logo, colours, bank details") : tr("View the company's details")}
         />
-        {isManager && <Tile href="/settings/team" title={tr("Team & roles")} sub={tr("Invite people, change roles")} />}
-        {isManager && <Tile href="/activity" title={tr("Activity log")} sub={tr("Every change, who made it and when")} />}
-        <Tile href="/help" title={tr("Help")} sub={tr("Short guide for your role, step by step")} />
-        {isManager && <Tile href="/settings/go-live" title={tr("Go-live checklist")} sub={tr("What is ready and what is left")} />}
-        <Tile href="/notifications" title={tr("Notifications")} sub={tr("Your alerts, phone notifications and emails")} />
-        {isManager && <Tile href="/settings/notifications" title={tr("Alerts setup")} sub={tr("Connect phone push and email sending")} />}
-        <Tile href="/account" title={tr("Your account")} sub={tr("Your details, password, sign out")} />
+        {isManager && <Tile show={on("/settings/team")} href="/settings/team" title={tr("Team & roles")} sub={tr("Invite people, change roles")} />}
+        {isManager && <Tile show={on("/activity")} href="/activity" title={tr("Activity log")} sub={tr("Every change, who made it and when")} />}
+        <Tile show={on("/help")} href="/help" title={tr("Help")} sub={tr("Short guide for your role, step by step")} />
+        {isManager && <Tile show={on("/settings/go-live")} href="/settings/go-live" title={tr("Go-live checklist")} sub={tr("What is ready and what is left")} />}
+        <Tile show={on("/notifications")} href="/notifications" title={tr("Notifications")} sub={tr("Your alerts, phone notifications and emails")} />
+        {isManager && <Tile show={on("/settings/notifications")} href="/settings/notifications" title={tr("Alerts setup")} sub={tr("Connect phone push and email sending")} />}
+        <Tile show={on("/account")} href="/account" title={tr("Your account")} sub={tr("Your details, password, sign out")} />
+      </div>
+
+      <h2 style={{ marginTop: 24 }}>{tr("Grow & improve")}</h2>
+      <div className="grid grid-2">
+        <Tile show={on("/suggestions")} href="/suggestions" title={tr("Suggestion Box")} sub={tr("Share an idea to improve the business")} />
+        {isManager && (
+          <Tile href="/growth" title={tr("Growth & recommendations")} sub={tr("Your business level and features that could help")} />
+        )}
+        {!isManager && <Tile href="/growth" title={tr("Your business level")} sub={tr("See the tools your company uses and what comes next")} />}
+        {isManager && (
+          <Tile href="/settings/features" title={tr("Features & business level")} sub={tr("Switch features on or off, change your level")} />
+        )}
+        {isPlatformAdmin && <Tile href="/admin" title={tr("Platform admin")} sub={tr("LeMo Tech: companies, features, feedback")} />}
       </div>
       <h2 style={{ marginTop: 24 }}>{tr("Appearance")}</h2>
       <p className="muted small">{tr("Auto follows your phone's light or dark setting.")}</p>

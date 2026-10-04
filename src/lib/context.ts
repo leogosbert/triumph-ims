@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Role } from "@/lib/roles";
+import { loadFeatures } from "@/lib/features";
+import type { Level } from "@/lib/levels";
 
 export const ACTIVE_COMPANY_COOKIE = "ims_company";
 
@@ -40,6 +42,10 @@ export type Company = {
   demo_expires_at?: string | null;
   require_mfa?: boolean;
   idle_timeout_minutes?: number;
+  /** Added in Stage 11 (growth): undefined until that SQL has been run. */
+  business_level?: Level;
+  onboarding_done?: boolean;
+  level_changed_at?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -103,11 +109,20 @@ export const getAppContext = cache(async () => {
   // Other companies hidden for the same reason are left out of lists and switchers.
   const visible = memberships.filter((m) => m.company);
 
-  const { data: profileRow } = await supabase
-    .from("profiles")
-    .select("id, full_name, email, phone")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: profileRow }, features, isPlatformAdmin] = await Promise.all([
+    supabase.from("profiles").select("id, full_name, email, phone").eq("id", user.id).maybeSingle(),
+    // Feature switches (Stage 11). Before that SQL is run every screen stays visible.
+    loadFeatures(supabase, membership.company_id),
+    // LeMo Tech staff (Stage 11). False when the function is missing or refuses.
+    (async () => {
+      try {
+        const { data: admin, error: adminError } = await supabase.rpc("is_platform_admin");
+        return !adminError && admin === true;
+      } catch {
+        return false;
+      }
+    })(),
+  ]);
   const profile: Profile = (profileRow as Profile | null) ?? {
     id: user.id,
     full_name: null,
@@ -124,6 +139,9 @@ export const getAppContext = cache(async () => {
     company: membership.company,
     role: membership.role,
     isManager: membership.role === "management",
+    /** Which features are switched on (`features.on(key)`); `ready` is false before the Stage 11 SQL. */
+    features,
+    isPlatformAdmin,
   };
 });
 

@@ -6,7 +6,8 @@ export const metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   await primeLang();
-  const { company, isManager } = await getAppContext();
+  const { company, isManager, features } = await getAppContext();
+  const on = features.on;
   return (
     <>
       <h1>{tr("Settings")}</h1>
@@ -18,6 +19,12 @@ export default async function SettingsPage() {
           </div>
         </Link>
         {isManager && (
+          <Link href="/settings/features" className="tile">
+            <div className="tile-title">{tr("Features & business level")}</div>
+            <div className="tile-sub">{tr("Switch features on or off, change your level")}</div>
+          </Link>
+        )}
+        {isManager && on("activity") && (
           <Link href="/activity" className="tile">
             <div className="tile-title">{tr("Activity log")}</div>
             <div className="tile-sub">{tr("Every change, who made it and when")}</div>
@@ -29,13 +36,13 @@ export default async function SettingsPage() {
             <div className="tile-sub">{tr("Clients, suppliers and products from the master data template")}</div>
           </Link>
         )}
-        {isManager && (
+        {isManager && on("security_policy") && (
           <Link href="/settings/security" className="tile">
             <div className="tile-title">{tr("Security")}</div>
             <div className="tile-sub">{tr("Two-step verification, automatic sign-out, password rules")}</div>
           </Link>
         )}
-        {isManager && (
+        {isManager && on("team") && (
           <Link href="/settings/team" className="tile">
             <div className="tile-title">{tr("Team & roles")}</div>
             <div className="tile-sub">{tr("Invite people, change roles, switch access off")}</div>
@@ -47,20 +54,24 @@ export default async function SettingsPage() {
             <div className="tile-sub">{tr("What is ready and what is left before everyone starts")}</div>
           </Link>
         )}
-        {isManager && (
+        {isManager && on("data_export") && (
           <Link href="/settings/export" className="tile">
             <div className="tile-title">{tr("Export data")}</div>
             <div className="tile-sub">{tr("Download everything as Excel (CSV) or one backup file")}</div>
           </Link>
         )}
-        <Link href="/rates" className="tile">
-          <div className="tile-title">{tr("Exchange rates")}</div>
-          <div className="tile-sub">{tr("Company rates for foreign currencies")}</div>
-        </Link>
-        <Link href="/notifications#settings" className="tile">
-          <div className="tile-title">{tr("Your notifications")}</div>
-          <div className="tile-sub">{tr("Phone notifications and alert emails for you")}</div>
-        </Link>
+        {on("multi_currency") && (
+          <Link href="/rates" className="tile">
+            <div className="tile-title">{tr("Exchange rates")}</div>
+            <div className="tile-sub">{tr("Company rates for foreign currencies")}</div>
+          </Link>
+        )}
+        {on("notifications") && (
+          <Link href="/notifications#settings" className="tile">
+            <div className="tile-title">{tr("Your notifications")}</div>
+            <div className="tile-sub">{tr("Phone notifications and alert emails for you")}</div>
+          </Link>
+        )}
         {isManager && (
           <Link href="/settings/notifications" className="tile">
             <div className="tile-title">{tr("Alerts setup (server)")}</div>

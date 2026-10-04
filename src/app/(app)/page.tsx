@@ -13,6 +13,9 @@ import { loadDashboard } from "@/lib/dashboard";
 import { Icon, type IconName } from "@/components/Icon";
 import type { Dict } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
+import { FirstStepsCard, GrowthCard, OnboardingCard } from "@/components/GrowthCard";
+import { loadRecommendations } from "@/lib/features";
+import { isLevel, levelRank, type Level } from "@/lib/levels";
 
 export const metadata = { title: "Home" };
 
@@ -45,8 +48,10 @@ function quickActions(role: Parameters<typeof can>[0], t: Dict) {
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, profile, company, role, isManager, user } = await getAppContext();
+  const { supabase, profile, company, role, isManager, user, features } = await getAppContext();
   if (role === "driver") redirect("/driver");
+  const sp = (await searchParams) ?? {};
+  const welcomeLevel = typeof sp.welcome === "string" && isLevel(sp.welcome) ? sp.welcome : null;
   const firstName = displayName(profile).split(" ")[0];
   // Check for time-based alerts (at most every 30 minutes; harmless before the Stage 7 update).
   await supabase.rpc("refresh_alerts", { p_company: company.id });
@@ -106,6 +111,30 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     poApprovals = (data ?? []) as unknown as PendingPo[];
   }
 
+  // Growth (Stage 11): onboarding card and recommendations for managers. Quiet before that SQL is run.
+  const level: Level = company.business_level ?? "medium";
+  const needsOnboarding = isManager && company.onboarding_done === false && !company.is_demo;
+  let growth: { featureRecs: number; featureLevel: Level | null; levelRec: Level | null } | null = null;
+  if (isManager && features.ready && !company.is_demo) {
+    try {
+      await supabase.rpc("run_growth_check", { p_company: company.id, p_force: false });
+    } catch {
+      /* the scheduled check covers it */
+    }
+    const recs = await loadRecommendations(supabase, company.id, features, level);
+    const featureKeys = recs.list.map((r) => r.feature_key).filter((k): k is string => Boolean(k));
+    const levelsOf = new Set(
+      features.list.filter((f) => featureKeys.includes(f.key) && levelRank(f.default_level) > levelRank(level)).map((f) => f.default_level),
+    );
+    const allAbove = featureKeys.every((k) => features.list.some((f) => f.key === k && levelRank(f.default_level) > levelRank(level)));
+    const levelRecs = recs.list.map((r) => r.target_level).filter((l): l is Level => Boolean(l));
+    growth = {
+      featureRecs: featureKeys.length,
+      featureLevel: allAbove && levelsOf.size === 1 ? [...levelsOf][0] : null,
+      levelRec: levelRecs.sort((a, b) => levelRank(a) - levelRank(b))[0] ?? null,
+    };
+  }
+
   const shortMoney = (v: number) => {
     const x = Math.abs(v);
     return x >= 1e9 ? `${(v / 1e9).toFixed(1)}B` : x >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : x >= 1e3 ? `${Math.round(v / 1e3)}K` : String(Math.round(v));
@@ -133,6 +162,10 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         <Notice {...notice} />
         <ControlTower tower={dash.tower} t={t} />
       </div>
+
+      {needsOnboarding && <OnboardingCard />}
+      {isManager && welcomeLevel && <FirstStepsCard level={welcomeLevel} />}
+      {growth && <GrowthCard level={level} featureRecs={growth.featureRecs} featureLevel={growth.featureLevel} levelRec={growth.levelRec} />}
 
       {(approvals.length > 0 || poApprovals.length > 0) && (
         <section className="card">

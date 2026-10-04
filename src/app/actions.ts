@@ -35,7 +35,8 @@ export async function createCompany(form: FormData) {
   const { data, error } = await supabase.rpc("create_company", { p_name: name });
   if (error) redirect(withNotice("/welcome", { error: friendlyError(error.message) }));
   (await cookies()).set(ACTIVE_COMPANY_COOKIE, String(data), COOKIE_OPTS);
-  redirect(withNotice("/", { msg: `${name} is set up. Start with the checklist below.` }));
+  // Stage 11: a few questions first, then the recommended starting level (skippable).
+  redirect(withNotice("/onboarding", { msg: `${name} is set up. A few quick questions to get started.` }));
 }
 
 export async function acceptInvitation(form: FormData) {

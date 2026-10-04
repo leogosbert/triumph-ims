@@ -16,7 +16,7 @@ import { setLanguage } from "../lang-actions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   await primeLang();
-  const { supabase, company, role, user, isManager, profile, memberships } = await getAppContext();
+  const { supabase, company, role, user, isManager, profile, memberships, features, isPlatformAdmin } = await getAppContext();
   const { lang, t } = await getDict();
   const logo = brandingUrl(supabase, company.logo_path);
   const initials = company.name
@@ -59,7 +59,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="shell" style={brandStyle}>
-      <SideNav items={sideNav(role, t)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
+      <SideNav items={sideNav(role, t, features.on)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">
           <CompanyButton className="topbar-brand" title={company.name}>
@@ -107,7 +107,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         lastSignIn={user.last_sign_in_at ?? null}
         enabled={!user.is_anonymous && Boolean(profile.email ?? user.email)}
       />
-      <BottomNav items={bottomNav(role, t)} menu={moreMenu(role, isManager)} menuStart={defaultCategory(role)} />
+      <BottomNav
+        items={bottomNav(role, t, features.on)}
+        menu={moreMenu(role, isManager, { on: features.on, isPlatformAdmin, features: features.list })}
+        menuStart={defaultCategory(role)}
+      />
     </div>
   );
 }

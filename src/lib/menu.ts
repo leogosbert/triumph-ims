@@ -1,14 +1,29 @@
 import type { IconName } from "@/components/Icon";
+import { featureForRoute, type FeatureRow } from "@/lib/features";
 import { can, type Role } from "@/lib/roles";
 
-export type MenuItem = { href: string; title: string; sub: string; icon: IconName; plain?: boolean };
+/**
+ * `feature`: hidden when that feature is switched off (defaults to the feature of the link's route).
+ * `soon`: shown muted (a planned feature, in the "Grow" category).
+ */
+export type MenuItem = { href: string; title: string; sub: string; icon: IconName; plain?: boolean; feature?: string; soon?: boolean };
 export type MenuCategory = { key: string; label: string; icon: IconName; items: MenuItem[] };
 
 /**
  * Everything a person can open, grouped for the slide-up menu (phones) and the More page.
  * English text is the key; screens translate it with tr().
  */
-export function moreMenu(role: Role, isManager: boolean): MenuCategory[] {
+export type MenuOptions = {
+  /** Is a feature switched on? (getAppContext().features.on) */
+  on?: (key?: string | null) => boolean;
+  /** LeMo Tech staff see "Platform admin". */
+  isPlatformAdmin?: boolean;
+  /** The company's feature list (empty before the Stage 11 SQL): fills the "Grow" category. */
+  features?: FeatureRow[];
+};
+
+export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {}): MenuCategory[] {
+  const on = opts.on ?? (() => true);
   const c = (perm: Parameters<typeof can>[1]) => can(role, perm);
   type Draft = { key: string; label: string; icon: IconName; items: (MenuItem | false)[] };
   const drafts: Draft[] = [
@@ -90,16 +105,54 @@ export function moreMenu(role: Role, isManager: boolean): MenuCategory[] {
         isManager && { href: "/settings/team", title: "Team & roles", sub: "Invite people, change roles", icon: "team" },
         isManager && { href: "/settings/security", title: "Security", sub: "Two-step verification, automatic sign-out, password rules", icon: "lock" },
         isManager && { href: "/activity", title: "Activity log", sub: "Every change, who made it and when", icon: "activity" },
+        { href: "/suggestions", title: "Suggestion Box", sub: "Share an idea to improve the business", icon: "inbox", feature: "suggestions" },
+        isManager && { href: "/growth", title: "Growth & recommendations", sub: "Your business level and features that could help", icon: "activity" },
+        isManager && { href: "/settings/features", title: "Features & business level", sub: "Switch features on or off, change your level", icon: "check" },
         { href: "/notifications", title: "Notifications", sub: "Your alerts, phone notifications and emails", icon: "bell" },
         isManager && { href: "/settings/notifications", title: "Alerts setup", sub: "Connect phone push and email sending", icon: "settings" },
         isManager && { href: "/settings/go-live", title: "Go-live checklist", sub: "What is ready and what is left", icon: "check" },
         { href: "/help", title: "Help", sub: "Short guide for your role, step by step", icon: "help" },
         { href: "/account", title: "Your account", sub: "Your details, password, appearance, sign out", icon: "user" },
+        opts.isPlatformAdmin === true && { href: "/admin", title: "Platform admin", sub: "LeMo Tech: companies, features, feedback", icon: "settings" },
       ],
     },
   ];
-  const cats: MenuCategory[] = drafts.map((cat) => ({ ...cat, items: cat.items.filter((i): i is MenuItem => Boolean(i)) }));
+  // Drivers always keep their deliveries screen.
+  const visible = (i: MenuItem) => (role === "driver" && i.href === "/driver") || on(i.feature ?? featureForRoute(i.href));
+  const cats: MenuCategory[] = drafts.map((cat) => ({
+    ...cat,
+    items: cat.items.filter((i): i is MenuItem => Boolean(i)).filter(visible),
+  }));
+  const grow = role === "driver" ? null : growCategory(opts.features ?? []);
+  if (grow) cats.push(grow);
   return cats.filter((cat) => cat.items.length > 0);
+}
+
+/** The label shown under a feature the company does not have switched on. */
+export function availabilityLabel(f: Pick<FeatureRow, "status" | "default_level">): string {
+  if (f.status === "planned") return "Coming soon";
+  if (f.default_level === "enterprise") return "Available in Enterprise Mode";
+  if (f.default_level === "medium") return "Available in Medium Mode";
+  return "Available — switched off";
+}
+
+/** "Grow": features that are not switched on yet (live ones first), each linking to its place on /growth. */
+function growCategory(features: FeatureRow[]): MenuCategory | null {
+  const off = features.filter((f) => !f.enabled);
+  if (off.length === 0) return null;
+  const ordered = [...off.filter((f) => f.status === "live"), ...off.filter((f) => f.status !== "live")];
+  return {
+    key: "grow",
+    label: "Grow",
+    icon: "activity",
+    items: ordered.map((f) => ({
+      href: `/growth#${f.key}`,
+      title: f.name,
+      sub: availabilityLabel(f),
+      icon: f.status === "live" ? "plus" : "lock",
+      soon: f.status !== "live",
+    })),
+  };
 }
 
 /** The category a role most likely wants first. */

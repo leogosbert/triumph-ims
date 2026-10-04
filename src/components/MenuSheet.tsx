@@ -105,6 +105,7 @@ export function MenuSheet({
               key={c.key}
               type="button"
               role="tab"
+              className={c.key === "grow" ? "msheet-grow" : undefined}
               aria-selected={c.key === current?.key}
               onClick={() => setCat(c.key)}
             >
@@ -117,6 +118,9 @@ export function MenuSheet({
 
         {current && (
           <ul className="msheet-list" role="tabpanel" key={current.key}>
+            {current.key === "grow" && (
+              <li className="msheet-note">{tr("Features your business can switch on as it grows. Tap one to learn more.")}</li>
+            )}
             {current.items.map((it) => {
               const here = pathname === it.href || pathname.startsWith(`${it.href}/`);
               const body = (
@@ -132,7 +136,7 @@ export function MenuSheet({
                 </>
               );
               return (
-                <li key={it.href}>
+                <li key={it.href} className={it.soon ? "msheet-soon" : undefined}>
                   {it.plain ? (
                     <a href={it.href} aria-current={here ? "page" : undefined} onClick={onClose}>
                       {body}

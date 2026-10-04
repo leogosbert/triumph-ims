@@ -3646,3 +3646,213 @@ body:has(.bottomnav) .install-arrow {
     width: 310px;
   }
 }
+
+/* ---------- Home: statistics you swipe through ---------- */
+.stats-block > h2 {
+  margin-bottom: 8px;
+}
+.carousel-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin: 0 -16px;
+  padding: 2px 16px 4px;
+  scroll-padding: 0 16px;
+  overscroll-behavior-x: contain;
+}
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+.carousel-slide {
+  flex: 0 0 88%;
+  min-width: 0;
+  scroll-snap-align: start;
+  display: flex;
+}
+.carousel-slide > .card {
+  flex: 1;
+  margin-bottom: 0;
+}
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px 0 18px;
+}
+.carousel-dots button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--line-strong);
+  cursor: pointer;
+  transition: width 0.3s var(--ease-out), background-color 0.3s;
+}
+.carousel-dots button[aria-selected="true"] {
+  width: 22px;
+  background: var(--brand);
+}
+.carousel-hint {
+  margin-left: 8px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.stat-slide .stat-grid {
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 0;
+}
+@media (min-width: 1024px) {
+  .carousel-track {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+    gap: 16px;
+  }
+  .carousel-dots {
+    display: none;
+  }
+  .carousel-slide > .card {
+    margin-bottom: 0;
+  }
+  .stats-block {
+    margin-bottom: 16px;
+  }
+}
+
+/* ---------- Stock: stores you open, items with a gauge ---------- */
+.store-card {
+  margin-bottom: 10px;
+  border-radius: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.store-card > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+.store-card > summary::-webkit-details-marker {
+  display: none;
+}
+.store-ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand) 10%, var(--card));
+  color: var(--brand);
+}
+.store-txt {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.store-txt span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.store-chev {
+  color: var(--chev);
+  transition: transform 0.3s var(--ease-out);
+}
+.store-card[open] .store-chev {
+  transform: rotate(90deg);
+}
+.store-card[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+.store-card .stock-list {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.store-card .stock-list a::after {
+  display: none;
+}
+.store-empty {
+  margin: 0;
+  padding: 14px 16px;
+}
+.gauge {
+  flex: none;
+  display: grid;
+  grid-template-columns: auto;
+  justify-items: center;
+  width: 64px;
+  margin-left: auto;
+  line-height: 1.1;
+}
+.gauge svg {
+  width: 52px;
+  height: 30px;
+  overflow: visible;
+}
+.gauge path {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.gauge-bg {
+  stroke: var(--line);
+}
+.gauge-val {
+  stroke: #14b8a6;
+}
+.g-low .gauge-val {
+  stroke: var(--err);
+}
+.g-mid .gauge-val {
+  stroke: #f59e0b;
+}
+.g-ok .gauge-val {
+  stroke: #10b981;
+}
+.gauge-tick {
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+.gauge-n {
+  margin-top: -6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.g-low .gauge-n {
+  color: var(--err);
+}
+.gauge-u {
+  font-size: 0.66rem;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .store-card[open] .gauge-val {
+    animation: gauge-fill 0.9s var(--ease-out) backwards;
+  }
+}
+@keyframes gauge-fill {
+  from {
+    stroke-dasharray: 0 100;
+  }
+}
+.stat-slide .stat {
+  padding: 11px 12px;
+}
+.stat-slide .stat .n {
+  font-size: 1.08rem;
+  white-space: nowrap;
+}

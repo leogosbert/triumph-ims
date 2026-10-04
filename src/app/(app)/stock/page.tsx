@@ -1,7 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Icon } from "@/components/Icon";
 import { Notice } from "@/components/Notice";
+import { StockGauge } from "@/components/StockGauge";
 import { getAppContext } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -40,8 +42,13 @@ export default async function StockPage({ searchParams }: { searchParams: Search
     .filter((r) => r.expiry_date && Number(r.quantity) > 0 && daysUntil(r.expiry_date) <= 60)
     .sort((a, b) => (a.expiry_date! < b.expiry_date! ? -1 : 1));
   const byId = new Map(products.map((p) => [p.id, p]));
-  let list = products.filter((p) => (view === "all" ? true : (totals.get(p.id) ?? 0) !== 0));
-  if (q) list = list.filter((p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+  // Quantity per store per product.
+  const byStore = new Map<string, Map<string, number>>();
+  for (const r of onHand) {
+    const m = byStore.get(r.warehouse_id) ?? new Map<string, number>();
+    m.set(r.product_id, (m.get(r.product_id) ?? 0) + Number(r.quantity));
+    byStore.set(r.warehouse_id, m);
+  }
 
   return (
     <>
@@ -147,34 +154,60 @@ export default async function StockPage({ searchParams }: { searchParams: Search
         </section>
       )}
 
-      <h2>{store ? stores.find((s) => s.id === store)?.name : tr("All stores")}</h2>
-      {list.length === 0 ? (
-        <p className="card muted">
-          {products.length === 0 ? tr("No products yet.") : tr("Nothing in stock here yet. Stock arrives when you receive goods against a purchase order, or through an adjustment (opening balance).")}
-        </p>
+      <h2>{tr("Stores")}</h2>
+      <p className="muted small" style={{ marginTop: -4 }}>{tr("Tap a store to see its items. The gauge shows each item's stock against its reorder level.")}</p>
+      {products.length === 0 ? (
+        <p className="card muted">{tr("No products yet.")}</p>
       ) : (
-        <ul className="rec-list">
-          {list.slice(0, 300).map((p) => {
-            const qty = totals.get(p.id) ?? 0;
-            const isLow = p.reorder_level != null && Number(p.reorder_level) > 0 && qty <= Number(p.reorder_level);
-            return (
-              <li key={p.id}>
-                <Link href={`/stock/${p.id}`}>
-                  <div className="main">
-                    <div className="title">{p.name}</div>
-                    <div className="sub">
-                      {p.sku}
-                      {p.category ? ` · ${p.category}` : ""}
-                    </div>
-                  </div>
-                  <div className={`side ${isLow ? "text-warn" : ""}`}>
-                    <strong>{fmtQty(qty)}</strong> {p.unit}
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        (store ? stores.filter((s) => s.id === store) : stores).map((st) => {
+          const here = byStore.get(st.id) ?? new Map<string, number>();
+          let items = products.filter((p) => (view === "all" ? true : (here.get(p.id) ?? 0) !== 0));
+          if (q) items = items.filter((p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+          const lowHere = items.filter((p) => p.reorder_level != null && Number(p.reorder_level) > 0 && (here.get(p.id) ?? 0) <= Number(p.reorder_level)).length;
+          const units = items.reduce((sum, p) => sum + Math.max(0, here.get(p.id) ?? 0), 0);
+          const scaleMax = Math.max(1, ...items.map((p) => here.get(p.id) ?? 0));
+          const open = Boolean(store) || (Boolean(q) && items.length > 0);
+          return (
+            <details key={st.id} className="store-card" open={open}>
+              <summary>
+                <span className="store-ico" aria-hidden>
+                  <Icon name="warehouse" size={20} />
+                </span>
+                <span className="store-txt">
+                  <strong>{st.name}</strong>
+                  <span>
+                    {st.code} · {items.length} {tr(items.length === 1 ? "item" : "items")} · {fmtQty(units)} {tr("units")}
+                  </span>
+                </span>
+                {lowHere > 0 && <span className="badge tone-bad">{lowHere} {tr("low")}</span>}
+                <span className="store-chev" aria-hidden>
+                  <Icon name="chevron" size={18} />
+                </span>
+              </summary>
+              {items.length === 0 ? (
+                <p className="muted small store-empty">{q ? tr("No matching items in this store.") : tr("Nothing in stock here yet.")}</p>
+              ) : (
+                <ul className="rec-list stock-list">
+                  {items.slice(0, 300).map((p) => (
+                    <li key={p.id}>
+                      <Link href={`/stock/${p.id}`}>
+                        <div className="main">
+                          <div className="title">{p.name}</div>
+                          <div className="sub">
+                            {p.sku}
+                            {p.category ? ` · ${p.category}` : ""}
+                            {p.reorder_level ? ` · ${tr("reorder at")} ${fmtQty(p.reorder_level)}` : ""}
+                          </div>
+                        </div>
+                        <StockGauge qty={here.get(p.id) ?? 0} reorder={p.reorder_level != null ? Number(p.reorder_level) : null} scaleMax={scaleMax} unit={p.unit} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </details>
+          );
+        })
       )}
     </>
   );

@@ -1,6 +1,21 @@
 // Kiswahili for screen text. Keys are the exact English shown in the app.
 // Generated for Stage 9; please have a native speaker review.
 export const SW: Record<string, string> = {
+  "Statistics": "Takwimu",
+  "Key figures": "Takwimu muhimu",
+  "Swipe for more": "Telezesha kuona zaidi",
+  "Show card": "Onyesha kadi",
+  "Tap a store to see its items. The gauge shows each item's stock against its reorder level.": "Gusa ghala kuona bidhaa zake. Kipimo kinaonyesha stoku ya kila bidhaa ikilinganishwa na kiwango cha kuagiza tena.",
+  "item": "bidhaa",
+  "units": "vipimo",
+  "low": "chini",
+  "No matching items in this store.": "Hakuna bidhaa zinazolingana kwenye ghala hili.",
+  "Nothing in stock here yet.": "Bado hakuna stoku hapa.",
+  "reorder at": "agiza tena kwenye",
+  "No reorder level": "Hakuna kiwango cha kuagiza",
+  "Reorder now": "Agiza sasa",
+  "Getting low": "Inapungua",
+  "Healthy": "Ya kutosha",
   "Enter your password to continue": "Weka nenosiri lako ili kuendelea",
   "Unlock": "Fungua",
   "Not you? Sign out": "Si wewe? Toka",

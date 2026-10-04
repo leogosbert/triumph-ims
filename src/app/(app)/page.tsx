@@ -1,5 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { Carousel } from "@/components/Carousel";
 import { CountUp } from "@/components/CountUp";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -179,15 +180,31 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         </section>
       )}
 
-      <KpiGrid kpis={restKpis} currency={base} />
+      {(() => {
+        const slides = [
+          restKpis.length > 0 && (
+            <section className="card stat-slide" key="kpis">
+              <h2>{tr("Key figures")}</h2>
+              <KpiGrid kpis={restKpis} currency={base} />
+            </section>
+          ),
+          dash.months && dash.months.some((m) => m.sales > 0) && <SalesChart key="sales" months={dash.months} currency={base} t={t} />,
+          dash.aging && <AgingChart key="aging" aging={dash.aging} currency={base} title={t["c.aging"]} />,
+          dash.industries && dash.industries.length > 0 && (
+            <BarList key="ind" title={t["c.industry"]} sub={t["c.thisYear"]} rows={dash.industries} currency={base} href="/profit" />
+          ),
+          dash.clients && dash.clients.length > 0 && (
+            <BarList key="cli" title={t["c.topClients"]} sub={t["c.thisYear"]} rows={dash.clients} currency={base} href="/profit" />
+          ),
+        ].filter(Boolean);
+        return slides.length > 0 ? (
+          <section className="stats-block">
+            <h2>{tr("Statistics")}</h2>
+            <Carousel label={tr("Statistics")}>{slides}</Carousel>
+          </section>
+        ) : null;
+      })()}
       <CountUp selector=".hero-kpis .num, .stat .n" />
-
-      <div className="dash-grid">
-        {dash.months && dash.months.some((m) => m.sales > 0) && <SalesChart months={dash.months} currency={base} t={t} />}
-        {dash.aging && <AgingChart aging={dash.aging} currency={base} title={t["c.aging"]} />}
-        {dash.industries && <BarList title={t["c.industry"]} sub={t["c.thisYear"]} rows={dash.industries} currency={base} href="/profit" />}
-        {dash.clients && <BarList title={t["c.topClients"]} sub={t["c.thisYear"]} rows={dash.clients} currency={base} href="/profit" />}
-      </div>
 
       {isManager && remaining > 0 && (
         <section className="card">

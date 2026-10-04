@@ -74,6 +74,10 @@ export default async function MorePage() {
         {isManager && <Tile href="/settings/notifications" title="Alerts setup" sub="Connect phone push and email sending" />}
         <Tile href="/account" title="Your account" sub="Your details, password, sign out" />
       </div>
+      <a className="lemo-foot" href="/help">
+        <img src="/brand/lemo-ims.svg" alt="LeMo IMS" />
+        <span>by LeMo Tech Solutions</span>
+      </a>
     </>
   );
 }

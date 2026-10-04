@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
 import { type SearchParams } from "@/lib/messages";
+import { getDict } from "@/lib/lang";
 import { DriverApp, type DriverDelivery } from "./DriverApp";
 
 export const metadata = { title: "My deliveries" };
@@ -17,6 +18,7 @@ export default async function DriverPage({ searchParams }: { searchParams: Searc
   const sp = await searchParams;
   const only = typeof sp.d === "string" ? sp.d : null;
   const { supabase, company, role, user } = await getAppContext();
+  const { t } = await getDict();
   const supervisor = role === "management" || role === "warehouse";
   if (role !== "driver" && !supervisor) redirect("/");
   if (supervisor && !only) redirect("/deliveries");
@@ -60,9 +62,9 @@ export default async function DriverPage({ searchParams }: { searchParams: Searc
         </p>
       )}
       <div className="page-head">
-        <h1>{only ? "Record delivery" : "My deliveries"}</h1>
+        <h1>{only ? t["dr.record"] : t["dr.title"]}</h1>
       </div>
-      <DriverApp companyId={company.id} userId={user.id} deliveries={deliveries} />
+      <DriverApp companyId={company.id} userId={user.id} deliveries={deliveries} t={t} />
     </>
   );
 }

@@ -91,12 +91,12 @@ export default function LoginPage() {
 
   return (
     <div className="auth-wrap">
+      <img className="auth-logo" src="/brand/lemo-ims-white.svg" alt="LeMo IMS" />
       <div className="auth-card">
         <div className="brand">
-          <img src="/icons/icon-192.png" alt="" />
           <div>
-            <h1 style={{ margin: 0 }}>TRIUMPH IMS</h1>
-            <span className="muted small">Supply · Procurement · Stock · Finance</span>
+            <h1 style={{ margin: 0 }}>Welcome back</h1>
+            <span className="muted small">Sales · Procurement · Stock · Delivery · Finance</span>
           </div>
         </div>
 
@@ -150,6 +150,7 @@ export default function LoginPage() {
           </p>
         )}
       </div>
+      <p className="auth-foot">LeMo IMS · by LeMo Tech Solutions</p>
     </div>
   );
 }

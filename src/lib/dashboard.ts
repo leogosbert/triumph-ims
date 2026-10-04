@@ -2,6 +2,7 @@ import type { createClient } from "@/lib/supabase/server";
 import { agingBucket, daysOverdue, n, openBase } from "@/lib/finance";
 import { can, type Role } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
+import type { Dict } from "@/lib/i18n";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
@@ -18,7 +19,7 @@ function addDays(iso: string, days: number) {
 }
 
 /** Everything the home dashboard shows, limited to what this role may see. */
-export async function loadDashboard(supabase: Supabase, companyId: string, role: Role) {
+export async function loadDashboard(supabase: Supabase, companyId: string, role: Role, t: Dict) {
   const today = todayTz();
   const monthStart = `${today.slice(0, 7)}-01`;
   const yearStart = `${today.slice(0, 4)}-01-01`;
@@ -105,28 +106,28 @@ export async function loadDashboard(supabase: Supabase, companyId: string, role:
   const rfqRows = (rfqs.data ?? []) as { status: string; due_on: string | null }[];
   const qRows = (quotes.data ?? []) as { status: string; valid_until: string | null; decided_at: string | null; total: number; exchange_rate: number }[];
   if (sales) {
-    push("critical", { label: "Client RFQs overdue", count: rfqRows.filter((r) => r.due_on && r.due_on < today).length, href: "/rfqs" });
-    push("attention", { label: "RFQs due within 2 days", count: rfqRows.filter((r) => r.due_on && r.due_on >= today && r.due_on <= addDays(today, 2)).length, href: "/rfqs" });
-    push("attention", { label: "Quotations waiting for approval", count: qRows.filter((q) => q.status === "pending_approval").length, href: "/quotations?tab=approval" });
+    push("critical", { label: t["d.rfqOverdue"], count: rfqRows.filter((r) => r.due_on && r.due_on < today).length, href: "/rfqs" });
+    push("attention", { label: t["d.rfqDueSoon"], count: rfqRows.filter((r) => r.due_on && r.due_on >= today && r.due_on <= addDays(today, 2)).length, href: "/rfqs" });
+    push("attention", { label: t["d.quotesApproval"], count: qRows.filter((q) => q.status === "pending_approval").length, href: "/quotations?tab=approval" });
     push("attention", {
-      label: "Quotations expiring within 3 days",
+      label: t["d.quotesExpiring"],
       count: qRows.filter((q) => ["approved", "sent"].includes(q.status) && q.valid_until && q.valid_until >= today && q.valid_until <= addDays(today, 3)).length,
       href: "/quotations?tab=sent",
     });
-    push("normal", { label: "Open client RFQs", count: rfqRows.length, href: "/rfqs" });
-    push("normal", { label: "Quotations with clients", count: qRows.filter((q) => q.status === "sent").length, href: "/quotations?tab=sent" });
+    push("normal", { label: t["d.rfqOpen"], count: rfqRows.length, href: "/rfqs" });
+    push("normal", { label: t["d.quotesWithClients"], count: qRows.filter((q) => q.status === "sent").length, href: "/quotations?tab=sent" });
   }
 
   // ----- Purchasing -----
   const poRows = (pos.data ?? []) as { status: string; expected_date: string | null }[];
   if (purchasing) {
     push("critical", {
-      label: "Supplier deliveries late",
+      label: t["d.poLate"],
       count: poRows.filter((p) => p.status !== "pending_approval" && p.expected_date && p.expected_date < today).length,
       href: "/purchase-orders?tab=incoming",
     });
-    push("attention", { label: "Purchase orders waiting for approval", count: poRows.filter((p) => p.status === "pending_approval").length, href: "/purchase-orders?tab=approval" });
-    push("normal", { label: "Purchase orders awaiting goods", count: poRows.filter((p) => ["sent", "confirmed", "partially_received"].includes(p.status)).length, href: "/purchase-orders?tab=incoming" });
+    push("attention", { label: t["d.poApproval"], count: poRows.filter((p) => p.status === "pending_approval").length, href: "/purchase-orders?tab=approval" });
+    push("normal", { label: t["d.poAwaiting"], count: poRows.filter((p) => ["sent", "confirmed", "partially_received"].includes(p.status)).length, href: "/purchase-orders?tab=incoming" });
   }
 
   // ----- Stock -----
@@ -135,23 +136,23 @@ export async function loadDashboard(supabase: Supabase, companyId: string, role:
   for (const s of sohRows) onHand.set(s.product_id, (onHand.get(s.product_id) ?? 0) + n(s.quantity));
   if (stock) {
     const live = sohRows.filter((s) => n(s.quantity) > 0 && s.expiry_date);
-    push("critical", { label: "Batches expired or expiring within 7 days", count: live.filter((s) => s.expiry_date! <= addDays(today, 7)).length, href: "/stock" });
+    push("critical", { label: t["d.batchCritical"], count: live.filter((s) => s.expiry_date! <= addDays(today, 7)).length, href: "/stock" });
     push("attention", {
-      label: "Batches expiring within 60 days",
+      label: t["d.batchSoon"],
       count: live.filter((s) => s.expiry_date! > addDays(today, 7) && s.expiry_date! <= addDays(today, 60)).length,
       href: "/stock",
     });
     const prodRows = (products.data ?? []) as { id: string; reorder_level: number }[];
-    push("attention", { label: "Products at or below reorder level", count: prodRows.filter((p) => (onHand.get(p.id) ?? 0) <= n(p.reorder_level)).length, href: "/stock#low" });
+    push("attention", { label: t["d.lowStock"], count: prodRows.filter((p) => (onHand.get(p.id) ?? 0) <= n(p.reorder_level)).length, href: "/stock#low" });
   }
 
   // ----- Deliveries -----
   const dnRows = (dns.data ?? []) as { id: string; status: string; updated_at: string }[];
   if (deliveries) {
     const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
-    push("critical", { label: "Failed deliveries (last 7 days)", count: dnRows.filter((d) => d.status === "failed" && d.updated_at >= weekAgo).length, href: "/deliveries?tab=problems" });
-    push("normal", { label: "Deliveries on the way", count: dnRows.filter((d) => d.status === "dispatched").length, href: "/deliveries?tab=dispatched" });
-    push("normal", { label: "Delivery notes being prepared", count: dnRows.filter((d) => d.status === "draft").length, href: "/deliveries" });
+    push("critical", { label: t["d.failed"], count: dnRows.filter((d) => d.status === "failed" && d.updated_at >= weekAgo).length, href: "/deliveries?tab=problems" });
+    push("normal", { label: t["d.onTheWay"], count: dnRows.filter((d) => d.status === "dispatched").length, href: "/deliveries?tab=dispatched" });
+    push("normal", { label: t["d.preparing"], count: dnRows.filter((d) => d.status === "draft").length, href: "/deliveries" });
   }
 
   // ----- Finance -----
@@ -160,16 +161,16 @@ export async function loadDashboard(supabase: Supabase, companyId: string, role:
   const aging = [0, 0, 0, 0, 0];
   for (const i of invRows) aging[agingBucket(i.due_date)] += openBase(i);
   if (finance) {
-    push("critical", { label: "Invoices more than 60 days overdue", count: invRows.filter((i) => daysOverdue(i.due_date) > 60).length, href: "/invoices?tab=overdue" });
+    push("critical", { label: t["d.invOver60"], count: invRows.filter((i) => daysOverdue(i.due_date) > 60).length, href: "/invoices?tab=overdue" });
     push("attention", {
-      label: "Invoices overdue",
+      label: t["d.invOverdue"],
       count: invRows.filter((i) => daysOverdue(i.due_date) > 0 && daysOverdue(i.due_date) <= 60).length,
       href: "/invoices?tab=overdue",
     });
-    push("attention", { label: "Supplier bills due within 7 days or late", count: billRows.filter((b) => b.due_date && daysOverdue(b.due_date) >= -7).length, href: "/bills" });
+    push("attention", { label: t["d.billsDue"], count: billRows.filter((b) => b.due_date && daysOverdue(b.due_date) >= -7).length, href: "/bills" });
     const done = new Set(((invoicedDns.data ?? []) as { delivery_id: string }[]).map((r) => r.delivery_id));
-    push("attention", { label: "Delivered but not invoiced", count: dnRows.filter((d) => d.status === "delivered" && !done.has(d.id)).length, href: "/invoices/new" });
-    push("normal", { label: "Unpaid invoices", count: invRows.length, href: "/invoices" });
+    push("attention", { label: t["d.toInvoice"], count: dnRows.filter((d) => d.status === "delivered" && !done.has(d.id)).length, href: "/invoices/new" });
+    push("normal", { label: t["d.unpaid"], count: invRows.length, href: "/invoices" });
   }
 
   // ----- KPIs and charts -----
@@ -181,7 +182,7 @@ export async function loadDashboard(supabase: Supabase, companyId: string, role:
     for (let k = 5; k >= 0; k--) {
       const d = new Date(Date.UTC(y, m - 1 - k, 1));
       const key = d.toISOString().slice(0, 7);
-      months.push({ month: key, label: d.toLocaleString("en-GB", { month: "short", timeZone: "UTC" }), sales: 0, profit: 0 });
+      months.push({ month: key, label: d.toLocaleString(t.locale, { month: "short", timeZone: "UTC" }), sales: 0, profit: 0 });
     }
   }
   for (const r of pRows) {
@@ -219,17 +220,17 @@ export async function loadDashboard(supabase: Supabase, companyId: string, role:
 
   const kpis: Kpi[] = [];
   if (profit) {
-    kpis.push({ label: "Sales this month (before VAT)", value: thisMonth.sales, money: true, href: "/profit" });
-    kpis.push({ label: "Gross profit this month", value: thisMonth.profit, money: true, href: "/profit" });
+    kpis.push({ label: t["k.sales"], value: thisMonth.sales, money: true, href: "/profit" });
+    kpis.push({ label: t["k.profit"], value: thisMonth.profit, money: true, href: "/profit" });
   }
   if (finance) {
-    kpis.push({ label: "Owed to us", value: aging.reduce((a, b) => a + b, 0), money: true, href: "/receivables", alert: aging[3] + aging[4] > 0 });
-    kpis.push({ label: "We owe suppliers", value: billRows.reduce((s, b) => s + openBase(b), 0), money: true, href: "/payables" });
+    kpis.push({ label: t["k.owed"], value: aging.reduce((a, b) => a + b, 0), money: true, href: "/receivables", alert: aging[3] + aging[4] > 0 });
+    kpis.push({ label: t["k.weOwe"], value: billRows.reduce((s, b) => s + openBase(b), 0), money: true, href: "/payables" });
   }
-  if (costs && stock) kpis.push({ label: "Stock value (at cost)", value: stockValue, money: true, href: "/stock" });
+  if (costs && stock) kpis.push({ label: t["k.stock"], value: stockValue, money: true, href: "/stock" });
   if (sales) {
-    kpis.push({ label: "Orders won this month", value: wonMonth.length, href: "/quotations?tab=accepted" });
-    kpis.push({ label: "Win rate, last 90 days", value: decided.length ? Math.round((won.length / decided.length) * 100) : 0, suffix: "%", href: "/quotations?tab=accepted" });
+    kpis.push({ label: t["k.won"], value: wonMonth.length, href: "/quotations?tab=accepted" });
+    kpis.push({ label: t["k.winRate"], value: decided.length ? Math.round((won.length / decided.length) * 100) : 0, suffix: "%", href: "/quotations?tab=accepted" });
   }
 
   return {

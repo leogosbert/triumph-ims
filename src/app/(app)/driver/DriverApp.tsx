@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import type { Dict } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 
 export type DriverDelivery = {
@@ -134,10 +135,12 @@ export function DriverApp({
   companyId,
   userId,
   deliveries,
+  t,
 }: {
   companyId: string;
   userId: string;
   deliveries: DriverDelivery[];
+  t: Dict;
 }) {
   const router = useRouter();
   const [online, setOnline] = useState(true);
@@ -207,11 +210,11 @@ export function DriverApp({
       setSyncing(false);
       await reloadQueue();
       if (sent > 0) {
-        setMessage(sent === 1 ? "1 delivery sent to the office." : `${sent} deliveries sent to the office.`);
+        setMessage(sent === 1 ? t["dr.sentOne"] : `${sent} ${t["dr.sentMany"]}`);
         router.refresh();
       }
     }
-  }, [userId, reloadQueue, router]);
+  }, [userId, reloadQueue, router, t]);
 
   // Online/offline tracking, background sync, and offline caching of this screen.
   useEffect(() => {
@@ -257,11 +260,11 @@ export function DriverApp({
     try {
       await queuePut(item);
     } catch {
-      setMessage("This phone could not save the record. Check that private browsing is off and try again.");
+      setMessage(t["dr.storageError"]);
       return false;
     }
     setOpenId(null);
-    setMessage(navigator.onLine ? "Saved. Sending to the office…" : "Saved on the phone. It will be sent when there is signal.");
+    setMessage(navigator.onLine ? t["dr.savedOnline"] : t["dr.savedOffline"]);
     await reloadQueue();
     if (navigator.onLine) sync();
     return true;
@@ -280,12 +283,12 @@ export function DriverApp({
       <div className={`sync-bar ${online ? "on" : "off"}`}>
         <span className="dot" aria-hidden="true" />
         <span className="grow">
-          {online ? "Online" : "No signal – working offline"}
-          {pendingCount > 0 && ` · ${pendingCount} waiting to send`}
+          {online ? t["dr.online"] : t["dr.offline"]}
+          {pendingCount > 0 && ` · ${pendingCount} ${t["dr.waiting"]}`}
         </span>
         {pendingCount > 0 && (
           <button type="button" className="btn btn-small" onClick={() => sync()} disabled={syncing || !online}>
-            {syncing ? "Sending…" : "Send now"}
+            {syncing ? t["dr.sending"] : t["dr.sendNow"]}
           </button>
         )}
       </div>
@@ -299,10 +302,10 @@ export function DriverApp({
         .filter((q) => q.error)
         .map((q) => (
           <div key={q.id} className="banner bad">
-            <strong>{q.number}</strong> could not be saved: {q.error}
+            <strong>{q.number}</strong> {t["dr.couldNotSave"]}: {q.error}
             <div className="actions">
               <button type="button" className="btn btn-small" onClick={() => discard(q.id)}>
-                Discard
+                {t["dr.discard"]}
               </button>
             </div>
           </div>
@@ -310,7 +313,7 @@ export function DriverApp({
 
       {active.length === 0 && done.length === 0 && (
         <div className="card">
-          <p className="muted">No deliveries assigned to you right now. When the store dispatches goods to you, they appear here.</p>
+          <p className="muted">{t["dr.none"]}</p>
         </div>
       )}
 
@@ -323,20 +326,20 @@ export function DriverApp({
                 <div className="desc">{d.client}</div>
                 <div className="small muted">
                   {d.number}
-                  {d.planned_date && ` · planned ${fmtDate(d.planned_date)}`}
+                  {d.planned_date && ` · ${t["dr.planned"]} ${fmtDate(d.planned_date)}`}
                   {d.vehicle && ` · ${d.vehicle}`}
                 </div>
               </div>
               {pending && !pending.error ? (
-                <span className="badge tone-info">{pending.kind === "fail" ? "Failed – waiting to send" : "Delivered – waiting to send"}</span>
+                <span className="badge tone-info">{pending.kind === "fail" ? t["dr.failedWaiting"] : t["dr.deliveredWaiting"]}</span>
               ) : (
-                <span className="badge tone-warn">On the way</span>
+                <span className="badge tone-warn">{t["dr.onTheWay"]}</span>
               )}
             </div>
             {d.delivery_site && <p className="drop">📍 {d.delivery_site}</p>}
             {(d.contact_name || d.contact_phone) && (
               <p className="small">
-                Contact: {d.contact_name}
+                {t["dr.contact"]}: {d.contact_name}
                 {d.contact_phone && (
                   <>
                     {" "}
@@ -358,10 +361,10 @@ export function DriverApp({
             </ul>
             {!pending &&
               (openId === d.id ? (
-                <PodForm delivery={d} companyId={companyId} userId={userId} onSave={save} onCancel={() => setOpenId(null)} />
+                <PodForm delivery={d} companyId={companyId} userId={userId} onSave={save} onCancel={() => setOpenId(null)} t={t} />
               ) : (
                 <button type="button" className="btn btn-primary btn-block" onClick={() => setOpenId(d.id)}>
-                  Record delivery
+                  {t["dr.record"]}
                 </button>
               ))}
           </div>
@@ -370,7 +373,7 @@ export function DriverApp({
 
       {done.length > 0 && (
         <>
-          <h2>Recently finished</h2>
+          <h2>{t["dr.recent"]}</h2>
           <ul className="rec-list card">
             {done.map((d) => (
               <li key={d.id}>
@@ -379,12 +382,12 @@ export function DriverApp({
                   <span className="sub">
                     {d.number} ·{" "}
                     {d.status === "delivered"
-                      ? `received by ${d.received_by_name ?? ""}${d.delivered_at ? `, ${fmtTime(d.delivered_at)}` : ""}`
-                      : `failed: ${d.failed_reason ?? ""}`}
+                      ? `${t["dr.receivedBy"]} ${d.received_by_name ?? ""}${d.delivered_at ? `, ${fmtTime(d.delivered_at)}` : ""}`
+                      : `${t["dr.failedReason"]}: ${d.failed_reason ?? ""}`}
                   </span>
                 </div>
                 <span className={`badge ${d.status === "delivered" ? "tone-ok" : "tone-bad"}`}>
-                  {d.status === "delivered" ? "Delivered" : "Failed"}
+                  {d.status === "delivered" ? t["dr.delivered"] : t["dr.failed"]}
                 </span>
               </li>
             ))}
@@ -403,12 +406,14 @@ function PodForm({
   userId,
   onSave,
   onCancel,
+  t,
 }: {
   delivery: DriverDelivery;
   companyId: string;
   userId: string;
   onSave: (item: QueueItem) => Promise<boolean>;
   onCancel: () => void;
+  t: Dict;
 }) {
   const [mode, setMode] = useState<"deliver" | "fail">("deliver");
   const [receivedBy, setReceivedBy] = useState(delivery.contact_name ?? "");
@@ -454,19 +459,19 @@ function PodForm({
     const at = new Date().toISOString();
     const base = { id: newId(), deliveryId: delivery.id, number: delivery.number, companyId, userId, at };
     if (mode === "fail") {
-      if (!reason.trim()) return setError("Say why the delivery failed.");
+      if (!reason.trim()) return setError(t["dr.errReason"]);
       setBusy(true);
       await onSave({ ...base, kind: "fail", reason: reason.trim() });
       setBusy(false);
       return;
     }
-    if (!receivedBy.trim()) return setError("Enter the name of the person who received the goods.");
-    if (!pad.current || pad.current.isEmpty()) return setError("Ask the receiver to sign in the box.");
+    if (!receivedBy.trim()) return setError(t["dr.errName"]);
+    if (!pad.current || pad.current.isEmpty()) return setError(t["dr.errSign"]);
     setBusy(true);
     const signature = await pad.current.toBlob();
     if (!signature) {
       setBusy(false);
-      return setError("Could not read the signature. Clear it and sign again.");
+      return setError(t["dr.errSignRead"]);
     }
     await onSave({
       ...base,
@@ -485,43 +490,43 @@ function PodForm({
     <div className="pod-form">
       <div className="tabs" role="group" aria-label="Outcome">
         <button type="button" aria-pressed={mode === "deliver"} onClick={() => setMode("deliver")}>
-          Delivered
+          {t["dr.tabDelivered"]}
         </button>
         <button type="button" aria-pressed={mode === "fail"} onClick={() => setMode("fail")}>
-          Could not deliver
+          {t["dr.tabFailed"]}
         </button>
       </div>
 
       {mode === "deliver" ? (
         <>
           <div className="field">
-            <label htmlFor={`rb-${delivery.id}`}>Received by (name)</label>
+            <label htmlFor={`rb-${delivery.id}`}>{t["dr.receiverName"]}</label>
             <input id={`rb-${delivery.id}`} value={receivedBy} onChange={(e) => setReceivedBy(e.target.value)} autoComplete="off" />
           </div>
           <div className="field">
-            <label>Signature</label>
-            <SignaturePad ref={pad} />
+            <label>{t["dr.signature"]}</label>
+            <SignaturePad ref={pad} clearLabel={t["dr.clear"]} />
           </div>
           <div className="field">
-            <label htmlFor={`ph-${delivery.id}`}>Photo of the goods (optional)</label>
+            <label htmlFor={`ph-${delivery.id}`}>{t["dr.photo"]}</label>
             <input id={`ph-${delivery.id}`} type="file" accept="image/*" capture="environment" onChange={onPhoto} />
             {photoUrl && <img src={photoUrl} alt="Delivery photo" className="pod-photo" />}
           </div>
           <div className="field">
-            <label htmlFor={`nt-${delivery.id}`}>Remarks (optional)</label>
-            <textarea id={`nt-${delivery.id}`} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. 1 drum dented, accepted" />
+            <label htmlFor={`nt-${delivery.id}`}>{t["dr.remarks"]}</label>
+            <textarea id={`nt-${delivery.id}`} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t["dr.remarksPh"]} />
           </div>
           <p className="hint">
-            {gpsState === "waiting" && "Getting your location…"}
-            {gpsState === "ok" && gps && `Location captured (±${Math.round(gps.acc)} m).`}
-            {gpsState === "none" && "Location not available – the delivery can still be recorded."}
+            {gpsState === "waiting" && t["dr.gpsWaiting"]}
+            {gpsState === "ok" && gps && `${t["dr.gpsOk"]} (±${Math.round(gps.acc)} m).`}
+            {gpsState === "none" && t["dr.gpsNone"]}
           </p>
         </>
       ) : (
         <div className="field">
-          <label htmlFor={`fr-${delivery.id}`}>Why could the goods not be delivered?</label>
-          <textarea id={`fr-${delivery.id}`} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Site closed, receiver not available" />
-          <p className="hint">The goods go back into stock when this reaches the office.</p>
+          <label htmlFor={`fr-${delivery.id}`}>{t["dr.why"]}</label>
+          <textarea id={`fr-${delivery.id}`} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t["dr.whyPh"]} />
+          <p className="hint">{t["dr.backToStock"]}</p>
         </div>
       )}
 
@@ -532,10 +537,10 @@ function PodForm({
       )}
       <div className="actions">
         <button type="button" className={`btn ${mode === "fail" ? "btn-danger" : "btn-primary"}`} onClick={submit} disabled={busy}>
-          {busy ? "Saving…" : mode === "fail" ? "Record failed delivery" : "Confirm delivery"}
+          {busy ? t["dr.saving"] : mode === "fail" ? t["dr.recordFailed"] : t["dr.confirm"]}
         </button>
         <button type="button" className="btn" onClick={onCancel} disabled={busy}>
-          Cancel
+          {t["dr.cancel"]}
         </button>
       </div>
     </div>
@@ -546,7 +551,7 @@ function PodForm({
 
 type SignaturePadHandle = { isEmpty: () => boolean; toBlob: () => Promise<Blob | null> };
 
-const SignaturePad = forwardRef<SignaturePadHandle>(function SignaturePad(_props, ref) {
+const SignaturePad = forwardRef<SignaturePadHandle, { clearLabel: string }>(function SignaturePad({ clearLabel }, ref) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
   const last = useRef<{ x: number; y: number } | null>(null);
@@ -626,7 +631,7 @@ const SignaturePad = forwardRef<SignaturePadHandle>(function SignaturePad(_props
         }}
       />
       <button type="button" className="btn btn-small sig-clear" onClick={setup}>
-        Clear
+        {clearLabel}
       </button>
     </div>
   );

@@ -7,19 +7,36 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { AgingChart, BarList, ControlTower, KpiGrid, SalesChart } from "@/components/Dashboard";
 import { loadDashboard } from "@/lib/dashboard";
+import { Icon, type IconName } from "@/components/Icon";
+import type { Dict } from "@/lib/i18n";
+import { getDict } from "@/lib/lang";
 
 export const metadata = { title: "Home" };
 
 
-function greeting() {
+function greeting(t: Dict) {
   const h = Number(
     new Intl.DateTimeFormat("en-GB", { hour: "numeric", hour12: false, timeZone: "Africa/Dar_es_Salaam" }).format(
       new Date(),
     ),
   );
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
+  if (h < 12) return t["home.morning"];
+  if (h < 17) return t["home.afternoon"];
+  return t["home.evening"];
+}
+
+function quickActions(role: Parameters<typeof can>[0], t: Dict) {
+  const all: { show: boolean; href: string; label: string; icon: IconName }[] = [
+    { show: can(role, "editSales"), href: "/rfqs/new", label: t["qa.rfq"], icon: "plus" },
+    { show: can(role, "editSales"), href: "/quotations/new", label: t["qa.quote"], icon: "doc" },
+    { show: can(role, "editPurchasing"), href: "/purchase-orders/new", label: t["qa.po"], icon: "purchasing" },
+    { show: can(role, "receiveGoods"), href: "/receiving", label: t["qa.receive"], icon: "stock" },
+    { show: can(role, "editDeliveries"), href: "/deliveries/new", label: t["qa.deliver"], icon: "deliveries" },
+    { show: can(role, "editInvoices"), href: "/invoices/new", label: t["qa.invoice"], icon: "doc" },
+    { show: can(role, "editInvoices"), href: "/invoices?tab=unpaid", label: t["qa.payment"], icon: "cash" },
+    { show: can(role, "seeStock"), href: "/stock", label: t["qa.stock"], icon: "stock" },
+  ];
+  return all.filter((a) => a.show).slice(0, 4);
 }
 
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
@@ -29,7 +46,12 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   const firstName = displayName(profile).split(" ")[0];
   // Check for time-based alerts (at most every 30 minutes; harmless before the Stage 7 update).
   await supabase.rpc("refresh_alerts", { p_company: company.id });
-  const dash = await loadDashboard(supabase, company.id, role);
+  const { t } = await getDict();
+  const dash = await loadDashboard(supabase, company.id, role, t);
+  const heroKpis = dash.kpis.slice(0, 2);
+  const restKpis = dash.kpis.slice(2);
+  const actions = quickActions(role, t);
+  const today = new Intl.DateTimeFormat(t.locale, { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Dar_es_Salaam" }).format(new Date());
   const base = company.base_currency;
 
   let checklist: { done: boolean; label: string; href: string }[] = [];
@@ -80,21 +102,95 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     poApprovals = (data ?? []) as unknown as PendingPo[];
   }
 
+  const shortMoney = (v: number) => {
+    const x = Math.abs(v);
+    return x >= 1e9 ? `${(v / 1e9).toFixed(1)}B` : x >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : x >= 1e3 ? `${Math.round(v / 1e3)}K` : String(Math.round(v));
+  };
+
   return (
     <>
-      <Notice {...notice} />
-      <h1>
-        {greeting()}, {firstName}
-      </h1>
-      <p className="muted">Here&apos;s where {company.name} stands.</p>
+      <section className="hero">
+        <div className="hero-date">{today}</div>
+        <h1>
+          {greeting(t)}, {firstName}
+        </h1>
+        {heroKpis.length > 0 && (
+          <div className="hero-kpis">
+            {heroKpis.map((k) => (
+              <Link key={k.label} href={k.href ?? "/"}>
+                <span className="num">{k.money ? `${base} ${shortMoney(k.value)}` : `${k.value.toLocaleString("en-GB")}${k.suffix ?? ""}`}</span>
+                <span>{k.label}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+      <div className="hero-overlap">
+        <Notice {...notice} />
+        <ControlTower tower={dash.tower} t={t} />
+      </div>
 
-      <ControlTower tower={dash.tower} />
-      <KpiGrid kpis={dash.kpis} currency={base} />
+      {(approvals.length > 0 || poApprovals.length > 0) && (
+        <section className="card">
+          <h2>{t["home.waiting"]}</h2>
+          <ul className="waitlist">
+            {approvals.map((q) => (
+              <li key={q.id}>
+                <Link href={`/quotations/${q.id}`}>
+                  <span>
+                    <strong>{q.client?.name ?? "Client"}</strong>
+                    <span>{q.revision > 0 ? `${q.number}-R${q.revision}` : q.number}</span>
+                  </span>
+                  <span className="num">{formatMoney(q.total, q.currency)}</span>
+                </Link>
+              </li>
+            ))}
+            {poApprovals.map((p) => (
+              <li key={p.id}>
+                <Link href={`/purchase-orders/${p.id}`}>
+                  <span>
+                    <strong>{p.supplier?.name ?? "Supplier"}</strong>
+                    <span>{p.number}</span>
+                  </span>
+                  <span className="num">{formatMoney(p.total, p.currency)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {actions.length > 0 && (
+        <section className="quick">
+          <h2>{t["home.quickActions"]}</h2>
+          <div className="quick-grid">
+            {actions.map((a) => (
+              <Link key={a.href} href={a.href}>
+                <span className="quick-icon">
+                  <Icon name={a.icon} />
+                </span>
+                {a.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <KpiGrid kpis={restKpis} currency={base} />
+
+      <div className="dash-grid">
+        {dash.months && dash.months.some((m) => m.sales > 0) && <SalesChart months={dash.months} currency={base} t={t} />}
+        {dash.aging && <AgingChart aging={dash.aging} currency={base} title={t["c.aging"]} />}
+        {dash.industries && <BarList title={t["c.industry"]} sub={t["c.thisYear"]} rows={dash.industries} currency={base} href="/profit" />}
+        {dash.clients && <BarList title={t["c.topClients"]} sub={t["c.thisYear"]} rows={dash.clients} currency={base} href="/profit" />}
+      </div>
 
       {isManager && remaining > 0 && (
         <section className="card">
-          <h2>Set up checklist</h2>
-          <p className="muted small">{remaining} of {checklist.length} left. These appear on your quotations and invoices.</p>
+          <h2>{t["home.setup"]}</h2>
+          <p className="muted small">
+            {remaining} / {checklist.length} {t["home.setupLeft"]}
+          </p>
           <ul className="list checklist">
             {checklist.map((c) => (
               <li key={c.label}>
@@ -107,112 +203,6 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
           </ul>
         </section>
       )}
-
-      {approvals.length > 0 && (
-        <section className="card" style={{ borderColor: "#f0d49a" }}>
-          <h2>Quotations waiting for your approval</h2>
-          <ul className="list">
-            {approvals.map((q) => (
-              <li key={q.id} className="row">
-                <Link href={`/quotations/${q.id}`}>
-                  {q.client?.name ?? "Client"} · {q.revision > 0 ? `${q.number}-R${q.revision}` : q.number}
-                </Link>
-                <span className="small">{formatMoney(q.total, q.currency)}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {poApprovals.length > 0 && (
-        <section className="card" style={{ borderColor: "#f0d49a" }}>
-          <h2>Purchase orders waiting for your approval</h2>
-          <ul className="list">
-            {poApprovals.map((p) => (
-              <li key={p.id} className="row">
-                <Link href={`/purchase-orders/${p.id}`}>
-                  {p.supplier?.name ?? "Supplier"} · {p.number}
-                </Link>
-                <span className="small">{formatMoney(p.total, p.currency)}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {dash.months && dash.months.some((m) => m.sales > 0) && <SalesChart months={dash.months} currency={base} />}
-      {dash.aging && <AgingChart aging={dash.aging} currency={base} />}
-      {dash.industries && (
-        <BarList title="Sales by industry" sub="This year, before VAT" rows={dash.industries} currency={base} href="/profit" />
-      )}
-      {dash.clients && <BarList title="Top clients" sub="This year, before VAT" rows={dash.clients} currency={base} href="/profit" />}
-
-      <h2 style={{ marginTop: 8 }}>Work</h2>
-      <div className="grid grid-2">
-        {can(role, "seeSales") && (
-          <Link href="/sales" className="tile">
-            <div className="tile-title">Sales</div>
-            <div className="tile-sub">Client RFQs, quotations and approvals</div>
-          </Link>
-        )}
-        {can(role, "seePurchasing") && (
-          <Link href="/purchasing" className="tile">
-            <div className="tile-title">Purchasing</div>
-            <div className="tile-sub">Supplier RFQs, price comparison, purchase orders</div>
-          </Link>
-        )}
-        {can(role, "seeFinance") && (
-          <Link href="/finance" className="tile">
-            <div className="tile-title">Finance</div>
-            <div className="tile-sub">Invoices, payments, money owed, supplier bills, profit</div>
-          </Link>
-        )}
-        {!can(role, "seeFinance") && can(role, "seeInvoices") && (
-          <Link href="/invoices" className="tile">
-            <div className="tile-title">Invoices</div>
-            <div className="tile-sub">Invoices to your clients and what they still owe</div>
-          </Link>
-        )}
-        {can(role, "seeStock") && (
-          <Link href="/stock" className="tile">
-            <div className="tile-title">Stock</div>
-            <div className="tile-sub">What is in the store, batches and expiry dates</div>
-          </Link>
-        )}
-        {can(role, "receiveGoods") && (
-          <Link href="/receiving" className="tile">
-            <div className="tile-title">Receive goods</div>
-            <div className="tile-sub">Purchase orders waiting for delivery, goods received notes</div>
-          </Link>
-        )}
-        {can(role, "seeDeliveries") && (
-          <Link href="/deliveries" className="tile">
-            <div className="tile-title">Deliveries</div>
-            <div className="tile-sub">Delivery notes, drivers, proof of delivery</div>
-          </Link>
-        )}
-        <Link href="/clients" className="tile">
-          <div className="tile-title">Clients</div>
-          <div className="tile-sub">Companies you sell to, their sites and contacts</div>
-        </Link>
-        {can(role, "seeSuppliers") && (
-          <Link href="/suppliers" className="tile">
-            <div className="tile-title">Suppliers</div>
-            <div className="tile-sub">Who you buy from, terms and lead times</div>
-          </Link>
-        )}
-        <Link href="/products" className="tile">
-          <div className="tile-title">Products</div>
-          <div className="tile-sub">Catalogue, prices and technical details</div>
-        </Link>
-        {can(role, "importData") && (
-          <Link href="/import" className="tile">
-            <div className="tile-title">Import from spreadsheet</div>
-            <div className="tile-sub">Load the master data template in one go</div>
-          </Link>
-        )}
-      </div>
-
     </>
   );
 }

@@ -29,6 +29,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="auth-wrap">
+      <img className="auth-logo" src="/brand/lemo-ims-white.svg" alt="LeMo IMS" />
       <div className="auth-card">
         <h1>Reset your password</h1>
         {sent ? (
@@ -53,6 +54,7 @@ export default function ForgotPasswordPage() {
           <Link href="/login">Back to sign in</Link>
         </p>
       </div>
+      <p className="auth-foot">LeMo IMS · by LeMo Tech Solutions</p>
     </div>
   );
 }

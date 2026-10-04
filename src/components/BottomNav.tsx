@@ -79,7 +79,7 @@ export function SideNav({
       </nav>
       <a className="powered" href="/help">
         <span>{poweredBy}</span>
-        <img src="/brand/lemo-sm-on-dark.svg" alt={tr("LeMoSp")} />
+        <img src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
       </a>
     </aside>
   );

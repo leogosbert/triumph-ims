@@ -1971,7 +1971,7 @@ p.card.muted::before {
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
 }
 [data-theme="dark"] .lemo-foot img {
-  content: url("/brand/lemo-sm-on-dark.svg");
+  content: url("/brand/lemosp-on-dark.svg");
 }
 [data-theme="dark"] .card,
 [data-theme="dark"] .rec-list,
@@ -2029,7 +2029,7 @@ a {
   overflow: visible;
 }
 .splash-word {
-  width: 190px;
+  width: 236px;
   height: auto;
   overflow: visible;
 }
@@ -2078,8 +2078,29 @@ a {
 .sp-l4 {
   animation-delay: 1.14s;
 }
+.sp-l5 {
+  animation-delay: 1.24s;
+}
+.sp-l6 {
+  animation-delay: 1.34s;
+}
+.sp-route2 {
+  animation-delay: 0.6s;
+}
+.sp-dot {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sp-pop 0.45s var(--ease-spring) forwards;
+}
+.sp-dot1 {
+  animation-delay: 1.3s;
+}
+.sp-dot2 {
+  animation-delay: 1.5s;
+}
 .sp-tagline {
-  animation: sp-fade-up 0.5s var(--ease-out) 1.25s forwards;
+  animation: sp-fade-up 0.5s var(--ease-out) 1.45s forwards;
 }
 .splash-tag {
   margin: 0;

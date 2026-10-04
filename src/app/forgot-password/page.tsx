@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="auth-wrap">
-      <img className="auth-logo" src="/brand/lemo-sm-on-dark.svg" alt={tr("LeMoSp")} />
+      <img className="auth-logo" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
       <div className="auth-card">
         <h1>{tr("Reset your password")}</h1>
         {sent ? (

@@ -13,7 +13,7 @@ export default async function SetupNeededPage({ searchParams }: { searchParams: 
 
   return (
     <div className="auth-wrap">
-      <img className="auth-logo" src="/brand/lemo-sm-on-dark.svg" alt={tr("LeMoSp")} />
+      <img className="auth-logo" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
       <div className="auth-card">
         {detail ? (
           <>

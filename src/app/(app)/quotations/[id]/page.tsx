@@ -32,6 +32,7 @@ import { DELIVERY_STATUS } from "@/lib/stock";
 import { OrderCosts, type OrderCost } from "@/components/OrderCosts";
 import { INVOICE_STATUS, shownStatus } from "@/lib/finance";
 import { newInvoice } from "../../invoices/actions";
+import { OrderProgress } from "@/components/OrderProgress";
 
 export const metadata = { title: "Quotation" };
 
@@ -145,6 +146,16 @@ export default async function QuotationPage({
       : Promise.resolve({ data: [] }),
   ]);
   const linkedInvoices = (invData ?? []) as { id: string; number: string; status: string; total: number; amount_paid: number; currency: string; due_date: string | null }[];
+  const liveInvoices = linkedInvoices.filter((i) => i.status !== "cancelled");
+  const progress = [
+    { label: "Quoted", done: true },
+    { label: "Approved", done: ["approved", "sent", "accepted"].includes(q.status) },
+    { label: "Sent", done: ["sent", "accepted"].includes(q.status) },
+    { label: "Won", done: q.status === "accepted" },
+    { label: "Delivered", done: linkedDns.some((d) => d.status === "delivered") },
+    { label: "Invoiced", done: liveInvoices.some((i) => i.status !== "draft") },
+    { label: "Paid", done: liveInvoices.length > 0 && liveInvoices.every((i) => i.status === "paid") },
+  ];
   const orderProfit = ((profitData ?? []) as { revenue_base: number; cost_base: number; lines_without_cost: number }[]).reduce(
     (a, r) => ({ rev: a.rev + n(r.revenue_base), cost: a.cost + n(r.cost_base), missing: a.missing + n(r.lines_without_cost) }),
     { rev: 0, cost: 0, missing: 0 },
@@ -181,6 +192,7 @@ export default async function QuotationPage({
         {q.created_by && <> · by {names.get(q.created_by)}</>}
       </p>
       <Notice {...notice} />
+      {!["rejected", "cancelled", "superseded"].includes(q.status) && <OrderProgress steps={progress} />}
 
       {isDraft && q.review_note && (
         <div className="banner bad">

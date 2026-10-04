@@ -1175,3 +1175,55 @@ svg.chart { width: 100%; height: auto; display: block; }
   height: auto;
   opacity: 0.9;
 }
+
+/* ---------- Order progress ---------- */
+.progress-card {
+  padding: 12px 14px;
+}
+.progress-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.progress-bar {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+}
+.progress-bar li {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+}
+.progress-bar li.done {
+  background: var(--brand);
+}
+.progress-bar li.now {
+  background: #d97706;
+}
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+}
+.progress-labels strong {
+  color: var(--warn);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

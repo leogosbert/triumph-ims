@@ -1,4 +1,4 @@
-# TRIUMPH IMS
+# LeMo IMS (first client: TRIUMPH General Suppliers)
 
 Phone-first system for a general supply company: clients, suppliers, products, RFQs, quotations, purchasing, stock,
 deliveries, invoices and payments. It is built for many companies from day one: each company's data is kept apart by
@@ -18,7 +18,8 @@ the database itself, and each has its own branding and settings.
 | 5 | Goods received, stock, deliveries, proof of delivery (offline) | Done |
 | 6 | Invoices, payments, receivables and payables, profit | Done |
 | 7 | Dashboard, notifications, email | Done |
-| 8 | Go-live: security review, backups, data import, training | **Built — follow [GO-LIVE.md](GO-LIVE.md)** |
+| 8 | Go-live: security review, backups, data import, training | Built — follow [GO-LIVE.md](GO-LIVE.md) |
+| 9 | LeMo IMS branding, new look (B), laptop layout, search, English/Kiswahili | **Built, ready to test** |
 
 ## First-time setup
 

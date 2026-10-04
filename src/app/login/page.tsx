@@ -91,7 +91,7 @@ export default function LoginPage() {
 
   return (
     <div className="auth-wrap">
-      <img className="auth-logo" src="/brand/lemo-ims-white.svg" alt="LeMo IMS" />
+      <img className="auth-logo" src="/brand/lemo-ims-on-dark.svg" alt="LeMo IMS" />
       <div className="auth-card">
         <div className="brand">
           <div>

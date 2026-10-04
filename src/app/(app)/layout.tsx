@@ -5,12 +5,13 @@ import { Icon } from "@/components/Icon";
 import { brandingUrl, getAppContext } from "@/lib/context";
 import type { Key } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
+import { defaultCategory, moreMenu } from "@/lib/menu";
 import { bottomNav, sideNav } from "@/lib/nav";
 import { setLanguage } from "../lang-actions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   await primeLang();
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, role, user, isManager } = await getAppContext();
   const { lang, t } = await getDict();
   const logo = brandingUrl(supabase, company.logo_path);
   const initials = company.name
@@ -64,7 +65,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </header>
         <main className="page">{children}</main>
       </div>
-      <BottomNav items={bottomNav(role, t)} />
+      <BottomNav items={bottomNav(role, t)} menu={moreMenu(role, isManager)} menuStart={defaultCategory(role)} />
     </div>
   );
 }

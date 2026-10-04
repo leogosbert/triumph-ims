@@ -2610,3 +2610,235 @@ body:has(.bottomnav) .install-arrow {
     display: none;
   }
 }
+
+/* ---------- Slide-up menu (phones: the "More" button) ---------- */
+.bottomnav {
+  z-index: 32;
+}
+.msheet {
+  position: fixed;
+  inset: 0;
+  z-index: 31;
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0s linear 0.4s;
+}
+.msheet.open {
+  pointer-events: auto;
+  visibility: visible;
+  transition: visibility 0s;
+}
+.msheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 14, 28, 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.msheet.open .msheet-backdrop {
+  opacity: 1;
+}
+.msheet-panel {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(var(--nav-h) + 18px + env(safe-area-inset-bottom));
+  max-height: calc(100dvh - var(--nav-h) - 80px - env(safe-area-inset-bottom) - env(safe-area-inset-top));
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  outline: none;
+  transform: translateY(calc(100% + var(--nav-h) + 40px));
+  transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
+}
+.msheet.open .msheet-panel {
+  transform: translateY(0);
+}
+.msheet-panel.dragging {
+  transition: none;
+}
+.msheet-grab {
+  touch-action: none;
+  cursor: grab;
+  padding: 8px 14px 4px 18px;
+}
+.msheet-handle {
+  display: block;
+  width: 42px;
+  height: 5px;
+  margin: 0 auto 6px;
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+.msheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.msheet-head strong {
+  font-size: 1.15rem;
+}
+.msheet-x {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.msheet-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 8px 16px 12px;
+  scroll-snap-type: x proximity;
+}
+.msheet-chips::-webkit-scrollbar {
+  display: none;
+}
+.msheet-chips button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px 0 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  scroll-snap-align: center;
+  transition: background-color 0.25s, color 0.25s, border-color 0.25s, transform 0.18s var(--ease-spring);
+}
+.msheet-chips button:active {
+  transform: scale(0.95);
+}
+.msheet-chips button[aria-selected="true"] {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+  color: #fff;
+}
+.msheet-count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: center;
+}
+.msheet-chips button[aria-selected="true"] .msheet-count {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+.msheet-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 10px 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.msheet-list a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 14px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+.msheet-list a:active,
+.msheet-list a:hover {
+  background: var(--soft);
+}
+.msheet-list a[aria-current="page"] {
+  background: color-mix(in srgb, var(--brand) 9%, var(--card));
+}
+.msheet-list a > svg:last-child {
+  flex: none;
+  color: var(--chev);
+}
+.msheet-ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--brand) 10%, var(--card));
+  color: var(--brand);
+}
+[data-theme="dark"] .msheet-ico {
+  background: color-mix(in srgb, var(--brand) 22%, var(--card));
+  color: color-mix(in srgb, var(--brand) 45%, #fff);
+}
+.msheet-txt {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.msheet-txt .t {
+  font-weight: 600;
+  font-size: 0.97rem;
+}
+.msheet-txt .s {
+  color: var(--muted);
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.msheet-all {
+  display: block;
+  margin: 2px 16px 14px;
+  padding: 10px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted) !important;
+  text-decoration: none;
+  border: 1px dashed var(--line-strong);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .msheet.open .msheet-list > li {
+    animation: rise 0.35s var(--ease-out) backwards;
+  }
+  .msheet.open .msheet-list > li:nth-child(2) { animation-delay: 0.03s; }
+  .msheet.open .msheet-list > li:nth-child(3) { animation-delay: 0.06s; }
+  .msheet.open .msheet-list > li:nth-child(4) { animation-delay: 0.09s; }
+  .msheet.open .msheet-list > li:nth-child(5) { animation-delay: 0.12s; }
+  .msheet.open .msheet-list > li:nth-child(6) { animation-delay: 0.15s; }
+  .msheet.open .msheet-list > li:nth-child(n + 7) { animation-delay: 0.18s; }
+  .msheet.open .msheet-chips button {
+    animation: rise 0.4s var(--ease-out) backwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .msheet-panel,
+  .msheet-backdrop {
+    transition-duration: 0.01s;
+  }
+}
+@media (min-width: 1024px) {
+  .msheet {
+    display: none;
+  }
+}

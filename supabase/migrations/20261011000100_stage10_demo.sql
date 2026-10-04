@@ -28,16 +28,17 @@
 alter table public.companies
   add column if not exists is_demo boolean not null default false,
   add column if not exists demo_expires_at timestamptz;
+alter table public.companies drop constraint if exists companies_demo_expiry;
 alter table public.companies add constraint companies_demo_expiry check (not is_demo or demo_expires_at is not null);
 create index if not exists companies_demo_expiry_idx on public.companies (demo_expires_at) where is_demo;
 
 -- Log of demo starts, for the abuse limits (kept one day).
-create table public.demo_starts (
+create table if not exists public.demo_starts (
   id          bigint generated always as identity primary key,
   user_id     uuid,
   created_at  timestamptz not null default now()
 );
-create index demo_starts_time_idx on public.demo_starts (created_at);
+create index if not exists demo_starts_time_idx on public.demo_starts (created_at);
 alter table public.demo_starts enable row level security;  -- no policies: only used by functions
 revoke all on public.demo_starts from anon, authenticated;
 
@@ -66,6 +67,7 @@ begin
   return new;
 end;
 $$;
+drop trigger if exists memberships_guard_demo on public.memberships;
 create trigger memberships_guard_demo before insert or update of company_id, user_id on public.memberships
   for each row execute function public.guard_demo_membership();
 

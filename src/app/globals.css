@@ -1227,3 +1227,332 @@ svg.chart { width: 100%; height: auto; display: block; }
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* =====================================================================
+   Look B for every screen: lists, detail pages, forms, tabs, buttons.
+   ===================================================================== */
+
+/* Page header: the "← Back" link becomes a quiet pill, the title bolder. */
+main.page > p.small:first-child {
+  margin: 0 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+  color: var(--muted);
+}
+main.page > p.small:first-child a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+main.page > p.small:first-child a:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+main.page > h1,
+.page-head h1 {
+  font-size: 1.55rem;
+  font-weight: 700;
+}
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.page-head h1 {
+  margin: 0;
+}
+
+/* Cards and section titles. */
+.card {
+  border-radius: 18px;
+  padding: 16px 18px;
+}
+.card > h2:first-child,
+section.card > h2 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+h2 + .muted.small {
+  margin-top: -4px;
+}
+
+/* Filter tabs: one scrollable row of pills. */
+.tabs-row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 -16px 14px;
+  padding: 2px 16px;
+}
+.tabs-row::-webkit-scrollbar {
+  display: none;
+}
+.tabs-row a {
+  flex: none;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tabs-row a[aria-current="page"] {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+  color: #fff;
+}
+
+/* Record lists: roomy rows with a chevron. */
+.rec-list {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(11, 31, 58, 0.04);
+  margin-bottom: 16px;
+}
+.rec-list a {
+  padding: 13px 14px 13px 16px;
+  min-height: 60px;
+}
+.rec-list a::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #9aa6b8;
+  border-top: 2px solid #9aa6b8;
+  transform: rotate(45deg);
+  margin-left: 2px;
+}
+.rec-list .title {
+  font-size: 0.97rem;
+}
+.rec-list .sub {
+  font-size: 0.8rem;
+}
+.rec-list .side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-left: auto;
+  text-align: right;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status labels. */
+.badge {
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* Buttons. */
+.btn {
+  min-height: 46px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn:hover {
+  border-color: var(--brand);
+}
+.btn-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  box-shadow: 0 2px 6px rgba(28, 76, 155, 0.25);
+}
+.btn-primary:hover {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+}
+.btn-danger {
+  background: #fff;
+  border-color: #f0c9c4;
+  color: var(--err);
+}
+.btn-danger:hover {
+  background: var(--err-bg);
+  border-color: var(--err);
+}
+.btn-small {
+  min-height: 36px;
+  border-radius: 10px;
+}
+.btn-block {
+  min-height: 50px;
+}
+
+/* Forms. */
+label {
+  font-size: 0.85rem;
+}
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+input[type="date"],
+input[type="search"],
+select,
+textarea {
+  border-color: var(--line-strong);
+  border-radius: 12px;
+  min-height: 46px;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(28, 76, 155, 0.18);
+}
+input[type="checkbox"],
+input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand);
+}
+fieldset.plain:disabled input,
+fieldset.plain:disabled select,
+fieldset.plain:disabled textarea {
+  background: #f6f8fb;
+  color: var(--text);
+}
+
+/* "+ Add an item" and similar expandable rows. */
+details > summary {
+  cursor: pointer;
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+.card details > summary,
+details.card > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  color: var(--brand);
+}
+details.card > summary strong {
+  color: var(--text);
+}
+
+/* Banners, notices, totals, key–value lists. */
+.banner {
+  border-radius: 16px;
+  padding: 13px 16px;
+}
+.notice {
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+.totals .grand {
+  border-top-width: 2px;
+  font-size: 1.15rem;
+}
+.kv dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.actions-bar {
+  gap: 8px;
+}
+.actions-bar .btn {
+  flex: 1 1 auto;
+}
+
+/* Tiles (More, Settings, Finance). */
+.tile {
+  border-radius: 18px;
+  padding: 15px 16px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+a.tile:hover {
+  box-shadow: 0 4px 14px rgba(11, 31, 58, 0.08);
+}
+.tile .tile-title {
+  font-size: 0.97rem;
+}
+
+/* Stats and tables. */
+.stat {
+  border-radius: 16px;
+  padding: 13px 15px;
+}
+.stat .l {
+  font-size: 0.78rem;
+}
+.scroll-x {
+  border-radius: 14px;
+}
+table.compare thead th {
+  background: #f3f5f8;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* Search box on list pages. */
+.toolbar {
+  border-radius: 18px;
+}
+.toolbar-row input[type="search"] {
+  border-color: var(--line-strong);
+  border-radius: 12px;
+  min-height: 44px;
+}
+
+/* Laptop: lists and details use the width. */
+@media (min-width: 1024px) {
+  main.page > h1,
+  .page-head h1 {
+    font-size: 1.8rem;
+  }
+  .tabs-row {
+    margin: 0 0 16px;
+    padding: 2px 0;
+    flex-wrap: wrap;
+  }
+  .grid-2 {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .rec-list a {
+    padding: 14px 20px;
+  }
+  .actions-bar .btn {
+    flex: 0 0 auto;
+  }
+}
+input[type="date"],
+input[type="number"] {
+  width: 100%;
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  color: var(--text);
+}

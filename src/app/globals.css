@@ -3509,3 +3509,140 @@ body:has(.bottomnav) .install-arrow {
   width: 150px;
   opacity: 0.85;
 }
+
+/* Company panel: a compact drop-down card under the logo (not full screen). */
+.csheet-backdrop {
+  background: rgba(6, 14, 28, 0.28);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.csheet-panel {
+  top: calc(66px + env(safe-area-inset-top));
+  left: 10px;
+  right: auto;
+  width: min(310px, calc(100vw - 20px));
+  max-height: min(68dvh, 540px);
+  border-radius: 20px;
+  transform-origin: 24px 0;
+  transform: translateY(-8px) scale(0.9);
+  opacity: 0;
+  transition: transform 0.28s var(--ease-spring), opacity 0.18s ease;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3);
+}
+.csheet.open .csheet-panel {
+  transform: none;
+  opacity: 1;
+}
+.csheet-hero {
+  gap: 10px;
+  padding: 12px 44px 12px 12px;
+}
+.csheet-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  padding: 3px;
+}
+.csheet-logo.mark {
+  font-size: 0.95rem;
+}
+.csheet-who strong {
+  font-size: 0.92rem;
+}
+.csheet-who span {
+  font-size: 0.75rem;
+}
+.csheet-x {
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 1.15rem;
+}
+.csheet-body {
+  padding: 8px 6px 2px;
+}
+.csheet-facts {
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin: 0 6px 6px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: var(--soft);
+}
+.csheet-facts > div,
+.csheet-facts > div:nth-child(n + 3) {
+  grid-column: auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 3px 0;
+  border-radius: 0;
+  background: transparent;
+}
+.csheet-facts dt {
+  flex: none;
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+.csheet-facts dd {
+  font-size: 0.8rem;
+  text-align: right;
+  min-width: 0;
+}
+.csheet-list a {
+  gap: 10px;
+  padding: 6px 6px;
+  border-radius: 10px;
+}
+.csheet-list .msheet-ico {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+.csheet-list .msheet-ico svg {
+  width: 17px;
+  height: 17px;
+}
+.csheet-list .msheet-txt .t {
+  font-size: 0.88rem;
+}
+.csheet-list .msheet-txt .s {
+  display: none;
+}
+.csheet-list a > svg:last-child {
+  width: 15px;
+  height: 15px;
+}
+.csheet-row {
+  padding: 6px 6px;
+  font-size: 0.8rem;
+}
+.seg.seg-sm button {
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 0.74rem;
+}
+.csheet-switch {
+  padding: 8px 6px 2px;
+}
+.csheet-co {
+  padding: 7px 10px;
+  font-size: 0.85rem;
+}
+.csheet-out {
+  margin: 6px 0 8px;
+  min-height: 38px;
+  font-size: 0.85rem;
+}
+.csheet-grab {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .csheet-panel {
+    top: 12px;
+    left: calc(var(--side-w) - 12px);
+    width: 310px;
+  }
+}

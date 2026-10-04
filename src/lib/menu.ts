@@ -88,6 +88,7 @@ export function moreMenu(role: Role, isManager: boolean): MenuCategory[] {
           icon: "building",
         },
         isManager && { href: "/settings/team", title: "Team & roles", sub: "Invite people, change roles", icon: "team" },
+        isManager && { href: "/settings/security", title: "Security", sub: "Two-step verification, automatic sign-out, password rules", icon: "lock" },
         isManager && { href: "/activity", title: "Activity log", sub: "Every change, who made it and when", icon: "activity" },
         { href: "/notifications", title: "Notifications", sub: "Your alerts, phone notifications and emails", icon: "bell" },
         isManager && { href: "/settings/notifications", title: "Alerts setup", sub: "Connect phone push and email sending", icon: "settings" },

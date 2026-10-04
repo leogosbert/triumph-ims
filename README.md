@@ -21,7 +21,8 @@ the database itself, and each has its own branding and settings.
 | 6 | Invoices, payments, receivables and payables, profit | Done |
 | 7 | Dashboard, notifications, email | Done |
 | 8 | Go-live: security review, backups, data import, training | Built — follow [GO-LIVE.md](GO-LIVE.md) |
-| 9 | LeMoSp branding, new look (B), laptop layout, search, English/Kiswahili | **Built, ready to test** |
+| 9 | LeMoSp branding, new look (B), laptop layout, search, English/Kiswahili | Built, ready to test |
+| 10 | Demo version, two-step verification and password security, "new version" pop-up | **Built — run the Stage 10 SQL** |
 
 ## First-time setup
 

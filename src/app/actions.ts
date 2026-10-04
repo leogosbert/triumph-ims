@@ -16,6 +16,18 @@ export async function signOut() {
   redirect("/login");
 }
 
+/** Automatic sign-out after the company's idle time. */
+export async function signOutIdle(form: FormData) {
+  const minutes = Number(form.get("minutes") ?? 0);
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect(
+    withNotice("/login", {
+      msg: minutes ? `You were signed out after ${minutes} minutes without activity. Please sign in again.` : "You were signed out.",
+    }),
+  );
+}
+
 export async function createCompany(form: FormData) {
   const name = str(form, "name");
   if (name.length < 2) redirect(withNotice("/welcome", { error: "Please enter the company name." }));

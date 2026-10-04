@@ -1,3 +1,4 @@
+import { APP_VERSION, BUILD_ID } from "@/lib/releases";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { getAppContext } from "@/lib/context";
@@ -122,6 +123,10 @@ export default async function HelpPage() {
           <li>{tr("Something wrong or missing? Tell management — every change is recorded in the activity log.")}</li>
         </ul>
       </section>
+      <p className="small muted" style={{ textAlign: "center", marginTop: 24 }}>
+        LeMoSp v{APP_VERSION}
+        {BUILD_ID ? ` · build ${BUILD_ID.slice(0, 7)}` : ""} · {tr("a LeMo Tech Solutions product")}
+      </p>
     </>
   );
 }

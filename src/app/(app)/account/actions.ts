@@ -1,5 +1,6 @@
 "use server";
 
+import { checkPassword } from "@/lib/password";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
@@ -23,7 +24,9 @@ export async function changePassword(form: FormData) {
   const { supabase } = await getAppContext();
   const password = str(form, "password");
   const confirm = str(form, "confirm");
-  if (password.length < 8) redirect(withNotice("/account", { error: "Use a password of at least 8 characters." }));
+  const { profile, company } = await getAppContext();
+  const rule = checkPassword(password, [profile.full_name ?? "", profile.email ?? "", company.name]);
+  if (!rule.ok) redirect(withNotice("/account", { error: rule.problems[0] }));
   if (password !== confirm) redirect(withNotice("/account", { error: "The two passwords don't match." }));
   const { error } = await supabase.auth.updateUser({ password });
   if (error) redirect(withNotice("/account", { error: friendlyError(error.message) }));

@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Each deployment gets its own id so open apps can tell when a newer version is live.
+  env: {
+    NEXT_PUBLIC_BUILD_ID: (process.env.COMMIT_REF || process.env.GITHUB_SHA || `local-${Date.now()}`).slice(0, 12),
+  },
   async headers() {
     return [
       {

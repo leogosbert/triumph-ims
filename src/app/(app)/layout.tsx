@@ -2,6 +2,8 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { BottomNav, SideNav } from "@/components/BottomNav";
 import { CompanyButton, CompanySheet, type CompanyCard } from "@/components/CompanySheet";
+import { DemoBar } from "@/components/DemoBar";
+import { IdleGuard } from "@/components/IdleGuard";
 import { Icon } from "@/components/Icon";
 import { getThemePref } from "@/lib/theme";
 import { brandingUrl, getAppContext } from "@/lib/context";
@@ -86,9 +88,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </a>
           </div>
         </header>
+        {company.is_demo && (
+          <DemoBar
+            role={role}
+            hoursLeft={Math.max(1, Math.ceil((Date.parse(company.demo_expires_at ?? "") - Date.now()) / 36e5) || 48)}
+          />
+        )}
         <main className="page">{children}</main>
       </div>
       <CompanySheet card={card} />
+      <IdleGuard minutes={company.idle_timeout_minutes ?? 0} />
       <BottomNav items={bottomNav(role, t)} menu={moreMenu(role, isManager)} menuStart={defaultCategory(role)} />
     </div>
   );

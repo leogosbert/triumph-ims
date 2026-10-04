@@ -4,8 +4,12 @@ import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useFormStatus } from "react-dom";
+import { NewPasswordField } from "@/components/NewPasswordField";
 import { PasswordInput } from "@/components/PasswordInput";
+import { checkPassword } from "@/lib/password";
 import { createClient } from "@/lib/supabase/client";
+import { startDemo } from "@/app/demo-actions";
 
 type Mode = "signin" | "signup";
 
@@ -41,8 +45,16 @@ export default function LoginPage() {
           setError(
             /confirm/i.test(error.message)
               ? "Please confirm your email first. Check your inbox for the link."
-              : "Email or password is not correct.",
+              : /rate|too many/i.test(error.message) || error.status === 429
+                ? "Too many sign-in attempts. For your security, please wait a few minutes and try again."
+                : "Email or password is not correct.",
           );
+          return;
+        }
+        // Two-step verification turned on: ask for the code next.
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+          router.replace("/two-step");
           return;
         }
         router.replace("/");
@@ -54,8 +66,9 @@ export default function LoginPage() {
         setError("Please enter your full name.");
         return;
       }
-      if (password.length < 8) {
-        setError("Use a password of at least 8 characters.");
+      const rule = checkPassword(password, [fullName, email]);
+      if (!rule.ok) {
+        setError(rule.problems[0]);
         return;
       }
       const { data, error } = await supabase.auth.signUp({
@@ -122,14 +135,12 @@ export default function LoginPage() {
             <input id="email" name="email" type="email" autoComplete="email" inputMode="email" required />
           </div>
           <div className="field">
-            <label htmlFor="password">{tr("Password")}{" "}{mode === "signup" && <span className="hint">{tr("· at least 8 characters")}</span>}
-            </label>
-            <PasswordInput
-              id="password"
-              name="password"
-              autoComplete={mode === "signin" ? "current-password" : "new-password"}
-              minLength={mode === "signup" ? 8 : undefined}
-            />
+            <label htmlFor="password">{tr("Password")}</label>
+            {mode === "signin" ? (
+              <PasswordInput id="password" name="password" autoComplete="current-password" />
+            ) : (
+              <NewPasswordField id="password" name="password" />
+            )}
           </div>
           <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
             {busy ? tr("Please wait…") : mode === "signin" ? tr("Sign in") : tr("Create account")}
@@ -145,7 +156,24 @@ export default function LoginPage() {
           <p className="small muted" style={{ marginTop: 16 }}>{tr("Joining a company? Create your account with the same email address your manager invited.")}</p>
         )}
       </div>
+      <form action={startDemo} className="demo-card">
+        <div>
+          <strong>{tr("Just looking?")}</strong>
+          <span>{tr("Try the demo with sample clients, quotations, stock and invoices. No sign-up needed; it deletes itself after 48 hours.")}</span>
+        </div>
+        <DemoButton />
+      </form>
       <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>
     </div>
+  );
+}
+
+function DemoButton() {
+  const tr = useTr();
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" className="btn btn-block demo-btn" disabled={pending}>
+      {pending ? tr("Preparing your demo…") : tr("Try the demo")}
+    </button>
   );
 }

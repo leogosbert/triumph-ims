@@ -120,7 +120,7 @@ export function CompanySheet({ card }: { card: CompanyCard }) {
           <div className="csheet-who">
             <strong>{card.name}</strong>
             <span>
-              {card.person.name || card.person.email} · {card.role}
+              {card.person.name || card.person.email || tr("Demo guest")} · {card.role}
             </span>
           </div>
           <button type="button" className="csheet-x" onClick={close} aria-label={tr("Close")}>

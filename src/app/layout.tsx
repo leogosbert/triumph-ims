@@ -6,6 +6,7 @@ import { getThemePref, THEME_SCRIPT } from "@/lib/theme";
 import { Splash, SPLASH_SCRIPT } from "@/components/Splash";
 import { NavProgress } from "@/components/NavProgress";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { UpdatePrompt } from "@/components/UpdatePrompt";
 import "./globals.css";
 
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
@@ -50,6 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <LangProvider lang={lang === "sw" ? "sw" : "en"}>
           {children}
           <InstallPrompt />
+          <UpdatePrompt lang={lang === "sw" ? "sw" : "en"} />
         </LangProvider>
       </body>
     </html>

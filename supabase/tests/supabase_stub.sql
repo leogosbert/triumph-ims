@@ -11,7 +11,16 @@ create schema auth;
 create table auth.users (
   id uuid primary key default gen_random_uuid(),
   email text,
-  raw_user_meta_data jsonb default '{}'::jsonb
+  raw_user_meta_data jsonb default '{}'::jsonb,
+  is_anonymous boolean not null default false,
+  created_at timestamptz default now()
+);
+create table auth.mfa_factors (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  factor_type text not null default 'totp',
+  status text not null default 'verified',
+  created_at timestamptz default now()
 );
 create function auth.jwt() returns jsonb language sql stable as
   $$ select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $$;

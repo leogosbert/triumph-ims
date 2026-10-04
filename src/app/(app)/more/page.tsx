@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icon";
 import { ThemePicker } from "@/components/ThemePicker";
 import { getAppContext } from "@/lib/context";
+import { APP_VERSION, BUILD_ID } from "@/lib/releases";
 import { can } from "@/lib/roles";
 
 export const metadata = { title: "More" };
@@ -118,6 +119,7 @@ export default async function MorePage() {
       <a className="lemo-foot" href="/help">
         <img src="/brand/lemosp.svg" alt={tr("LeMoSp")} />
         <span>{tr("a LeMo Tech Solutions product")}</span>
+        <span className="lemo-ver">v{APP_VERSION}{BUILD_ID ? ` · ${BUILD_ID.slice(0, 7)}` : ""}</span>
       </a>
     </>
   );

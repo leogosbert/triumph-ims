@@ -8,7 +8,8 @@ everything it can check by itself.
 ## 0. Database updates
 
 In **Supabase → SQL Editor**, make sure every file in `supabase/migrations/` has been run once, in order, ending with
-`20261010000100_stage8_go_live.sql`. Stage 8 contains the security fixes from the pre-launch review, so it must be run.
+`20261011000200_stage10_security.sql`. Stage 8 contains the security fixes from the pre-launch review, and Stage 10
+the demo and two-step verification rules, so both must be run.
 
 After running Stage 8, **set your exchange rates** (Finance → Exchange rates) before quoting, buying or invoicing in
 USD or any other foreign currency. Documents in TZS are unaffected.
@@ -30,10 +31,20 @@ Supabase → **Authentication**:
   `https://ims.triumphsuppliers.co.tz/**` (keep the netlify.app one until everyone has moved).
 - **Sign In / Providers → Email** → **Confirm email: ON**. Invitations rely on people proving they own the invited
   email address, so this must stay on in production.
-- **Passwords**: minimum length 10.
+- **Passwords** (Authentication → Policies / Passwords): minimum length **10**, require **lower, upper, digits and
+  symbols**, turn on **leaked password protection** if your plan has it, and **Secure password change** (asks for a
+  fresh sign-in before changing a password). The app checks the same rules, but these settings make them impossible
+  to bypass.
+- **Multi-Factor**: make sure **TOTP (authenticator app)** is enabled (it is by default). Then in the app,
+  Management → **Settings → Security** can require two-step verification for everyone.
+- **Sessions** (if your plan has it): set an *inactivity timeout* to match the app's automatic sign-out, so an
+  idle sign-in also expires on the server.
+- **Sign In / Providers → Allow anonymous sign-ins: ON** — needed for **Try the demo** on the sign-in page
+  (guests get a demo company only; real companies are protected by database rules). Also turn on
+  **Attack Protection → CAPTCHA** (Cloudflare Turnstile) later so bots cannot start demos in bulk.
 - **SMTP Settings** → *Enable custom SMTP* (fixes "email rate limit exceeded" for good):
   host `smtp.resend.com`, port `465`, user `resend`, password = your Resend API key,
-  sender `TRIUMPH IMS <no-reply@triumphsuppliers.co.tz>` (domain must be verified in Resend first).
+  sender `TRIUMPH via LeMoSp <no-reply@triumphsuppliers.co.tz>` (domain must be verified in Resend first).
 
 ## 3. Alerts (push and email)
 

@@ -30,6 +30,12 @@ export default async function SettingsPage() {
           </Link>
         )}
         {isManager && (
+          <Link href="/settings/security" className="tile">
+            <div className="tile-title">{tr("Security")}</div>
+            <div className="tile-sub">{tr("Two-step verification, automatic sign-out, password rules")}</div>
+          </Link>
+        )}
+        {isManager && (
           <Link href="/settings/team" className="tile">
             <div className="tile-title">{tr("Team & roles")}</div>
             <div className="tile-sub">{tr("Invite people, change roles, switch access off")}</div>

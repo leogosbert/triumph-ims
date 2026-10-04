@@ -1,5 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import { Notice } from "@/components/Notice";
+import { NewPasswordField } from "@/components/NewPasswordField";
+import { SecurityPanel } from "@/components/SecurityPanel";
 import { PasswordInput } from "@/components/PasswordInput";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ThemePicker } from "@/components/ThemePicker";
@@ -50,20 +52,30 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
         <ThemePicker />
       </section>
 
+      {user.is_anonymous ? (
+        <section className="card">
+          <h2>{tr("Demo guest")}</h2>
+          <p className="muted small" style={{ margin: 0 }}>{tr("You are trying LeMoSp as a guest. Nothing here is real and it is deleted after 48 hours. To use LeMoSp for your company, exit the demo and create an account.")}</p>
+        </section>
+      ) : (
       <section className="card" id="password">
-        <h2>{tr("Change password")}</h2>
-        <form action={changePassword}>
-          <div className="field">
-            <label htmlFor="password">{tr("New password")}</label>
-            <PasswordInput id="password" name="password" minLength={8} autoComplete="new-password" />
-          </div>
-          <div className="field">
-            <label htmlFor="confirm">{tr("Type it again")}</label>
-            <PasswordInput id="confirm" name="confirm" minLength={8} autoComplete="new-password" />
-          </div>
-          <SubmitButton>{tr("Change password")}</SubmitButton>
-        </form>
-      </section>
+          <h2>{tr("Change password")}</h2>
+          <form action={changePassword}>
+            <div className="field">
+              <label htmlFor="password">{tr("New password")}</label>
+              <NewPasswordField id="password" name="password" context={[profile.full_name ?? "", profile.email ?? "", membership.company.name]} />
+            </div>
+            <div className="field">
+              <label htmlFor="confirm">{tr("Type it again")}</label>
+              <PasswordInput id="confirm" name="confirm" minLength={10} autoComplete="new-password" />
+            </div>
+            <SubmitButton>{tr("Change password")}</SubmitButton>
+          </form>
+        </section>
+      )}
+      {!user.is_anonymous && (
+        <SecurityPanel lastSignIn={user.last_sign_in_at ?? null} required={Boolean(membership.company.require_mfa)} />
+      )}
 
       {memberships.length > 1 && (
         <section className="card">

@@ -35,6 +35,11 @@ export type Company = {
   /** Added in Stage 6; missing until that SQL has been run. */
   invoice_due_days?: number;
   invoice_terms?: string | null;
+  /** Added in Stage 10. */
+  is_demo?: boolean;
+  demo_expires_at?: string | null;
+  require_mfa?: boolean;
+  idle_timeout_minutes?: number;
   created_at: string;
   updated_at: string;
 };
@@ -66,6 +71,10 @@ export const getAppContext = cache(async () => {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Two-step verification is on for this person: they must enter their code first.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") redirect("/two-step");
+
   const { data, error } = await supabase
     .from("memberships")
     .select("id, role, company_id, company:companies(*)")
@@ -88,6 +97,11 @@ export const getAppContext = cache(async () => {
 
   const chosen = (await cookies()).get(ACTIVE_COMPANY_COOKIE)?.value;
   const membership = memberships.find((m) => m.company_id === chosen) ?? memberships[0];
+  // The company requires two-step verification and this session has not passed it:
+  // the database hides the company until then.
+  if (!membership.company) redirect("/two-step");
+  // Other companies hidden for the same reason are left out of lists and switchers.
+  const visible = memberships.filter((m) => m.company);
 
   const { data: profileRow } = await supabase
     .from("profiles")
@@ -105,7 +119,7 @@ export const getAppContext = cache(async () => {
     supabase,
     user,
     profile,
-    memberships,
+    memberships: visible,
     membership,
     company: membership.company,
     role: membership.role,

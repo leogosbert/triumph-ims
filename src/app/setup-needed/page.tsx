@@ -13,7 +13,7 @@ export default async function SetupNeededPage({ searchParams }: { searchParams: 
 
   return (
     <div className="auth-wrap">
-      <img className="auth-logo" src="/brand/lemo-sm-on-dark.svg" alt={tr("LeMo Suppliers Manager")} />
+      <img className="auth-logo" src="/brand/lemo-sm-on-dark.svg" alt={tr("LeMoSp")} />
       <div className="auth-card">
         {detail ? (
           <>
@@ -46,7 +46,7 @@ export default async function SetupNeededPage({ searchParams }: { searchParams: 
           </form>
         </div>
       </div>
-      <p className="auth-foot">{tr("LeMo Suppliers Manager · a LeMo Tech Solutions product")}</p>
+      <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>
     </div>
   );
 }

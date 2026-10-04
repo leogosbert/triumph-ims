@@ -121,7 +121,7 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   pdf.setTitle(`${d.title} ${clean(d.meta[0]?.[1] ?? "")}`);
   pdf.setAuthor(clean(d.company.name));
-  pdf.setCreator("LeMo Suppliers Manager");
+  pdf.setCreator("LeMoSp");
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const brand = hex(d.company.primary_color, rgb(0.11, 0.3, 0.61));

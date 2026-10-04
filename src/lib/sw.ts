@@ -445,7 +445,7 @@ export const SW: Record<string, string> = {
   "Last cost": "Gharama ya mwisho",
   "Last cost (": "Gharama ya mwisho (",
   "Later →": "Baadaye →",
-  "LeMo Suppliers Manager · a LeMo Tech Solutions product": "LeMo Suppliers Manager · bidhaa ya LeMo Tech Solutions",
+  "LeMoSp · a LeMo Tech Solutions product": "LeMoSp · bidhaa ya LeMo Tech Solutions",
   "Lead time": "Muda wa kusubiri",
   "Lead time (days)": "Muda wa kusubiri (siku)",
   "Leave empty for the standard PO terms": "Acha wazi kwa masharti ya kawaida ya PO",

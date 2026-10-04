@@ -1,5 +1,5 @@
 /**
- * Launch animation: the LeMo Suppliers Manager S-route draws itself, the nodes light up, the
+ * Launch animation: the LeMoSp S-route draws itself, the nodes light up, the
  * wordmark writes in, then the screen lifts away. Shown once per app session
  * (see SPLASH_SCRIPT); pure CSS so it can never block the app.
  */

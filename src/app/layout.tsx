@@ -11,15 +11,15 @@ const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "LeMo Suppliers Manager", template: "%s · LeMo Suppliers Manager" },
-  description: "LeMo Suppliers Manager, a LeMo Tech Solutions product — sales, procurement, stock, delivery and finance for general supply companies.",
-  applicationName: "LeMo Suppliers Manager",
+  title: { default: "LeMoSp", template: "%s · LeMoSp" },
+  description: "LeMoSp, a LeMo Tech Solutions product — sales, procurement, stock, delivery and finance for general supply companies.",
+  applicationName: "LeMoSp",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/icons/favicon-48.png", sizes: "48x48" }],
     apple: "/icons/icon-180.png",
   },
-  appleWebApp: { capable: true, title: "LeMo Suppliers", statusBarStyle: "black-translucent" },
+  appleWebApp: { capable: true, title: "LeMoSp", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {

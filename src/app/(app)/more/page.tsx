@@ -116,7 +116,7 @@ export default async function MorePage() {
       <ThemePicker />
 
       <a className="lemo-foot" href="/help">
-        <img src="/brand/lemo-sm.svg" alt={tr("LeMo Suppliers Manager")} />
+        <img src="/brand/lemo-sm.svg" alt={tr("LeMoSp")} />
         <span>{tr("a LeMo Tech Solutions product")}</span>
       </a>
     </>

@@ -1,6 +1,6 @@
-# LeMo Suppliers Manager (first client: TRIUMPH General Suppliers)
+# LeMoSp (first client: TRIUMPH General Suppliers)
 
-LeMo Suppliers Manager is a product of **LeMo Tech Solutions** (sister product: LeMo Farm Manager). Brand files: `public/brand/`.
+LeMoSp is a product of **LeMo Tech Solutions** (sister product: LeMo Farm Manager). Brand files: `public/brand/`.
 
 Phone-first system for a general supply company: clients, suppliers, products, RFQs, quotations, purchasing, stock,
 deliveries, invoices and payments. It is built for many companies from day one: each company's data is kept apart by
@@ -21,7 +21,7 @@ the database itself, and each has its own branding and settings.
 | 6 | Invoices, payments, receivables and payables, profit | Done |
 | 7 | Dashboard, notifications, email | Done |
 | 8 | Go-live: security review, backups, data import, training | Built — follow [GO-LIVE.md](GO-LIVE.md) |
-| 9 | LeMo Suppliers Manager branding, new look (B), laptop layout, search, English/Kiswahili | **Built, ready to test** |
+| 9 | LeMoSp branding, new look (B), laptop layout, search, English/Kiswahili | **Built, ready to test** |
 
 ## First-time setup
 

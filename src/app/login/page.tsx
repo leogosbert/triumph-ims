@@ -93,7 +93,7 @@ export default function LoginPage() {
 
   return (
     <div className="auth-wrap">
-      <img className="auth-logo" src="/brand/lemo-sm-on-dark.svg" alt={tr("LeMo Suppliers Manager")} />
+      <img className="auth-logo" src="/brand/lemo-sm-on-dark.svg" alt={tr("LeMoSp")} />
       <div className="auth-card">
         <div className="brand">
           <div>
@@ -145,7 +145,7 @@ export default function LoginPage() {
           <p className="small muted" style={{ marginTop: 16 }}>{tr("Joining a company? Create your account with the same email address your manager invited.")}</p>
         )}
       </div>
-      <p className="auth-foot">{tr("LeMo Suppliers Manager · a LeMo Tech Solutions product")}</p>
+      <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>
     </div>
   );
 }

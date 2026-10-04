@@ -1,6 +1,6 @@
 {
-  "name": "LeMo Suppliers Manager",
-  "short_name": "LeMo Suppliers",
+  "name": "LeMoSp",
+  "short_name": "LeMoSp",
   "description": "Sales, procurement, stock, delivery and finance for general supply companies — by LeMo Tech Solutions.",
   "start_url": "/",
   "scope": "/",

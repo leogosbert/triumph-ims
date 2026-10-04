@@ -4,6 +4,7 @@ import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { CompanyButton } from "@/components/CompanySheet";
 import { Icon } from "@/components/Icon";
 import { MenuSheet } from "@/components/MenuSheet";
 import type { MenuCategory } from "@/lib/menu";
@@ -78,10 +79,10 @@ export function SideNav({
   const pathname = usePathname();
   return (
     <aside className="sidenav" aria-label={tr("Sections")}>
-      <Link href="/settings/company" className="sidenav-brand" title={company}>
+      <CompanyButton className="sidenav-brand" title={company}>
         {logo ? <img src={logo} alt="" /> : <span className="mark">{initials}</span>}
         <strong>{company}</strong>
-      </Link>
+      </CompanyButton>
       <nav>
         {items.map((it) => {
           const active = isActive(it, pathname);

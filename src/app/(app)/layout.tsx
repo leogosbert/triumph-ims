@@ -1,7 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { BottomNav, SideNav } from "@/components/BottomNav";
+import { CompanyButton, CompanySheet, type CompanyCard } from "@/components/CompanySheet";
 import { Icon } from "@/components/Icon";
+import { getThemePref } from "@/lib/theme";
 import { brandingUrl, getAppContext } from "@/lib/context";
 import type { Key } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
@@ -11,7 +13,7 @@ import { setLanguage } from "../lang-actions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   await primeLang();
-  const { supabase, company, role, user, isManager } = await getAppContext();
+  const { supabase, company, role, user, isManager, profile, memberships } = await getAppContext();
   const { lang, t } = await getDict();
   const logo = brandingUrl(supabase, company.logo_path);
   const initials = company.name
@@ -26,6 +28,27 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq("user_id", user.id)
     .is("read_at", null);
 
+  const card: CompanyCard = {
+    name: company.name,
+    logo,
+    initials,
+    role: t[`role.${role}` as Key],
+    details: [
+      { label: "TIN", value: company.tin },
+      { label: "VRN", value: company.vrn },
+      { label: "Phone", value: company.phone },
+      { label: "Email", value: company.email },
+      { label: "Address", value: company.address },
+    ].filter((d): d is { label: string; value: string } => Boolean(d.value)),
+    person: { name: profile.full_name ?? "", email: profile.email ?? user.email ?? "" },
+    isManager,
+    others: memberships
+      .filter((m) => m.company_id !== company.id)
+      .map((m) => ({ id: m.company_id, name: m.company.name, role: t[`role.${m.role}` as Key] })),
+    lang: lang === "sw" ? "sw" : "en",
+    theme: await getThemePref(),
+  };
+
   const brandStyle = {
     "--brand": company.primary_color,
     "--brand-dark": company.accent_color,
@@ -36,13 +59,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <SideNav items={sideNav(role, t)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">
-          <Link href="/settings/company" className="topbar-brand" aria-label={company.name} title={company.name}>
+          <CompanyButton className="topbar-brand" title={company.name}>
             {logo ? <img src={logo} alt="" /> : <span className="mark">{initials}</span>}
             <span className="who">
               <strong>{company.name}</strong>
               <span>{t[`role.${role}` as Key]}</span>
             </span>
-          </Link>
+          </CompanyButton>
           <form action="/search" className="topbar-search" role="search">
             <Icon name="search" size={18} />
             <input type="search" name="q" placeholder={t["shell.searchPlaceholder"]} aria-label={t["shell.search"]} />
@@ -65,6 +88,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </header>
         <main className="page">{children}</main>
       </div>
+      <CompanySheet card={card} />
       <BottomNav items={bottomNav(role, t)} menu={moreMenu(role, isManager)} menuStart={defaultCategory(role)} />
     </div>
   );

@@ -1,6 +1,8 @@
 // Kiswahili for screen text. Keys are the exact English shown in the app.
 // Generated for Stage 9; please have a native speaker review.
 export const SW: Record<string, string> = {
+  "Language": "Lugha",
+  "Switch company": "Badilisha kampuni",
   "+ New client RFQ": "+ RFQ mpya ya mteja",
   "+ New invoice": "+ Ankara mpya",
   "+ New purchase order": "+ Oda mpya ya ununuzi",

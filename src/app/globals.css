@@ -2842,3 +2842,278 @@ body:has(.bottomnav) .install-arrow {
     display: none;
   }
 }
+
+/* ---------- Company panel (tap the logo): slides down from the top ---------- */
+.csheet {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0s linear 0.45s;
+}
+.csheet.open {
+  pointer-events: auto;
+  visibility: visible;
+  transition: visibility 0s;
+}
+.csheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 14, 28, 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.csheet.open .csheet-backdrop {
+  opacity: 1;
+}
+.csheet-panel {
+  position: absolute;
+  top: calc(8px + env(safe-area-inset-top));
+  left: 8px;
+  right: 8px;
+  max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  outline: none;
+  overflow: hidden;
+  transform: translateY(calc(-100% - 40px));
+  transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.csheet.open .csheet-panel {
+  transform: translateY(0);
+}
+.csheet-panel.dragging {
+  transition: none;
+}
+.csheet-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 56px 18px 18px;
+  background: var(--brand-dark);
+  background-image: radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.12), transparent 60%);
+  color: #fff;
+}
+.csheet-logo {
+  flex: none;
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: #fff;
+  object-fit: contain;
+  padding: 4px;
+}
+.csheet-logo.mark {
+  display: grid;
+  place-items: center;
+  color: var(--brand-dark);
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+.csheet-who {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.csheet-who strong {
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+.csheet-who span {
+  font-size: 0.82rem;
+  color: #c9d6ec;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.csheet-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.csheet-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 10px 4px;
+}
+.csheet-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0 6px 10px;
+}
+.csheet-facts > div {
+  min-width: 0;
+  padding: 9px 12px;
+  border-radius: 14px;
+  background: var(--soft);
+}
+.csheet-facts > div:nth-child(n + 3) {
+  grid-column: 1 / -1;
+}
+.csheet-facts dt {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.csheet-facts dd {
+  margin: 1px 0 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.csheet-list {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+}
+.csheet-list a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 8px;
+  border-radius: 14px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+.csheet-list a:active,
+.csheet-list a:hover {
+  background: var(--soft);
+}
+.csheet-list a > svg:last-child {
+  flex: none;
+  color: var(--chev);
+}
+.csheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 8px;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.seg.seg-sm {
+  margin: 0;
+  padding: 3px;
+}
+.seg.seg-sm button {
+  min-height: 32px;
+  padding: 0 11px;
+  font-size: 0.8rem;
+}
+.csheet-switch {
+  border-top: 1px solid var(--line);
+  padding: 10px 8px 4px;
+}
+.csheet-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.csheet-co {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.csheet-co span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.csheet-out {
+  margin: 8px 0 6px;
+  min-height: 46px;
+}
+.csheet-grab {
+  touch-action: none;
+  cursor: grab;
+  padding: 6px 0 10px;
+}
+.csheet-grab .msheet-handle {
+  margin: 0 auto;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .csheet.open .csheet-facts > div,
+  .csheet.open .csheet-list > li,
+  .csheet.open .csheet-row {
+    animation: drop-in 0.4s var(--ease-out) backwards;
+  }
+  .csheet.open .csheet-facts > div:nth-child(2) { animation-delay: 0.03s; }
+  .csheet.open .csheet-facts > div:nth-child(n + 3) { animation-delay: 0.06s; }
+  .csheet.open .csheet-list > li:nth-child(1) { animation-delay: 0.08s; }
+  .csheet.open .csheet-list > li:nth-child(2) { animation-delay: 0.11s; }
+  .csheet.open .csheet-list > li:nth-child(3) { animation-delay: 0.14s; }
+  .csheet.open .csheet-list > li:nth-child(4) { animation-delay: 0.17s; }
+  .csheet.open .csheet-row { animation-delay: 0.2s; }
+  .csheet.open .csheet-logo {
+    animation: sp-pop 0.5s var(--ease-spring) 0.12s backwards;
+  }
+}
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .csheet-panel,
+  .csheet-backdrop {
+    transition-duration: 0.01s;
+  }
+}
+/* Laptops: drops down from the sidebar's company name. */
+@media (min-width: 1024px) {
+  .csheet-panel {
+    top: 12px;
+    left: calc(var(--side-w) - 12px);
+    right: auto;
+    width: 400px;
+    max-height: calc(100dvh - 24px);
+    transform-origin: top left;
+    transform: translateY(-12px) scale(0.97);
+    opacity: 0;
+    transition: transform 0.25s var(--ease-out), opacity 0.2s;
+  }
+  .csheet.open .csheet-panel {
+    transform: none;
+    opacity: 1;
+  }
+  .csheet-grab {
+    display: none;
+  }
+}

@@ -19,7 +19,7 @@ See [PRODUCT-VISION.md](PRODUCT-VISION.md) for the philosophy. This file tracks 
 | English/Kiswahili, dark mode, PWA install, animations | ✅ | All |
 | Demo (one level), two-step verification, password security, app lock, update pop-up | ✅ | All |
 
-## Stage 11 — Progressive platform foundation (in progress)
+## Stage 11 — Progressive platform foundation (built — run the Stage 11 SQL)
 - Business level per company (Small / Medium / Enterprise), changeable any time, never loses data.
 - Feature catalogue + per-company switches (level = defaults; any feature can be switched on).
 - Onboarding questionnaire → recommended level with plain-language explanation and comparison.

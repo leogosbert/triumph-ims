@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -13,6 +14,7 @@ export const metadata = { title: "Goods received" };
 type L = { id: string; description: string; quantity: number; unit: string; batch_no: string; expiry_date: string | null; condition: string };
 
 export default async function GrnPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -31,13 +33,12 @@ export default async function GrnPage({ params, searchParams }: { params: Promis
   return (
     <>
       <p className="small">
-        <Link href="/receiving">← Receive goods</Link> · <Link href={`/purchase-orders/${g.po?.id}`}>{g.po?.number}</Link>
+        <Link href="/receiving">{tr("← Receive goods")}</Link> · <Link href={`/purchase-orders/${g.po?.id}`}>{g.po?.number}</Link>
       </p>
       <h1>{g.number}</h1>
-      <p className="muted small">
-        From {g.po?.supplier?.name} into {g.store?.name} on {formatDate(g.received_on)}
-        {g.received_by && <> by {names.get(g.received_by)}</>}
-        {g.supplier_delivery_note && <> · their DN {g.supplier_delivery_note}</>}
+      <p className="muted small">{tr("From")}{" "}{g.po?.supplier?.name}{" "}{tr("into")}{" "}{g.store?.name}{" "}{tr("on")}{" "}{formatDate(g.received_on)}
+        {g.received_by && <>{" "}{tr("by")}{" "}{names.get(g.received_by)}</>}
+        {g.supplier_delivery_note && <>{" "}{tr("· their DN")}{" "}{g.supplier_delivery_note}</>}
       </p>
       <Notice {...notice} />
       {g.notes && <p className="card">{g.notes}</p>}
@@ -48,9 +49,9 @@ export default async function GrnPage({ params, searchParams }: { params: Promis
               <div>
                 <div className="desc">{l.description}</div>
                 <div className="muted small">
-                  {l.batch_no ? `Batch ${l.batch_no}` : "No batch"}
+                  {l.batch_no ? `Batch ${l.batch_no}` : tr("No batch")}
                   {l.expiry_date ? ` · expires ${formatDate(l.expiry_date)}` : ""}
-                  {l.condition === "damaged" && <span className="text-warn"> · damaged, not in stock</span>}
+                  {l.condition === "damaged" && <span className="text-warn">{" "}{tr("· damaged, not in stock")}</span>}
                 </div>
               </div>
               <strong>

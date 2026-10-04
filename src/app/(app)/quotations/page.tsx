@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -33,6 +34,7 @@ type Row = {
 };
 
 export default async function QuotationsPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
@@ -59,33 +61,29 @@ export default async function QuotationsPage({ searchParams }: { searchParams: S
   return (
     <>
       <p className="small">
-        <Link href="/sales">← Sales</Link>
+        <Link href="/sales">{tr("← Sales")}</Link>
       </p>
       <div className="page-head">
-        <h1>Quotations</h1>
+        <h1>{tr("Quotations")}</h1>
         {can(role, "editSales") && (
-          <Link href="/quotations/new" className="btn btn-primary btn-small">
-            + New quotation
-          </Link>
+          <Link href="/quotations/new" className="btn btn-primary btn-small">{tr("+ New quotation")}</Link>
         )}
       </div>
       <Notice {...notice} />
-      <nav className="tabs-row" aria-label="Filter">
+      <nav className="tabs-row" aria-label={tr("Filter")}>
         {TABS.map((t) => (
           <Link key={t.key} href={`/quotations?tab=${t.key}`} aria-current={t.key === tab.key ? "page" : undefined}>
-            {t.label}
+            {tr(String(t.label ?? ""))}
           </Link>
         ))}
       </nav>
       <form method="get" className="toolbar-row" style={{ marginBottom: 12 }}>
         <input type="hidden" name="tab" value={tab.key} />
-        <input type="search" name="q" defaultValue={q} placeholder="Search quotation no. or client ref…" />
-        <button className="btn" type="submit">
-          Search
-        </button>
+        <input type="search" name="q" defaultValue={q} placeholder={tr("Search quotation no. or client ref…")} />
+        <button className="btn" type="submit">{tr("Search")}</button>
       </form>
       {rows.length === 0 ? (
-        <p className="card muted">No quotations here.</p>
+        <p className="card muted">{tr("No quotations here.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {
@@ -94,10 +92,10 @@ export default async function QuotationsPage({ searchParams }: { searchParams: S
               <li key={r.id}>
                 <Link href={`/quotations/${r.id}`}>
                   <div className="main">
-                    <div className="title">{r.client?.name ?? "Client"}</div>
+                    <div className="title">{r.client?.name ?? tr("Client")}</div>
                     <div className="sub">
                       {quoteNo(r)} · {formatDate(r.issue_date)}
-                      {expired && <span className="text-warn"> · validity expired</span>}
+                      {expired && <span className="text-warn">{" "}{tr("· validity expired")}</span>}
                     </div>
                   </div>
                   <div className="side">
@@ -112,7 +110,7 @@ export default async function QuotationsPage({ searchParams }: { searchParams: S
           })}
         </ul>
       )}
-      {(count ?? 0) > LIST_LIMIT && <p className="muted small">Showing the first {LIST_LIMIT}.</p>}
+      {(count ?? 0) > LIST_LIMIT && <p className="muted small">{tr("Showing the first")}{" "}{LIST_LIMIT}.</p>}
     </>
   );
 }

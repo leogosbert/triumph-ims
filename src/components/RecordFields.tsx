@@ -1,3 +1,4 @@
+import { tr } from "@/lib/tr";
 import type { FieldDef, Section } from "@/lib/fields";
 
 type Values = Record<string, unknown>;
@@ -32,8 +33,8 @@ function Input({ f, value, disabled }: { f: FieldDef; value: unknown; disabled: 
     case "bool":
       return (
         <select {...common} defaultValue={value === true ? "true" : "false"}>
-          <option value="false">No</option>
-          <option value="true">Yes</option>
+          <option value="false">{tr("No")}</option>
+          <option value="true">{tr("Yes")}</option>
         </select>
       );
     case "money":
@@ -72,15 +73,15 @@ export function RecordFields({
     <>
       {sections.map((s) => (
         <section key={s.title} className="card">
-          <h2>{s.title}</h2>
+          <h2>{tr(String(s.title ?? ""))}</h2>
           <div className="grid grid-2">
             {s.fields.map((f) => {
               const locked = readOnly || lockedKeys.includes(f.key);
               return (
                 <div key={f.key} className="field" style={f.wide ? { gridColumn: "1 / -1" } : undefined}>
                   <label htmlFor={`f-${f.key}`}>
-                    {f.label} {f.required && !locked && <span className="hint">· required</span>}
-                    {f.hint && !locked && <span className="hint"> · {f.hint}</span>}
+                    {tr(String(f.label ?? ""))} {f.required && !locked && <span className="hint">{tr("· required")}</span>}
+                    {f.hint && !locked && <span className="hint"> · {tr(String(f.hint ?? ""))}</span>}
                   </label>
                   <Input f={f} value={values[f.key]} disabled={locked} />
                 </div>

@@ -1,3 +1,4 @@
+import { tr } from "@/lib/tr";
 import Link from "next/link";
 import { AGING } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
@@ -14,22 +15,22 @@ export function AgingTable({ rows, currency, partyLabel }: { rows: AgingRow[]; c
       <div className="stat-grid">
         <div className="stat">
           <div className="n">{formatMoney(grand, currency)}</div>
-          <div className="l">Total outstanding</div>
+          <div className="l">{tr("Total outstanding")}</div>
         </div>
         <div className={`stat ${grand - totals[0] > 0 ? "alert" : ""}`}>
           <div className="n">{formatMoney(grand - totals[0], currency)}</div>
-          <div className="l">Overdue</div>
+          <div className="l">{tr("Overdue")}</div>
         </div>
       </div>
       {rows.length === 0 ? (
-        <p className="card muted">Nothing outstanding.</p>
+        <p className="card muted">{tr("Nothing outstanding.")}</p>
       ) : (
         <div className="card scroll-x">
           <table className="compare">
             <thead>
               <tr>
                 <th>{partyLabel}</th>
-                <th>Total</th>
+                <th>{tr("Total")}</th>
                 {AGING.map((a) => (
                   <th key={a}>{a}</th>
                 ))}
@@ -56,7 +57,7 @@ export function AgingTable({ rows, currency, partyLabel }: { rows: AgingRow[]; c
                 );
               })}
               <tr className="total">
-                <td>Total ({currency})</td>
+                <td>{tr("Total (")}{currency})</td>
                 <td>{short(grand)}</td>
                 {totals.map((v, i) => (
                   <td key={i}>{short(v)}</td>

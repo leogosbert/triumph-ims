@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -44,6 +45,7 @@ type QuoteLine = { srfq_supplier_id: string; srfq_line_id: string; unit_price: n
 const n = (v: unknown) => Number(v ?? 0);
 
 export default async function SupplierRfqPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -107,17 +109,17 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
   return (
     <>
       <p className="small">
-        <Link href="/supplier-rfqs">← Supplier RFQs</Link>
+        <Link href="/supplier-rfqs">{tr("← Supplier RFQs")}</Link>
         {r.quotation_id && (
           <>
             {" · "}
-            <Link href={`/quotations/${r.quotation_id}`}>Client quotation</Link>
+            <Link href={`/quotations/${r.quotation_id}`}>{tr("Client quotation")}</Link>
           </>
         )}
         {r.rfq_id && (
           <>
             {" · "}
-            <Link href={`/rfqs/${r.rfq_id}`}>Client RFQ</Link>
+            <Link href={`/rfqs/${r.rfq_id}`}>{tr("Client RFQ")}</Link>
           </>
         )}
       </p>
@@ -127,14 +129,13 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
       </div>
       <p className="muted small">
         {r.number}
-        {r.due_on && <> · reply by {formatDate(r.due_on)}</>}
-        {r.delivery_location && <> · deliver to {r.delivery_location}</>}
+        {r.due_on && <>{" "}{tr("· reply by")}{" "}{formatDate(r.due_on)}</>}
+        {r.delivery_location && <>{" "}{tr("· deliver to")}{" "}{r.delivery_location}</>}
       </p>
       <Notice {...notice} />
 
       {pos.length > 0 && (
-        <div className="banner ok">
-          Purchase order{pos.length > 1 ? "s" : ""}:{" "}
+        <div className="banner ok">{tr("Purchase order")}{pos.length > 1 ? "s" : ""}:{" "}
           {pos.map((p, i) => (
             <span key={p.id}>
               {i > 0 && ", "}
@@ -145,8 +146,8 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
       )}
 
       <section className="card" id="items">
-        <h2>Items ({lines.length})</h2>
-        {lines.length === 0 && <p className="muted small">No items yet.</p>}
+        <h2>{tr("Items (")}{lines.length})</h2>
+        {lines.length === 0 && <p className="muted small">{tr("No items yet.")}</p>}
         <ul className="lines">
           {lines.map((l) => (
             <li key={l.id} className="line-head">
@@ -163,9 +164,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
                 <form action={removeSrfqLine}>
                   <input type="hidden" name="srfq_id" value={r.id} />
                   <input type="hidden" name="line_id" value={l.id} />
-                  <SubmitButton className="btn btn-small btn-danger" pendingText="…">
-                    Remove
-                  </SubmitButton>
+                  <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
                 </form>
               )}
             </li>
@@ -174,28 +173,26 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
         {open && (
           <details style={{ marginTop: 12 }} open={lines.length === 0}>
             <summary>
-              <strong>+ Add an item</strong>
+              <strong>{tr("+ Add an item")}</strong>
             </summary>
             <form action={addSrfqLine} style={{ marginTop: 12 }}>
               <input type="hidden" name="srfq_id" value={r.id} />
               <ProductLineFields products={products} />
-              <SubmitButton pendingText="Adding…">Add item</SubmitButton>
+              <SubmitButton pendingText={tr("Adding…")}>{tr("Add item")}</SubmitButton>
             </form>
           </details>
         )}
         {lines.length > 0 && (
           <div className="actions" style={{ marginTop: 12 }}>
             <SharePdfButton href={`/supplier-rfqs/${r.id}/pdf`} fileName={`${r.number} request for quotation.pdf`} title={`Request for quotation ${r.number}`} />
-            <a className="btn" href={`/supplier-rfqs/${r.id}/pdf`} target="_blank" rel="noopener">
-              Open RFQ PDF
-            </a>
+            <a className="btn" href={`/supplier-rfqs/${r.id}/pdf`} target="_blank" rel="noopener">{tr("Open RFQ PDF")}</a>
           </div>
         )}
       </section>
 
       <section className="card" id="suppliers">
-        <h2>Suppliers asked ({invites.length})</h2>
-        {invites.length === 0 && <p className="muted small">Add the suppliers you want prices from.</p>}
+        <h2>{tr("Suppliers asked (")}{invites.length})</h2>
+        {invites.length === 0 && <p className="muted small">{tr("Add the suppliers you want prices from.")}</p>}
         <ul className="list">
           {invites.map((inv) => (
             <li key={inv.id}>
@@ -210,7 +207,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
                 <div className="actions" style={{ marginTop: 0 }}>
                   {open && (
                     <Link href={`/supplier-rfqs/${r.id}/quote/${inv.id}`} className="btn btn-small btn-primary">
-                      {inv.status === "quoted" ? "Edit prices" : "Enter prices"}
+                      {inv.status === "quoted" ? tr("Edit prices") : tr("Enter prices")}
                     </Link>
                   )}
                   {lines.length > 0 && (
@@ -226,7 +223,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
                       <input type="hidden" name="invite_id" value={inv.id} />
                       <input type="hidden" name="declined" value={inv.status === "declined" ? "false" : "true"} />
                       <SubmitButton className="btn btn-small" pendingText="…">
-                        {inv.status === "declined" ? "Undo declined" : "Declined"}
+                        {inv.status === "declined" ? tr("Undo declined") : tr("Declined")}
                       </SubmitButton>
                     </form>
                   )}
@@ -234,9 +231,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
                     <form action={removeInvite}>
                       <input type="hidden" name="srfq_id" value={r.id} />
                       <input type="hidden" name="invite_id" value={inv.id} />
-                      <SubmitButton className="btn btn-small btn-danger" pendingText="…">
-                        Remove
-                      </SubmitButton>
+                      <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
                     </form>
                   )}
                 </div>
@@ -247,10 +242,8 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
         {open && (
           <form action={inviteSupplier} className="inline-form" style={{ marginTop: 12 }}>
             <input type="hidden" name="srfq_id" value={r.id} />
-            <select name="supplier_id" defaultValue="" required aria-label="Supplier" style={{ flex: 1 }}>
-              <option value="" disabled>
-                Choose a supplier to ask
-              </option>
+            <select name="supplier_id" defaultValue="" required aria-label={tr("Supplier")} style={{ flex: 1 }}>
+              <option value="" disabled>{tr("Choose a supplier to ask")}</option>
               {suppliers
                 .filter((s) => !invitedIds.has(s.id))
                 .map((s) => (
@@ -259,30 +252,24 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
                   </option>
                 ))}
             </select>
-            <SubmitButton className="btn btn-small" pendingText="Adding…">
-              Add supplier
-            </SubmitButton>
+            <SubmitButton className="btn btn-small" pendingText={tr("Adding…")}>{tr("Add supplier")}</SubmitButton>
           </form>
         )}
         {open && suppliers.length === 0 && (
-          <p className="small">
-            No suppliers yet. <Link href="/suppliers/new">+ New supplier</Link>
+          <p className="small">{tr("No suppliers yet.")}{" "}<Link href="/suppliers/new">{tr("+ New supplier")}</Link>
           </p>
         )}
       </section>
 
       {quoted.length > 0 && lines.length > 0 && (
         <section className="card" id="compare">
-          <h2>Compare prices</h2>
-          <p className="muted small">
-            Unit prices converted to {base}. Green = cheapest. Totals include freight; a supplier that didn&apos;t price every item shows
-            how many it priced.
-          </p>
+          <h2>{tr("Compare prices")}</h2>
+          <p className="muted small">{tr("Unit prices converted to")}{" "}{base}{tr(". Green = cheapest. Totals include freight; a supplier that didn't price every item shows how many it priced.")}</p>
           <div className="scroll-x">
             <table className="compare">
               <thead>
                 <tr>
-                  <th>Item</th>
+                  <th>{tr("Item")}</th>
                   {summary.map((s) => (
                     <th key={s.inv.id}>{s.inv.supplier?.name}</th>
                   ))}
@@ -299,7 +286,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
                     </td>
                     {summary.map((s) => {
                       const p = price.get(`${s.inv.id}:${l.id}`);
-                      if (p === null || p === undefined) return <td key={s.inv.id} className="none">not quoted</td>;
+                      if (p === null || p === undefined) return <td key={s.inv.id} className="none">{tr("not quoted")}</td>;
                       const b = p * n(s.inv.exchange_rate);
                       const best = quoted.length > 1 && Math.abs(b - (bestPerLine.get(l.id) ?? -1)) < 0.005;
                       return (
@@ -312,55 +299,53 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
                   </tr>
                 ))}
                 <tr>
-                  <td>Freight</td>
+                  <td>{tr("Freight")}</td>
                   {summary.map((s) => (
                     <td key={s.inv.id}>{formatMoney(n(s.inv.freight) * n(s.inv.exchange_rate), base)}</td>
                   ))}
                 </tr>
                 <tr className="total">
-                  <td>Total (excl. VAT)</td>
+                  <td>{tr("Total (excl. VAT)")}</td>
                   {summary.map((s) => (
                     <td key={s.inv.id} className={quoted.length > 1 && s.complete && s.total === bestTotal ? "best" : undefined}>
                       {formatMoney(s.total, base)}
-                      {!s.complete && <div className="small muted">{s.count} of {lines.length} items</div>}
+                      {!s.complete && <div className="small muted">{s.count}{" "}{tr("of")}{" "}{lines.length}{" "}{tr("items")}</div>}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td>Lead time</td>
+                  <td>{tr("Lead time")}</td>
                   {summary.map((s) => (
                     <td key={s.inv.id}>{s.inv.lead_time_days != null ? `${s.inv.lead_time_days} days` : "—"}</td>
                   ))}
                 </tr>
                 <tr>
-                  <td>Payment</td>
+                  <td>{tr("Payment")}</td>
                   {summary.map((s) => (
                     <td key={s.inv.id}>{s.inv.payment_terms ?? "—"}</td>
                   ))}
                 </tr>
                 <tr>
-                  <td>Incoterms</td>
+                  <td>{tr("Incoterms")}</td>
                   {summary.map((s) => (
                     <td key={s.inv.id}>{s.inv.incoterms ?? "—"}</td>
                   ))}
                 </tr>
                 <tr>
-                  <td>Valid until</td>
+                  <td>{tr("Valid until")}</td>
                   {summary.map((s) => (
                     <td key={s.inv.id}>{s.inv.valid_until ? formatDate(s.inv.valid_until) : "—"}</td>
                   ))}
                 </tr>
                 {open && (
                   <tr>
-                    <td>Choose</td>
+                    <td>{tr("Choose")}</td>
                     {summary.map((s) => (
                       <td key={s.inv.id}>
                         <form action={awardSupplier}>
                           <input type="hidden" name="srfq_id" value={r.id} />
                           <input type="hidden" name="invite_id" value={s.inv.id} />
-                          <SubmitButton className="btn btn-small btn-primary" pendingText="Creating PO…">
-                            Award &amp; create PO
-                          </SubmitButton>
+                          <SubmitButton className="btn btn-small btn-primary" pendingText={tr("Creating PO…")}>{tr("Award & create PO")}</SubmitButton>
                         </form>
                       </td>
                     ))}
@@ -375,29 +360,29 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
       {open && (
         <details className="card">
           <summary>
-            <strong>Edit details</strong>
+            <strong>{tr("Edit details")}</strong>
           </summary>
           <form action={saveSrfqHeader} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={r.id} />
             <div className="field">
-              <label htmlFor="title">Title</label>
+              <label htmlFor="title">{tr("Title")}</label>
               <input id="title" name="title" type="text" defaultValue={r.title ?? ""} />
             </div>
             <div className="grid grid-2">
               <div className="field">
-                <label htmlFor="due_on">Reply by</label>
+                <label htmlFor="due_on">{tr("Reply by")}</label>
                 <input id="due_on" name="due_on" type="date" defaultValue={r.due_on ?? ""} />
               </div>
               <div className="field">
-                <label htmlFor="delivery_location">Delivery to</label>
+                <label htmlFor="delivery_location">{tr("Delivery to")}</label>
                 <input id="delivery_location" name="delivery_location" type="text" defaultValue={r.delivery_location ?? ""} />
               </div>
             </div>
             <div className="field">
-              <label htmlFor="notes">Notes for suppliers</label>
-              <textarea id="notes" name="notes" defaultValue={r.notes ?? ""} placeholder="Printed on the RFQ PDF" />
+              <label htmlFor="notes">{tr("Notes for suppliers")}</label>
+              <textarea id="notes" name="notes" defaultValue={r.notes ?? ""} placeholder={tr("Printed on the RFQ PDF")} />
             </div>
-            <SubmitButton>Save</SubmitButton>
+            <SubmitButton>{tr("Save")}</SubmitButton>
           </form>
         </details>
       )}
@@ -405,9 +390,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
       {open && (
         <form action={cancelSrfq}>
           <input type="hidden" name="id" value={r.id} />
-          <SubmitButton className="btn btn-block btn-danger" pendingText="Cancelling…">
-            Cancel this supplier RFQ
-          </SubmitButton>
+          <SubmitButton className="btn btn-block btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel this supplier RFQ")}</SubmitButton>
         </form>
       )}
     </>

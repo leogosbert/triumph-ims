@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AgingTable, type AgingRow } from "@/components/AgingTable";
@@ -18,6 +19,7 @@ type Bill = {
 };
 
 export default async function PayablesPage() {
+  await primeLang();
   const { supabase, company, role } = await getAppContext();
   if (!can(role, "seeFinance")) redirect("/");
   const { data, error } = await supabase
@@ -51,13 +53,13 @@ export default async function PayablesPage() {
   return (
     <>
       <p className="small">
-        <Link href="/finance">← Finance</Link>
+        <Link href="/finance">{tr("← Finance")}</Link>
       </p>
-      <h1>Money we owe</h1>
-      <p className="muted small">Unpaid supplier bills. Totals are converted to {company.base_currency} at each bill&apos;s rate.</p>
+      <h1>{tr("Money we owe")}</h1>
+      <p className="muted small">{tr("Unpaid supplier bills. Totals are converted to")}{" "}{company.base_currency}{" "}{tr("at each bill's rate.")}</p>
       {byCurrency.size > 0 && (
         <div className="card">
-          <h2>By currency</h2>
+          <h2>{tr("By currency")}</h2>
           <ul className="list">
             {[...byCurrency.entries()].map(([c, v]) => (
               <li key={c} className="row">
@@ -66,12 +68,12 @@ export default async function PayablesPage() {
               </li>
             ))}
           </ul>
-          {dueSoon > 0 && <p className="small text-warn">{formatMoney(dueSoon, company.base_currency)} falls due in the next 7 days.</p>}
+          {dueSoon > 0 && <p className="small text-warn">{formatMoney(dueSoon, company.base_currency)}{" "}{tr("falls due in the next 7 days.")}</p>}
         </div>
       )}
       <AgingTable rows={rows} currency={company.base_currency} partyLabel="Supplier" />
       <p className="small">
-        <Link href="/bills">See all supplier bills →</Link>
+        <Link href="/bills">{tr("See all supplier bills →")}</Link>
       </p>
     </>
   );

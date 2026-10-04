@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ListToolbar } from "@/components/ListToolbar";
@@ -23,6 +24,7 @@ type Row = {
 };
 
 export default async function SuppliersPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
@@ -50,8 +52,8 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
   return (
     <>
       <div className="page-head">
-        <h1>Suppliers</h1>
-        <span className="muted small">{count ?? 0} found</span>
+        <h1>{tr("Suppliers")}</h1>
+        <span className="muted small">{count ?? 0}{" "}{tr("found")}</span>
       </div>
       <Notice {...notice} />
       <ListToolbar
@@ -62,7 +64,7 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
         addLabel="New supplier"
       />
       {rows.length === 0 ? (
-        <p className="card muted">{q || currency ? "No suppliers match your search." : "No suppliers yet."}</p>
+        <p className="card muted">{q || currency ? tr("No suppliers match your search.") : tr("No suppliers yet.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((s) => (
@@ -70,7 +72,7 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
               <Link href={`/suppliers/${s.id}`}>
                 <div className="main">
                   <div className="title">
-                    {s.name} {!s.active && <span className="badge off">Archived</span>}
+                    {s.name} {!s.active && <span className="badge off">{tr("Archived")}</span>}
                   </div>
                   <div className="sub">
                     {s.code}
@@ -80,7 +82,7 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
                 </div>
                 <div className="side muted">
                   {s.currency}
-                  {s.lead_time_days !== null && <div className="small">{s.lead_time_days} days</div>}
+                  {s.lead_time_days !== null && <div className="small">{s.lead_time_days}{" "}{tr("days")}</div>}
                 </div>
               </Link>
             </li>
@@ -88,7 +90,7 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
         </ul>
       )}
       {(count ?? 0) > LIST_LIMIT && (
-        <p className="muted small">Showing the first {LIST_LIMIT}. Search to narrow the list.</p>
+        <p className="muted small">{tr("Showing the first")}{" "}{LIST_LIMIT}{tr(". Search to narrow the list.")}</p>
       )}
     </>
   );

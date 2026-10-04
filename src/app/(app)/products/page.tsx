@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { ListToolbar } from "@/components/ListToolbar";
 import { Notice } from "@/components/Notice";
@@ -25,6 +26,7 @@ type Row = {
 };
 
 export default async function ProductsPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
@@ -68,8 +70,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
   return (
     <>
       <div className="page-head">
-        <h1>Products</h1>
-        <span className="muted small">{count ?? 0} found</span>
+        <h1>{tr("Products")}</h1>
+        <span className="muted small">{count ?? 0}{" "}{tr("found")}</span>
       </div>
       <Notice {...notice} />
       <ListToolbar
@@ -81,10 +83,9 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
       />
       {rows.length === 0 ? (
         <p className="card muted">
-          {q || category ? "No products match your search." : "No products yet."}{" "}
+          {q || category ? tr("No products match your search.") : tr("No products yet.")}{" "}
           {can(role, "importData") && !q && !category && (
-            <>
-              You can <Link href="/import">import them from your spreadsheet</Link>.
+            <>{tr("You can")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
             </>
           )}
         </p>
@@ -97,8 +98,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
                 <Link href={`/products/${p.id}`}>
                   <div className="main">
                     <div className="title">
-                      {p.name} {p.hazardous && <span className="badge warn">Hazardous</span>}{" "}
-                      {!p.active && <span className="badge off">Archived</span>}
+                      {p.name} {p.hazardous && <span className="badge warn">{tr("Hazardous")}</span>}{" "}
+                      {!p.active && <span className="badge off">{tr("Archived")}</span>}
                     </div>
                     <div className="sub">
                       {p.sku}
@@ -109,12 +110,11 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
                   </div>
                   <div className="side">
                     {formatMoney(p.selling_price, company.base_currency)}
-                    <div className="small muted">
-                      per {p.unit}
+                    <div className="small muted">{tr("per")}{" "}{p.unit}
                       {p.pack_size ? ` (${p.pack_size})` : ""}
                     </div>
                     {showCosts && m !== null && (
-                      <div className={`small ${m < 12 ? "text-warn" : "muted"}`}>{m.toFixed(1)}% margin</div>
+                      <div className={`small ${m < 12 ? "text-warn" : "muted"}`}>{m.toFixed(1)}{tr("% margin")}</div>
                     )}
                   </div>
                 </Link>
@@ -124,7 +124,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
         </ul>
       )}
       {(count ?? 0) > LIST_LIMIT && (
-        <p className="muted small">Showing the first {LIST_LIMIT}. Search to narrow the list.</p>
+        <p className="muted small">{tr("Showing the first")}{" "}{LIST_LIMIT}{tr(". Search to narrow the list.")}</p>
       )}
     </>
   );

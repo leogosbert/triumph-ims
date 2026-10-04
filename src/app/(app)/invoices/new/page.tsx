@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -14,6 +15,7 @@ export const metadata = { title: "New invoice" };
 type Dn = { id: string; number: string; delivered_at: string | null; client: { name: string } | null };
 
 export default async function NewInvoicePage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
   if (!can(role, "editInvoices")) redirect("/invoices");
@@ -35,15 +37,15 @@ export default async function NewInvoicePage({ searchParams }: { searchParams: S
   return (
     <>
       <p className="small">
-        <Link href="/invoices">← Invoices</Link>
+        <Link href="/invoices">{tr("← Invoices")}</Link>
       </p>
-      <h1>New invoice</h1>
+      <h1>{tr("New invoice")}</h1>
       <Notice {...notice} />
 
       <section className="card">
-        <h2>Delivered, not yet invoiced ({ready.length})</h2>
+        <h2>{tr("Delivered, not yet invoiced (")}{ready.length})</h2>
         {ready.length === 0 ? (
-          <p className="muted small">Nothing waiting. Delivered delivery notes appear here until they are invoiced.</p>
+          <p className="muted small">{tr("Nothing waiting. Delivered delivery notes appear here until they are invoiced.")}</p>
         ) : (
           <ul className="list">
             {ready.map((d) => (
@@ -59,26 +61,22 @@ export default async function NewInvoicePage({ searchParams }: { searchParams: S
                 <form action={newInvoice}>
                   <input type="hidden" name="delivery_id" value={d.id} />
                   <input type="hidden" name="back" value="/invoices/new" />
-                  <SubmitButton className="btn btn-small btn-primary" pendingText="…">
-                    Invoice it
-                  </SubmitButton>
+                  <SubmitButton className="btn btn-small btn-primary" pendingText="…">{tr("Invoice it")}</SubmitButton>
                 </form>
               </li>
             ))}
           </ul>
         )}
-        <p className="hint">To invoice a whole order (for example an advance payment invoice), open the accepted quotation and use &ldquo;Create invoice&rdquo;.</p>
+        <p className="hint">{tr("To invoice a whole order (for example an advance payment invoice), open the accepted quotation and use “Create invoice”.")}</p>
       </section>
 
       <form action={newInvoice} className="card">
-        <h2>Blank invoice</h2>
+        <h2>{tr("Blank invoice")}</h2>
         <input type="hidden" name="back" value="/invoices/new" />
         <div className="field">
-          <label htmlFor="client_id">Client</label>
+          <label htmlFor="client_id">{tr("Client")}</label>
           <select id="client_id" name="client_id" required defaultValue="">
-            <option value="" disabled>
-              Choose a client
-            </option>
+            <option value="" disabled>{tr("Choose a client")}</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name} ({c.code})
@@ -86,9 +84,7 @@ export default async function NewInvoicePage({ searchParams }: { searchParams: S
             ))}
           </select>
         </div>
-        <SubmitButton className="btn btn-block" pendingText="Creating…">
-          Create blank invoice
-        </SubmitButton>
+        <SubmitButton className="btn btn-block" pendingText={tr("Creating…")}>{tr("Create blank invoice")}</SubmitButton>
       </form>
     </>
   );

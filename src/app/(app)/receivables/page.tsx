@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AgingTable, type AgingRow } from "@/components/AgingTable";
@@ -17,6 +18,7 @@ type Inv = {
 };
 
 export default async function ReceivablesPage() {
+  await primeLang();
   const { supabase, company, role } = await getAppContext();
   if (!can(role, "seeFinance")) redirect("/");
   const { data, error } = await supabase
@@ -50,13 +52,13 @@ export default async function ReceivablesPage() {
   return (
     <>
       <p className="small">
-        <Link href="/finance">← Finance</Link>
+        <Link href="/finance">{tr("← Finance")}</Link>
       </p>
-      <h1>Money owed to us</h1>
-      <p className="muted small">Unpaid invoices by client and how late they are. Foreign-currency invoices are shown in {company.base_currency} at their invoice rate.</p>
+      <h1>{tr("Money owed to us")}</h1>
+      <p className="muted small">{tr("Unpaid invoices by client and how late they are. Foreign-currency invoices are shown in")}{" "}{company.base_currency}{" "}{tr("at their invoice rate.")}</p>
       <AgingTable rows={rows} currency={company.base_currency} partyLabel="Client" />
       <p className="small">
-        <Link href="/invoices?tab=overdue">See overdue invoices →</Link>
+        <Link href="/invoices?tab=overdue">{tr("See overdue invoices →")}</Link>
       </p>
     </>
   );

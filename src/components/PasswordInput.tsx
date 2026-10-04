@@ -1,5 +1,6 @@
 "use client";
 
+import { useTr } from "@/lib/tr-client";
 import { useState } from "react";
 
 /** A password box with a button to show or hide what was typed. */
@@ -16,6 +17,7 @@ export function PasswordInput({
   minLength?: number;
   required?: boolean;
 }) {
+  const tr = useTr();
   const [visible, setVisible] = useState(false);
   return (
     <div className="password-wrap">
@@ -34,7 +36,7 @@ export function PasswordInput({
         type="button"
         className="password-toggle"
         onClick={() => setVisible((v) => !v)}
-        aria-label={visible ? "Hide password" : "Show password"}
+        aria-label={visible ? tr("Hide password") : tr("Show password")}
         aria-pressed={visible}
         aria-controls={id}
       >
@@ -48,7 +50,7 @@ export function PasswordInput({
             <circle cx="12" cy="12" r="3" />
           </svg>
         )}
-        <span>{visible ? "Hide" : "Show"}</span>
+        <span>{visible ? tr("Hide") : tr("Show")}</span>
       </button>
     </div>
   );

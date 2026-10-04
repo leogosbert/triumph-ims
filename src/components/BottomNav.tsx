@@ -1,5 +1,6 @@
 "use client";
 
+import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/Icon";
@@ -7,15 +8,16 @@ import { isActive, type NavItem } from "@/lib/nav";
 
 /** Phone navigation: a floating bar at the bottom. */
 export function BottomNav({ items }: { items: NavItem[] }) {
+  const tr = useTr();
   const pathname = usePathname();
   return (
-    <nav className="bottomnav" aria-label="Main">
+    <nav className="bottomnav" aria-label={tr("Main")}>
       {items.map((it) => {
         const active = isActive(it, pathname);
         const body = (
           <>
             <Icon name={it.icon} strokeWidth={active ? 2.1 : 1.8} />
-            <span>{it.label}</span>
+            <span>{tr(String(it.label ?? ""))}</span>
           </>
         );
         // The driver screen is a plain link so the phone can open it offline.
@@ -47,9 +49,10 @@ export function SideNav({
   initials: string;
   poweredBy: string;
 }) {
+  const tr = useTr();
   const pathname = usePathname();
   return (
-    <aside className="sidenav" aria-label="Sections">
+    <aside className="sidenav" aria-label={tr("Sections")}>
       <div className="sidenav-brand">
         {logo ? <img src={logo} alt="" /> : <span className="mark">{initials}</span>}
         <strong>{company}</strong>
@@ -60,7 +63,7 @@ export function SideNav({
           const body = (
             <>
               <Icon name={it.icon} size={19} />
-              {it.label}
+              {tr(String(it.label ?? ""))}
             </>
           );
           return it.plain ? (
@@ -76,7 +79,7 @@ export function SideNav({
       </nav>
       <a className="powered" href="/help">
         <span>{poweredBy}</span>
-        <img src="/brand/lemo-ims-on-dark.svg" alt="LeMo IMS" />
+        <img src="/brand/lemo-ims-on-dark.svg" alt={tr("LeMo IMS")} />
       </a>
     </aside>
   );

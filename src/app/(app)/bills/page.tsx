@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -33,6 +34,7 @@ type Row = {
 };
 
 export default async function BillsPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
@@ -55,26 +57,24 @@ export default async function BillsPage({ searchParams }: { searchParams: Search
   return (
     <>
       <p className="small">
-        <Link href={can(role, "seeFinance") ? "/finance" : "/purchasing"}>← {can(role, "seeFinance") ? "Finance" : "Purchasing"}</Link>
+        <Link href={can(role, "seeFinance") ? "/finance" : "/purchasing"}>← {can(role, "seeFinance") ? tr("Finance") : tr("Purchasing")}</Link>
       </p>
       <div className="page-head">
-        <h1>Supplier bills</h1>
+        <h1>{tr("Supplier bills")}</h1>
         {can(role, "editBills") && (
-          <Link href="/bills/new" className="btn btn-primary btn-small">
-            + Bill
-          </Link>
+          <Link href="/bills/new" className="btn btn-primary btn-small">{tr("+ Bill")}</Link>
         )}
       </div>
       <Notice {...notice} />
-      <nav className="tabs-row" aria-label="Filter">
+      <nav className="tabs-row" aria-label={tr("Filter")}>
         {TABS.map((t) => (
           <Link key={t.key} href={`/bills?tab=${t.key}`} aria-current={t.key === tab.key ? "page" : undefined}>
-            {t.label}
+            {tr(String(t.label ?? ""))}
           </Link>
         ))}
       </nav>
       {rows.length === 0 ? (
-        <p className="card muted">No bills here. Record a supplier&apos;s invoice from its purchase order, or with &ldquo;+ Bill&rdquo;.</p>
+        <p className="card muted">{tr("No bills here. Record a supplier's invoice from its purchase order, or with “+ Bill”.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {

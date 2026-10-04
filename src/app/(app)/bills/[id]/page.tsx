@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -30,6 +31,7 @@ type Pay = {
 };
 
 export default async function BillPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -60,7 +62,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
   return (
     <>
       <p className="small">
-        <Link href="/bills">← Supplier bills</Link>
+        <Link href="/bills">{tr("← Supplier bills")}</Link>
         {b.po && (
           <>
             {" · "}
@@ -74,35 +76,34 @@ export default async function BillPage({ params, searchParams }: { params: Promi
       </div>
       <p className="muted small">
         {b.number}
-        {b.supplier_invoice_no && <> · their invoice {b.supplier_invoice_no}</>} · dated {formatDate(b.bill_date)}
-        {b.due_date && <> · due {formatDate(b.due_date)}</>}
-        {late > 0 && <span className="text-warn"> · {late} days overdue</span>}
+        {b.supplier_invoice_no && <>{" "}{tr("· their invoice")}{" "}{b.supplier_invoice_no}</>}{" "}{tr("· dated")}{" "}{formatDate(b.bill_date)}
+        {b.due_date && <>{" "}{tr("· due")}{" "}{formatDate(b.due_date)}</>}
+        {late > 0 && <span className="text-warn"> · {late}{" "}{tr("days overdue")}</span>}
       </p>
       <Notice {...notice} />
 
       <section className="card" id="payments">
-        <h2>Payment</h2>
+        <h2>{tr("Payment")}</h2>
         <div className="totals" style={{ maxWidth: "none" }}>
           <div className="row">
-            <span>Bill total</span>
+            <span>{tr("Bill total")}</span>
             <span>{formatMoney(b.total, ccy)}</span>
           </div>
           <div className="row small muted">
-            <span>of which VAT</span>
+            <span>{tr("of which VAT")}</span>
             <span>{formatMoney(b.vat_amount, ccy)}</span>
           </div>
           <div className="row">
-            <span>Paid</span>
+            <span>{tr("Paid")}</span>
             <span>{formatMoney(b.amount_paid, ccy)}</span>
           </div>
           <div className={`row grand ${late > 0 ? "text-warn" : ""}`}>
-            <span>Still to pay</span>
+            <span>{tr("Still to pay")}</span>
             <span>{formatMoney(b.status === "cancelled" ? 0 : balance, ccy)}</span>
           </div>
           {ccy !== company.base_currency && (
             <div className="row small muted">
-              <span>
-                ≈ in {company.base_currency} at {fmtNum(b.exchange_rate)}
+              <span>{tr("≈ in")}{" "}{company.base_currency}{" "}{tr("at")}{" "}{fmtNum(b.exchange_rate)}
               </span>
               <span>{formatMoney(balance * n(b.exchange_rate), company.base_currency)}</span>
             </div>
@@ -121,17 +122,15 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                     {p.currency !== company.base_currency && ` · rate ${fmtNum(p.exchange_rate)}`}
                   </span>
                 </div>
-                {p.voided_at && <div className="small text-warn">Voided: {p.void_reason}</div>}
+                {p.voided_at && <div className="small text-warn">{tr("Voided:")}{" "}{p.void_reason}</div>}
                 {!p.voided_at && can(role, "voidPayments") && (
                   <details className="small">
-                    <summary>Void this payment</summary>
+                    <summary>{tr("Void this payment")}</summary>
                     <form action={voidSupplierPayment} className="inline-form" style={{ marginTop: 6 }}>
                       <input type="hidden" name="bill_id" value={b.id} />
                       <input type="hidden" name="payment_id" value={p.id} />
-                      <input name="reason" type="text" placeholder="Reason" required />
-                      <SubmitButton className="btn btn-small btn-danger" pendingText="…">
-                        Void
-                      </SubmitButton>
+                      <input name="reason" type="text" placeholder={tr("Reason")} required />
+                      <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Void")}</SubmitButton>
                     </form>
                   </details>
                 )}
@@ -143,21 +142,21 @@ export default async function BillPage({ params, searchParams }: { params: Promi
         {edit && open && (
           <details style={{ marginTop: 12 }} open={pays.length === 0}>
             <summary>
-              <strong>+ Record a payment to the supplier</strong>
+              <strong>{tr("+ Record a payment to the supplier")}</strong>
             </summary>
             <form action={payBill} style={{ marginTop: 12 }}>
               <input type="hidden" name="bill_id" value={b.id} />
               <div className="grid grid-2">
                 <div className="field">
-                  <label htmlFor="amount">Amount ({ccy})</label>
+                  <label htmlFor="amount">{tr("Amount (")}{ccy})</label>
                   <input id="amount" name="amount" type="text" inputMode="decimal" defaultValue={fmtNum(balance)} required />
                 </div>
                 <div className="field">
-                  <label htmlFor="paid_on">Date paid</label>
+                  <label htmlFor="paid_on">{tr("Date paid")}</label>
                   <input id="paid_on" name="paid_on" type="date" defaultValue={todayTz()} />
                 </div>
                 <div className="field">
-                  <label htmlFor="method">How</label>
+                  <label htmlFor="method">{tr("How")}</label>
                   <select id="method" name="method" defaultValue="bank_transfer">
                     {Object.entries(PAY_METHODS).map(([k, v]) => (
                       <option key={k} value={k}>
@@ -167,28 +166,27 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                   </select>
                 </div>
                 <div className="field">
-                  <label htmlFor="reference">Reference</label>
-                  <input id="reference" name="reference" type="text" placeholder="TT / transfer ref" />
+                  <label htmlFor="reference">{tr("Reference")}</label>
+                  <input id="reference" name="reference" type="text" placeholder={tr("TT / transfer ref")} />
                 </div>
                 {ccy !== company.base_currency && (
                   <div className="field">
-                    <label htmlFor="exchange_rate">
-                      Bank rate used <span className="hint">· {company.base_currency} per 1 {ccy}</span>
+                    <label htmlFor="exchange_rate">{tr("Bank rate used")}{" "}<span className="hint">· {company.base_currency}{" "}{tr("per 1")}{" "}{ccy}</span>
                     </label>
                     <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(b.exchange_rate)} />
                   </div>
                 )}
               </div>
-              <SubmitButton pendingText="Saving…">Record payment</SubmitButton>
+              <SubmitButton pendingText={tr("Saving…")}>{tr("Record payment")}</SubmitButton>
             </form>
           </details>
         )}
       </section>
 
       <section className="card" id="details">
-        <h2>Details</h2>
+        <h2>{tr("Details")}</h2>
         {!editable && b.status !== "cancelled" && n(b.amount_paid) > 0 && (
-          <p className="small muted">This bill has payments, so it can no longer be changed.</p>
+          <p className="small muted">{tr("This bill has payments, so it can no longer be changed.")}</p>
         )}
         <form action={saveBill}>
           <input type="hidden" name="id" value={b.id} />
@@ -206,7 +204,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                 notes: b.notes,
               }}
             />
-            {editable && <SubmitButton>Save</SubmitButton>}
+            {editable && <SubmitButton>{tr("Save")}</SubmitButton>}
           </fieldset>
         </form>
       </section>
@@ -214,9 +212,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
       {editable && (
         <form action={cancelBill} className="actions">
           <input type="hidden" name="id" value={b.id} />
-          <SubmitButton className="btn btn-danger" pendingText="Cancelling…">
-            Cancel this bill
-          </SubmitButton>
+          <SubmitButton className="btn btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel this bill")}</SubmitButton>
         </form>
       )}
     </>

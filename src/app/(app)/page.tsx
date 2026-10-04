@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -40,6 +41,7 @@ function quickActions(role: Parameters<typeof can>[0], t: Dict) {
 }
 
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, profile, company, role, isManager, user } = await getAppContext();
   if (role === "driver") redirect("/driver");
@@ -119,7 +121,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
             {heroKpis.map((k) => (
               <Link key={k.label} href={k.href ?? "/"}>
                 <span className="num">{k.money ? `${base} ${shortMoney(k.value)}` : `${k.value.toLocaleString("en-GB")}${k.suffix ?? ""}`}</span>
-                <span>{k.label}</span>
+                <span>{tr(String(k.label ?? ""))}</span>
               </Link>
             ))}
           </div>
@@ -138,7 +140,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               <li key={q.id}>
                 <Link href={`/quotations/${q.id}`}>
                   <span>
-                    <strong>{q.client?.name ?? "Client"}</strong>
+                    <strong>{q.client?.name ?? tr("Client")}</strong>
                     <span>{q.revision > 0 ? `${q.number}-R${q.revision}` : q.number}</span>
                   </span>
                   <span className="num">{formatMoney(q.total, q.currency)}</span>
@@ -149,7 +151,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               <li key={p.id}>
                 <Link href={`/purchase-orders/${p.id}`}>
                   <span>
-                    <strong>{p.supplier?.name ?? "Supplier"}</strong>
+                    <strong>{p.supplier?.name ?? tr("Supplier")}</strong>
                     <span>{p.number}</span>
                   </span>
                   <span className="num">{formatMoney(p.total, p.currency)}</span>
@@ -169,7 +171,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
                 <span className="quick-icon">
                   <Icon name={a.icon} />
                 </span>
-                {a.label}
+                {tr(String(a.label ?? ""))}
               </Link>
             ))}
           </div>
@@ -197,7 +199,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
                 <span className={c.done ? "tick" : "todo"} aria-hidden="true">
                   {c.done ? "✓" : "○"}
                 </span>
-                {c.done ? <span className="muted">{c.label}</span> : <Link href={c.href}>{c.label}</Link>}
+                {c.done ? <span className="muted">{tr(String(c.label ?? ""))}</span> : <Link href={c.href}>{tr(String(c.label ?? ""))}</Link>}
               </li>
             ))}
           </ul>

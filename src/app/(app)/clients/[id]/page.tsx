@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -32,6 +33,7 @@ export default async function ClientPage({
   params: Promise<{ id: string }>;
   searchParams: SearchParams;
 }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -69,18 +71,17 @@ export default async function ClientPage({
   return (
     <>
       <p className="small">
-        <Link href="/clients">← Clients</Link>
+        <Link href="/clients">{tr("← Clients")}</Link>
       </p>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{client.name}</h1>
         <span className="badge">{client.code}</span>
       </div>
-      <p className="muted small">
-        Added {formatDate(client.created_at)}
+      <p className="muted small">{tr("Added")}{" "}{formatDate(client.created_at)}
         {!client.active && (
           <>
             {" "}
-            · <span className="badge off">Archived</span>
+            · <span className="badge off">{tr("Archived")}</span>
           </>
         )}
       </p>
@@ -88,19 +89,19 @@ export default async function ClientPage({
 
       {invData && (
         <section className="card" id="account">
-          <h2>Account</h2>
+          <h2>{tr("Account")}</h2>
           <dl className="kv">
-            <dt>Owed to us</dt>
+            <dt>{tr("Owed to us")}</dt>
             <dd>
               <strong>{formatMoney(owed, base)}</strong>
             </dd>
-            <dt>Overdue</dt>
+            <dt>{tr("Overdue")}</dt>
             <dd className={overdue > 0 ? "text-warn" : undefined}>{formatMoney(overdue, base)}</dd>
-            <dt>Credit limit</dt>
-            <dd>{limit > 0 ? formatMoney(limit, base) : "Not set"}</dd>
+            <dt>{tr("Credit limit")}</dt>
+            <dd>{limit > 0 ? formatMoney(limit, base) : tr("Not set")}</dd>
             {limit > 0 && (
               <>
-                <dt>Credit available</dt>
+                <dt>{tr("Credit available")}</dt>
                 <dd className={limit - owed < 0 ? "text-warn" : undefined}>{formatMoney(limit - owed, base)}</dd>
               </>
             )}
@@ -110,7 +111,7 @@ export default async function ClientPage({
               {invoices.slice(0, 10).map((i) => (
                 <li key={i.id} className="row">
                   <Link href={`/invoices/${i.id}`}>
-                    {i.number || "Draft"}
+                    {i.number || tr("Draft")}
                     {i.issue_date ? ` · ${formatDate(i.issue_date)}` : ""}
                   </Link>
                   <span className="small">
@@ -125,15 +126,15 @@ export default async function ClientPage({
       )}
 
       <section className="card" id="contacts">
-        <h2>Contacts</h2>
+        <h2>{tr("Contacts")}</h2>
         {contacts.length === 0 ? (
-          <p className="muted small">No contacts yet.</p>
+          <p className="muted small">{tr("No contacts yet.")}</p>
         ) : (
           <ul className="list">
             {contacts.map((ct) => (
               <li key={ct.id} className="row">
                 <div>
-                  <strong>{ct.name ?? "(no name)"}</strong> <span className="badge">{kindLabel(ct.kind)}</span>
+                  <strong>{ct.name ?? tr("(no name)")}</strong> <span className="badge">{kindLabel(ct.kind)}</span>
                   {ct.position && <div className="muted small">{ct.position}</div>}
                   <div className="small">
                     {ct.phone && <a href={`tel:${ct.phone.replace(/\s/g, "")}`}>{ct.phone}</a>}
@@ -145,9 +146,7 @@ export default async function ClientPage({
                   <form action={removeContact}>
                     <input type="hidden" name="client_id" value={client.id} />
                     <input type="hidden" name="contact_id" value={ct.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="Removing…">
-                      Remove
-                    </SubmitButton>
+                    <SubmitButton className="btn btn-small btn-danger" pendingText={tr("Removing…")}>{tr("Remove")}</SubmitButton>
                   </form>
                 )}
               </li>
@@ -157,39 +156,39 @@ export default async function ClientPage({
         {editable && (
           <details style={{ marginTop: 12 }}>
             <summary className="small">
-              <strong>+ Add a contact</strong>
+              <strong>{tr("+ Add a contact")}</strong>
             </summary>
             <form action={addContact} style={{ marginTop: 12 }}>
               <input type="hidden" name="client_id" value={client.id} />
               <div className="grid grid-2">
                 <div className="field">
-                  <label htmlFor="c-kind">Type</label>
+                  <label htmlFor="c-kind">{tr("Type")}</label>
                   <select id="c-kind" name="kind" defaultValue="purchasing">
                     {CONTACT_KINDS.map((k) => (
                       <option key={k.value} value={k.value}>
-                        {k.label}
+                        {tr(String(k.label ?? ""))}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div className="field">
-                  <label htmlFor="c-name">Name</label>
+                  <label htmlFor="c-name">{tr("Name")}</label>
                   <input id="c-name" name="name" type="text" />
                 </div>
                 <div className="field">
-                  <label htmlFor="c-position">Position</label>
+                  <label htmlFor="c-position">{tr("Position")}</label>
                   <input id="c-position" name="position" type="text" />
                 </div>
                 <div className="field">
-                  <label htmlFor="c-phone">Phone / WhatsApp</label>
+                  <label htmlFor="c-phone">{tr("Phone / WhatsApp")}</label>
                   <input id="c-phone" name="phone" type="tel" />
                 </div>
                 <div className="field" style={{ gridColumn: "1 / -1" }}>
-                  <label htmlFor="c-email">Email</label>
+                  <label htmlFor="c-email">{tr("Email")}</label>
                   <input id="c-email" name="email" type="email" />
                 </div>
               </div>
-              <SubmitButton pendingText="Adding…">Add contact</SubmitButton>
+              <SubmitButton pendingText={tr("Adding…")}>{tr("Add contact")}</SubmitButton>
             </form>
           </details>
         )}
@@ -204,7 +203,7 @@ export default async function ClientPage({
             readOnly={!editable}
             lockedKeys={can(role, "setCreditLimit") ? [] : ["credit_limit"]}
           />
-          {editable && <SubmitButton className="btn btn-primary btn-block">Save changes</SubmitButton>}
+          {editable && <SubmitButton className="btn btn-primary btn-block">{tr("Save changes")}</SubmitButton>}
         </fieldset>
       </form>
 
@@ -212,13 +211,11 @@ export default async function ClientPage({
         <form action={setClientActive} style={{ marginTop: 16 }}>
           <input type="hidden" name="id" value={client.id} />
           <input type="hidden" name="active" value={client.active ? "false" : "true"} />
-          <SubmitButton className={`btn btn-block ${client.active ? "btn-danger" : ""}`} pendingText="Working…">
-            {client.active ? "Archive client" : "Restore client"}
+          <SubmitButton className={`btn btn-block ${client.active ? "btn-danger" : ""}`} pendingText={tr("Working…")}>
+            {client.active ? tr("Archive client") : tr("Restore client")}
           </SubmitButton>
           {client.active && (
-            <p className="muted small" style={{ marginTop: 6 }}>
-              Archived clients are hidden from lists but keep their history.
-            </p>
+            <p className="muted small" style={{ marginTop: 6 }}>{tr("Archived clients are hidden from lists but keep their history.")}</p>
           )}
         </form>
       )}

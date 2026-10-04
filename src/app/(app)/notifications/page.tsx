@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { PushSetup } from "@/components/PushSetup";
@@ -13,6 +14,7 @@ export const dynamic = "force-dynamic";
 type N = { id: string; title: string; body: string | null; severity: string; created_at: string; read_at: string | null };
 
 export default async function NotificationsPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, user, company } = await getAppContext();
   await supabase.rpc("refresh_alerts", { p_company: company.id });
@@ -28,8 +30,8 @@ export default async function NotificationsPage({ searchParams }: { searchParams
   if (error) {
     return (
       <>
-        <h1>Notifications</h1>
-        <p className="card muted">Notifications are not switched on yet. Management needs to run the Stage 7 database update.</p>
+        <h1>{tr("Notifications")}</h1>
+        <p className="card muted">{tr("Notifications are not switched on yet. Management needs to run the Stage 7 database update.")}</p>
       </>
     );
   }
@@ -41,18 +43,16 @@ export default async function NotificationsPage({ searchParams }: { searchParams
   return (
     <>
       <div className="page-head">
-        <h1>Notifications</h1>
+        <h1>{tr("Notifications")}</h1>
         {unread > 0 && (
           <form action={markAllRead}>
-            <SubmitButton className="btn btn-small" pendingText="…">
-              Mark all read
-            </SubmitButton>
+            <SubmitButton className="btn btn-small" pendingText="…">{tr("Mark all read")}</SubmitButton>
           </form>
         )}
       </div>
       <Notice {...notice} />
       {rows.length === 0 ? (
-        <p className="card muted">Nothing yet. You&apos;ll be told here when something needs you: approvals, new RFQs, deliveries, overdue invoices, stock alerts.</p>
+        <p className="card muted">{tr("Nothing yet. You'll be told here when something needs you: approvals, new RFQs, deliveries, overdue invoices, stock alerts.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => (
@@ -60,8 +60,8 @@ export default async function NotificationsPage({ searchParams }: { searchParams
               <a href={`/notifications/${r.id}`}>
                 <div className="main">
                   <div className="title">
-                    {r.severity === "critical" && <span className="dot-critical" aria-label="Urgent" />}
-                    {r.title}
+                    {r.severity === "critical" && <span className="dot-critical" aria-label={tr("Urgent")} />}
+                    {tr(String(r.title ?? ""))}
                   </div>
                   <div className="sub">
                     {r.body && <>{r.body} · </>}
@@ -70,7 +70,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
                 </div>
                 {!r.read_at && (
                   <div className="side">
-                    <span className="badge tone-info">New</span>
+                    <span className="badge tone-info">{tr("New")}</span>
                   </div>
                 )}
               </a>
@@ -80,31 +80,23 @@ export default async function NotificationsPage({ searchParams }: { searchParams
       )}
 
       <section className="card" id="settings" style={{ marginTop: 20 }}>
-        <h2>How you are told</h2>
-        <p className="small muted">
-          Everything appears here. Urgent things (approvals, new RFQs, deliveries, overdue invoices, expiring stock) can also reach your
-          phone and email.
-        </p>
+        <h2>{tr("How you are told")}</h2>
+        <p className="small muted">{tr("Everything appears here. Urgent things (approvals, new RFQs, deliveries, overdue invoices, expiring stock) can also reach your phone and email.")}</p>
         <form action={saveNotificationSettings}>
           <label className="check">
-            <input type="checkbox" name="push_alerts" defaultChecked={pushOn} /> Phone notifications
-          </label>
+            <input type="checkbox" name="push_alerts" defaultChecked={pushOn} />{" "}{tr("Phone notifications")}</label>
           <label className="check">
-            <input type="checkbox" name="email_alerts" defaultChecked={emailOn} /> Emails to {user.email}
+            <input type="checkbox" name="email_alerts" defaultChecked={emailOn} />{" "}{tr("Emails to")}{" "}{user.email}
           </label>
-          <SubmitButton className="btn btn-small" pendingText="Saving…">
-            Save
-          </SubmitButton>
+          <SubmitButton className="btn btn-small" pendingText={tr("Saving…")}>{tr("Save")}</SubmitButton>
         </form>
-        <h3 style={{ marginTop: 16 }}>This device</h3>
+        <h3 style={{ marginTop: 16 }}>{tr("This device")}</h3>
         <PushSetup vapidKey={process.env.VAPID_PUBLIC_KEY ?? null} />
         <form action={sendTestNotification} style={{ marginTop: 12 }}>
-          <SubmitButton className="btn btn-small" pendingText="Sending…">
-            Send me a test
-          </SubmitButton>
+          <SubmitButton className="btn btn-small" pendingText={tr("Sending…")}>{tr("Send me a test")}</SubmitButton>
         </form>
         <p className="small" style={{ marginTop: 12 }}>
-          <Link href="/settings/notifications">Server setup for phone and email alerts →</Link>
+          <Link href="/settings/notifications">{tr("Server setup for phone and email alerts →")}</Link>
         </p>
       </section>
     </>

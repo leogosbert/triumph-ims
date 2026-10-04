@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -35,6 +36,7 @@ function Field(props: {
 }
 
 export default async function CompanyPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company: c, isManager } = await getAppContext();
   const logo = brandingUrl(supabase, c.logo_path);
@@ -42,15 +44,15 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
   return (
     <>
       <p className="small">
-        <Link href="/settings">← Settings</Link>
+        <Link href="/settings">{tr("← Settings")}</Link>
       </p>
-      <h1>Company details</h1>
-      {!isManager && <p className="muted">Only management can change these details.</p>}
+      <h1>{tr("Company details")}</h1>
+      {!isManager && <p className="muted">{tr("Only management can change these details.")}</p>}
       <Notice {...notice} />
 
       {isManager && (
         <section className="card" id="branding">
-          <h2>Logo</h2>
+          <h2>{tr("Logo")}</h2>
           <LogoUpload companyId={c.id} currentUrl={logo} />
         </section>
       )}
@@ -58,31 +60,31 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
       <form action={updateCompany}>
         <fieldset disabled={!isManager} style={{ border: 0, padding: 0, margin: 0 }}>
           <section className="card">
-            <h2>Registration</h2>
-            <Field name="name" label="Trading name" value={c.name} required />
-            <Field name="legal_name" label="Registered name" value={c.legal_name} hint="as on BRELA certificate" />
+            <h2>{tr("Registration")}</h2>
+            <Field name="name" label={tr("Trading name")} value={c.name} required />
+            <Field name="legal_name" label={tr("Registered name")} value={c.legal_name} hint={tr("as on BRELA certificate")} />
             <div className="grid grid-2">
-              <Field name="tin" label="TIN" value={c.tin} />
-              <Field name="vrn" label="VRN" value={c.vrn} hint="if VAT registered" />
+              <Field name="tin" label={tr("TIN")} value={c.tin} />
+              <Field name="vrn" label={tr("VRN")} value={c.vrn} hint={tr("if VAT registered")} />
             </div>
-            <Field name="registration_no" label="Registration number" value={c.registration_no} />
+            <Field name="registration_no" label={tr("Registration number")} value={c.registration_no} />
           </section>
 
           <section className="card">
-            <h2>Contact</h2>
-            <Field name="address" label="Address" value={c.address} textarea />
+            <h2>{tr("Contact")}</h2>
+            <Field name="address" label={tr("Address")} value={c.address} textarea />
             <div className="grid grid-2">
-              <Field name="phone" label="Phone" value={c.phone} type="tel" />
-              <Field name="email" label="Email" value={c.email} type="email" />
+              <Field name="phone" label={tr("Phone")} value={c.phone} type="tel" />
+              <Field name="email" label={tr("Email")} value={c.email} type="email" />
             </div>
-            <Field name="website" label="Website" value={c.website} />
+            <Field name="website" label={tr("Website")} value={c.website} />
           </section>
 
           <section className="card">
-            <h2>Currencies</h2>
+            <h2>{tr("Currencies")}</h2>
             <div className="grid grid-2">
               <div className="field">
-                <label htmlFor="base_currency">Main currency</label>
+                <label htmlFor="base_currency">{tr("Main currency")}</label>
                 <select id="base_currency" name="base_currency" defaultValue={c.base_currency}>
                   {CURRENCIES.map((x) => (
                     <option key={x}>{x}</option>
@@ -90,9 +92,9 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="second_currency">Second currency</label>
+                <label htmlFor="second_currency">{tr("Second currency")}</label>
                 <select id="second_currency" name="second_currency" defaultValue={c.second_currency ?? ""}>
-                  <option value="">None</option>
+                  <option value="">{tr("None")}</option>
                   {CURRENCIES.map((x) => (
                     <option key={x}>{x}</option>
                   ))}
@@ -102,80 +104,80 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
           </section>
 
           <section className="card">
-            <h2>Colours</h2>
-            <p className="muted small">Used in the app and on your documents.</p>
+            <h2>{tr("Colours")}</h2>
+            <p className="muted small">{tr("Used in the app and on your documents.")}</p>
             <div className="swatches">
               <div className="field">
                 <input id="primary_color" name="primary_color" type="color" defaultValue={c.primary_color} />
-                <label htmlFor="primary_color">Main colour</label>
+                <label htmlFor="primary_color">{tr("Main colour")}</label>
               </div>
               <div className="field">
                 <input id="accent_color" name="accent_color" type="color" defaultValue={c.accent_color} />
-                <label htmlFor="accent_color">Dark colour (top bar)</label>
+                <label htmlFor="accent_color">{tr("Dark colour (top bar)")}</label>
               </div>
             </div>
           </section>
 
           <section className="card" id="documents">
-            <h2>On your documents</h2>
+            <h2>{tr("On your documents")}</h2>
             <Field
               name="bank_details"
-              label="Bank details"
+              label={tr("Bank details")}
               value={c.bank_details}
               textarea
-              hint="bank, branch, account name and numbers, SWIFT"
+              hint={tr("bank, branch, account name and numbers, SWIFT")}
             />
             <Field
               name="document_footer"
-              label="Footer text"
+              label={tr("Footer text")}
               value={c.document_footer}
               textarea
-              hint="appears at the bottom of quotations and invoices"
+              hint={tr("appears at the bottom of quotations and invoices")}
             />
           </section>
 
           <section className="card" id="quotations">
-            <h2>Quotations</h2>
+            <h2>{tr("Quotations")}</h2>
             <div className="grid grid-2">
-              <Field name="vat_rate" label="VAT rate %" value={String(c.vat_rate ?? 18)} hint="0 is used automatically for exempt clients" />
-              <Field name="quote_validity_days" label="Quotations valid for (days)" value={String(c.quote_validity_days ?? 30)} />
-              <Field name="quote_min_margin_pct" label="Minimum margin %" value={String(c.quote_min_margin_pct ?? 12)} hint="below this needs approval" />
+              <Field name="vat_rate" label={tr("VAT rate %")} value={String(c.vat_rate ?? 18)} hint={tr("0 is used automatically for exempt clients")} />
+              <Field name="quote_validity_days" label={tr("Quotations valid for (days)")} value={String(c.quote_validity_days ?? 30)} />
+              <Field name="quote_min_margin_pct" label={tr("Minimum margin %")} value={String(c.quote_min_margin_pct ?? 12)} hint={tr("below this needs approval")} />
               <Field
                 name="quote_approval_above"
                 label={`Approval needed above (${c.base_currency})`}
                 value={Number(c.quote_approval_above ?? 25000000).toLocaleString("en-GB")}
-                hint="incl. VAT"
+                hint={tr("incl. VAT")}
               />
             </div>
-            <Field name="quote_terms" label="Standard terms and conditions" value={c.quote_terms} textarea hint="printed on every quotation" />
+            <Field name="quote_terms" label={tr("Standard terms and conditions")} value={c.quote_terms} textarea hint={tr("printed on every quotation")} />
           </section>
 
           <section className="card" id="purchasing">
-            <h2>Purchase orders</h2>
+            <h2>{tr("Purchase orders")}</h2>
             <Field
               name="po_approval_above"
               label={`Approval needed above (${c.base_currency})`}
               value={Number(c.po_approval_above ?? 2500000).toLocaleString("en-GB")}
-              hint="for POs raised by procurement"
+              hint={tr("for POs raised by procurement")}
             />
-            <Field name="po_terms" label="Standard PO terms" value={c.po_terms} textarea hint="printed on every purchase order" />
+            <Field name="po_terms" label={tr("Standard PO terms")} value={c.po_terms} textarea hint={tr("printed on every purchase order")} />
           </section>
 
           {c.invoice_due_days !== undefined && (
             <section className="card" id="invoicing">
-              <h2>Invoices</h2>
+              <h2>{tr("Invoices")}</h2>
               <Field
                 name="invoice_due_days"
-                label="Clients pay within (days)"
+                label={tr("Clients pay within (days)")}
                 value={String(c.invoice_due_days ?? 30)}
-                hint="sets the due date when an invoice is issued"
+                hint={tr("sets the due date when an invoice is issued")}
               />
-              <Field name="invoice_terms" label="Standard invoice terms" value={c.invoice_terms ?? null} textarea hint="printed on every invoice" />
+              <Field name="invoice_terms" label={tr("Standard invoice terms")} value={c.invoice_terms ?? null} textarea hint={tr("printed on every invoice")} />
             </section>
           )}
 
           {isManager && (
-            <SubmitButton className="btn btn-primary btn-block">Save company details</SubmitButton>
+            <SubmitButton className="btn btn-primary btn-block">{tr("Save company details")}</SubmitButton>
           )}
         </fieldset>
       </form>

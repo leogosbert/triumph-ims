@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
@@ -24,6 +25,7 @@ type Row = {
 };
 
 export default async function PaymentsPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const { supabase, company, role } = await getAppContext();
@@ -44,28 +46,28 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
   return (
     <>
       <p className="small">
-        <Link href="/finance">← Finance</Link>
+        <Link href="/finance">{tr("← Finance")}</Link>
       </p>
-      <h1>Payments received</h1>
-      <nav className="tabs-row" aria-label="Month">
-        <Link href={`/payments?m=${m.prev}`}>← Earlier</Link>
+      <h1>{tr("Payments received")}</h1>
+      <nav className="tabs-row" aria-label={tr("Month")}>
+        <Link href={`/payments?m=${m.prev}`}>{tr("← Earlier")}</Link>
         <Link href={`/payments?m=${m.month}`} aria-current="page">
-          {m.label}
+          {tr(String(m.label ?? ""))}
         </Link>
-        {!m.isCurrent && <Link href={`/payments?m=${m.after}`}>Later →</Link>}
+        {!m.isCurrent && <Link href={`/payments?m=${m.after}`}>{tr("Later →")}</Link>}
       </nav>
       <div className="stat-grid">
         <div className="stat">
           <div className="n">{formatMoney(total, company.base_currency)}</div>
-          <div className="l">Collected in {m.label}</div>
+          <div className="l">{tr("Collected in")}{" "}{tr(String(m.label ?? ""))}</div>
         </div>
         <div className="stat">
           <div className="n">{rows.filter((r) => !r.voided_at).length}</div>
-          <div className="l">Payments</div>
+          <div className="l">{tr("Payments")}</div>
         </div>
       </div>
       {rows.length === 0 ? (
-        <p className="card muted">No payments recorded in {m.label}. Record payments on the invoice they pay.</p>
+        <p className="card muted">{tr("No payments recorded in")}{" "}{tr(String(m.label ?? ""))}{tr(". Record payments on the invoice they pay.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => (
@@ -78,7 +80,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
                   <div className="sub">
                     {formatDate(r.received_on)} · {r.number} · {r.invoice?.number} · {PAY_METHODS[r.method] ?? r.method}
                     {r.reference ? ` · ${r.reference}` : ""}
-                    {r.voided_at ? " · voided" : ""}
+                    {r.voided_at ? tr(" · voided") : ""}
                   </div>
                 </div>
                 <div className="side">{formatMoney(r.amount, r.currency)}</div>

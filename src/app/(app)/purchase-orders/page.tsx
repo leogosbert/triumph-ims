@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -32,6 +33,7 @@ type Row = {
 };
 
 export default async function PurchaseOrdersPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
@@ -55,33 +57,29 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
   return (
     <>
       <p className="small">
-        <Link href="/purchasing">← Purchasing</Link>
+        <Link href="/purchasing">{tr("← Purchasing")}</Link>
       </p>
       <div className="page-head">
-        <h1>Purchase orders</h1>
+        <h1>{tr("Purchase orders")}</h1>
         {can(role, "editPurchasing") && (
-          <Link href="/purchase-orders/new" className="btn btn-primary btn-small">
-            + New PO
-          </Link>
+          <Link href="/purchase-orders/new" className="btn btn-primary btn-small">{tr("+ New PO")}</Link>
         )}
       </div>
       <Notice {...notice} />
-      <nav className="tabs-row" aria-label="Filter">
+      <nav className="tabs-row" aria-label={tr("Filter")}>
         {TABS.map((t) => (
           <Link key={t.key} href={`/purchase-orders?tab=${t.key}`} aria-current={t.key === tab.key ? "page" : undefined}>
-            {t.label}
+            {tr(String(t.label ?? ""))}
           </Link>
         ))}
       </nav>
       <form method="get" className="toolbar-row" style={{ marginBottom: 12 }}>
         <input type="hidden" name="tab" value={tab.key} />
-        <input type="search" name="q" defaultValue={q} placeholder="Search PO no. or supplier ref…" />
-        <button className="btn" type="submit">
-          Search
-        </button>
+        <input type="search" name="q" defaultValue={q} placeholder={tr("Search PO no. or supplier ref…")} />
+        <button className="btn" type="submit">{tr("Search")}</button>
       </form>
       {rows.length === 0 ? (
-        <p className="card muted">No purchase orders here.</p>
+        <p className="card muted">{tr("No purchase orders here.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {
@@ -90,13 +88,13 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
               <li key={r.id}>
                 <Link href={`/purchase-orders/${r.id}`}>
                   <div className="main">
-                    <div className="title">{r.supplier?.name ?? "Supplier"}</div>
+                    <div className="title">{r.supplier?.name ?? tr("Supplier")}</div>
                     <div className="sub">
                       {r.number} · {formatDate(r.order_date)}
                       {r.expected_date && (
                         <span className={late ? "text-warn" : undefined}>
                           {" "}
-                          · {late ? "late, was due" : "due"} {formatDate(r.expected_date)}
+                          · {late ? tr("late, was due") : tr("due")} {formatDate(r.expected_date)}
                         </span>
                       )}
                     </div>
@@ -113,7 +111,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
           })}
         </ul>
       )}
-      {(count ?? 0) > LIST_LIMIT && <p className="muted small">Showing the first {LIST_LIMIT}.</p>}
+      {(count ?? 0) > LIST_LIMIT && <p className="muted small">{tr("Showing the first")}{" "}{LIST_LIMIT}.</p>}
     </>
   );
 }

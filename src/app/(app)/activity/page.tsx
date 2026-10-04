@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { displayName, requireManager, type Profile } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
@@ -147,6 +148,7 @@ function describe(row: LogRow): { title: string; changes: string[] } {
 }
 
 export default async function ActivityPage() {
+  await primeLang();
   const { supabase, company } = await requireManager();
   const { data, error } = await supabase
     .from("audit_log")
@@ -165,11 +167,11 @@ export default async function ActivityPage() {
 
   return (
     <>
-      <h1>Activity</h1>
-      <p className="muted">Every change to settings, the team, clients, suppliers and products, newest first. This record cannot be edited.</p>
+      <h1>{tr("Activity")}</h1>
+      <p className="muted">{tr("Every change to settings, the team, clients, suppliers and products, newest first. This record cannot be edited.")}</p>
       <section className="card">
         {rows.length === 0 ? (
-          <p className="muted">Nothing recorded yet.</p>
+          <p className="muted">{tr("Nothing recorded yet.")}</p>
         ) : (
           <ul className="list">
             {rows.map((r) => {
@@ -180,7 +182,7 @@ export default async function ActivityPage() {
                     {LINKS[r.entity] && r.entity_id ? <Link href={`${LINKS[r.entity]}${r.entity_id}`}>{title}</Link> : title}
                   </div>
                   <div className="muted small">
-                    {r.actor_id ? names.get(r.actor_id) ?? "Former team member" : "System"} ·{" "}
+                    {r.actor_id ? names.get(r.actor_id) ?? tr("Former team member") : tr("System")} ·{" "}
                     {formatDateTime(r.created_at)}
                   </div>
                   {changes.length > 0 && (

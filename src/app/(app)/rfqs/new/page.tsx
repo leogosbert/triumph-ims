@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -14,6 +15,7 @@ import { saveRfq } from "../actions";
 export const metadata = { title: "New RFQ" };
 
 export default async function NewRfqPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -23,14 +25,13 @@ export default async function NewRfqPage({ searchParams }: { searchParams: Searc
   return (
     <>
       <p className="small">
-        <Link href="/rfqs">← RFQs</Link>
+        <Link href="/rfqs">{tr("← RFQs")}</Link>
       </p>
-      <h1>New client RFQ</h1>
-      <p className="muted small">Record a request for quotation from a client. You&apos;ll add the items next.</p>
+      <h1>{tr("New client RFQ")}</h1>
+      <p className="muted small">{tr("Record a request for quotation from a client. You'll add the items next.")}</p>
       <Notice {...notice} />
       {clients.length === 0 ? (
-        <p className="card">
-          Add the client first: <Link href="/clients/new">+ New client</Link>
+        <p className="card">{tr("Add the client first:")}{" "}<Link href="/clients/new">{tr("+ New client")}</Link>
         </p>
       ) : (
         <form action={saveRfq} className="card">
@@ -40,9 +41,7 @@ export default async function NewRfqPage({ searchParams }: { searchParams: Searc
             clients={clients}
             people={people}
           />
-          <SubmitButton className="btn btn-primary btn-block" pendingText="Saving…">
-            Save RFQ
-          </SubmitButton>
+          <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Saving…")}>{tr("Save RFQ")}</SubmitButton>
         </form>
       )}
     </>

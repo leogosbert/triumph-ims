@@ -1,5 +1,6 @@
 "use client";
 
+import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { useState } from "react";
 import readXlsxFile, { readSheetNames } from "read-excel-file";
@@ -24,6 +25,7 @@ const SHEETS = [
 ] as const;
 
 export function ImportClient() {
+  const tr = useTr();
   const [fileName, setFileName] = useState<string | null>(null);
   const [parsed, setParsed] = useState<Parsed | null>(null);
   const [reading, setReading] = useState(false);
@@ -88,9 +90,9 @@ export function ImportClient() {
   return (
     <>
       <section className="card">
-        <h2>1. Choose the file</h2>
+        <h2>{tr("1. Choose the file")}</h2>
         <label className="btn btn-primary" style={{ cursor: "pointer" }}>
-          {reading ? "Reading…" : fileName ? "Choose a different file" : "Choose Excel file"}
+          {reading ? tr("Reading…") : fileName ? tr("Choose a different file") : tr("Choose Excel file")}
           <input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden onChange={onFile} />
         </label>
         {fileName && <p className="small muted" style={{ marginTop: 8 }}>{fileName}</p>}
@@ -99,7 +101,7 @@ export function ImportClient() {
 
       {parsed && (
         <section className="card">
-          <h2>2. Check what was found</h2>
+          <h2>{tr("2. Check what was found")}</h2>
           <ul className="list">
             {SHEETS.map((s) => {
               const rows = parsed[s.key];
@@ -109,9 +111,9 @@ export function ImportClient() {
                     <strong>{s.name}</strong>
                     <div className="muted small">
                       {parsed.missing.includes(s.name)
-                        ? "Tab not found in the file — skipped"
+                        ? tr("Tab not found in the file — skipped")
                         : rows.length === 0
-                          ? "No rows filled in"
+                          ? tr("No rows filled in")
                           : rows
                               .slice(0, 3)
                               .map((r) => String(r.name))
@@ -126,29 +128,24 @@ export function ImportClient() {
 
           {parsed.problems.length > 0 ? (
             <div className="notice notice-error" style={{ marginTop: 12 }}>
-              <strong>
-                Fix {parsed.problems.length} problem{parsed.problems.length > 1 ? "s" : ""} in the spreadsheet, then
-                choose the file again:
-              </strong>
+              <strong>{tr("Fix")}{" "}{parsed.problems.length}{" "}{tr("problem")}{parsed.problems.length > 1 ? "s" : ""}{" "}{tr("in the spreadsheet, then choose the file again:")}</strong>
               <ul className="small" style={{ margin: "8px 0 0", paddingLeft: 18 }}>
                 {parsed.problems.slice(0, 30).map((p, i) => (
                   <li key={i}>
-                    {p.sheet}, row {p.row}: {p.message}
+                    {p.sheet}{tr(", row")}{" "}{p.row}: {p.message}
                   </li>
                 ))}
-                {parsed.problems.length > 30 && <li>…and {parsed.problems.length - 30} more.</li>}
+                {parsed.problems.length > 30 && <li>{tr("…and")}{" "}{parsed.problems.length - 30}{" "}{tr("more.")}</li>}
               </ul>
             </div>
           ) : total === 0 ? (
-            <p className="notice notice-error">No rows to import. The grey example rows are skipped automatically.</p>
+            <p className="notice notice-error">{tr("No rows to import. The grey example rows are skipped automatically.")}</p>
           ) : (
             <>
-              <p className="small muted" style={{ marginTop: 12 }}>
-                Records whose ID or SKU already exists will be <strong>updated</strong>; new ones are{" "}
-                <strong>added</strong>. Rows without an ID get one automatically. If anything fails, nothing is saved.
-              </p>
+              <p className="small muted" style={{ marginTop: 12 }}>{tr("Records whose ID or SKU already exists will be")}{" "}<strong>{tr("updated")}</strong>{tr("; new ones are")}{" "}
+                <strong>{tr("added")}</strong>{tr(". Rows without an ID get one automatically. If anything fails, nothing is saved.")}</p>
               <button className="btn btn-primary btn-block" onClick={onImport} disabled={saving}>
-                {saving ? "Importing…" : `3. Import ${total} record${total > 1 ? "s" : ""}`}
+                {saving ? tr("Importing…") : `3. Import ${total} record${total > 1 ? "s" : ""}`}
               </button>
             </>
           )}
@@ -158,33 +155,26 @@ export function ImportClient() {
       {result && !result.ok && <p className="notice notice-error">{result.error}</p>}
       {result && result.ok && (
         <section className="card">
-          <h2>Done</h2>
+          <h2>{tr("Done")}</h2>
           <ul className="list">
             <li className="row">
-              <Link href="/suppliers">Suppliers</Link>
+              <Link href="/suppliers">{tr("Suppliers")}</Link>
               <span>
-                {result.counts.suppliers_added} added · {result.counts.suppliers_updated} updated
-              </span>
+                {result.counts.suppliers_added}{" "}{tr("added ·")}{" "}{result.counts.suppliers_updated}{" "}{tr("updated")}</span>
             </li>
             <li className="row">
-              <Link href="/clients">Clients</Link>
+              <Link href="/clients">{tr("Clients")}</Link>
               <span>
-                {result.counts.clients_added} added · {result.counts.clients_updated} updated
-              </span>
+                {result.counts.clients_added}{" "}{tr("added ·")}{" "}{result.counts.clients_updated}{" "}{tr("updated")}</span>
             </li>
             <li className="row">
-              <Link href="/products">Products</Link>
+              <Link href="/products">{tr("Products")}</Link>
               <span>
-                {result.counts.products_added} added · {result.counts.products_updated} updated
-              </span>
+                {result.counts.products_added}{" "}{tr("added ·")}{" "}{result.counts.products_updated}{" "}{tr("updated")}</span>
             </li>
           </ul>
           {result.unmatched.length > 0 && (
-            <p className="notice notice-error small" style={{ marginTop: 12 }}>
-              These &ldquo;Main supplier&rdquo; names didn&apos;t match any supplier, so those products have no main
-              supplier yet: {result.unmatched.join(", ")}. Check the spelling against the Suppliers tab, or set it on
-              each product.
-            </p>
+            <p className="notice notice-error small" style={{ marginTop: 12 }}>{tr("These “Main supplier” names didn't match any supplier, so those products have no main supplier yet:")}{" "}{result.unmatched.join(", ")}{tr(". Check the spelling against the Suppliers tab, or set it on each product.")}</p>
           )}
         </section>
       )}

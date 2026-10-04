@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -13,6 +14,7 @@ import { BillFields } from "../BillFields";
 export const metadata = { title: "New supplier bill" };
 
 export default async function NewBillPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const poId = typeof sp.po === "string" ? sp.po : null;
@@ -35,11 +37,10 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
   return (
     <>
       <p className="small">
-        <Link href={po ? `/purchase-orders/${po.id}` : "/bills"}>← {po ? po.number : "Supplier bills"}</Link>
+        <Link href={po ? `/purchase-orders/${po.id}` : "/bills"}>← {po ? po.number : tr("Supplier bills")}</Link>
       </p>
-      <h1>Record a supplier bill</h1>
-      <p className="muted small">
-        Enter the supplier&apos;s invoice as you received it. {po && "The amounts are filled in from the purchase order — change them to match the invoice."}
+      <h1>{tr("Record a supplier bill")}</h1>
+      <p className="muted small">{tr("Enter the supplier's invoice as you received it.")}{" "}{po && tr("The amounts are filled in from the purchase order — change them to match the invoice.")}
       </p>
       <Notice {...notice} />
       <form action={newBill} className="card">
@@ -53,11 +54,9 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
           </>
         ) : (
           <div className="field">
-            <label htmlFor="supplier_id">Supplier</label>
+            <label htmlFor="supplier_id">{tr("Supplier")}</label>
             <select id="supplier_id" name="supplier_id" required defaultValue="">
-              <option value="" disabled>
-                Choose a supplier
-              </option>
+              <option value="" disabled>{tr("Choose a supplier")}</option>
               {suppliers.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name} ({s.code})
@@ -79,9 +78,7 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
             notes: null,
           }}
         />
-        <SubmitButton className="btn btn-primary btn-block" pendingText="Saving…">
-          Save bill
-        </SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Saving…")}>{tr("Save bill")}</SubmitButton>
       </form>
     </>
   );

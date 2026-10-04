@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
@@ -13,6 +14,7 @@ type Po = { id: string; number: string; status: string; total: number; currency:
 type Q = { id: string; number: string; revision: number; total: number; currency: string; client: { name: string } | null };
 
 export default async function PurchasingPage() {
+  await primeLang();
   const { supabase, company, role } = await getAppContext();
   if (!can(role, "seePurchasing")) redirect("/");
   const today = todayTz();
@@ -71,15 +73,11 @@ export default async function PurchasingPage() {
   return (
     <>
       <div className="page-head">
-        <h1>Purchasing</h1>
+        <h1>{tr("Purchasing")}</h1>
         {edit && (
           <div className="actions" style={{ marginTop: 0 }}>
-            <Link href="/supplier-rfqs/new" className="btn btn-primary btn-small">
-              + Ask suppliers
-            </Link>
-            <Link href="/purchase-orders/new" className="btn btn-small">
-              + PO
-            </Link>
+            <Link href="/supplier-rfqs/new" className="btn btn-primary btn-small">{tr("+ Ask suppliers")}</Link>
+            <Link href="/purchase-orders/new" className="btn btn-small">{tr("+ PO")}</Link>
           </div>
         )}
       </div>
@@ -88,27 +86,27 @@ export default async function PurchasingPage() {
         {edit && (
           <Link href="/supplier-rfqs" className="stat">
             <div className="n">{openSrfq.count ?? 0}</div>
-            <div className="l">Supplier RFQs collecting prices</div>
+            <div className="l">{tr("Supplier RFQs collecting prices")}</div>
           </Link>
         )}
         <Link href="/purchase-orders?tab=approval" className={`stat ${(pending.count ?? 0) > 0 ? "alert" : ""}`}>
           <div className="n">{pending.count ?? 0}</div>
-          <div className="l">POs waiting for approval</div>
+          <div className="l">{tr("POs waiting for approval")}</div>
         </Link>
         <Link href="/purchase-orders?tab=open" className="stat">
           <div className="n">{awaiting.count ?? 0}</div>
-          <div className="l">Approved, not yet confirmed</div>
+          <div className="l">{tr("Approved, not yet confirmed")}</div>
         </Link>
         <Link href="/purchase-orders?tab=incoming" className={`stat ${(late.count ?? 0) > 0 ? "alert" : ""}`}>
           <div className="n">{late.count ?? 0}</div>
-          <div className="l">Deliveries late</div>
+          <div className="l">{tr("Deliveries late")}</div>
         </Link>
       </div>
 
       {toBuy.length > 0 && (
         <section className="card" style={{ borderColor: "#f0d49a" }}>
-          <h2>Won orders to buy for</h2>
-          <p className="muted small">Accepted client quotations with no supplier RFQ or PO yet.</p>
+          <h2>{tr("Won orders to buy for")}</h2>
+          <p className="muted small">{tr("Accepted client quotations with no supplier RFQ or PO yet.")}</p>
           <ul className="list">
             {toBuy.map((q) => (
               <li key={q.id} className="row">
@@ -124,7 +122,7 @@ export default async function PurchasingPage() {
 
       {approvals.length > 0 && (
         <section className="card">
-          <h2>{can(role, "approvePOs") ? "POs waiting for your approval" : "POs waiting for approval"}</h2>
+          <h2>{can(role, "approvePOs") ? tr("POs waiting for your approval") : tr("POs waiting for approval")}</h2>
           <ul className="list">
             {approvals.map((p) => (
               <li key={p.id} className="row">
@@ -140,13 +138,11 @@ export default async function PurchasingPage() {
 
       <section className="card">
         <div className="row">
-          <h2 style={{ margin: 0 }}>Expected deliveries</h2>
-          <Link href="/purchase-orders?tab=incoming" className="small">
-            All →
-          </Link>
+          <h2 style={{ margin: 0 }}>{tr("Expected deliveries")}</h2>
+          <Link href="/purchase-orders?tab=incoming" className="small">{tr("All →")}</Link>
         </div>
         {incomingList.length === 0 ? (
-          <p className="muted small">Nothing on order.</p>
+          <p className="muted small">{tr("Nothing on order.")}</p>
         ) : (
           <ul className="list">
             {incomingList.map((p) => (
@@ -166,13 +162,13 @@ export default async function PurchasingPage() {
 
       <div className="grid grid-2">
         <Link href="/purchase-orders" className="tile">
-          <div className="tile-title">All purchase orders</div>
-          <div className="tile-sub">Drafts, approvals, confirmations</div>
+          <div className="tile-title">{tr("All purchase orders")}</div>
+          <div className="tile-sub">{tr("Drafts, approvals, confirmations")}</div>
         </Link>
         {can(role, "seeSuppliers") && (
           <Link href="/suppliers" className="tile">
-            <div className="tile-title">Suppliers</div>
-            <div className="tile-sub">Contacts, terms and lead times</div>
+            <div className="tile-title">{tr("Suppliers")}</div>
+            <div className="tile-sub">{tr("Contacts, terms and lead times")}</div>
           </Link>
         )}
       </div>

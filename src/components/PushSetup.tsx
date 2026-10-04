@@ -1,5 +1,6 @@
 "use client";
 
+import { useTr } from "@/lib/tr-client";
 import { useEffect, useState } from "react";
 import { removePushSubscription, savePushSubscription } from "@/app/(app)/notifications/actions";
 
@@ -13,6 +14,7 @@ type State = "checking" | "unsupported" | "ios-install" | "blocked" | "off" | "o
 
 /** Turns phone notifications on or off for this device. */
 export function PushSetup({ vapidKey }: { vapidKey: string | null }) {
+  const tr = useTr();
   const [state, setState] = useState<State>("checking");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -74,31 +76,26 @@ export function PushSetup({ vapidKey }: { vapidKey: string | null }) {
     }
   }
 
-  if (!vapidKey) return <p className="small muted">Phone notifications are not set up on the server yet (ask management).</p>;
+  if (!vapidKey) return <p className="small muted">{tr("Phone notifications are not set up on the server yet (ask management).")}</p>;
   return (
     <div>
-      {state === "checking" && <p className="small muted">Checking this device…</p>}
-      {state === "unsupported" && <p className="small muted">This browser cannot receive notifications. Try Chrome on Android, or Safari on iPhone.</p>}
+      {state === "checking" && <p className="small muted">{tr("Checking this device…")}</p>}
+      {state === "unsupported" && <p className="small muted">{tr("This browser cannot receive notifications. Try Chrome on Android, or Safari on iPhone.")}</p>}
       {state === "ios-install" && (
-        <p className="small">
-          On iPhone, first add the app to your Home Screen: tap <strong>Share</strong> → <strong>Add to Home Screen</strong>, open it from
-          there, then come back to this page.
-        </p>
+        <p className="small">{tr("On iPhone, first add the app to your Home Screen: tap")}{" "}<strong>{tr("Share")}</strong> → <strong>{tr("Add to Home Screen")}</strong>{tr(", open it from there, then come back to this page.")}</p>
       )}
       {state === "blocked" && (
-        <p className="small text-warn">Notifications are blocked for this site. Allow them in your browser or phone settings, then reload.</p>
+        <p className="small text-warn">{tr("Notifications are blocked for this site. Allow them in your browser or phone settings, then reload.")}</p>
       )}
       {(state === "off" || state === "busy") && (
         <button type="button" className="btn btn-primary" onClick={turnOn} disabled={state === "busy"}>
-          {state === "busy" ? "Turning on…" : "Turn on notifications on this device"}
+          {state === "busy" ? tr("Turning on…") : tr("Turn on notifications on this device")}
         </button>
       )}
       {state === "on" && (
         <div className="row">
-          <span className="badge tone-ok">On for this device</span>
-          <button type="button" className="btn btn-small" onClick={turnOff}>
-            Turn off
-          </button>
+          <span className="badge tone-ok">{tr("On for this device")}</span>
+          <button type="button" className="btn btn-small" onClick={turnOff}>{tr("Turn off")}</button>
         </div>
       )}
       {message && <p className="small">{message}</p>}

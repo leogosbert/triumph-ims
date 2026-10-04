@@ -1,9 +1,11 @@
 "use client";
 
+import { useTr } from "@/lib/tr-client";
 import { useState } from "react";
 
 /** Shares the PDF through the phone's share sheet (WhatsApp, email…), or downloads it on a computer. */
 export function SharePdfButton({ href, fileName, title }: { href: string; fileName: string; title: string }) {
+  const tr = useTr();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +38,7 @@ export function SharePdfButton({ href, fileName, title }: { href: string; fileNa
   return (
     <>
       <button type="button" className="btn btn-primary" onClick={onShare} disabled={busy}>
-        {busy ? "Preparing…" : "Share PDF"}
+        {busy ? tr("Preparing…") : tr("Share PDF")}
       </button>
       {error && <span className="small text-warn">{error}</span>}
     </>

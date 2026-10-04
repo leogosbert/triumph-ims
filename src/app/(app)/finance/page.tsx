@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
@@ -10,6 +11,7 @@ export const metadata = { title: "Finance" };
 type Inv = { id: string; number: string; total: number; amount_paid: number; exchange_rate: number; currency: string; due_date: string | null; client: { name: string } | null };
 
 export default async function FinancePage() {
+  await primeLang();
   const { supabase, company, role } = await getAppContext();
   if (!can(role, "seeFinance")) redirect(can(role, "seeInvoices") ? "/invoices" : "/");
   const base = company.base_currency;
@@ -71,47 +73,47 @@ export default async function FinancePage() {
 
   return (
     <>
-      <h1>Finance</h1>
+      <h1>{tr("Finance")}</h1>
       <div className="stat-grid">
         <Link href="/receivables" className="stat">
           <div className="n">{formatMoney(owed, base)}</div>
-          <div className="l">Owed to us</div>
+          <div className="l">{tr("Owed to us")}</div>
         </Link>
         <Link href="/invoices?tab=overdue" className={`stat ${lateSum > 0 ? "alert" : ""}`}>
           <div className="n">{formatMoney(lateSum, base)}</div>
-          <div className="l">Overdue · {late.length} invoice{late.length === 1 ? "" : "s"}</div>
+          <div className="l">{tr("Overdue ·")}{" "}{late.length}{" "}{tr("invoice")}{late.length === 1 ? "" : "s"}</div>
         </Link>
         <Link href="/payables" className="stat">
           <div className="n">{formatMoney(weOwe, base)}</div>
-          <div className="l">We owe suppliers</div>
+          <div className="l">{tr("We owe suppliers")}</div>
         </Link>
         <Link href="/bills" className={`stat ${dueSoon > 0 ? "alert" : ""}`}>
           <div className="n">{formatMoney(dueSoon, base)}</div>
-          <div className="l">To pay within 7 days (or late)</div>
+          <div className="l">{tr("To pay within 7 days (or late)")}</div>
         </Link>
         <Link href="/profit" className="stat">
           <div className="n">{formatMoney(sales, base)}</div>
-          <div className="l">Invoiced in {m.label} (before VAT)</div>
+          <div className="l">{tr("Invoiced in")}{" "}{tr(String(m.label ?? ""))}{" "}{tr("(before VAT)")}</div>
         </Link>
         <Link href="/payments" className="stat">
           <div className="n">{formatMoney(collected, base)}</div>
-          <div className="l">Collected in {m.label}</div>
+          <div className="l">{tr("Collected in")}{" "}{tr(String(m.label ?? ""))}</div>
         </Link>
       </div>
 
       {(toInvoice > 0 || (drafts ?? 0) > 0) && (
         <section className="card" style={{ borderColor: "#f0d49a" }}>
-          <h2>To do</h2>
+          <h2>{tr("To do")}</h2>
           <ul className="list">
             {toInvoice > 0 && (
               <li className="row">
-                <Link href="/invoices/new">Delivered but not invoiced</Link>
+                <Link href="/invoices/new">{tr("Delivered but not invoiced")}</Link>
                 <strong>{toInvoice}</strong>
               </li>
             )}
             {(drafts ?? 0) > 0 && (
               <li className="row">
-                <Link href="/invoices?tab=draft">Draft invoices to issue</Link>
+                <Link href="/invoices?tab=draft">{tr("Draft invoices to issue")}</Link>
                 <strong>{drafts}</strong>
               </li>
             )}
@@ -121,7 +123,7 @@ export default async function FinancePage() {
 
       {late.length > 0 && (
         <section className="card">
-          <h2>Most overdue</h2>
+          <h2>{tr("Most overdue")}</h2>
           <ul className="list">
             {late
               .sort((a, b) => daysOverdue(b.due_date) - daysOverdue(a.due_date))
@@ -132,7 +134,7 @@ export default async function FinancePage() {
                     {i.client?.name} · {i.number}
                   </Link>
                   <span className="small">
-                    {formatMoney(n(i.total) - n(i.amount_paid), i.currency)} · <span className="text-warn">{daysOverdue(i.due_date)} days</span>
+                    {formatMoney(n(i.total) - n(i.amount_paid), i.currency)} · <span className="text-warn">{daysOverdue(i.due_date)}{" "}{tr("days")}</span>
                   </span>
                 </li>
               ))}
@@ -141,13 +143,13 @@ export default async function FinancePage() {
       )}
 
       <div className="grid grid-2">
-        <Tile href="/invoices" title="Invoices" sub="Create, issue and share invoices" />
-        <Tile href="/payments" title="Payments received" sub="Money in, with receipts" />
-        <Tile href="/receivables" title="Money owed to us" sub="By client and how late (aging)" />
-        <Tile href="/bills" title="Supplier bills" sub="Record and pay suppliers' invoices" />
-        <Tile href="/payables" title="Money we owe" sub="By supplier and currency" />
-        {can(role, "seeProfit") && <Tile href="/profit" title="Profit" sub="By order, client, industry, salesperson" />}
-        <Tile href="/rates" title="Exchange rates" sub="Company rates for USD, EUR and other currencies" />
+        <Tile href="/invoices" title={tr("Invoices")} sub={tr("Create, issue and share invoices")} />
+        <Tile href="/payments" title={tr("Payments received")} sub={tr("Money in, with receipts")} />
+        <Tile href="/receivables" title={tr("Money owed to us")} sub={tr("By client and how late (aging)")} />
+        <Tile href="/bills" title={tr("Supplier bills")} sub={tr("Record and pay suppliers' invoices")} />
+        <Tile href="/payables" title={tr("Money we owe")} sub={tr("By supplier and currency")} />
+        {can(role, "seeProfit") && <Tile href="/profit" title={tr("Profit")} sub={tr("By order, client, industry, salesperson")} />}
+        <Tile href="/rates" title={tr("Exchange rates")} sub={tr("Company rates for USD, EUR and other currencies")} />
       </div>
     </>
   );

@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -22,6 +23,7 @@ const TABS = [
 type Row = { id: string; number: string; status: string; planned_date: string | null; delivered_at: string | null; vehicle: string | null; client: { name: string } | null };
 
 export default async function DeliveriesPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
@@ -44,28 +46,24 @@ export default async function DeliveriesPage({ searchParams }: { searchParams: S
   return (
     <>
       <p className="small">
-        <Link href="/stock">← Stock</Link>
+        <Link href="/stock">{tr("← Stock")}</Link>
       </p>
       <div className="page-head">
-        <h1>Deliveries</h1>
+        <h1>{tr("Deliveries")}</h1>
         {can(role, "editDeliveries") && (
-          <Link href="/deliveries/new" className="btn btn-primary btn-small">
-            + Delivery note
-          </Link>
+          <Link href="/deliveries/new" className="btn btn-primary btn-small">{tr("+ Delivery note")}</Link>
         )}
       </div>
       <Notice {...notice} />
-      <nav className="tabs-row" aria-label="Filter">
+      <nav className="tabs-row" aria-label={tr("Filter")}>
         {TABS.map((t) => (
           <Link key={t.key} href={`/deliveries?tab=${t.key}`} aria-current={t.key === tab.key ? "page" : undefined}>
-            {t.label}
+            {tr(String(t.label ?? ""))}
           </Link>
         ))}
       </nav>
       {rows.length === 0 ? (
-        <p className="card muted">
-          No deliveries here. Delivery notes are usually created from an accepted quotation.
-        </p>
+        <p className="card muted">{tr("No deliveries here. Delivery notes are usually created from an accepted quotation.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => (

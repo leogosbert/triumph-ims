@@ -1,3 +1,4 @@
+import { tr } from "@/lib/tr";
 import Link from "next/link";
 
 /** Search box, an optional filter, and a "show archived" switch for list pages. */
@@ -17,15 +18,13 @@ export function ListToolbar({
   return (
     <form className="card toolbar" method="get" role="search">
       <div className="toolbar-row">
-        <input type="search" name="q" defaultValue={q} placeholder="Search…" aria-label="Search" />
-        <button className="btn" type="submit">
-          Search
-        </button>
+        <input type="search" name="q" defaultValue={q} placeholder={tr("Search…")} aria-label={tr("Search")} />
+        <button className="btn" type="submit">{tr("Search")}</button>
       </div>
       <div className="toolbar-row small">
         {filter && (
           <select name={filter.name} defaultValue={filter.value} aria-label={filter.label}>
-            <option value="">All {filter.label.toLowerCase()}</option>
+            <option value="">{tr("All")}{" "}{filter.label.toLowerCase()}</option>
             {filter.options.map((o) => (
               <option key={o} value={o}>
                 {o}
@@ -34,8 +33,7 @@ export function ListToolbar({
           </select>
         )}
         <label className="check">
-          <input type="checkbox" name="archived" value="1" defaultChecked={archived} /> Show archived
-        </label>
+          <input type="checkbox" name="archived" value="1" defaultChecked={archived} />{" "}{tr("Show archived")}</label>
         {addHref && (
           <Link href={addHref} className="btn btn-primary btn-small" style={{ marginLeft: "auto" }}>
             + {addLabel}

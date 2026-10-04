@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -22,6 +23,7 @@ export default async function SupplierPage({
   params: Promise<{ id: string }>;
   searchParams: SearchParams;
 }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -45,18 +47,17 @@ export default async function SupplierPage({
   return (
     <>
       <p className="small">
-        <Link href="/suppliers">← Suppliers</Link>
+        <Link href="/suppliers">{tr("← Suppliers")}</Link>
       </p>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{supplier.name}</h1>
         <span className="badge">{supplier.code}</span>
       </div>
-      <p className="muted small">
-        Added {formatDate(supplier.created_at)}
+      <p className="muted small">{tr("Added")}{" "}{formatDate(supplier.created_at)}
         {!supplier.active && (
           <>
             {" "}
-            · <span className="badge off">Archived</span>
+            · <span className="badge off">{tr("Archived")}</span>
           </>
         )}
       </p>
@@ -64,14 +65,14 @@ export default async function SupplierPage({
 
       {linked.length > 0 && (
         <section className="card">
-          <h2>Main supplier for</h2>
+          <h2>{tr("Main supplier for")}</h2>
           <ul className="list">
             {linked.map((l) => (
               <li key={l.product_id} className="row">
                 <Link href={`/products/${l.product_id}`}>
-                  {l.product?.name ?? "Product"} <span className="muted small">{l.product?.sku}</span>
+                  {l.product?.name ?? tr("Product")} <span className="muted small">{l.product?.sku}</span>
                 </Link>
-                <span className="small muted">Last cost {formatMoney(l.last_cost, "TZS")}</span>
+                <span className="small muted">{tr("Last cost")}{" "}{formatMoney(l.last_cost, "TZS")}</span>
               </li>
             ))}
           </ul>
@@ -82,7 +83,7 @@ export default async function SupplierPage({
         <input type="hidden" name="id" value={supplier.id} />
         <fieldset className="plain" disabled={!editable}>
           <RecordFields sections={SUPPLIER_SECTIONS} values={supplier} readOnly={!editable} />
-          {editable && <SubmitButton className="btn btn-primary btn-block">Save changes</SubmitButton>}
+          {editable && <SubmitButton className="btn btn-primary btn-block">{tr("Save changes")}</SubmitButton>}
         </fieldset>
       </form>
 
@@ -90,8 +91,8 @@ export default async function SupplierPage({
         <form action={setSupplierActive} style={{ marginTop: 16 }}>
           <input type="hidden" name="id" value={supplier.id} />
           <input type="hidden" name="active" value={supplier.active ? "false" : "true"} />
-          <SubmitButton className={`btn btn-block ${supplier.active ? "btn-danger" : ""}`} pendingText="Working…">
-            {supplier.active ? "Archive supplier" : "Restore supplier"}
+          <SubmitButton className={`btn btn-block ${supplier.active ? "btn-danger" : ""}`} pendingText={tr("Working…")}>
+            {supplier.active ? tr("Archive supplier") : tr("Restore supplier")}
           </SubmitButton>
         </form>
       )}

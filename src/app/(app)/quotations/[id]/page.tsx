@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -59,6 +60,7 @@ export default async function QuotationPage({
   params: Promise<{ id: string }>;
   searchParams: SearchParams;
 }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role, user } = await getAppContext();
@@ -173,11 +175,11 @@ export default async function QuotationPage({
   return (
     <>
       <p className="small">
-        <Link href="/quotations">← Quotations</Link>
+        <Link href="/quotations">{tr("← Quotations")}</Link>
         {q.rfq_id && (
           <>
             {" · "}
-            <Link href={`/rfqs/${q.rfq_id}`}>RFQ</Link>
+            <Link href={`/rfqs/${q.rfq_id}`}>{tr("RFQ")}</Link>
           </>
         )}
       </p>
@@ -186,37 +188,34 @@ export default async function QuotationPage({
         <StatusBadge map={QUOTE_STATUS} status={q.status} />
       </div>
       <p className="muted small">
-        {quoteNo(q)} · issued {formatDate(q.issue_date)}
-        {q.valid_until && <> · valid until {formatDate(q.valid_until)}</>}
-        {expired && <span className="text-warn"> · expired</span>}
-        {q.created_by && <> · by {names.get(q.created_by)}</>}
+        {quoteNo(q)}{" "}{tr("· issued")}{" "}{formatDate(q.issue_date)}
+        {q.valid_until && <>{" "}{tr("· valid until")}{" "}{formatDate(q.valid_until)}</>}
+        {expired && <span className="text-warn">{" "}{tr("· expired")}</span>}
+        {q.created_by && <>{" "}{tr("· by")}{" "}{names.get(q.created_by)}</>}
       </p>
       <Notice {...notice} />
       {!["rejected", "cancelled", "superseded"].includes(q.status) && <OrderProgress steps={progress} />}
 
       {isDraft && q.review_note && (
         <div className="banner bad">
-          <strong>Sent back by management:</strong> {q.review_note}
+          <strong>{tr("Sent back by management:")}</strong> {q.review_note}
         </div>
       )}
       {q.status === "pending_approval" && (
         <div className="banner warn">
-          <strong>Waiting for management approval</strong> because: {q.approval_reason}.
+          <strong>{tr("Waiting for management approval")}</strong>{" "}{tr("because:")}{" "}{q.approval_reason}.
           {q.submitted_by && (
-            <div className="small">
-              Submitted by {names.get(q.submitted_by)} on {formatDateTime(q.submitted_at)}
+            <div className="small">{tr("Submitted by")}{" "}{names.get(q.submitted_by)}{" "}{tr("on")}{" "}{formatDateTime(q.submitted_at)}
             </div>
           )}
         </div>
       )}
       {["approved", "sent", "accepted"].includes(q.status) && q.approved_by && q.approval_reason && (
-        <div className="banner ok small">
-          Approved by {names.get(q.approved_by)} despite: {q.approval_reason}.{q.review_note ? ` Note: ${q.review_note}` : ""}
+        <div className="banner ok small">{tr("Approved by")}{" "}{names.get(q.approved_by)}{" "}{tr("despite:")}{" "}{q.approval_reason}.{q.review_note ? ` Note: ${q.review_note}` : ""}
         </div>
       )}
       {["accepted", "rejected"].includes(q.status) && q.outcome_reason && (
-        <div className={`banner ${q.status === "accepted" ? "ok" : "bad"} small`}>
-          Client&apos;s answer: {q.outcome_reason}
+        <div className={`banner ${q.status === "accepted" ? "ok" : "bad"} small`}>{tr("Client's answer:")}{" "}{q.outcome_reason}
         </div>
       )}
 
@@ -225,76 +224,57 @@ export default async function QuotationPage({
         {["approved", "sent", "accepted", "rejected"].includes(q.status) && (
           <>
             <SharePdfButton href={pdfHref} fileName={pdfName} title={`Quotation ${quoteNo(q)}`} />
-            <a className="btn" href={pdfHref} target="_blank" rel="noopener">
-              Open PDF
-            </a>
+            <a className="btn" href={pdfHref} target="_blank" rel="noopener">{tr("Open PDF")}</a>
           </>
         )}
         {isDraft && lines.length > 0 && (
-          <a className="btn" href={pdfHref} target="_blank" rel="noopener">
-            Preview PDF
-          </a>
+          <a className="btn" href={pdfHref} target="_blank" rel="noopener">{tr("Preview PDF")}</a>
         )}
       </div>
 
       {canEdit && isDraft && lines.length > 0 && (
         <form action={submitQuote} className="card">
           <input type="hidden" name="id" value={q.id} />
-          <p className="small muted" style={{ marginTop: 0 }}>
-            When you submit, the app checks the margin and value. If they&apos;re within the rules it&apos;s approved
-            straight away; otherwise management is asked to approve.
-          </p>
-          <SubmitButton className="btn btn-primary btn-block" pendingText="Checking…">
-            Submit quotation
-          </SubmitButton>
+          <p className="small muted" style={{ marginTop: 0 }}>{tr("When you submit, the app checks the margin and value. If they're within the rules it's approved straight away; otherwise management is asked to approve.")}</p>
+          <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Checking…")}>{tr("Submit quotation")}</SubmitButton>
         </form>
       )}
 
       {q.status === "pending_approval" && can(role, "approveQuotes") && q.submitted_by !== user.id && (
         <form action={reviewQuote} className="card">
           <input type="hidden" name="id" value={q.id} />
-          <h2>Your decision</h2>
+          <h2>{tr("Your decision")}</h2>
           <div className="field">
-            <label htmlFor="note">
-              Note <span className="hint">· required when sending back</span>
+            <label htmlFor="note">{tr("Note")}{" "}<span className="hint">{tr("· required when sending back")}</span>
             </label>
-            <textarea id="note" name="note" placeholder="e.g. OK for this client; or: reduce discount to 5%" />
+            <textarea id="note" name="note" placeholder={tr("e.g. OK for this client; or: reduce discount to 5%")} />
           </div>
           <div className="actions">
-            <SubmitButton name="decision" value="approve" pendingText="Saving…">
-              Approve
-            </SubmitButton>
-            <SubmitButton name="decision" value="return" className="btn btn-danger" pendingText="Saving…">
-              Send back for changes
-            </SubmitButton>
+            <SubmitButton name="decision" value="approve" pendingText={tr("Saving…")}>{tr("Approve")}</SubmitButton>
+            <SubmitButton name="decision" value="return" className="btn btn-danger" pendingText={tr("Saving…")}>{tr("Send back for changes")}</SubmitButton>
           </div>
         </form>
       )}
 
       {canEdit && ["approved", "sent"].includes(q.status) && (
         <section className="card">
-          <h2>Client</h2>
+          <h2>{tr("Client")}</h2>
           {q.status === "approved" && (
             <form action={markSent} style={{ marginBottom: 12 }}>
               <input type="hidden" name="id" value={q.id} />
-              <SubmitButton className="btn btn-block">I have sent it to the client</SubmitButton>
+              <SubmitButton className="btn btn-block">{tr("I have sent it to the client")}</SubmitButton>
             </form>
           )}
           <form action={recordOutcome}>
             <input type="hidden" name="id" value={q.id} />
             <div className="field">
-              <label htmlFor="reason">
-                Client&apos;s answer <span className="hint">· e.g. PO number, or why they declined</span>
+              <label htmlFor="reason">{tr("Client's answer")}{" "}<span className="hint">{tr("· e.g. PO number, or why they declined")}</span>
               </label>
               <input id="reason" name="reason" type="text" />
             </div>
             <div className="actions">
-              <SubmitButton name="outcome" value="accepted" pendingText="Saving…">
-                Client accepted
-              </SubmitButton>
-              <SubmitButton name="outcome" value="rejected" className="btn btn-danger" pendingText="Saving…">
-                Client rejected
-              </SubmitButton>
+              <SubmitButton name="outcome" value="accepted" pendingText={tr("Saving…")}>{tr("Client accepted")}</SubmitButton>
+              <SubmitButton name="outcome" value="rejected" className="btn btn-danger" pendingText={tr("Saving…")}>{tr("Client rejected")}</SubmitButton>
             </div>
           </form>
         </section>
@@ -302,16 +282,16 @@ export default async function QuotationPage({
 
       {buyer && ["approved", "sent", "accepted"].includes(q.status) && (
         <section className="card" id="purchasing">
-          <h2>Purchasing for this order</h2>
+          <h2>{tr("Purchasing for this order")}</h2>
           {linkedSrfqs.length + linkedPos.length === 0 && (
             <p className="muted small">
-              {q.status === "accepted" ? "The client accepted. Ask suppliers for prices, or order directly." : "You can ask suppliers for prices already."}
+              {q.status === "accepted" ? tr("The client accepted. Ask suppliers for prices, or order directly.") : tr("You can ask suppliers for prices already.")}
             </p>
           )}
           <ul className="list">
             {linkedSrfqs.map((r) => (
               <li key={r.id} className="row">
-                <Link href={`/supplier-rfqs/${r.id}`}>Supplier RFQ {r.number}</Link>
+                <Link href={`/supplier-rfqs/${r.id}`}>{tr("Supplier RFQ")}{" "}{r.number}</Link>
                 <StatusBadge map={SRFQ_STATUS} status={r.status} />
               </li>
             ))}
@@ -327,21 +307,17 @@ export default async function QuotationPage({
           <div className="actions">
             <form action={createSupplierRfq}>
               <input type="hidden" name="quotation_id" value={q.id} />
-              <SubmitButton className="btn btn-primary" pendingText="Creating…">
-                Request supplier quotes
-              </SubmitButton>
+              <SubmitButton className="btn btn-primary" pendingText={tr("Creating…")}>{tr("Request supplier quotes")}</SubmitButton>
             </form>
-            <Link href={`/purchase-orders/new?quotation=${q.id}`} className="btn">
-              Create purchase order
-            </Link>
+            <Link href={`/purchase-orders/new?quotation=${q.id}`} className="btn">{tr("Create purchase order")}</Link>
           </div>
         </section>
       )}
 
       {showDeliveries && (
         <section className="card" id="deliveries">
-          <h2>Deliveries to the client</h2>
-          {linkedDns.length === 0 && <p className="muted small">No delivery notes yet.</p>}
+          <h2>{tr("Deliveries to the client")}</h2>
+          {linkedDns.length === 0 && <p className="muted small">{tr("No delivery notes yet.")}</p>}
           <ul className="list">
             {linkedDns.map((d) => (
               <li key={d.id} className="row">
@@ -353,9 +329,7 @@ export default async function QuotationPage({
           {can(role, "editDeliveries") && (
             <form action={newDelivery} className="actions">
               <input type="hidden" name="quotation_id" value={q.id} />
-              <SubmitButton className="btn btn-primary" pendingText="Creating…">
-                Create delivery note
-              </SubmitButton>
+              <SubmitButton className="btn btn-primary" pendingText={tr("Creating…")}>{tr("Create delivery note")}</SubmitButton>
             </form>
           )}
         </section>
@@ -363,12 +337,12 @@ export default async function QuotationPage({
 
       {showInvoices && (
         <section className="card" id="invoices">
-          <h2>Invoices</h2>
-          {linkedInvoices.length === 0 && <p className="muted small">Not invoiced yet.</p>}
+          <h2>{tr("Invoices")}</h2>
+          {linkedInvoices.length === 0 && <p className="muted small">{tr("Not invoiced yet.")}</p>}
           <ul className="list">
             {linkedInvoices.map((i) => (
               <li key={i.id} className="row">
-                <Link href={`/invoices/${i.id}`}>{i.number || "Draft invoice"}</Link>
+                <Link href={`/invoices/${i.id}`}>{i.number || tr("Draft invoice")}</Link>
                 <span className="small">
                   {formatMoney(i.total, i.currency)} <StatusBadge map={INVOICE_STATUS} status={shownStatus(i.status, i.due_date)} />
                 </span>
@@ -379,27 +353,27 @@ export default async function QuotationPage({
             <form action={newInvoice} className="actions">
               <input type="hidden" name="quotation_id" value={q.id} />
               <input type="hidden" name="back" value={`/quotations/${q.id}#invoices`} />
-              <SubmitButton className="btn btn-primary" pendingText="Creating…">
-                {linkedInvoices.some((i) => i.status !== "cancelled") ? "Invoice the rest" : "Create invoice"}
+              <SubmitButton className="btn btn-primary" pendingText={tr("Creating…")}>
+                {linkedInvoices.some((i) => i.status !== "cancelled") ? tr("Invoice the rest") : tr("Create invoice")}
               </SubmitButton>
             </form>
           )}
-          <p className="hint">Usually you invoice each delivery from its delivery note. Use this for advance or whole-order invoices.</p>
+          <p className="hint">{tr("Usually you invoice each delivery from its delivery note. Use this for advance or whole-order invoices.")}</p>
         </section>
       )}
 
       {showOrderCosts && (
         <section className="card" id="profit">
-          <h2>Order costs{can(role, "seeProfit") ? " & profit" : ""}</h2>
+          <h2>{tr("Order costs")}{can(role, "seeProfit") ? tr(" & profit") : ""}</h2>
           {can(role, "seeProfit") && (
             <dl className="kv">
-              <dt>Invoiced (before VAT)</dt>
+              <dt>{tr("Invoiced (before VAT)")}</dt>
               <dd>{formatMoney(orderProfit.rev, company.base_currency)}</dd>
-              <dt>Cost of goods</dt>
+              <dt>{tr("Cost of goods")}</dt>
               <dd>{formatMoney(orderProfit.cost, company.base_currency)}</dd>
-              <dt>Other order costs</dt>
+              <dt>{tr("Other order costs")}</dt>
               <dd>{formatMoney(orderExtras, company.base_currency)}</dd>
-              <dt>Gross profit</dt>
+              <dt>{tr("Gross profit")}</dt>
               <dd>
                 <strong>{formatMoney(orderProfit.rev - orderProfit.cost - orderExtras, company.base_currency)}</strong>
                 {orderProfit.rev > 0 && (
@@ -411,13 +385,13 @@ export default async function QuotationPage({
               </dd>
               {orderProfit.missing > 0 && (
                 <>
-                  <dt>Lines without a cost</dt>
+                  <dt>{tr("Lines without a cost")}</dt>
                   <dd className="text-warn">{orderProfit.missing}</dd>
                 </>
               )}
             </dl>
           )}
-          <p className="muted small">Costs of this order that are not part of the goods: local transport, bank charges, commission…</p>
+          <p className="muted small">{tr("Costs of this order that are not part of the goods: local transport, bank charges, commission…")}</p>
           <OrderCosts
             costs={orderCosts}
             back={`/quotations/${q.id}#profit`}
@@ -430,8 +404,8 @@ export default async function QuotationPage({
 
       {/* ---------- Lines ---------- */}
       <section className="card" id="lines">
-        <h2>Items ({lines.length})</h2>
-        {lines.length === 0 && <p className="muted small">No items yet.</p>}
+        <h2>{tr("Items (")}{lines.length})</h2>
+        {lines.length === 0 && <p className="muted small">{tr("No items yet.")}</p>}
         <ul className="lines">
           {lines.map((l) => (
             <li key={l.id}>
@@ -454,27 +428,23 @@ export default async function QuotationPage({
                     <input type="hidden" name="quotation_id" value={q.id} />
                     <input type="hidden" name="line_id" value={l.id} />
                     <div>
-                      <label htmlFor={`q-${l.id}`}>Qty</label>
+                      <label htmlFor={`q-${l.id}`}>{tr("Qty")}</label>
                       <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} />
                     </div>
                     <div>
-                      <label htmlFor={`p-${l.id}`}>Unit price</label>
+                      <label htmlFor={`p-${l.id}`}>{tr("Unit price")}</label>
                       <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} />
                     </div>
                     <div>
-                      <label htmlFor={`d-${l.id}`}>Disc. %</label>
+                      <label htmlFor={`d-${l.id}`}>{tr("Disc. %")}</label>
                       <input id={`d-${l.id}`} name="discount_pct" type="text" inputMode="decimal" defaultValue={fmtNum(l.discount_pct)} />
                     </div>
-                    <SubmitButton className="btn btn-small" pendingText="…">
-                      Update
-                    </SubmitButton>
+                    <SubmitButton className="btn btn-small" pendingText="…">{tr("Update")}</SubmitButton>
                   </form>
                   <form action={removeQuoteLine}>
                     <input type="hidden" name="quotation_id" value={q.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">
-                      Remove
-                    </SubmitButton>
+                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
                   </form>
                 </div>
               )}
@@ -485,26 +455,25 @@ export default async function QuotationPage({
         <div className="totals" style={{ marginTop: 12 }}>
           {n(q.discount_total) > 0 && (
             <div className="row small muted">
-              <span>Discounts</span>
+              <span>{tr("Discounts")}</span>
               <span>− {formatMoney(q.discount_total, ccy)}</span>
             </div>
           )}
           <div className="row">
-            <span>Subtotal</span>
+            <span>{tr("Subtotal")}</span>
             <span>{formatMoney(q.subtotal, ccy)}</span>
           </div>
           <div className="row">
-            <span>VAT {n(q.vat_rate)}%</span>
+            <span>{tr("VAT")}{" "}{n(q.vat_rate)}%</span>
             <span>{formatMoney(q.vat_amount, ccy)}</span>
           </div>
           <div className="row grand">
-            <span>Total</span>
+            <span>{tr("Total")}</span>
             <span>{formatMoney(q.total, ccy)}</span>
           </div>
           {ccy !== company.base_currency && (
             <div className="row small muted">
-              <span>
-                ≈ in {company.base_currency} at {fmtNum(q.exchange_rate)}
+              <span>{tr("≈ in")}{" "}{company.base_currency}{" "}{tr("at")}{" "}{fmtNum(q.exchange_rate)}
               </span>
               <span>{formatMoney(n(q.total) * n(q.exchange_rate), company.base_currency)}</span>
             </div>
@@ -514,18 +483,15 @@ export default async function QuotationPage({
         {editable && (
           <details style={{ marginTop: 16 }} open={lines.length === 0}>
             <summary>
-              <strong>+ Add an item</strong>
+              <strong>{tr("+ Add an item")}</strong>
             </summary>
             <form action={addQuoteLine} style={{ marginTop: 12 }}>
               <input type="hidden" name="quotation_id" value={q.id} />
               <ProductLineFields products={products} showPrice />
               {ccy !== company.base_currency && (
-                <p className="hint">
-                  Catalogue prices are converted from {company.base_currency} at the rate on this quotation ({fmtNum(q.exchange_rate)}).
-                  Set the rate under Details first.
-                </p>
+                <p className="hint">{tr("Catalogue prices are converted from")}{" "}{company.base_currency}{" "}{tr("at the rate on this quotation (")}{fmtNum(q.exchange_rate)}{tr("). Set the rate under Details first.")}</p>
               )}
-              <SubmitButton pendingText="Adding…">Add item</SubmitButton>
+              <SubmitButton pendingText={tr("Adding…")}>{tr("Add item")}</SubmitButton>
             </form>
           </details>
         )}
@@ -533,26 +499,26 @@ export default async function QuotationPage({
 
       {showCosts && (estimate || marginRow) && (
         <section className="card">
-          <h2>Margin</h2>
-          <p className="muted small">Only management, procurement and finance can see this.</p>
+          <h2>{tr("Margin")}</h2>
+          <p className="muted small">{tr("Only management, procurement and finance can see this.")}</p>
           {(() => {
             const m = estimate ? estimate.margin : marginRow?.margin_pct != null ? n(marginRow.margin_pct) : null;
             const missing = estimate ? estimate.missing : n(marginRow?.lines_without_cost);
             return (
               <dl className="kv">
-                <dt>{estimate ? "Estimated margin" : "Margin at submission"}</dt>
+                <dt>{estimate ? tr("Estimated margin") : tr("Margin at submission")}</dt>
                 <dd className={m !== null && m < minMargin ? "text-warn" : undefined}>
                   {m === null ? "—" : `${m.toFixed(1)}%`}
                 </dd>
                 {missing > 0 && (
                   <>
-                    <dt>Lines without a cost</dt>
+                    <dt>{tr("Lines without a cost")}</dt>
                     <dd className="text-warn">{missing}</dd>
                   </>
                 )}
                 {!estimate && marginRow && (
                   <>
-                    <dt>Cost (known lines)</dt>
+                    <dt>{tr("Cost (known lines)")}</dt>
                     <dd>{formatMoney(marginRow.cost_base, company.base_currency)}</dd>
                   </>
                 )}
@@ -564,21 +530,21 @@ export default async function QuotationPage({
 
       {/* ---------- Details ---------- */}
       <section className="card" id="details">
-        <h2>Details</h2>
+        <h2>{tr("Details")}</h2>
         <form action={saveQuoteHeader}>
           <input type="hidden" name="id" value={q.id} />
           <fieldset className="plain" disabled={!editable}>
             <div className="grid grid-2">
               <div className="field">
-                <label htmlFor="contact_name">Attention (client contact)</label>
+                <label htmlFor="contact_name">{tr("Attention (client contact)")}</label>
                 <input id="contact_name" name="contact_name" type="text" defaultValue={q.contact_name ?? ""} />
               </div>
               <div className="field">
-                <label htmlFor="client_ref">Client&apos;s reference</label>
+                <label htmlFor="client_ref">{tr("Client's reference")}</label>
                 <input id="client_ref" name="client_ref" type="text" defaultValue={q.client_ref ?? ""} />
               </div>
               <div className="field">
-                <label htmlFor="currency">Currency</label>
+                <label htmlFor="currency">{tr("Currency")}</label>
                 <select id="currency" name="currency" defaultValue={ccy}>
                   {CURRENCIES.map((c) => (
                     <option key={c}>{c}</option>
@@ -586,25 +552,24 @@ export default async function QuotationPage({
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="exchange_rate">
-                  Exchange rate <span className="hint">· {company.base_currency} per 1 unit</span>
+                <label htmlFor="exchange_rate">{tr("Exchange rate")}{" "}<span className="hint">· {company.base_currency}{" "}{tr("per 1 unit")}</span>
                 </label>
                 <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(q.exchange_rate)} />
               </div>
               <div className="field">
-                <label htmlFor="issue_date">Issue date</label>
+                <label htmlFor="issue_date">{tr("Issue date")}</label>
                 <input id="issue_date" name="issue_date" type="date" defaultValue={q.issue_date} />
               </div>
               <div className="field">
-                <label htmlFor="valid_until">Valid until</label>
+                <label htmlFor="valid_until">{tr("Valid until")}</label>
                 <input id="valid_until" name="valid_until" type="date" defaultValue={q.valid_until ?? ""} />
               </div>
               <div className="field">
-                <label htmlFor="delivery_time">Delivery time</label>
-                <input id="delivery_time" name="delivery_time" type="text" defaultValue={q.delivery_time ?? ""} placeholder="e.g. 2–3 weeks after PO" />
+                <label htmlFor="delivery_time">{tr("Delivery time")}</label>
+                <input id="delivery_time" name="delivery_time" type="text" defaultValue={q.delivery_time ?? ""} placeholder={tr("e.g. 2–3 weeks after PO")} />
               </div>
               <div className="field">
-                <label htmlFor="payment_terms">Payment terms</label>
+                <label htmlFor="payment_terms">{tr("Payment terms")}</label>
                 <select id="payment_terms" name="payment_terms" defaultValue={q.payment_terms ?? ""}>
                   <option value="">—</option>
                   {[...new Set([...(q.payment_terms ? [q.payment_terms] : []), ...PAYMENT_TERMS])].map((t) => (
@@ -613,7 +578,7 @@ export default async function QuotationPage({
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="incoterms">Incoterms</label>
+                <label htmlFor="incoterms">{tr("Incoterms")}</label>
                 <select id="incoterms" name="incoterms" defaultValue={q.incoterms ?? ""}>
                   <option value="">—</option>
                   {INCOTERMS.map((t) => (
@@ -622,32 +587,31 @@ export default async function QuotationPage({
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="vat_rate">VAT %</label>
+                <label htmlFor="vat_rate">{tr("VAT %")}</label>
                 <input id="vat_rate" name="vat_rate" type="text" inputMode="decimal" defaultValue={fmtNum(q.vat_rate)} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label htmlFor="notes">
-                  Notes to the client <span className="hint">· printed on the quotation</span>
+                <label htmlFor="notes">{tr("Notes to the client")}{" "}<span className="hint">{tr("· printed on the quotation")}</span>
                 </label>
                 <textarea id="notes" name="notes" defaultValue={q.notes ?? ""} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label htmlFor="terms">Terms and conditions</label>
+                <label htmlFor="terms">{tr("Terms and conditions")}</label>
                 <textarea id="terms" name="terms" defaultValue={q.terms ?? ""} />
               </div>
             </div>
-            {editable && <SubmitButton>Save details</SubmitButton>}
+            {editable && <SubmitButton>{tr("Save details")}</SubmitButton>}
           </fieldset>
         </form>
       </section>
 
       {revisions.length > 1 && (
         <section className="card">
-          <h2>Versions</h2>
+          <h2>{tr("Versions")}</h2>
           <ul className="list">
             {revisions.map((r) => (
               <li key={r.id} className="row">
-                {r.id === q.id ? <strong>{quoteNo(r)} (this one)</strong> : <Link href={`/quotations/${r.id}`}>{quoteNo(r)}</Link>}
+                {r.id === q.id ? <strong>{quoteNo(r)}{" "}{tr("(this one)")}</strong> : <Link href={`/quotations/${r.id}`}>{quoteNo(r)}</Link>}
                 <StatusBadge map={QUOTE_STATUS} status={r.status} />
               </li>
             ))}
@@ -660,17 +624,13 @@ export default async function QuotationPage({
           {["pending_approval", "approved", "sent", "rejected"].includes(q.status) && (
             <form action={reviseQuote}>
               <input type="hidden" name="id" value={q.id} />
-              <SubmitButton className="btn" pendingText="Copying…">
-                Make a revision
-              </SubmitButton>
+              <SubmitButton className="btn" pendingText={tr("Copying…")}>{tr("Make a revision")}</SubmitButton>
             </form>
           )}
           {!["accepted", "superseded", "cancelled"].includes(q.status) && (
             <form action={cancelQuote}>
               <input type="hidden" name="id" value={q.id} />
-              <SubmitButton className="btn btn-danger" pendingText="Cancelling…">
-                Cancel quotation
-              </SubmitButton>
+              <SubmitButton className="btn btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel quotation")}</SubmitButton>
             </form>
           )}
         </div>

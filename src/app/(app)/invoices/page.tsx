@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -34,6 +35,7 @@ type Row = {
 };
 
 export default async function InvoicesPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
@@ -69,36 +71,32 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   return (
     <>
       <p className="small">
-        <Link href={can(role, "seeFinance") ? "/finance" : "/sales"}>← {can(role, "seeFinance") ? "Finance" : "Sales"}</Link>
+        <Link href={can(role, "seeFinance") ? "/finance" : "/sales"}>← {can(role, "seeFinance") ? tr("Finance") : tr("Sales")}</Link>
       </p>
       <div className="page-head">
-        <h1>Invoices</h1>
+        <h1>{tr("Invoices")}</h1>
         {can(role, "editInvoices") && (
-          <Link href="/invoices/new" className="btn btn-primary btn-small">
-            + Invoice
-          </Link>
+          <Link href="/invoices/new" className="btn btn-primary btn-small">{tr("+ Invoice")}</Link>
         )}
       </div>
       <Notice {...notice} />
       <form className="card toolbar" method="get" role="search">
         <div className="toolbar-row">
-          <input type="search" name="q" defaultValue={search} placeholder="Invoice no. or client's PO no." aria-label="Search" />
-          <button className="btn" type="submit">
-            Search
-          </button>
+          <input type="search" name="q" defaultValue={search} placeholder={tr("Invoice no. or client's PO no.")} aria-label={tr("Search")} />
+          <button className="btn" type="submit">{tr("Search")}</button>
         </div>
       </form>
       {!search && (
-        <nav className="tabs-row" aria-label="Filter">
+        <nav className="tabs-row" aria-label={tr("Filter")}>
           {TABS.map((t) => (
             <Link key={t.key} href={`/invoices?tab=${t.key}`} aria-current={t.key === tab.key ? "page" : undefined}>
-              {t.label}
+              {tr(String(t.label ?? ""))}
             </Link>
           ))}
         </nav>
       )}
       {rows.length === 0 ? (
-        <p className="card muted">No invoices here. Invoices are usually created from an accepted quotation or a delivered delivery note.</p>
+        <p className="card muted">{tr("No invoices here. Invoices are usually created from an accepted quotation or a delivered delivery note.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {
@@ -111,7 +109,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
                   <div className="main">
                     <div className="title">{r.client?.name}</div>
                     <div className="sub">
-                      {r.number || "Draft"}
+                      {r.number || tr("Draft")}
                       {r.issue_date && ` · ${formatDate(r.issue_date)}`}
                       {r.due_date && (r.status === "issued" || r.status === "partly_paid") && ` · due ${formatDate(r.due_date)}`}
                       {late > 0 && ` · ${late} days late`}
@@ -128,7 +126,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
         </ul>
       )}
       {openTotal > 0 && tab.key !== "all" && rows.every((r) => r.currency === company.base_currency) && (
-        <p className="small muted">Still owed on this list: {formatMoney(openTotal, company.base_currency)}</p>
+        <p className="small muted">{tr("Still owed on this list:")}{" "}{formatMoney(openTotal, company.base_currency)}</p>
       )}
     </>
   );

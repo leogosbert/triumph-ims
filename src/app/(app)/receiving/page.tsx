@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
@@ -12,6 +13,7 @@ type Po = { id: string; number: string; status: string; expected_date: string | 
 type Grn = { id: string; number: string; received_on: string; po: { number: string; supplier: { name: string } | null } | null };
 
 export default async function ReceivingPage() {
+  await primeLang();
   const { supabase, company, role } = await getAppContext();
   if (!can(role, "receiveGoods")) redirect("/");
   const today = todayTz();
@@ -36,12 +38,12 @@ export default async function ReceivingPage() {
   return (
     <>
       <p className="small">
-        <Link href="/stock">← Stock</Link>
+        <Link href="/stock">{tr("← Stock")}</Link>
       </p>
-      <h1>Receive goods</h1>
-      <p className="muted small">Choose the purchase order the delivery belongs to. Check quantities against the supplier&apos;s delivery note.</p>
+      <h1>{tr("Receive goods")}</h1>
+      <p className="muted small">{tr("Choose the purchase order the delivery belongs to. Check quantities against the supplier's delivery note.")}</p>
       {pos.length === 0 ? (
-        <p className="card muted">No purchase orders are waiting for delivery.</p>
+        <p className="card muted">{tr("No purchase orders are waiting for delivery.")}</p>
       ) : (
         <ul className="rec-list">
           {pos.map((p) => (
@@ -52,7 +54,7 @@ export default async function ReceivingPage() {
                   <div className="sub">
                     {p.number}
                     {p.expected_date && (
-                      <span className={p.expected_date < today ? "text-warn" : undefined}> · due {formatDate(p.expected_date)}</span>
+                      <span className={p.expected_date < today ? "text-warn" : undefined}>{" "}{tr("· due")}{" "}{formatDate(p.expected_date)}</span>
                     )}
                   </div>
                 </div>
@@ -66,7 +68,7 @@ export default async function ReceivingPage() {
       )}
       {grns.length > 0 && (
         <section className="card" style={{ marginTop: 16 }}>
-          <h2>Recently received</h2>
+          <h2>{tr("Recently received")}</h2>
           <ul className="list">
             {grns.map((g) => (
               <li key={g.id} className="row">

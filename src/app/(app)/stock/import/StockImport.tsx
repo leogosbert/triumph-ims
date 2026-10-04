@@ -1,5 +1,6 @@
 "use client";
 
+import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { useState } from "react";
 import readXlsxFile, { readSheetNames } from "read-excel-file";
@@ -26,6 +27,7 @@ function isoDate(v: Cell) {
 const find = (header: string[], ...names: string[]) => header.findIndex((h) => names.some((n) => h.startsWith(n)));
 
 export function StockImport() {
+  const tr = useTr();
   const [rows, setRows] = useState<StockRow[] | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +99,7 @@ export function StockImport() {
   return (
     <div className="card">
       <div className="field">
-        <label htmlFor="file">Spreadsheet (.xlsx)</label>
+        <label htmlFor="file">{tr("Spreadsheet (.xlsx)")}</label>
         <input id="file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={onFile} />
         {fileName && <p className="hint">{fileName}</p>}
       </div>
@@ -109,26 +111,24 @@ export function StockImport() {
       {rows && (
         <>
           <p>
-            <strong>{rows.length}</strong> row{rows.length === 1 ? "" : "s"} ready, {rows.reduce((s, r) => s + (Number(r.quantity) || 0), 0).toLocaleString("en-GB")} units in total.
-          </p>
+            <strong>{rows.length}</strong>{" "}{tr("row")}{rows.length === 1 ? "" : "s"}{" "}{tr("ready,")}{" "}{rows.reduce((s, r) => s + (Number(r.quantity) || 0), 0).toLocaleString("en-GB")}{" "}{tr("units in total.")}</p>
           <ul className="list small">
             {rows.slice(0, 5).map((r, i) => (
               <li key={i}>
-                {r.sku} · {r.store || "MAIN"} · {r.quantity}
+                {r.sku} · {r.store || tr("MAIN")} · {r.quantity}
                 {r.batch_no && ` · batch ${r.batch_no}`}
                 {r.expiry_date && ` · exp ${r.expiry_date}`}
               </li>
             ))}
-            {rows.length > 5 && <li className="muted">…and {rows.length - 5} more</li>}
+            {rows.length > 5 && <li className="muted">{tr("…and")}{" "}{rows.length - 5}{" "}{tr("more")}</li>}
           </ul>
           <button type="button" className="btn btn-primary btn-block" onClick={onLoad} disabled={busy}>
-            {busy ? "Loading…" : "Load opening stock"}
+            {busy ? tr("Loading…") : tr("Load opening stock")}
           </button>
         </>
       )}
       {done !== null && (
-        <div className="notice notice-ok" role="status">
-          Loaded {done} row{done === 1 ? "" : "s"} of opening stock. <Link href="/stock">See stock →</Link>
+        <div className="notice notice-ok" role="status">{tr("Loaded")}{" "}{done}{" "}{tr("row")}{done === 1 ? "" : "s"}{" "}{tr("of opening stock.")}{" "}<Link href="/stock">{tr("See stock →")}</Link>
         </div>
       )}
     </div>

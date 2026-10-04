@@ -1,5 +1,6 @@
 "use client";
 
+import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 type Mode = "signin" | "signup";
 
 export default function LoginPage() {
+  const tr = useTr();
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("signin");
   const [busy, setBusy] = useState(false);
@@ -91,22 +93,18 @@ export default function LoginPage() {
 
   return (
     <div className="auth-wrap">
-      <img className="auth-logo" src="/brand/lemo-ims-on-dark.svg" alt="LeMo IMS" />
+      <img className="auth-logo" src="/brand/lemo-ims-on-dark.svg" alt={tr("LeMo IMS")} />
       <div className="auth-card">
         <div className="brand">
           <div>
-            <h1 style={{ margin: 0 }}>Welcome back</h1>
-            <span className="muted small">Sales · Procurement · Stock · Delivery · Finance</span>
+            <h1 style={{ margin: 0 }}>{tr("Welcome back")}</h1>
+            <span className="muted small">{tr("Sales · Procurement · Stock · Delivery · Finance")}</span>
           </div>
         </div>
 
-        <div className="tabs" role="group" aria-label="Sign in or create an account">
-          <button type="button" aria-pressed={mode === "signin"} onClick={() => setMode("signin")}>
-            Sign in
-          </button>
-          <button type="button" aria-pressed={mode === "signup"} onClick={() => setMode("signup")}>
-            Create account
-          </button>
+        <div className="tabs" role="group" aria-label={tr("Sign in or create an account")}>
+          <button type="button" aria-pressed={mode === "signin"} onClick={() => setMode("signin")}>{tr("Sign in")}</button>
+          <button type="button" aria-pressed={mode === "signup"} onClick={() => setMode("signup")}>{tr("Create account")}</button>
         </div>
 
         {error && <p className="notice notice-error" role="alert">{error}</p>}
@@ -115,17 +113,16 @@ export default function LoginPage() {
         <form onSubmit={onSubmit}>
           {mode === "signup" && (
             <div className="field">
-              <label htmlFor="full_name">Full name</label>
+              <label htmlFor="full_name">{tr("Full name")}</label>
               <input id="full_name" name="full_name" type="text" autoComplete="name" required />
             </div>
           )}
           <div className="field">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">{tr("Email")}</label>
             <input id="email" name="email" type="email" autoComplete="email" inputMode="email" required />
           </div>
           <div className="field">
-            <label htmlFor="password">
-              Password {mode === "signup" && <span className="hint">· at least 8 characters</span>}
+            <label htmlFor="password">{tr("Password")}{" "}{mode === "signup" && <span className="hint">{tr("· at least 8 characters")}</span>}
             </label>
             <PasswordInput
               id="password"
@@ -135,22 +132,20 @@ export default function LoginPage() {
             />
           </div>
           <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
-            {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+            {busy ? tr("Please wait…") : mode === "signin" ? tr("Sign in") : tr("Create account")}
           </button>
         </form>
 
         {mode === "signin" && (
           <p className="small" style={{ marginTop: 16, textAlign: "center" }}>
-            <Link href="/forgot-password">Forgot your password?</Link>
+            <Link href="/forgot-password">{tr("Forgot your password?")}</Link>
           </p>
         )}
         {mode === "signup" && (
-          <p className="small muted" style={{ marginTop: 16 }}>
-            Joining a company? Create your account with the same email address your manager invited.
-          </p>
+          <p className="small muted" style={{ marginTop: 16 }}>{tr("Joining a company? Create your account with the same email address your manager invited.")}</p>
         )}
       </div>
-      <p className="auth-foot">LeMo IMS · a LeMo Tech Solutions product</p>
+      <p className="auth-foot">{tr("LeMo IMS · a LeMo Tech Solutions product")}</p>
     </div>
   );
 }

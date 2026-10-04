@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -21,6 +22,7 @@ export default async function SupplierQuotePage({
   params: Promise<{ id: string; sid: string }>;
   searchParams: SearchParams;
 }) {
+  await primeLang();
   const { id, sid } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -42,17 +44,17 @@ export default async function SupplierQuotePage({
       <p className="small">
         <Link href={`/supplier-rfqs/${id}`}>← {r.title ?? r.number}</Link>
       </p>
-      <h1>Prices from {inv.supplier?.name}</h1>
-      <p className="muted small">Type the prices exactly as the supplier quoted them, in their currency. Leave an item empty if they can&apos;t supply it.</p>
+      <h1>{tr("Prices from")}{" "}{inv.supplier?.name}</h1>
+      <p className="muted small">{tr("Type the prices exactly as the supplier quoted them, in their currency. Leave an item empty if they can't supply it.")}</p>
       <Notice {...notice} />
       <form action={saveSupplierQuote}>
         <input type="hidden" name="srfq_id" value={id} />
         <input type="hidden" name="invite_id" value={sid} />
         <section className="card">
-          <h2>Their offer</h2>
+          <h2>{tr("Their offer")}</h2>
           <div className="grid grid-2">
             <div className="field">
-              <label htmlFor="currency">Currency</label>
+              <label htmlFor="currency">{tr("Currency")}</label>
               <select id="currency" name="currency" defaultValue={inv.currency}>
                 {CURRENCIES.map((c) => (
                   <option key={c}>{c}</option>
@@ -60,21 +62,20 @@ export default async function SupplierQuotePage({
               </select>
             </div>
             <div className="field">
-              <label htmlFor="exchange_rate">
-                Exchange rate <span className="hint">· {company.base_currency} per 1 unit (ignored for {company.base_currency})</span>
+              <label htmlFor="exchange_rate">{tr("Exchange rate")}{" "}<span className="hint">· {company.base_currency}{" "}{tr("per 1 unit (ignored for")}{" "}{company.base_currency})</span>
               </label>
               <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmt(inv.exchange_rate)} />
             </div>
             <div className="field">
-              <label htmlFor="freight">Freight / delivery charge (their currency)</label>
+              <label htmlFor="freight">{tr("Freight / delivery charge (their currency)")}</label>
               <input id="freight" name="freight" type="text" inputMode="decimal" defaultValue={fmt(inv.freight)} />
             </div>
             <div className="field">
-              <label htmlFor="lead_time_days">Lead time (days)</label>
+              <label htmlFor="lead_time_days">{tr("Lead time (days)")}</label>
               <input id="lead_time_days" name="lead_time_days" type="text" inputMode="numeric" defaultValue={fmt(inv.lead_time_days)} />
             </div>
             <div className="field">
-              <label htmlFor="payment_terms">Payment terms</label>
+              <label htmlFor="payment_terms">{tr("Payment terms")}</label>
               <select id="payment_terms" name="payment_terms" defaultValue={inv.payment_terms ?? ""}>
                 <option value="">—</option>
                 {[...new Set([...(inv.payment_terms ? [inv.payment_terms] : []), ...PAYMENT_TERMS])].map((t) => (
@@ -83,7 +84,7 @@ export default async function SupplierQuotePage({
               </select>
             </div>
             <div className="field">
-              <label htmlFor="incoterms">Incoterms</label>
+              <label htmlFor="incoterms">{tr("Incoterms")}</label>
               <select id="incoterms" name="incoterms" defaultValue={inv.incoterms ?? ""}>
                 <option value="">—</option>
                 {INCOTERMS.map((t) => (
@@ -92,26 +93,26 @@ export default async function SupplierQuotePage({
               </select>
             </div>
             <div className="field">
-              <label htmlFor="valid_until">Offer valid until</label>
+              <label htmlFor="valid_until">{tr("Offer valid until")}</label>
               <input id="valid_until" name="valid_until" type="date" defaultValue={inv.valid_until ?? ""} />
             </div>
             <div className="field">
-              <label htmlFor="received_on">Received on</label>
+              <label htmlFor="received_on">{tr("Received on")}</label>
               <input id="received_on" name="received_on" type="date" defaultValue={inv.received_on ?? todayTz()} />
             </div>
             <div className="field">
-              <label htmlFor="supplier_ref">Their quote reference</label>
+              <label htmlFor="supplier_ref">{tr("Their quote reference")}</label>
               <input id="supplier_ref" name="supplier_ref" type="text" defaultValue={inv.supplier_ref ?? ""} />
             </div>
             <div className="field" style={{ gridColumn: "1 / -1" }}>
-              <label htmlFor="notes">Notes</label>
-              <textarea id="notes" name="notes" defaultValue={inv.notes ?? ""} placeholder="e.g. offers FAG instead of SKF; price excludes CoA" />
+              <label htmlFor="notes">{tr("Notes")}</label>
+              <textarea id="notes" name="notes" defaultValue={inv.notes ?? ""} placeholder={tr("e.g. offers FAG instead of SKF; price excludes CoA")} />
             </div>
           </div>
         </section>
 
         <section className="card">
-          <h2>Unit prices</h2>
+          <h2>{tr("Unit prices")}</h2>
           <ul className="lines">
             {lines.map((l) => (
               <li key={l.id}>
@@ -129,7 +130,7 @@ export default async function SupplierQuotePage({
                     type="text"
                     inputMode="decimal"
                     aria-label={`Unit price for ${l.description}`}
-                    placeholder="price / unit"
+                    placeholder={tr("price / unit")}
                     defaultValue={fmt(prices.get(l.id))}
                     style={{ width: 140 }}
                   />
@@ -138,7 +139,7 @@ export default async function SupplierQuotePage({
             ))}
           </ul>
         </section>
-        <SubmitButton className="btn btn-primary btn-block">Save prices</SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block">{tr("Save prices")}</SubmitButton>
       </form>
     </>
   );

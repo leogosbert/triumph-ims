@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { getAppContext } from "@/lib/context";
@@ -12,6 +13,7 @@ export const metadata = { title: "Search" };
 type Hit = { href: string; title: string; sub: string; side?: string };
 
 export default async function SearchPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const { supabase, company, role } = await getAppContext();
@@ -105,14 +107,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
       ) : (
         found.map((g) => (
           <section key={g.title}>
-            <h2 className="search-group">{g.title}</h2>
+            <h2 className="search-group">{tr(String(g.title ?? ""))}</h2>
             <ul className="rec-list">
               {g.hits.map((h) => (
                 <li key={h.href}>
                   <Link href={h.href}>
                     <div className="main">
-                      <div className="title">{h.title}</div>
-                      <div className="sub">{h.sub}</div>
+                      <div className="title">{tr(String(h.title ?? ""))}</div>
+                      <div className="sub">{tr(String(h.sub ?? ""))}</div>
                     </div>
                     {h.side && <div className="side num small">{h.side}</div>}
                   </Link>

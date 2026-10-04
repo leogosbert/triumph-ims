@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { getLang } from "@/lib/lang";
+import { LangProvider } from "@/lib/tr-client";
 import "./globals.css";
 
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
@@ -29,7 +30,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const lang = await getLang();
   return (
     <html lang={lang} className={`${sans.variable} ${mono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <LangProvider lang={lang === "sw" ? "sw" : "en"}>{children}</LangProvider>
+      </body>
     </html>
   );
 }

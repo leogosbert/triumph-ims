@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -12,6 +13,7 @@ import { saveProduct } from "../actions";
 export const metadata = { title: "New product" };
 
 export default async function NewProductPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const notice = await readNotice(searchParams);
   const { role } = await getAppContext();
   if (!can(role, "editProducts")) redirect("/products");
@@ -19,21 +21,17 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
   return (
     <>
       <p className="small">
-        <Link href="/products">← Products</Link>
+        <Link href="/products">{tr("← Products")}</Link>
       </p>
-      <h1>New product</h1>
+      <h1>{tr("New product")}</h1>
       <Notice {...notice} />
       <form action={saveProduct}>
         <input type="hidden" name="id" value="" />
         <RecordFields sections={PRODUCT_SECTIONS} values={{ unit: "pcs", hazardous: false, sds_on_file: false }} />
-        <SubmitButton className="btn btn-primary btn-block" pendingText="Adding…">
-          Add product
-        </SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Adding…")}>{tr("Add product")}</SubmitButton>
       </form>
       {can(role, "editCosts") && (
-        <p className="muted small" style={{ marginTop: 8 }}>
-          You can add the supplier and cost after saving.
-        </p>
+        <p className="muted small" style={{ marginTop: 8 }}>{tr("You can add the supplier and cost after saving.")}</p>
       )}
     </>
   );

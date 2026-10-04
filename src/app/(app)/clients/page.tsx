@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { ListToolbar } from "@/components/ListToolbar";
 import { Notice } from "@/components/Notice";
@@ -22,6 +23,7 @@ type Row = {
 };
 
 export default async function ClientsPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
@@ -45,8 +47,8 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
   return (
     <>
       <div className="page-head">
-        <h1>Clients</h1>
-        <span className="muted small">{count ?? 0} found</span>
+        <h1>{tr("Clients")}</h1>
+        <span className="muted small">{count ?? 0}{" "}{tr("found")}</span>
       </div>
       <Notice {...notice} />
       <ListToolbar
@@ -58,10 +60,9 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
       />
       {rows.length === 0 ? (
         <p className="card muted">
-          {q || industry ? "No clients match your search." : "No clients yet."}{" "}
+          {q || industry ? tr("No clients match your search.") : tr("No clients yet.")}{" "}
           {can(role, "importData") && !q && !industry && (
-            <>
-              You can <Link href="/import">import them from your spreadsheet</Link>.
+            <>{tr("You can")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
             </>
           )}
         </p>
@@ -72,7 +73,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
               <Link href={`/clients/${c.id}`}>
                 <div className="main">
                   <div className="title">
-                    {c.name} {!c.active && <span className="badge off">Archived</span>}
+                    {c.name} {!c.active && <span className="badge off">{tr("Archived")}</span>}
                   </div>
                   <div className="sub">
                     {c.code}
@@ -83,7 +84,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
                 <div className="side muted">
                   {c.credit_limit > 0 ? (
                     <>
-                      <div className="small">Credit limit</div>
+                      <div className="small">{tr("Credit limit")}</div>
                       {formatMoney(c.credit_limit, "TZS")}
                     </>
                   ) : (
@@ -96,7 +97,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
         </ul>
       )}
       {(count ?? 0) > LIST_LIMIT && (
-        <p className="muted small">Showing the first {LIST_LIMIT}. Search to narrow the list.</p>
+        <p className="muted small">{tr("Showing the first")}{" "}{LIST_LIMIT}{tr(". Search to narrow the list.")}</p>
       )}
     </>
   );

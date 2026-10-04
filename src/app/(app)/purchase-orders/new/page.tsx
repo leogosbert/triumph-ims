@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -11,6 +12,7 @@ import { newPurchaseOrder } from "../actions";
 export const metadata = { title: "New purchase order" };
 
 export default async function NewPoPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -28,29 +30,22 @@ export default async function NewPoPage({ searchParams }: { searchParams: Search
   return (
     <>
       <p className="small">
-        <Link href="/purchase-orders">← Purchase orders</Link>
+        <Link href="/purchase-orders">{tr("← Purchase orders")}</Link>
       </p>
-      <h1>New purchase order</h1>
+      <h1>{tr("New purchase order")}</h1>
       {q && (
-        <p className="banner ok small">
-          For client quotation {quoteNo(q)} ({q.client?.name}). Its items are copied in at the last known cost.
-        </p>
+        <p className="banner ok small">{tr("For client quotation")}{" "}{quoteNo(q)} ({q.client?.name}{tr("). Its items are copied in at the last known cost.")}</p>
       )}
       {!q && (
-        <p className="muted small">
-          To compare several suppliers first, use a <Link href="/supplier-rfqs/new">supplier RFQ</Link> and award the winner: the PO is created
-          for you.
-        </p>
+        <p className="muted small">{tr("To compare several suppliers first, use a")}{" "}<Link href="/supplier-rfqs/new">{tr("supplier RFQ")}</Link>{" "}{tr("and award the winner: the PO is created for you.")}</p>
       )}
       <Notice {...notice} />
       <form action={newPurchaseOrder} className="card">
         <input type="hidden" name="quotation_id" value={q?.id ?? ""} />
         <div className="field">
-          <label htmlFor="supplier_id">Supplier</label>
+          <label htmlFor="supplier_id">{tr("Supplier")}</label>
           <select id="supplier_id" name="supplier_id" required defaultValue="">
-            <option value="" disabled>
-              Choose a supplier
-            </option>
+            <option value="" disabled>{tr("Choose a supplier")}</option>
             {((suppliers ?? []) as { id: string; name: string; code: string }[]).map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name} ({s.code})
@@ -58,9 +53,7 @@ export default async function NewPoPage({ searchParams }: { searchParams: Search
             ))}
           </select>
         </div>
-        <SubmitButton className="btn btn-primary btn-block" pendingText="Creating…">
-          Create draft PO
-        </SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Creating…")}>{tr("Create draft PO")}</SubmitButton>
       </form>
     </>
   );

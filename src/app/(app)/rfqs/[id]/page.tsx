@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -21,6 +22,7 @@ type Line = { id: string; line_no: number; description: string; quantity: number
 type Quote = { id: string; number: string; revision: number; status: string; total: number; currency: string };
 
 export default async function RfqPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -51,25 +53,25 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
   return (
     <>
       <p className="small">
-        <Link href="/rfqs">← RFQs</Link>
+        <Link href="/rfqs">{tr("← RFQs")}</Link>
       </p>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{rfq.client?.name}</h1>
         <StatusBadge map={RFQ_STATUS} status={rfq.status} />
       </div>
       <p className="muted small">
-        {rfq.number} · received {formatDate(rfq.received_on)} by{" "}
+        {rfq.number}{" "}{tr("· received")}{" "}{formatDate(rfq.received_on)}{" "}{tr("by")}{" "}
         {RECEIVED_VIA.find((r) => r.value === rfq.received_via)?.label.toLowerCase()}
-        {rfq.due_on && <> · due {formatDate(rfq.due_on)}</>}
+        {rfq.due_on && <>{" "}{tr("· due")}{" "}{formatDate(rfq.due_on)}</>}
         {rfq.assigned_to && <> · {names.get(rfq.assigned_to)}</>}
       </p>
-      {rfq.title && <p><strong>{rfq.title}</strong></p>}
+      {rfq.title && <p><strong>{tr(String(rfq.title ?? ""))}</strong></p>}
       <Notice {...notice} />
 
       <section className="card" id="lines">
-        <h2>Items requested ({lines.length})</h2>
+        <h2>{tr("Items requested (")}{lines.length})</h2>
         {lines.length === 0 ? (
-          <p className="muted small">No items yet.</p>
+          <p className="muted small">{tr("No items yet.")}</p>
         ) : (
           <ul className="lines">
             {lines.map((l) => (
@@ -81,7 +83,7 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
                     </div>
                     <div className="muted small">
                       {Number(l.quantity).toLocaleString("en-GB")} {l.unit}
-                      {l.product ? ` · ${l.product.sku}` : " · not in catalogue"}
+                      {l.product ? ` · ${l.product.sku}` : tr(" · not in catalogue")}
                       {l.notes ? ` · ${l.notes}` : ""}
                     </div>
                   </div>
@@ -89,9 +91,7 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
                     <form action={removeRfqLine}>
                       <input type="hidden" name="rfq_id" value={rfq.id} />
                       <input type="hidden" name="line_id" value={l.id} />
-                      <SubmitButton className="btn btn-small btn-danger" pendingText="…">
-                        Remove
-                      </SubmitButton>
+                      <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
                     </form>
                   )}
                 </div>
@@ -102,25 +102,25 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
         {linesEditable && (
           <details style={{ marginTop: 12 }} open={lines.length === 0}>
             <summary className="small">
-              <strong>+ Add an item</strong>
+              <strong>{tr("+ Add an item")}</strong>
             </summary>
             <form action={addRfqLine} style={{ marginTop: 12 }}>
               <input type="hidden" name="rfq_id" value={rfq.id} />
               <ProductLineFields products={products} />
               <div className="field">
-                <label htmlFor="notes">Notes</label>
-                <input id="notes" name="notes" type="text" placeholder="e.g. client wants SKF only" />
+                <label htmlFor="notes">{tr("Notes")}</label>
+                <input id="notes" name="notes" type="text" placeholder={tr("e.g. client wants SKF only")} />
               </div>
-              <SubmitButton pendingText="Adding…">Add item</SubmitButton>
+              <SubmitButton pendingText={tr("Adding…")}>{tr("Add item")}</SubmitButton>
             </form>
           </details>
         )}
       </section>
 
       <section className="card">
-        <h2>Quotations</h2>
+        <h2>{tr("Quotations")}</h2>
         {quotes.length === 0 ? (
-          <p className="muted small">No quotation yet.</p>
+          <p className="muted small">{tr("No quotation yet.")}</p>
         ) : (
           <ul className="list">
             {quotes.map((q) => (
@@ -137,8 +137,8 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
           <form action={quoteFromRfq} style={{ marginTop: 12 }}>
             <input type="hidden" name="rfq_id" value={rfq.id} />
             <input type="hidden" name="client_id" value={rfq.client_id} />
-            <SubmitButton className="btn btn-primary btn-block" pendingText="Creating…">
-              {quotes.length ? "Create another quotation" : "Create quotation from these items"}
+            <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Creating…")}>
+              {quotes.length ? tr("Create another quotation") : tr("Create quotation from these items")}
             </SubmitButton>
           </form>
         )}
@@ -147,30 +147,26 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
       {can(role, "editPurchasing") && ["new", "quoting"].includes(rfq.status) && lines.length > 0 && (
         <form action={createSupplierRfq} className="card">
           <input type="hidden" name="rfq_id" value={rfq.id} />
-          <p className="small muted" style={{ marginTop: 0 }}>
-            Need supplier prices before quoting? Send these items to suppliers.
-          </p>
-          <SubmitButton className="btn btn-block" pendingText="Creating…">
-            Request supplier quotes
-          </SubmitButton>
+          <p className="small muted" style={{ marginTop: 0 }}>{tr("Need supplier prices before quoting? Send these items to suppliers.")}</p>
+          <SubmitButton className="btn btn-block" pendingText={tr("Creating…")}>{tr("Request supplier quotes")}</SubmitButton>
         </form>
       )}
 
       {editable && (
         <details className="card">
           <summary>
-            <strong>Edit RFQ details</strong>
+            <strong>{tr("Edit RFQ details")}</strong>
           </summary>
           <form action={saveRfq} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={rfq.id} />
             <RfqHeaderFields values={rfq} clients={clients} people={people} />
-            <SubmitButton>Save</SubmitButton>
+            <SubmitButton>{tr("Save")}</SubmitButton>
           </form>
         </details>
       )}
       {rfq.notes && !editable && (
         <section className="card">
-          <h2>Notes</h2>
+          <h2>{tr("Notes")}</h2>
           <p>{rfq.notes}</p>
         </section>
       )}
@@ -178,9 +174,7 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
       {can(role, "editSales") && ["new", "quoting", "quoted"].includes(rfq.status) && (
         <form action={cancelRfq}>
           <input type="hidden" name="id" value={rfq.id} />
-          <SubmitButton className="btn btn-block btn-danger" pendingText="Cancelling…">
-            Cancel this RFQ
-          </SubmitButton>
+          <SubmitButton className="btn btn-block btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel this RFQ")}</SubmitButton>
         </form>
       )}
     </>

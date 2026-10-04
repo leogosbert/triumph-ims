@@ -1,3 +1,4 @@
+import { tr } from "@/lib/tr";
 import Link from "next/link";
 import type { Kpi, MonthBar, NamedValue, Tower } from "@/lib/dashboard";
 import { Icon } from "@/components/Icon";
@@ -34,7 +35,7 @@ export function ControlTower({ tower, t }: { tower: Tower; t: Dict }) {
               <summary>
                 <span className="tower-n num">{total}</span>
                 <span className="tower-text">
-                  <strong>{s.title}</strong>
+                  <strong>{tr(String(s.title ?? ""))}</strong>
                   <span>
                     {items
                       .slice(0, 2)
@@ -51,7 +52,7 @@ export function ControlTower({ tower, t }: { tower: Tower; t: Dict }) {
                 {items.map((i) => (
                   <li key={i.label}>
                     <Link href={i.href}>
-                      <strong className="num">{i.count}</strong> {i.label}
+                      <strong className="num">{i.count}</strong> {tr(String(i.label ?? ""))}
                     </Link>
                   </li>
                 ))}
@@ -71,7 +72,7 @@ export function KpiGrid({ kpis, currency }: { kpis: Kpi[]; currency: string }) {
         const body = (
           <>
             <div className="n num">{k.money ? `${currency} ${short(k.value)}` : `${k.value.toLocaleString("en-GB")}${k.suffix ?? ""}`}</div>
-            <div className="l">{k.label}</div>
+            <div className="l">{tr(String(k.label ?? ""))}</div>
           </>
         );
         return k.href ? (
@@ -102,7 +103,7 @@ export function SalesChart({ months, currency, t }: { months: MonthBar[]; curren
       <p className="small muted">
         {t["c.last6"]} · {currency}
       </p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="chart" role="img" aria-label="Sales and gross profit by month">
+      <svg viewBox={`0 0 ${W} ${H}`} className="chart" role="img" aria-label={tr("Sales and gross profit by month")}>
         <line x1="0" x2={W} y1={H - 20} y2={H - 20} stroke="var(--line)" />
         {months.map((m, i) => {
           const x = i * slot + slot / 2;
@@ -120,7 +121,7 @@ export function SalesChart({ months, currency, t }: { months: MonthBar[]; curren
                 </text>
               )}
               <text x={x} y={H - 6} textAnchor="middle" fontSize="10" fill="var(--muted)">
-                {m.label}
+                {tr(String(m.label ?? ""))}
               </text>
             </g>
           );
@@ -145,7 +146,7 @@ export function BarList({ title, sub, rows, currency, href }: { title: string; s
         {rows.map((r) => (
           <li key={r.label}>
             <div className="row small">
-              <span>{r.label}</span>
+              <span>{tr(String(r.label ?? ""))}</span>
               <span>
                 {currency} {short(r.value)} {total > 0 && <span className="muted">· {Math.round((r.value / total) * 100)}%</span>}
               </span>

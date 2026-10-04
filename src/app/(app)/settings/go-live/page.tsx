@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { requireManager } from "@/lib/context";
@@ -18,7 +19,7 @@ function Row({ i }: { i: Item }) {
         {mark}
       </span>
       <span>
-        {i.href && !i.ok ? <Link href={i.href}>{i.label}</Link> : i.ok ? <span className="muted">{i.label}</span> : i.label}
+        {i.href && !i.ok ? <Link href={i.href}>{tr(String(i.label ?? ""))}</Link> : i.ok ? <span className="muted">{tr(String(i.label ?? ""))}</span> : i.label}
         {i.detail && <span className="small muted"> — {i.detail}</span>}
       </span>
     </li>
@@ -26,6 +27,7 @@ function Row({ i }: { i: Item }) {
 }
 
 export default async function GoLivePage() {
+  await primeLang();
   const { supabase, company } = await requireManager();
   const c = company as typeof company & { alerts_checked_at?: string | null };
   const host = (await headers()).get("host") ?? "";
@@ -108,16 +110,14 @@ export default async function GoLivePage() {
   return (
     <>
       <p className="small">
-        <Link href="/settings">← Settings</Link>
+        <Link href="/settings">{tr("← Settings")}</Link>
       </p>
-      <h1>Go-live checklist</h1>
+      <h1>{tr("Go-live checklist")}</h1>
       <p className="muted small">
-        {done} of {auto.length} automatic checks done. Items marked • can&apos;t be checked from inside the app — follow the go-live
-        runbook (GO-LIVE.md in the project) for those.
-      </p>
+        {done}{" "}{tr("of")}{" "}{auto.length}{" "}{tr("automatic checks done. Items marked • can't be checked from inside the app — follow the go-live runbook (GO-LIVE.md in the project) for those.")}</p>
       {groups.map((g) => (
         <section key={g.title} className="card">
-          <h2>{g.title}</h2>
+          <h2>{tr(String(g.title ?? ""))}</h2>
           <ul className="list checklist">
             {g.items.map((i) => (
               <Row key={i.label} i={i} />
@@ -126,7 +126,7 @@ export default async function GoLivePage() {
         </section>
       ))}
       <p className="small">
-        <Link href="/settings/export">Export all data →</Link>
+        <Link href="/settings/export">{tr("Export all data →")}</Link>
       </p>
     </>
   );

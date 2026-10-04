@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
@@ -12,6 +13,7 @@ type Rfq = { id: string; number: string; title: string | null; status: string; d
 type Quote = { id: string; number: string; revision: number; status: string; total: number; currency: string; client: { name: string } | null };
 
 export default async function SalesPage() {
+  await primeLang();
   const { supabase, company, role } = await getAppContext();
   if (!can(role, "seeSales")) redirect("/");
   const today = todayTz();
@@ -55,15 +57,11 @@ export default async function SalesPage() {
   return (
     <>
       <div className="page-head">
-        <h1>Sales</h1>
+        <h1>{tr("Sales")}</h1>
         {can(role, "editSales") && (
           <div className="actions" style={{ marginTop: 0 }}>
-            <Link href="/rfqs/new" className="btn btn-primary btn-small">
-              + RFQ
-            </Link>
-            <Link href="/quotations/new" className="btn btn-small">
-              + Quotation
-            </Link>
+            <Link href="/rfqs/new" className="btn btn-primary btn-small">{tr("+ RFQ")}</Link>
+            <Link href="/quotations/new" className="btn btn-small">{tr("+ Quotation")}</Link>
           </div>
         )}
       </div>
@@ -71,29 +69,28 @@ export default async function SalesPage() {
       <div className="stat-grid">
         <Link href="/rfqs?tab=open" className={`stat ${(overdueRfqs.count ?? 0) > 0 ? "alert" : ""}`}>
           <div className="n">{openRfqs.count ?? 0}</div>
-          <div className="l">
-            RFQs to answer{(overdueRfqs.count ?? 0) > 0 ? ` · ${overdueRfqs.count} overdue` : ""}
+          <div className="l">{tr("RFQs to answer")}{(overdueRfqs.count ?? 0) > 0 ? ` · ${overdueRfqs.count} overdue` : ""}
           </div>
         </Link>
         <Link href="/quotations?tab=approval" className={`stat ${(pending.count ?? 0) > 0 ? "alert" : ""}`}>
           <div className="n">{pending.count ?? 0}</div>
-          <div className="l">Waiting for approval</div>
+          <div className="l">{tr("Waiting for approval")}</div>
         </Link>
         <Link href="/quotations?tab=sent" className="stat">
           <div className="n">{sent.count ?? 0}</div>
-          <div className="l">Sent, awaiting answer</div>
+          <div className="l">{tr("Sent, awaiting answer")}</div>
         </Link>
         <Link href="/quotations?tab=accepted" className="stat">
           <div className="n" style={{ fontSize: "1.1rem" }}>
             {formatMoney(wonValue, company.base_currency)}
           </div>
-          <div className="l">Accepted this month (incl. VAT)</div>
+          <div className="l">{tr("Accepted this month (incl. VAT)")}</div>
         </Link>
       </div>
 
       {approvals.length > 0 && (
         <section className="card">
-          <h2>{can(role, "approveQuotes") ? "Waiting for your approval" : "Waiting for approval"}</h2>
+          <h2>{can(role, "approveQuotes") ? tr("Waiting for your approval") : tr("Waiting for approval")}</h2>
           <ul className="list">
             {approvals.map((q) => (
               <li key={q.id} className="row">
@@ -109,13 +106,11 @@ export default async function SalesPage() {
 
       <section className="card">
         <div className="row">
-          <h2 style={{ margin: 0 }}>RFQs to answer</h2>
-          <Link href="/rfqs" className="small">
-            All RFQs →
-          </Link>
+          <h2 style={{ margin: 0 }}>{tr("RFQs to answer")}</h2>
+          <Link href="/rfqs" className="small">{tr("All RFQs →")}</Link>
         </div>
         {rfqs.length === 0 ? (
-          <p className="muted small">Nothing waiting. New client requests will appear here.</p>
+          <p className="muted small">{tr("Nothing waiting. New client requests will appear here.")}</p>
         ) : (
           <ul className="list">
             {rfqs.map((r) => (
@@ -138,19 +133,17 @@ export default async function SalesPage() {
 
       <div className="grid grid-2">
         <Link href="/quotations" className="tile">
-          <div className="tile-title">All quotations</div>
+          <div className="tile-title">{tr("All quotations")}</div>
           <div className="tile-sub">
-            {drafts.count ?? 0} draft{(drafts.count ?? 0) === 1 ? "" : "s"} in progress
-          </div>
+            {drafts.count ?? 0}{" "}{tr("draft")}{(drafts.count ?? 0) === 1 ? "" : "s"}{" "}{tr("in progress")}</div>
         </Link>
         <Link href="/clients" className="tile">
-          <div className="tile-title">Clients</div>
-          <div className="tile-sub">Contacts, sites and history</div>
+          <div className="tile-title">{tr("Clients")}</div>
+          <div className="tile-sub">{tr("Contacts, sites and history")}</div>
         </Link>
       </div>
       <p className="muted small" style={{ marginTop: 12 }}>
-        <StatusBadge map={QUOTE_STATUS} status="pending_approval" /> quotations need a manager before they can be sent.
-      </p>
+        <StatusBadge map={QUOTE_STATUS} status="pending_approval" />{" "}{tr("quotations need a manager before they can be sent.")}</p>
     </>
   );
 }

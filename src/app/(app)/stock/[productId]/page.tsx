@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -24,6 +25,7 @@ type Move = {
 const KIND: Record<string, string> = { receipt: "Received", dispatch: "Dispatched", return: "Returned", adjustment: "Adjusted" };
 
 export default async function StockCardPage({ params, searchParams }: { params: Promise<{ productId: string }>; searchParams: SearchParams }) {
+  await primeLang();
   const { productId } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -49,22 +51,21 @@ export default async function StockCardPage({ params, searchParams }: { params: 
   return (
     <>
       <p className="small">
-        <Link href="/stock">← Stock</Link> · <Link href={`/products/${product.id}`}>Product details</Link>
+        <Link href="/stock">{tr("← Stock")}</Link> · <Link href={`/products/${product.id}`}>{tr("Product details")}</Link>
       </p>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{product.name}</h1>
         <span className="badge">{product.sku}</span>
       </div>
       <p>
-        <strong style={{ fontSize: "1.4rem" }}>{fmtQty(total)}</strong> {product.unit} in stock
-        {product.reorder_level ? <span className="muted small"> · reorder at {fmtQty(product.reorder_level)}</span> : null}
+        <strong style={{ fontSize: "1.4rem" }}>{fmtQty(total)}</strong> {product.unit}{" "}{tr("in stock")}{product.reorder_level ? <span className="muted small">{" "}{tr("· reorder at")}{" "}{fmtQty(product.reorder_level)}</span> : null}
       </p>
       <Notice {...notice} />
 
       <section className="card">
-        <h2>By store and batch</h2>
+        <h2>{tr("By store and batch")}</h2>
         {onHand.length === 0 ? (
-          <p className="muted small">None in stock.</p>
+          <p className="muted small">{tr("None in stock.")}</p>
         ) : (
           <ul className="list">
             {onHand.map((r) => {
@@ -73,10 +74,9 @@ export default async function StockCardPage({ params, searchParams }: { params: 
                 <li key={`${r.warehouse_id}-${r.batch_no}`} className="row">
                   <div>
                     <strong>{storeName.get(r.warehouse_id)}</strong>
-                    <div className="muted small">
-                      Batch {r.batch_no || "—"}
+                    <div className="muted small">{tr("Batch")}{" "}{r.batch_no || "—"}
                       {r.expiry_date && (
-                        <span className={d !== null && d <= 60 ? "text-warn" : undefined}> · expires {formatDate(r.expiry_date)}</span>
+                        <span className={d !== null && d <= 60 ? "text-warn" : undefined}>{" "}{tr("· expires")}{" "}{formatDate(r.expiry_date)}</span>
                       )}
                     </div>
                   </div>
@@ -89,26 +89,24 @@ export default async function StockCardPage({ params, searchParams }: { params: 
           </ul>
         )}
         {can(role, "adjustStock") && (
-          <Link href={`/stock/adjust?product=${product.id}`} className="btn btn-small" style={{ marginTop: 12 }}>
-            Adjust stock
-          </Link>
+          <Link href={`/stock/adjust?product=${product.id}`} className="btn btn-small" style={{ marginTop: 12 }}>{tr("Adjust stock")}</Link>
         )}
       </section>
 
       <section className="card">
-        <h2>Movements</h2>
+        <h2>{tr("Movements")}</h2>
         {moves.length === 0 ? (
-          <p className="muted small">No movements yet.</p>
+          <p className="muted small">{tr("No movements yet.")}</p>
         ) : (
           <ul className="list">
             {moves.map((m) => (
               <li key={m.id} className="row">
                 <div>
                   <strong>{KIND[m.kind] ?? m.kind}</strong>{" "}
-                  {m.grn_id && can(role, "receiveGoods") && <Link href={`/grns/${m.grn_id}`} className="small">GRN</Link>}
-                  {m.delivery_id && can(role, "seeDeliveries") && <Link href={`/deliveries/${m.delivery_id}`} className="small">Delivery</Link>}
+                  {m.grn_id && can(role, "receiveGoods") && <Link href={`/grns/${m.grn_id}`} className="small">{tr("GRN")}</Link>}
+                  {m.delivery_id && can(role, "seeDeliveries") && <Link href={`/deliveries/${m.delivery_id}`} className="small">{tr("Delivery")}</Link>}
                   <div className="muted small">
-                    {formatDateTime(m.created_at)} · {storeName.get(m.warehouse_id)} · batch {m.batch_no || "—"}
+                    {formatDateTime(m.created_at)} · {storeName.get(m.warehouse_id)}{" "}{tr("· batch")}{" "}{m.batch_no || "—"}
                     {m.note ? ` · ${m.note}` : ""}
                   </div>
                 </div>

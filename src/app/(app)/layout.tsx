@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { BottomNav, SideNav } from "@/components/BottomNav";
 import { Icon } from "@/components/Icon";
@@ -8,6 +9,7 @@ import { bottomNav, sideNav } from "@/lib/nav";
 import { setLanguage } from "../lang-actions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  await primeLang();
   const { supabase, company, role, user } = await getAppContext();
   const { lang, t } = await getDict();
   const logo = brandingUrl(supabase, company.logo_path);
@@ -51,7 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <form action={setLanguage}>
               <input type="hidden" name="lang" value={lang === "en" ? "sw" : "en"} />
               <button type="submit" className="lang-btn" aria-label={t["shell.language"]}>
-                <span aria-current={lang === "en" ? "true" : undefined}>EN</span>·<span aria-current={lang === "sw" ? "true" : undefined}>SW</span>
+                <span aria-current={lang === "en" ? "true" : undefined}>{tr("EN")}</span>·<span aria-current={lang === "sw" ? "true" : undefined}>{tr("SW")}</span>
               </button>
             </form>
             <a href="/notifications" className="icon-btn bell" aria-label={`${t["shell.notifications"]}${unread ? `, ${unread} ${t["shell.unread"]}` : ""}`}>

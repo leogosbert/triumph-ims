@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -22,6 +23,7 @@ export default async function ProductPage({
   params: Promise<{ id: string }>;
   searchParams: SearchParams;
 }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -50,25 +52,25 @@ export default async function ProductPage({
   return (
     <>
       <p className="small">
-        <Link href="/products">← Products</Link>
+        <Link href="/products">{tr("← Products")}</Link>
       </p>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{product.name}</h1>
         <span className="badge">{product.sku}</span>
       </div>
       <p className="muted small">
-        {formatMoney(product.selling_price, company.base_currency)} per {product.unit} · added{" "}
+        {formatMoney(product.selling_price, company.base_currency)}{" "}{tr("per")}{" "}{product.unit}{" "}{tr("· added")}{" "}
         {formatDate(product.created_at)}
         {product.hazardous && (
           <>
             {" "}
-            · <span className="badge warn">Hazardous</span>
+            · <span className="badge warn">{tr("Hazardous")}</span>
           </>
         )}
         {!product.active && (
           <>
             {" "}
-            · <span className="badge off">Archived</span>
+            · <span className="badge off">{tr("Archived")}</span>
           </>
         )}
       </p>
@@ -76,15 +78,15 @@ export default async function ProductPage({
 
       {showCosts && (
         <section className="card" id="costs">
-          <h2>Purchasing</h2>
-          <p className="muted small">Only management, procurement and finance can see this.</p>
+          <h2>{tr("Purchasing")}</h2>
+          <p className="muted small">{tr("Only management, procurement and finance can see this.")}</p>
           <dl className="kv" style={{ marginBottom: 12 }}>
-            <dt>Last cost</dt>
+            <dt>{tr("Last cost")}</dt>
             <dd>{formatMoney(cost?.last_cost, company.base_currency)}</dd>
-            <dt>Margin</dt>
+            <dt>{tr("Margin")}</dt>
             <dd className={margin !== null && margin < 12 ? "text-warn" : undefined}>
               {margin === null ? "—" : `${margin.toFixed(1)}%`}
-              {margin !== null && margin < 12 && " · below 12%, needs approval when quoting"}
+              {margin !== null && margin < 12 && tr(" · below 12%, needs approval when quoting")}
             </dd>
           </dl>
           {editCosts && (
@@ -92,7 +94,7 @@ export default async function ProductPage({
               <input type="hidden" name="product_id" value={product.id} />
               <div className="grid grid-2">
                 <div className="field">
-                  <label htmlFor="main_supplier_id">Main supplier</label>
+                  <label htmlFor="main_supplier_id">{tr("Main supplier")}</label>
                   <select id="main_supplier_id" name="main_supplier_id" defaultValue={cost?.main_supplier_id ?? ""}>
                     <option value="">—</option>
                     {suppliers.map((s) => (
@@ -103,7 +105,7 @@ export default async function ProductPage({
                   </select>
                 </div>
                 <div className="field">
-                  <label htmlFor="last_cost">Last cost ({company.base_currency})</label>
+                  <label htmlFor="last_cost">{tr("Last cost (")}{company.base_currency})</label>
                   <input
                     id="last_cost"
                     name="last_cost"
@@ -113,14 +115,13 @@ export default async function ProductPage({
                   />
                 </div>
               </div>
-              <SubmitButton>Save purchasing details</SubmitButton>
+              <SubmitButton>{tr("Save purchasing details")}</SubmitButton>
             </form>
           )}
           {!editCosts && cost?.main_supplier_id && (
-            <p className="small">
-              Main supplier:{" "}
+            <p className="small">{tr("Main supplier:")}{" "}
               <Link href={`/suppliers/${cost.main_supplier_id}`}>
-                {suppliers.find((s) => s.id === cost.main_supplier_id)?.name ?? "view supplier"}
+                {suppliers.find((s) => s.id === cost.main_supplier_id)?.name ?? tr("view supplier")}
               </Link>
             </p>
           )}
@@ -131,7 +132,7 @@ export default async function ProductPage({
         <input type="hidden" name="id" value={product.id} />
         <fieldset className="plain" disabled={!editable}>
           <RecordFields sections={PRODUCT_SECTIONS} values={product} readOnly={!editable} />
-          {editable && <SubmitButton className="btn btn-primary btn-block">Save changes</SubmitButton>}
+          {editable && <SubmitButton className="btn btn-primary btn-block">{tr("Save changes")}</SubmitButton>}
         </fieldset>
       </form>
 
@@ -139,8 +140,8 @@ export default async function ProductPage({
         <form action={setProductActive} style={{ marginTop: 16 }}>
           <input type="hidden" name="id" value={product.id} />
           <input type="hidden" name="active" value={product.active ? "false" : "true"} />
-          <SubmitButton className={`btn btn-block ${product.active ? "btn-danger" : ""}`} pendingText="Working…">
-            {product.active ? "Archive product" : "Restore product"}
+          <SubmitButton className={`btn btn-block ${product.active ? "btn-danger" : ""}`} pendingText={tr("Working…")}>
+            {product.active ? tr("Archive product") : tr("Restore product")}
           </SubmitButton>
         </form>
       )}

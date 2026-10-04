@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
@@ -32,9 +33,9 @@ function Table({ title, groups, base, minMargin }: { title: string; groups: Map<
           <thead>
             <tr>
               <th>{title.replace("By ", "")}</th>
-              <th>Sales</th>
-              <th>Gross profit</th>
-              <th>Margin</th>
+              <th>{tr("Sales")}</th>
+              <th>{tr("Gross profit")}</th>
+              <th>{tr("Margin")}</th>
             </tr>
           </thead>
           <tbody>
@@ -43,7 +44,7 @@ function Table({ title, groups, base, minMargin }: { title: string; groups: Map<
               const m = g.sales > 0 ? (gp / g.sales) * 100 : null;
               return (
                 <tr key={g.key}>
-                  <td>{g.href ? <Link href={g.href}>{g.label}</Link> : g.label}</td>
+                  <td>{g.href ? <Link href={g.href}>{tr(String(g.label ?? ""))}</Link> : g.label}</td>
                   <td>{short(g.sales)}</td>
                   <td>{short(gp)}</td>
                   <td className={m !== null && m < minMargin ? "text-warn" : undefined}>{m === null ? "–" : `${m.toFixed(1)}%`}</td>
@@ -58,6 +59,7 @@ function Table({ title, groups, base, minMargin }: { title: string; groups: Map<
 }
 
 export default async function ProfitPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const { supabase, company, role } = await getAppContext();
@@ -131,50 +133,44 @@ export default async function ProfitPage({ searchParams }: { searchParams: Searc
   return (
     <>
       <p className="small">
-        <Link href="/finance">← Finance</Link>
+        <Link href="/finance">{tr("← Finance")}</Link>
       </p>
-      <h1>Profit</h1>
-      <nav className="tabs-row" aria-label="Month">
-        <Link href={`/profit?m=${m.prev}`}>← Earlier</Link>
+      <h1>{tr("Profit")}</h1>
+      <nav className="tabs-row" aria-label={tr("Month")}>
+        <Link href={`/profit?m=${m.prev}`}>{tr("← Earlier")}</Link>
         <Link href={`/profit?m=${m.month}`} aria-current="page">
-          {m.label}
+          {tr(String(m.label ?? ""))}
         </Link>
-        {!m.isCurrent && <Link href={`/profit?m=${m.after}`}>Later →</Link>}
+        {!m.isCurrent && <Link href={`/profit?m=${m.after}`}>{tr("Later →")}</Link>}
       </nav>
       <div className="stat-grid">
         <div className="stat">
           <div className="n">{formatMoney(sales, base)}</div>
-          <div className="l">Sales invoiced (before VAT)</div>
+          <div className="l">{tr("Sales invoiced (before VAT)")}</div>
         </div>
         <div className="stat">
           <div className="n">{formatMoney(gp, base)}</div>
-          <div className="l">Gross profit {sales > 0 && `· ${((gp / sales) * 100).toFixed(1)}%`}</div>
+          <div className="l">{tr("Gross profit")}{" "}{sales > 0 && `· ${((gp / sales) * 100).toFixed(1)}%`}</div>
         </div>
         <div className="stat">
           <div className="n">{formatMoney(cogs, base)}</div>
-          <div className="l">Cost of goods sold</div>
+          <div className="l">{tr("Cost of goods sold")}</div>
         </div>
         <div className="stat">
           <div className="n">{formatMoney(other, base)}</div>
-          <div className="l">Other order costs (transport, bank…)</div>
+          <div className="l">{tr("Other order costs (transport, bank…)")}</div>
         </div>
       </div>
       {missing > 0 && (
         <div className="banner warn small">
-          {missing} invoiced line{missing === 1 ? " has" : "s have"} no product cost, so profit is overstated. Set costs on the
-          products (or confirm their purchase orders) before invoicing.
-        </div>
+          {missing}{" "}{tr("invoiced line")}{missing === 1 ? tr(" has") : tr("s have")}{" "}{tr("no product cost, so profit is overstated. Set costs on the products (or confirm their purchase orders) before invoicing.")}</div>
       )}
-      {rows.length === 0 && extras.length === 0 && <p className="card muted">No invoices issued in {m.label}.</p>}
-      <Table title="By order" groups={byOrder} base={base} minMargin={minMargin} />
-      <Table title="By client" groups={byClient} base={base} minMargin={minMargin} />
-      <Table title="By industry" groups={byIndustry} base={base} minMargin={minMargin} />
-      <Table title="By salesperson" groups={bySales} base={base} minMargin={minMargin} />
-      <p className="small muted">
-        Sales are issued invoices in {m.label}. Cost of goods uses each product&apos;s cost when the invoice was issued (landed cost if it was
-        applied). Freight, duty and clearing on purchase orders are part of the landed cost; transport, bank charges and similar costs
-        are added on the order.
-      </p>
+      {rows.length === 0 && extras.length === 0 && <p className="card muted">{tr("No invoices issued in")}{" "}{tr(String(m.label ?? ""))}.</p>}
+      <Table title={tr("By order")} groups={byOrder} base={base} minMargin={minMargin} />
+      <Table title={tr("By client")} groups={byClient} base={base} minMargin={minMargin} />
+      <Table title={tr("By industry")} groups={byIndustry} base={base} minMargin={minMargin} />
+      <Table title={tr("By salesperson")} groups={bySales} base={base} minMargin={minMargin} />
+      <p className="small muted">{tr("Sales are issued invoices in")}{" "}{tr(String(m.label ?? ""))}{tr(". Cost of goods uses each product's cost when the invoice was issued (landed cost if it was applied). Freight, duty and clearing on purchase orders are part of the landed cost; transport, bank charges and similar costs are added on the order.")}</p>
     </>
   );
 }

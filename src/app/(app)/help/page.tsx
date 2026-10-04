@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { getAppContext } from "@/lib/context";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
@@ -77,6 +78,7 @@ const GUIDES: Guide[] = [
 ];
 
 export default async function HelpPage() {
+  await primeLang();
   const { role } = await getAppContext();
   const mine = GUIDES.find((g) => g.role === role);
   const others = GUIDES.filter((g) => g.role !== role);
@@ -85,7 +87,7 @@ export default async function HelpPage() {
     <ol className="help-steps">
       {g.steps.map((s) => (
         <li key={s.title}>
-          <strong>{s.href ? <Link href={s.href}>{s.title}</Link> : s.title}.</strong> {s.text}
+          <strong>{s.href ? <Link href={s.href}>{tr(String(s.title ?? ""))}</Link> : s.title}.</strong> {tr(String(s.text ?? ""))}
         </li>
       ))}
     </ol>
@@ -93,34 +95,31 @@ export default async function HelpPage() {
 
   return (
     <>
-      <h1>Help</h1>
-      <p className="muted small">
-        The whole flow: client RFQ → quotation → approval → order won → supplier quotes → purchase order → goods received →
-        delivery → proof of delivery → invoice → payment → profit. Each person does their part and the next person is told.
-      </p>
+      <h1>{tr("Help")}</h1>
+      <p className="muted small">{tr("The whole flow: client RFQ → quotation → approval → order won → supplier quotes → purchase order → goods received → delivery → proof of delivery → invoice → payment → profit. Each person does their part and the next person is told.")}</p>
       {mine && (
         <section className="card">
-          <h2>Your role: {ROLE_LABELS[mine.role]}</h2>
-          <p className="small muted">{mine.intro}</p>
+          <h2>{tr("Your role:")}{" "}{ROLE_LABELS[mine.role]}</h2>
+          <p className="small muted">{tr(String(mine.intro ?? ""))}</p>
           {render(mine)}
         </section>
       )}
-      <h2>Other roles</h2>
+      <h2>{tr("Other roles")}</h2>
       {others.map((g) => (
         <details key={g.role} className="card">
           <summary>
-            <strong>{ROLE_LABELS[g.role]}</strong> <span className="small muted">— {g.intro}</span>
+            <strong>{ROLE_LABELS[g.role]}</strong> <span className="small muted">— {tr(String(g.intro ?? ""))}</span>
           </summary>
           {render(g)}
         </details>
       ))}
       <section className="card">
-        <h2>Tips</h2>
+        <h2>{tr("Tips")}</h2>
         <ul className="small">
-          <li>Install the app: on Android, Chrome menu → Add to Home screen; on iPhone, Safari Share → Add to Home Screen.</li>
-          <li>Turn on phone notifications under Notifications → This device.</li>
-          <li>Every list has search; every document has a PDF you can share by WhatsApp or email.</li>
-          <li>Something wrong or missing? Tell management — every change is recorded in the activity log.</li>
+          <li>{tr("Install the app: on Android, Chrome menu → Add to Home screen; on iPhone, Safari Share → Add to Home Screen.")}</li>
+          <li>{tr("Turn on phone notifications under Notifications → This device.")}</li>
+          <li>{tr("Every list has search; every document has a PDF you can share by WhatsApp or email.")}</li>
+          <li>{tr("Something wrong or missing? Tell management — every change is recorded in the activity log.")}</li>
         </ul>
       </section>
     </>

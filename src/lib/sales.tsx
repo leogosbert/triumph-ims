@@ -1,3 +1,4 @@
+import { tr } from "@/lib/tr";
 export const RFQ_STATUS: Record<string, { label: string; tone: string }> = {
   new: { label: "New", tone: "info" },
   quoting: { label: "Quoting", tone: "warn" },
@@ -33,7 +34,7 @@ export function quoteNo(q: { number: string; revision: number }) {
 
 export function StatusBadge({ map, status }: { map: Record<string, { label: string; tone: string }>; status: string }) {
   const s = map[status] ?? { label: status, tone: "off" };
-  return <span className={`badge tone-${s.tone}`}>{s.label}</span>;
+  return <span className={`badge tone-${s.tone}`}>{tr(String(s.label ?? ""))}</span>;
 }
 
 export function todayTz() {

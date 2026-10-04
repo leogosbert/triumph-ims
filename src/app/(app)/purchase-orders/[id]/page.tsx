@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -46,6 +47,7 @@ const n = (v: unknown) => Number(v ?? 0);
 const fmtNum = (v: unknown) => n(v).toLocaleString("en-GB", { maximumFractionDigits: 6 });
 
 export default async function PurchaseOrderPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role, user } = await getAppContext();
@@ -103,18 +105,17 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
   return (
     <>
       <p className="small">
-        <Link href="/purchase-orders">← Purchase orders</Link>
+        <Link href="/purchase-orders">{tr("← Purchase orders")}</Link>
         {po.srfq_id && can(role, "editPurchasing") && (
           <>
             {" · "}
-            <Link href={`/supplier-rfqs/${po.srfq_id}`}>Supplier RFQ</Link>
+            <Link href={`/supplier-rfqs/${po.srfq_id}`}>{tr("Supplier RFQ")}</Link>
           </>
         )}
         {q && (
           <>
             {" · "}
-            <Link href={`/quotations/${q.id}`}>
-              For {q.client?.name} ({quoteNo(q)})
+            <Link href={`/quotations/${q.id}`}>{tr("For")}{" "}{q.client?.name} ({quoteNo(q)})
             </Link>
           </>
         )}
@@ -128,24 +129,23 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         {po.expected_date && (
           <span className={late ? "text-warn" : undefined}>
             {" "}
-            · {late ? "late, was due" : "due"} {formatDate(po.expected_date)}
+            · {late ? tr("late, was due") : tr("due")} {formatDate(po.expected_date)}
           </span>
         )}
-        {po.supplier_ref && <> · their ref {po.supplier_ref}</>}
+        {po.supplier_ref && <>{" "}{tr("· their ref")}{" "}{po.supplier_ref}</>}
       </p>
       <Notice {...notice} />
 
       {isDraft && po.review_note && (
         <div className="banner bad">
-          <strong>Sent back by management:</strong> {po.review_note}
+          <strong>{tr("Sent back by management:")}</strong> {po.review_note}
         </div>
       )}
       {po.status === "pending_approval" && (
         <div className="banner warn">
-          <strong>Waiting for management approval</strong> because: {po.approval_reason}.
+          <strong>{tr("Waiting for management approval")}</strong>{" "}{tr("because:")}{" "}{po.approval_reason}.
           {po.submitted_by && (
-            <div className="small">
-              Submitted by {names.get(po.submitted_by)} on {formatDateTime(po.submitted_at)}
+            <div className="small">{tr("Submitted by")}{" "}{names.get(po.submitted_by)}{" "}{tr("on")}{" "}{formatDateTime(po.submitted_at)}
             </div>
           )}
         </div>
@@ -155,82 +155,69 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         {!["draft", "pending_approval", "cancelled"].includes(po.status) && (
           <>
             <SharePdfButton href={pdfHref} fileName={pdfName} title={`Purchase order ${po.number}`} />
-            <a className="btn" href={pdfHref} target="_blank" rel="noopener">
-              Open PDF
-            </a>
+            <a className="btn" href={pdfHref} target="_blank" rel="noopener">{tr("Open PDF")}</a>
           </>
         )}
         {isDraft && lines.length > 0 && (
-          <a className="btn" href={pdfHref} target="_blank" rel="noopener">
-            Preview PDF
-          </a>
+          <a className="btn" href={pdfHref} target="_blank" rel="noopener">{tr("Preview PDF")}</a>
         )}
       </div>
 
       {editable && lines.length > 0 && (
         <form action={submitPo} className="card">
           <input type="hidden" name="id" value={po.id} />
-          <p className="small muted" style={{ marginTop: 0 }}>
-            POs above {formatMoney(company.po_approval_above, company.base_currency)} need management approval (unless you are management).
-          </p>
-          <SubmitButton className="btn btn-primary btn-block" pendingText="Submitting…">
-            Submit purchase order
-          </SubmitButton>
+          <p className="small muted" style={{ marginTop: 0 }}>{tr("POs above")}{" "}{formatMoney(company.po_approval_above, company.base_currency)}{" "}{tr("need management approval (unless you are management).")}</p>
+          <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Submitting…")}>{tr("Submit purchase order")}</SubmitButton>
         </form>
       )}
 
       {po.status === "pending_approval" && can(role, "approvePOs") && po.submitted_by !== user.id && (
         <form action={reviewPo} className="card">
           <input type="hidden" name="id" value={po.id} />
-          <h2>Your decision</h2>
+          <h2>{tr("Your decision")}</h2>
           <div className="field">
-            <label htmlFor="note">
-              Note <span className="hint">· required when sending back</span>
+            <label htmlFor="note">{tr("Note")}{" "}<span className="hint">{tr("· required when sending back")}</span>
             </label>
             <textarea id="note" name="note" />
           </div>
           <div className="actions">
-            <SubmitButton name="decision" value="approve" pendingText="Saving…">
-              Approve
-            </SubmitButton>
-            <SubmitButton name="decision" value="return" className="btn btn-danger" pendingText="Saving…">
-              Send back for changes
-            </SubmitButton>
+            <SubmitButton name="decision" value="approve" pendingText={tr("Saving…")}>{tr("Approve")}</SubmitButton>
+            <SubmitButton name="decision" value="return" className="btn btn-danger" pendingText={tr("Saving…")}>{tr("Send back for changes")}</SubmitButton>
           </div>
         </form>
       )}
 
       {canEdit && ["approved", "sent"].includes(po.status) && (
         <section className="card">
-          <h2>Supplier</h2>
+          <h2>{tr("Supplier")}</h2>
           {po.status === "approved" && (
             <form action={markPoSent} style={{ marginBottom: 12 }}>
               <input type="hidden" name="id" value={po.id} />
-              <SubmitButton className="btn btn-block">I have sent it to the supplier</SubmitButton>
+              <SubmitButton className="btn btn-block">{tr("I have sent it to the supplier")}</SubmitButton>
             </form>
           )}
           <form action={confirmPo}>
             <input type="hidden" name="id" value={po.id} />
             <div className="grid grid-2">
               <div className="field">
-                <label htmlFor="supplier_ref">Their order / confirmation no.</label>
+                <label htmlFor="supplier_ref">{tr("Their order / confirmation no.")}</label>
                 <input id="supplier_ref" name="supplier_ref" type="text" defaultValue={po.supplier_ref ?? ""} />
               </div>
               <div className="field">
-                <label htmlFor="expected_date">Confirmed delivery date</label>
+                <label htmlFor="expected_date">{tr("Confirmed delivery date")}</label>
                 <input id="expected_date" name="expected_date" type="date" defaultValue={po.expected_date ?? ""} />
               </div>
             </div>
-            <SubmitButton pendingText="Saving…">Supplier confirmed</SubmitButton>
-            <p className="hint" style={{ marginTop: 6 }}>Confirming also updates each product&apos;s last cost from this PO.</p>
+            <SubmitButton pendingText={tr("Saving…")}>{tr("Supplier confirmed")}</SubmitButton>
+            <p className="hint" style={{ marginTop: 6 }}>{tr("Confirming also updates each product's last cost from this PO.")}</p>
           </form>
         </section>
       )}
 
       {(can(role, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status)) || grns.length > 0 ? (
         <section className="card">
-          <h2>Goods received</h2>
-          {grns.length === 0 && <p className="muted small">Nothing received yet.</p>}
+          <h2>{tr("Goods received")}</h2>
+          {grns.length === 0 && <p className="muted small">{tr("Nothing received yet.")}</p>}
           <ul className="list">
             {grns.map((g) => (
               <li key={g.id} className="row">
@@ -240,17 +227,15 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
             ))}
           </ul>
           {can(role, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status) && (
-            <Link href={`/purchase-orders/${po.id}/receive`} className="btn btn-primary" style={{ marginTop: 8 }}>
-              Receive goods
-            </Link>
+            <Link href={`/purchase-orders/${po.id}/receive`} className="btn btn-primary" style={{ marginTop: 8 }}>{tr("Receive goods")}</Link>
           )}
         </section>
       ) : null}
 
       {showBills && (
         <section className="card" id="bills">
-          <h2>Supplier&apos;s invoices</h2>
-          {poBills.length === 0 && <p className="muted small">No supplier invoice recorded yet.</p>}
+          <h2>{tr("Supplier's invoices")}</h2>
+          {poBills.length === 0 && <p className="muted small">{tr("No supplier invoice recorded yet.")}</p>}
           <ul className="list">
             {poBills.map((b) => (
               <li key={b.id} className="row">
@@ -262,20 +247,15 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
             ))}
           </ul>
           {can(role, "editBills") && (
-            <Link href={`/bills/new?po=${po.id}`} className="btn" style={{ marginTop: 8 }}>
-              Record supplier&apos;s invoice
-            </Link>
+            <Link href={`/bills/new?po=${po.id}`} className="btn" style={{ marginTop: 8 }}>{tr("Record supplier's invoice")}</Link>
           )}
         </section>
       )}
 
       {showCosts && (
         <section className="card" id="costs">
-          <h2>Import costs &amp; landed cost</h2>
-          <p className="muted small">
-            Add duty, clearing, port charges, insurance and other costs for this order. They are shared over the items by value to give the
-            true landed cost per unit.
-          </p>
+          <h2>{tr("Import costs & landed cost")}</h2>
+          <p className="muted small">{tr("Add duty, clearing, port charges, insurance and other costs for this order. They are shared over the items by value to give the true landed cost per unit.")}</p>
           <OrderCosts
             costs={costs}
             back={`/purchase-orders/${po.id}#costs`}
@@ -288,10 +268,10 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
               <table className="compare">
                 <thead>
                   <tr>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Price ({company.base_currency})</th>
-                    <th>Landed / unit</th>
+                    <th>{tr("Item")}</th>
+                    <th>{tr("Qty")}</th>
+                    <th>{tr("Price (")}{company.base_currency})</th>
+                    <th>{tr("Landed / unit")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -308,7 +288,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
                     );
                   })}
                   <tr className="total">
-                    <td>Total landed</td>
+                    <td>{tr("Total landed")}</td>
                     <td />
                     <td>{formatMoney(goodsBase, company.base_currency).replace(`${company.base_currency} `, "")}</td>
                     <td>{formatMoney(goodsBase + spread, company.base_currency).replace(`${company.base_currency} `, "")}</td>
@@ -318,27 +298,26 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
             </div>
           )}
           {po.landed_applied_at && (
-            <p className="small muted">
-              Applied {formatDateTime(po.landed_applied_at)}: {formatMoney(po.landed_cost_base, company.base_currency)}.
+            <p className="small muted">{tr("Applied")}{" "}{formatDateTime(po.landed_applied_at)}: {formatMoney(po.landed_cost_base, company.base_currency)}.
             </p>
           )}
           {landedReady ? (
             <form action={applyLandedCost} style={{ marginTop: 8 }}>
               <input type="hidden" name="po_id" value={po.id} />
-              <SubmitButton className="btn btn-primary" pendingText="Applying…">
-                {po.landed_applied_at ? "Re-apply landed cost" : "Use landed cost as product cost"}
+              <SubmitButton className="btn btn-primary" pendingText={tr("Applying…")}>
+                {po.landed_applied_at ? tr("Re-apply landed cost") : tr("Use landed cost as product cost")}
               </SubmitButton>
-              <p className="hint" style={{ marginTop: 6 }}>Updates each product&apos;s cost, so quotation margins and profit use the real cost.</p>
+              <p className="hint" style={{ marginTop: 6 }}>{tr("Updates each product's cost, so quotation margins and profit use the real cost.")}</p>
             </form>
           ) : (
-            <p className="hint">The landed cost can be applied once the supplier has confirmed the order.</p>
+            <p className="hint">{tr("The landed cost can be applied once the supplier has confirmed the order.")}</p>
           )}
         </section>
       )}
 
       <section className="card" id="lines">
-        <h2>Items ({lines.length})</h2>
-        {lines.length === 0 && <p className="muted small">No items yet.</p>}
+        <h2>{tr("Items (")}{lines.length})</h2>
+        {lines.length === 0 && <p className="muted small">{tr("No items yet.")}</p>}
         <ul className="lines">
           {lines.map((l) => (
             <li key={l.id}>
@@ -361,23 +340,19 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
                     <input type="hidden" name="po_id" value={po.id} />
                     <input type="hidden" name="line_id" value={l.id} />
                     <div>
-                      <label htmlFor={`q-${l.id}`}>Qty</label>
+                      <label htmlFor={`q-${l.id}`}>{tr("Qty")}</label>
                       <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} />
                     </div>
                     <div>
-                      <label htmlFor={`p-${l.id}`}>Unit price</label>
+                      <label htmlFor={`p-${l.id}`}>{tr("Unit price")}</label>
                       <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} />
                     </div>
-                    <SubmitButton className="btn btn-small" pendingText="…">
-                      Update
-                    </SubmitButton>
+                    <SubmitButton className="btn btn-small" pendingText="…">{tr("Update")}</SubmitButton>
                   </form>
                   <form action={removePoLine}>
                     <input type="hidden" name="po_id" value={po.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">
-                      Remove
-                    </SubmitButton>
+                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
                   </form>
                 </div>
               )}
@@ -386,27 +361,26 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         </ul>
         <div className="totals" style={{ marginTop: 12 }}>
           <div className="row">
-            <span>Subtotal</span>
+            <span>{tr("Subtotal")}</span>
             <span>{formatMoney(po.subtotal, ccy)}</span>
           </div>
           {n(po.freight) > 0 && (
             <div className="row">
-              <span>Freight</span>
+              <span>{tr("Freight")}</span>
               <span>{formatMoney(po.freight, ccy)}</span>
             </div>
           )}
           <div className="row">
-            <span>VAT {n(po.vat_rate)}%</span>
+            <span>{tr("VAT")}{" "}{n(po.vat_rate)}%</span>
             <span>{formatMoney(po.vat_amount, ccy)}</span>
           </div>
           <div className="row grand">
-            <span>Total</span>
+            <span>{tr("Total")}</span>
             <span>{formatMoney(po.total, ccy)}</span>
           </div>
           {ccy !== company.base_currency && (
             <div className="row small muted">
-              <span>
-                ≈ in {company.base_currency} at {fmtNum(po.exchange_rate)}
+              <span>{tr("≈ in")}{" "}{company.base_currency}{" "}{tr("at")}{" "}{fmtNum(po.exchange_rate)}
               </span>
               <span>{formatMoney(n(po.total) * n(po.exchange_rate), company.base_currency)}</span>
             </div>
@@ -415,26 +389,26 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         {editable && (
           <details style={{ marginTop: 16 }} open={lines.length === 0}>
             <summary>
-              <strong>+ Add an item</strong>
+              <strong>{tr("+ Add an item")}</strong>
             </summary>
             <form action={addPoLine} style={{ marginTop: 12 }}>
               <input type="hidden" name="po_id" value={po.id} />
               <ProductLineFields products={products} showPrice />
-              <p className="hint">An empty price uses the product&apos;s last cost (converted at this PO&apos;s exchange rate).</p>
-              <SubmitButton pendingText="Adding…">Add item</SubmitButton>
+              <p className="hint">{tr("An empty price uses the product's last cost (converted at this PO's exchange rate).")}</p>
+              <SubmitButton pendingText={tr("Adding…")}>{tr("Add item")}</SubmitButton>
             </form>
           </details>
         )}
       </section>
 
       <section className="card" id="details">
-        <h2>Details</h2>
+        <h2>{tr("Details")}</h2>
         <form action={savePoHeader}>
           <input type="hidden" name="id" value={po.id} />
           <fieldset className="plain" disabled={!editable}>
             <div className="grid grid-2">
               <div className="field">
-                <label htmlFor="currency">Currency</label>
+                <label htmlFor="currency">{tr("Currency")}</label>
                 <select id="currency" name="currency" defaultValue={ccy}>
                   {CURRENCIES.map((c) => (
                     <option key={c}>{c}</option>
@@ -442,25 +416,24 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="exchange_rate">
-                  Exchange rate <span className="hint">· {company.base_currency} per 1 unit</span>
+                <label htmlFor="exchange_rate">{tr("Exchange rate")}{" "}<span className="hint">· {company.base_currency}{" "}{tr("per 1 unit")}</span>
                 </label>
                 <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(po.exchange_rate)} />
               </div>
               <div className="field">
-                <label htmlFor="order_date">Order date</label>
+                <label htmlFor="order_date">{tr("Order date")}</label>
                 <input id="order_date" name="order_date" type="date" defaultValue={po.order_date} />
               </div>
               <div className="field">
-                <label htmlFor="expected_date2">Required by</label>
+                <label htmlFor="expected_date2">{tr("Required by")}</label>
                 <input id="expected_date2" name="expected_date" type="date" defaultValue={po.expected_date ?? ""} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label htmlFor="delivery_location">Deliver to</label>
-                <input id="delivery_location" name="delivery_location" type="text" defaultValue={po.delivery_location ?? ""} placeholder={company.address ?? "Our store"} />
+                <label htmlFor="delivery_location">{tr("Deliver to")}</label>
+                <input id="delivery_location" name="delivery_location" type="text" defaultValue={po.delivery_location ?? ""} placeholder={company.address ?? tr("Our store")} />
               </div>
               <div className="field">
-                <label htmlFor="payment_terms">Payment terms</label>
+                <label htmlFor="payment_terms">{tr("Payment terms")}</label>
                 <select id="payment_terms" name="payment_terms" defaultValue={po.payment_terms ?? ""}>
                   <option value="">—</option>
                   {[...new Set([...(po.payment_terms ? [po.payment_terms] : []), ...PAYMENT_TERMS])].map((t) => (
@@ -469,7 +442,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="incoterms">Incoterms</label>
+                <label htmlFor="incoterms">{tr("Incoterms")}</label>
                 <select id="incoterms" name="incoterms" defaultValue={po.incoterms ?? ""}>
                   <option value="">—</option>
                   {INCOTERMS.map((t) => (
@@ -478,31 +451,31 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="freight">Freight</label>
+                <label htmlFor="freight">{tr("Freight")}</label>
                 <input id="freight" name="freight" type="text" inputMode="decimal" defaultValue={fmtNum(po.freight)} />
               </div>
               <div className="field">
-                <label htmlFor="vat_rate">VAT % <span className="hint">· 0 for foreign suppliers</span></label>
+                <label htmlFor="vat_rate">{tr("VAT %")}{" "}<span className="hint">{tr("· 0 for foreign suppliers")}</span></label>
                 <input id="vat_rate" name="vat_rate" type="text" inputMode="decimal" defaultValue={fmtNum(po.vat_rate)} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label htmlFor="supplier_ref2">Supplier&apos;s quote reference</label>
+                <label htmlFor="supplier_ref2">{tr("Supplier's quote reference")}</label>
                 <input id="supplier_ref2" name="supplier_ref" type="text" defaultValue={po.supplier_ref ?? ""} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label htmlFor="shipping_instructions">Shipping instructions</label>
+                <label htmlFor="shipping_instructions">{tr("Shipping instructions")}</label>
                 <textarea id="shipping_instructions" name="shipping_instructions" defaultValue={po.shipping_instructions ?? ""} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label htmlFor="notes">Notes to the supplier</label>
+                <label htmlFor="notes">{tr("Notes to the supplier")}</label>
                 <textarea id="notes" name="notes" defaultValue={po.notes ?? ""} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label htmlFor="terms">Terms</label>
-                <textarea id="terms" name="terms" defaultValue={po.terms ?? ""} placeholder="Leave empty for the standard PO terms" />
+                <label htmlFor="terms">{tr("Terms")}</label>
+                <textarea id="terms" name="terms" defaultValue={po.terms ?? ""} placeholder={tr("Leave empty for the standard PO terms")} />
               </div>
             </div>
-            {editable && <SubmitButton>Save details</SubmitButton>}
+            {editable && <SubmitButton>{tr("Save details")}</SubmitButton>}
           </fieldset>
         </form>
       </section>
@@ -510,9 +483,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
       {canEdit && !["partially_received", "received", "closed", "cancelled"].includes(po.status) && (
         <form action={cancelPo}>
           <input type="hidden" name="id" value={po.id} />
-          <SubmitButton className="btn btn-block btn-danger" pendingText="Cancelling…">
-            Cancel purchase order
-          </SubmitButton>
+          <SubmitButton className="btn btn-block btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel purchase order")}</SubmitButton>
         </form>
       )}
     </>

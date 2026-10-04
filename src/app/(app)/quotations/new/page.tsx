@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -11,6 +12,7 @@ import { newQuotation } from "../actions";
 export const metadata = { title: "New quotation" };
 
 export default async function NewQuotationPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -20,21 +22,16 @@ export default async function NewQuotationPage({ searchParams }: { searchParams:
   return (
     <>
       <p className="small">
-        <Link href="/quotations">← Quotations</Link>
+        <Link href="/quotations">{tr("← Quotations")}</Link>
       </p>
-      <h1>New quotation</h1>
-      <p className="muted small">
-        For a quotation that answers a client RFQ, open the RFQ and use &ldquo;Create quotation&rdquo; instead, so the
-        items are copied across.
-      </p>
+      <h1>{tr("New quotation")}</h1>
+      <p className="muted small">{tr("For a quotation that answers a client RFQ, open the RFQ and use “Create quotation” instead, so the items are copied across.")}</p>
       <Notice {...notice} />
       <form action={newQuotation} className="card">
         <div className="field">
-          <label htmlFor="client_id">Client</label>
+          <label htmlFor="client_id">{tr("Client")}</label>
           <select id="client_id" name="client_id" required defaultValue={typeof sp.client === "string" ? sp.client : ""}>
-            <option value="" disabled>
-              Choose a client
-            </option>
+            <option value="" disabled>{tr("Choose a client")}</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name} ({c.code})
@@ -42,9 +39,7 @@ export default async function NewQuotationPage({ searchParams }: { searchParams:
             ))}
           </select>
         </div>
-        <SubmitButton className="btn btn-primary btn-block" pendingText="Creating…">
-          Create draft quotation
-        </SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Creating…")}>{tr("Create draft quotation")}</SubmitButton>
       </form>
     </>
   );

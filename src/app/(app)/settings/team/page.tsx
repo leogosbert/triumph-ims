@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -14,11 +15,9 @@ type InviteRow = { id: string; email: string; role: Role; created_at: string };
 
 function RoleSelect({ name, value }: { name: string; value?: Role }) {
   return (
-    <select name={name} defaultValue={value ?? ""} required aria-label="Role">
+    <select name={name} defaultValue={value ?? ""} required aria-label={tr("Role")}>
       {!value && (
-        <option value="" disabled>
-          Choose a role
-        </option>
+        <option value="" disabled>{tr("Choose a role")}</option>
       )}
       {ROLES.map((r) => (
         <option key={r} value={r}>
@@ -30,6 +29,7 @@ function RoleSelect({ name, value }: { name: string; value?: Role }) {
 }
 
 export default async function TeamPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, user } = await requireManager();
 
@@ -63,26 +63,26 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
   return (
     <>
       <p className="small">
-        <Link href="/settings">← Settings</Link>
+        <Link href="/settings">{tr("← Settings")}</Link>
       </p>
-      <h1>Team &amp; roles</h1>
+      <h1>{tr("Team & roles")}</h1>
       <Notice {...notice} />
 
       <section className="card">
-        <h2>Invite someone</h2>
+        <h2>{tr("Invite someone")}</h2>
         <form action={inviteMember}>
           <div className="field">
-            <label htmlFor="email">Their email</label>
-            <input id="email" name="email" type="email" required placeholder="name@company.co.tz" />
+            <label htmlFor="email">{tr("Their email")}</label>
+            <input id="email" name="email" type="email" required placeholder={tr("name@company.co.tz")} />
           </div>
           <div className="field">
-            <label htmlFor="role">Role</label>
+            <label htmlFor="role">{tr("Role")}</label>
             <RoleSelect name="role" />
           </div>
-          <SubmitButton pendingText="Inviting…">Invite</SubmitButton>
+          <SubmitButton pendingText={tr("Inviting…")}>{tr("Invite")}</SubmitButton>
         </form>
         <details style={{ marginTop: 12 }}>
-          <summary className="small">What can each role do?</summary>
+          <summary className="small">{tr("What can each role do?")}</summary>
           <ul className="small muted">
             {ROLES.map((r) => (
               <li key={r}>
@@ -95,21 +95,19 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
 
       {invites.length > 0 && (
         <section className="card">
-          <h2>Waiting to join</h2>
+          <h2>{tr("Waiting to join")}</h2>
           <ul className="list">
             {invites.map((i) => (
               <li key={i.id} className="row">
                 <div>
                   <strong>{i.email}</strong>
                   <div className="muted small">
-                    {ROLE_LABELS[i.role]} · invited {formatDate(i.created_at)}
+                    {ROLE_LABELS[i.role]}{" "}{tr("· invited")}{" "}{formatDate(i.created_at)}
                   </div>
                 </div>
                 <form action={revokeInvitation}>
                   <input type="hidden" name="invitation_id" value={i.id} />
-                  <SubmitButton className="btn btn-small btn-danger" pendingText="Cancelling…">
-                    Cancel
-                  </SubmitButton>
+                  <SubmitButton className="btn btn-small btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel")}</SubmitButton>
                 </form>
               </li>
             ))}
@@ -118,7 +116,7 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
       )}
 
       <section className="card">
-        <h2>Team ({members.filter((m) => m.active).length} active)</h2>
+        <h2>{tr("Team (")}{members.filter((m) => m.active).length}{" "}{tr("active)")}</h2>
         <ul className="list">
           {members.map((m) => {
             const p = profiles.get(m.user_id);
@@ -126,19 +124,19 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
               <li key={m.id}>
                 <div className="row" style={{ marginBottom: 8 }}>
                   <div>
-                    <strong>{displayName(p)}</strong> {m.user_id === user.id && <span className="badge">You</span>}{" "}
-                    {!m.active && <span className="badge off">Switched off</span>}
+                    <strong>{displayName(p)}</strong> {m.user_id === user.id && <span className="badge">{tr("You")}</span>}{" "}
+                    {!m.active && <span className="badge off">{tr("Switched off")}</span>}
                     <div className="muted small">{p?.email}</div>
                   </div>
                 </div>
                 <form action={updateMember} className="inline-form">
                   <input type="hidden" name="membership_id" value={m.id} />
                   <RoleSelect name="role" value={m.role} />
-                  <select name="active" defaultValue={String(m.active)} aria-label="Access">
-                    <option value="true">Has access</option>
-                    <option value="false">Switched off</option>
+                  <select name="active" defaultValue={String(m.active)} aria-label={tr("Access")}>
+                    <option value="true">{tr("Has access")}</option>
+                    <option value="false">{tr("Switched off")}</option>
                   </select>
-                  <SubmitButton className="btn btn-small">Update</SubmitButton>
+                  <SubmitButton className="btn btn-small">{tr("Update")}</SubmitButton>
                 </form>
               </li>
             );

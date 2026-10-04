@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -20,6 +21,7 @@ const TABS = [
 type Row = { id: string; number: string; title: string | null; status: string; due_on: string | null; invites: { status: string }[] };
 
 export default async function SupplierRfqsPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
@@ -41,24 +43,22 @@ export default async function SupplierRfqsPage({ searchParams }: { searchParams:
   return (
     <>
       <p className="small">
-        <Link href="/purchasing">← Purchasing</Link>
+        <Link href="/purchasing">{tr("← Purchasing")}</Link>
       </p>
       <div className="page-head">
-        <h1>Supplier RFQs</h1>
-        <Link href="/supplier-rfqs/new" className="btn btn-primary btn-small">
-          + New
-        </Link>
+        <h1>{tr("Supplier RFQs")}</h1>
+        <Link href="/supplier-rfqs/new" className="btn btn-primary btn-small">{tr("+ New")}</Link>
       </div>
       <Notice {...notice} />
-      <nav className="tabs-row" aria-label="Filter">
+      <nav className="tabs-row" aria-label={tr("Filter")}>
         {TABS.map((t) => (
           <Link key={t.key} href={`/supplier-rfqs?tab=${t.key}`} aria-current={t.key === tab.key ? "page" : undefined}>
-            {t.label}
+            {tr(String(t.label ?? ""))}
           </Link>
         ))}
       </nav>
       {rows.length === 0 ? (
-        <p className="card muted">Nothing here.</p>
+        <p className="card muted">{tr("Nothing here.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {
@@ -69,13 +69,12 @@ export default async function SupplierRfqsPage({ searchParams }: { searchParams:
                   <div className="main">
                     <div className="title">{r.title ?? r.number}</div>
                     <div className="sub">
-                      {r.number} · {quoted} of {r.invites.length} supplier{r.invites.length === 1 ? "" : "s"} priced
-                    </div>
+                      {r.number} · {quoted}{" "}{tr("of")}{" "}{r.invites.length}{" "}{tr("supplier")}{r.invites.length === 1 ? "" : "s"}{" "}{tr("priced")}</div>
                   </div>
                   <div className="side">
                     <StatusBadge map={SRFQ_STATUS} status={r.status} />
                     {r.due_on && r.status === "open" && (
-                      <div className={`small ${r.due_on < today ? "text-warn" : "muted"}`}>Reply by {formatDate(r.due_on)}</div>
+                      <div className={`small ${r.due_on < today ? "text-warn" : "muted"}`}>{tr("Reply by")}{" "}{formatDate(r.due_on)}</div>
                     )}
                   </div>
                 </Link>

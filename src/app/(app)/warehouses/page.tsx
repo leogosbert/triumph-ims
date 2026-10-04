@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -13,23 +14,23 @@ function Fields({ w }: { w?: W }) {
   return (
     <div className="grid grid-2">
       <div className="field">
-        <label>Code</label>
-        <input name="code" type="text" defaultValue={w?.code ?? ""} placeholder="e.g. GTA" required maxLength={20} />
+        <label>{tr("Code")}</label>
+        <input name="code" type="text" defaultValue={w?.code ?? ""} placeholder={tr("e.g. GTA")} required maxLength={20} />
       </div>
       <div className="field">
-        <label>Name</label>
-        <input name="name" type="text" defaultValue={w?.name ?? ""} placeholder="e.g. Geita store" required />
+        <label>{tr("Name")}</label>
+        <input name="name" type="text" defaultValue={w?.name ?? ""} placeholder={tr("e.g. Geita store")} required />
       </div>
       <div className="field" style={{ gridColumn: "1 / -1" }}>
-        <label>Address</label>
+        <label>{tr("Address")}</label>
         <input name="address" type="text" defaultValue={w?.address ?? ""} />
       </div>
       {w && (
         <div className="field">
-          <label>Status</label>
+          <label>{tr("Status")}</label>
           <select name="active" defaultValue={String(w.active)}>
-            <option value="true">In use</option>
-            <option value="false">Closed</option>
+            <option value="true">{tr("In use")}</option>
+            <option value="false">{tr("Closed")}</option>
           </select>
         </div>
       )}
@@ -38,6 +39,7 @@ function Fields({ w }: { w?: W }) {
 }
 
 export default async function WarehousesPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company } = await requireManager();
   const { data } = await supabase.from("warehouses").select("id, code, name, address, active").eq("company_id", company.id).order("code");
@@ -46,28 +48,28 @@ export default async function WarehousesPage({ searchParams }: { searchParams: S
   return (
     <>
       <p className="small">
-        <Link href="/stock">← Stock</Link>
+        <Link href="/stock">{tr("← Stock")}</Link>
       </p>
-      <h1>Stores and warehouses</h1>
+      <h1>{tr("Stores and warehouses")}</h1>
       <Notice {...notice} />
       {stores.map((w) => (
         <details key={w.id} className="card">
           <summary>
-            <strong>{w.name}</strong> <span className="badge">{w.code}</span> {!w.active && <span className="badge off">Closed</span>}
+            <strong>{w.name}</strong> <span className="badge">{w.code}</span> {!w.active && <span className="badge off">{tr("Closed")}</span>}
           </summary>
           <form action={saveWarehouse} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={w.id} />
             <Fields w={w} />
-            <SubmitButton>Save</SubmitButton>
+            <SubmitButton>{tr("Save")}</SubmitButton>
           </form>
         </details>
       ))}
       <section className="card">
-        <h2>Add a store</h2>
+        <h2>{tr("Add a store")}</h2>
         <form action={saveWarehouse}>
           <input type="hidden" name="id" value="" />
           <Fields />
-          <SubmitButton pendingText="Adding…">Add store</SubmitButton>
+          <SubmitButton pendingText={tr("Adding…")}>{tr("Add store")}</SubmitButton>
         </form>
       </section>
     </>

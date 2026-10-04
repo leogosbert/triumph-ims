@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { primeLang } from "@/lib/tr";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
@@ -58,6 +59,7 @@ export type Profile = {
  * /welcome when they are not ready to use the app yet.
  */
 export const getAppContext = cache(async () => {
+  await primeLang();
   const supabase = await createClient();
   const {
     data: { user },

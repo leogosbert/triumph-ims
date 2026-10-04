@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -28,6 +29,7 @@ export const metadata = { title: "Delivery" };
 type Line = { id: string; line_no: number; description: string; quantity: number; unit: string; product_id: string | null; product: { sku: string } | null };
 
 export default async function DeliveryPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -76,7 +78,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
   return (
     <>
       <p className="small">
-        <Link href="/deliveries">← Deliveries</Link>
+        <Link href="/deliveries">{tr("← Deliveries")}</Link>
         {d.quotation && can(role, "seeSales") && (
           <>
             {" · "}
@@ -89,9 +91,9 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
         <StatusBadge map={DELIVERY_STATUS} status={d.status} />
       </div>
       <p className="muted small">
-        {d.number} · from {d.store?.name}
-        {d.planned_date && <> · planned {formatDate(d.planned_date)}</>}
-        {d.driver_id && <> · driver {names.get(d.driver_id)}</>}
+        {d.number}{" "}{tr("· from")}{" "}{d.store?.name}
+        {d.planned_date && <>{" "}{tr("· planned")}{" "}{formatDate(d.planned_date)}</>}
+        {d.driver_id && <>{" "}{tr("· driver")}{" "}{names.get(d.driver_id)}</>}
         {d.vehicle && <> · {d.vehicle}</>}
       </p>
       <Notice {...notice} />
@@ -99,53 +101,49 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
       {d.status === "delivered" && can(role, "seeInvoices") && (
         <div className="banner ok small">
           {dnInvoice ? (
-            <>
-              Invoiced: <Link href={`/invoices/${dnInvoice.id}`}>{dnInvoice.number || "draft invoice"}</Link>
+            <>{tr("Invoiced:")}{" "}<Link href={`/invoices/${dnInvoice.id}`}>{dnInvoice.number || tr("draft invoice")}</Link>
             </>
           ) : can(role, "editInvoices") ? (
             <form action={newInvoice} className="row">
               <input type="hidden" name="delivery_id" value={d.id} />
               <input type="hidden" name="back" value={`/deliveries/${d.id}`} />
-              <span>Delivered and ready to invoice.</span>
-              <SubmitButton className="btn btn-small btn-primary" pendingText="…">
-                Create invoice
-              </SubmitButton>
+              <span>{tr("Delivered and ready to invoice.")}</span>
+              <SubmitButton className="btn btn-small btn-primary" pendingText="…">{tr("Create invoice")}</SubmitButton>
             </form>
           ) : (
-            "Delivered, not invoiced yet."
+            tr("Delivered, not invoiced yet.")
           )}
         </div>
       )}
 
       {d.status === "delivered" && (
         <section className="card" style={{ borderColor: "#b9e0cc" }}>
-          <h2>Proof of delivery</h2>
+          <h2>{tr("Proof of delivery")}</h2>
           <dl className="kv">
-            <dt>Received by</dt>
+            <dt>{tr("Received by")}</dt>
             <dd>
               <strong>{d.received_by_name}</strong>
             </dd>
-            <dt>When</dt>
+            <dt>{tr("When")}</dt>
             <dd>{formatDateTime(d.delivered_at)}</dd>
             {d.gps_lat != null && (
               <>
-                <dt>Where</dt>
+                <dt>{tr("Where")}</dt>
                 <dd>
                   <a href={`https://www.google.com/maps?q=${d.gps_lat},${d.gps_lng}`} target="_blank" rel="noopener">
-                    {Number(d.gps_lat).toFixed(5)}, {Number(d.gps_lng).toFixed(5)} (map)
-                  </a>
+                    {Number(d.gps_lat).toFixed(5)}, {Number(d.gps_lng).toFixed(5)}{" "}{tr("(map)")}</a>
                 </dd>
               </>
             )}
             {d.pod_notes && (
               <>
-                <dt>Remarks</dt>
+                <dt>{tr("Remarks")}</dt>
                 <dd>{d.pod_notes}</dd>
               </>
             )}
             {d.pod_recorded_by && (
               <>
-                <dt>Recorded by</dt>
+                <dt>{tr("Recorded by")}</dt>
                 <dd>{names.get(d.pod_recorded_by)}</dd>
               </>
             )}
@@ -153,29 +151,29 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
           <div className="grid grid-2" style={{ marginTop: 12 }}>
             {signatureUrl && (
               <div>
-                <div className="muted small">Signature</div>
-                <img src={signatureUrl} alt="Signature" style={{ maxWidth: "100%", border: "1px solid var(--line)", borderRadius: 8, background: "#fff" }} />
+                <div className="muted small">{tr("Signature")}</div>
+                <img src={signatureUrl} alt={tr("Signature")} style={{ maxWidth: "100%", border: "1px solid var(--line)", borderRadius: 8, background: "#fff" }} />
               </div>
             )}
             {photoUrl && (
               <div>
-                <div className="muted small">Photo</div>
+                <div className="muted small">{tr("Photo")}</div>
                 <a href={photoUrl} target="_blank" rel="noopener">
-                  <img src={photoUrl} alt="Delivery photo" style={{ maxWidth: "100%", borderRadius: 8 }} />
+                  <img src={photoUrl} alt={tr("Delivery photo")} style={{ maxWidth: "100%", borderRadius: 8 }} />
                 </a>
               </div>
             )}
           </div>
         </section>
       )}
-      {d.status === "failed" && <div className="banner bad">Delivery failed: {d.failed_reason}. The goods were returned to stock.</div>}
+      {d.status === "failed" && <div className="banner bad">{tr("Delivery failed:")}{" "}{d.failed_reason}{tr(". The goods were returned to stock.")}</div>}
 
       <div className="actions-bar">
         {lines.length > 0 && d.status !== "cancelled" && (
           <>
             <SharePdfButton href={pdfHref} fileName={`${d.number} ${d.client?.name ?? ""}.pdf`.replace(/[^\w.\- ]+/g, "")} title={`Delivery note ${d.number}`} />
             <a className="btn" href={pdfHref} target="_blank" rel="noopener">
-              {d.status === "delivered" ? "Signed delivery note" : "Print delivery note"}
+              {d.status === "delivered" ? tr("Signed delivery note") : tr("Print delivery note")}
             </a>
           </>
         )}
@@ -184,37 +182,29 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
       {isDraft && can(role, "dispatch") && lines.length > 0 && (
         <form action={dispatchDelivery} className="card">
           <input type="hidden" name="id" value={d.id} />
-          <p className="small muted" style={{ marginTop: 0 }}>
-            Dispatching takes the goods out of {d.store?.name} (oldest expiry first) and sends the delivery to the driver&apos;s phone.
-          </p>
-          <SubmitButton className="btn btn-primary btn-block" pendingText="Dispatching…">
-            Dispatch now
-          </SubmitButton>
+          <p className="small muted" style={{ marginTop: 0 }}>{tr("Dispatching takes the goods out of")}{" "}{d.store?.name}{" "}{tr("(oldest expiry first) and sends the delivery to the driver's phone.")}</p>
+          <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Dispatching…")}>{tr("Dispatch now")}</SubmitButton>
         </form>
       )}
 
       {d.status === "dispatched" && can(role, "dispatch") && (
         <section className="card">
-          <h2>On the way</h2>
-          <Link href={`/driver?d=${d.id}`} className="btn btn-primary btn-block">
-            Record proof of delivery
-          </Link>
+          <h2>{tr("On the way")}</h2>
+          <Link href={`/driver?d=${d.id}`} className="btn btn-primary btn-block">{tr("Record proof of delivery")}</Link>
           <form action={failDelivery} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={d.id} />
             <div className="field">
-              <label htmlFor="reason">Delivery failed? Why</label>
-              <input id="reason" name="reason" type="text" placeholder="e.g. site closed, client refused" />
+              <label htmlFor="reason">{tr("Delivery failed? Why")}</label>
+              <input id="reason" name="reason" type="text" placeholder={tr("e.g. site closed, client refused")} />
             </div>
-            <SubmitButton className="btn btn-danger" pendingText="Saving…">
-              Record failed delivery
-            </SubmitButton>
+            <SubmitButton className="btn btn-danger" pendingText={tr("Saving…")}>{tr("Record failed delivery")}</SubmitButton>
           </form>
         </section>
       )}
 
       <section className="card" id="lines">
-        <h2>Items ({lines.length})</h2>
-        {lines.length === 0 && <p className="muted small">No items yet.</p>}
+        <h2>{tr("Items (")}{lines.length})</h2>
+        {lines.length === 0 && <p className="muted small">{tr("No items yet.")}</p>}
         <ul className="lines">
           {lines.map((l) => (
             <li key={l.id}>
@@ -224,7 +214,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
                     {l.line_no}. {l.description}
                   </div>
                   <div className="muted small">
-                    {l.product ? l.product.sku : "not a catalogue item"}
+                    {l.product ? l.product.sku : tr("not a catalogue item")}
                     {l.product_id && batches.get(l.product_id) ? ` · batch ${batches.get(l.product_id)!.join(", ")}` : ""}
                   </div>
                 </div>
@@ -237,17 +227,13 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
                   <form action={updateDeliveryLine} className="inline-form">
                     <input type="hidden" name="delivery_id" value={d.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <input name="quantity" type="text" inputMode="decimal" defaultValue={fmtQty(l.quantity)} aria-label="Quantity" style={{ width: 90 }} />
-                    <SubmitButton className="btn btn-small" pendingText="…">
-                      Update
-                    </SubmitButton>
+                    <input name="quantity" type="text" inputMode="decimal" defaultValue={fmtQty(l.quantity)} aria-label={tr("Quantity")} style={{ width: 90 }} />
+                    <SubmitButton className="btn btn-small" pendingText="…">{tr("Update")}</SubmitButton>
                   </form>
                   <form action={removeDeliveryLine}>
                     <input type="hidden" name="delivery_id" value={d.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">
-                      Remove
-                    </SubmitButton>
+                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
                   </form>
                 </div>
               )}
@@ -257,12 +243,12 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
         {edit && isDraft && (
           <details style={{ marginTop: 12 }} open={lines.length === 0}>
             <summary>
-              <strong>+ Add an item</strong>
+              <strong>{tr("+ Add an item")}</strong>
             </summary>
             <form action={addDeliveryLine} style={{ marginTop: 12 }}>
               <input type="hidden" name="delivery_id" value={d.id} />
               <ProductLineFields products={products} />
-              <SubmitButton pendingText="Adding…">Add item</SubmitButton>
+              <SubmitButton pendingText={tr("Adding…")}>{tr("Add item")}</SubmitButton>
             </form>
           </details>
         )}
@@ -270,14 +256,14 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
 
       {assignable && (
         <section className="card" id="details">
-          <h2>{isDraft ? "Details" : "Driver and vehicle"}</h2>
+          <h2>{isDraft ? tr("Details") : tr("Driver and vehicle")}</h2>
           <form action={saveDelivery}>
             <input type="hidden" name="id" value={d.id} />
             <div className="grid grid-2">
               <div className="field">
-                <label htmlFor="driver_id">Driver</label>
+                <label htmlFor="driver_id">{tr("Driver")}</label>
                 <select id="driver_id" name="driver_id" defaultValue={d.driver_id ?? ""}>
-                  <option value="">Not assigned</option>
+                  <option value="">{tr("Not assigned")}</option>
                   {drivers.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name} ({ROLE_LABELS[p.role as Role] ?? p.role})
@@ -286,17 +272,17 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="vehicle">Vehicle</label>
-                <input id="vehicle" name="vehicle" type="text" defaultValue={d.vehicle ?? ""} placeholder="e.g. T 123 ABC" />
+                <label htmlFor="vehicle">{tr("Vehicle")}</label>
+                <input id="vehicle" name="vehicle" type="text" defaultValue={d.vehicle ?? ""} placeholder={tr("e.g. T 123 ABC")} />
               </div>
               <div className="field">
-                <label htmlFor="planned_date">Planned date</label>
+                <label htmlFor="planned_date">{tr("Planned date")}</label>
                 <input id="planned_date" name="planned_date" type="date" defaultValue={d.planned_date ?? ""} />
               </div>
               {isDraft && (
                 <>
                   <div className="field">
-                    <label htmlFor="warehouse_id">From store</label>
+                    <label htmlFor="warehouse_id">{tr("From store")}</label>
                     <select id="warehouse_id" name="warehouse_id" defaultValue={d.warehouse_id}>
                       {stores.map((s) => (
                         <option key={s.id} value={s.id}>
@@ -306,25 +292,25 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
                     </select>
                   </div>
                   <div className="field" style={{ gridColumn: "1 / -1" }}>
-                    <label htmlFor="delivery_site">Delivery site / address</label>
+                    <label htmlFor="delivery_site">{tr("Delivery site / address")}</label>
                     <textarea id="delivery_site" name="delivery_site" defaultValue={d.delivery_site ?? ""} />
                   </div>
                   <div className="field">
-                    <label htmlFor="contact_name">Contact at site</label>
+                    <label htmlFor="contact_name">{tr("Contact at site")}</label>
                     <input id="contact_name" name="contact_name" type="text" defaultValue={d.contact_name ?? ""} />
                   </div>
                   <div className="field">
-                    <label htmlFor="contact_phone">Contact phone</label>
+                    <label htmlFor="contact_phone">{tr("Contact phone")}</label>
                     <input id="contact_phone" name="contact_phone" type="tel" defaultValue={d.contact_phone ?? ""} />
                   </div>
                   <div className="field" style={{ gridColumn: "1 / -1" }}>
-                    <label htmlFor="notes">Notes for the driver and client</label>
-                    <textarea id="notes" name="notes" defaultValue={d.notes ?? ""} placeholder="Printed on the delivery note" />
+                    <label htmlFor="notes">{tr("Notes for the driver and client")}</label>
+                    <textarea id="notes" name="notes" defaultValue={d.notes ?? ""} placeholder={tr("Printed on the delivery note")} />
                   </div>
                 </>
               )}
             </div>
-            <SubmitButton>Save</SubmitButton>
+            <SubmitButton>{tr("Save")}</SubmitButton>
           </form>
         </section>
       )}
@@ -332,9 +318,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
       {edit && isDraft && (
         <form action={cancelDelivery}>
           <input type="hidden" name="id" value={d.id} />
-          <SubmitButton className="btn btn-block btn-danger" pendingText="Cancelling…">
-            Cancel delivery note
-          </SubmitButton>
+          <SubmitButton className="btn btn-block btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel delivery note")}</SubmitButton>
         </form>
       )}
     </>

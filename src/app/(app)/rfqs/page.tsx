@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -29,6 +30,7 @@ type Row = {
 };
 
 export default async function RfqsPage({ searchParams }: { searchParams: SearchParams }) {
+  await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
@@ -53,33 +55,29 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
   return (
     <>
       <p className="small">
-        <Link href="/sales">← Sales</Link>
+        <Link href="/sales">{tr("← Sales")}</Link>
       </p>
       <div className="page-head">
-        <h1>Client RFQs</h1>
+        <h1>{tr("Client RFQs")}</h1>
         {can(role, "editSales") && (
-          <Link href="/rfqs/new" className="btn btn-primary btn-small">
-            + New RFQ
-          </Link>
+          <Link href="/rfqs/new" className="btn btn-primary btn-small">{tr("+ New RFQ")}</Link>
         )}
       </div>
       <Notice {...notice} />
-      <nav className="tabs-row" aria-label="Filter">
+      <nav className="tabs-row" aria-label={tr("Filter")}>
         {TABS.map((t) => (
           <Link key={t.key} href={`/rfqs?tab=${t.key}`} aria-current={t.key === tab.key ? "page" : undefined}>
-            {t.label}
+            {tr(String(t.label ?? ""))}
           </Link>
         ))}
       </nav>
       <form method="get" className="toolbar-row" style={{ marginBottom: 12 }}>
         <input type="hidden" name="tab" value={tab.key} />
-        <input type="search" name="q" defaultValue={q} placeholder="Search number, title, client ref…" />
-        <button className="btn" type="submit">
-          Search
-        </button>
+        <input type="search" name="q" defaultValue={q} placeholder={tr("Search number, title, client ref…")} />
+        <button className="btn" type="submit">{tr("Search")}</button>
       </form>
       {rows.length === 0 ? (
-        <p className="card muted">No RFQs here.</p>
+        <p className="card muted">{tr("No RFQs here.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {
@@ -88,7 +86,7 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
               <li key={r.id}>
                 <Link href={`/rfqs/${r.id}`}>
                   <div className="main">
-                    <div className="title">{r.client?.name ?? "Client"}</div>
+                    <div className="title">{r.client?.name ?? tr("Client")}</div>
                     <div className="sub">
                       {r.number}
                       {r.title ? ` · ${r.title}` : ""}
@@ -98,7 +96,7 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
                     <StatusBadge map={RFQ_STATUS} status={r.status} />
                     {r.due_on && (
                       <div className={`small ${overdue ? "text-warn" : "muted"}`}>
-                        {overdue ? "Overdue · " : "Due "}
+                        {overdue ? tr("Overdue · ") : tr("Due ")}
                         {formatDate(r.due_on)}
                       </div>
                     )}
@@ -109,7 +107,7 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
           })}
         </ul>
       )}
-      {(count ?? 0) > LIST_LIMIT && <p className="muted small">Showing the first {LIST_LIMIT}.</p>}
+      {(count ?? 0) > LIST_LIMIT && <p className="muted small">{tr("Showing the first")}{" "}{LIST_LIMIT}.</p>}
     </>
   );
 }

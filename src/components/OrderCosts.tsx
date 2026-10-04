@@ -1,3 +1,4 @@
+import { tr } from "@/lib/tr";
 import { addOrderCost, removeOrderCost } from "@/app/(app)/finance/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { COST_KINDS, n } from "@/lib/finance";
@@ -38,7 +39,7 @@ export function OrderCosts({
   return (
     <>
       {costs.length === 0 ? (
-        <p className="muted small">No extra costs recorded.</p>
+        <p className="muted small">{tr("No extra costs recorded.")}</p>
       ) : (
         <ul className="list">
           {costs.map((c) => (
@@ -67,7 +68,7 @@ export function OrderCosts({
             </li>
           ))}
           <li className="row">
-            <strong>Total extra costs</strong>
+            <strong>{tr("Total extra costs")}</strong>
             <strong>{formatMoney(total, base)}</strong>
           </li>
         </ul>
@@ -75,7 +76,7 @@ export function OrderCosts({
       {canEdit && (
         <details style={{ marginTop: 12 }}>
           <summary>
-            <strong>+ Add a cost</strong>
+            <strong>{tr("+ Add a cost")}</strong>
           </summary>
           <form action={addOrderCost} style={{ marginTop: 12 }}>
             <input type="hidden" name="back" value={back} />
@@ -83,7 +84,7 @@ export function OrderCosts({
             {poId && <input type="hidden" name="po_id" value={poId} />}
             <div className="grid grid-2">
               <div className="field">
-                <label htmlFor={`kind-${back}`}>Type</label>
+                <label htmlFor={`kind-${back}`}>{tr("Type")}</label>
                 <select id={`kind-${back}`} name="kind" defaultValue={poId ? "duty" : "transport"}>
                   {Object.entries(COST_KINDS).map(([k, v]) => (
                     <option key={k} value={k}>
@@ -93,15 +94,15 @@ export function OrderCosts({
                 </select>
               </div>
               <div className="field">
-                <label htmlFor={`desc-${back}`}>Description</label>
-                <input id={`desc-${back}`} name="description" type="text" placeholder="e.g. TRA duty, agent invoice no." />
+                <label htmlFor={`desc-${back}`}>{tr("Description")}</label>
+                <input id={`desc-${back}`} name="description" type="text" placeholder={tr("e.g. TRA duty, agent invoice no.")} />
               </div>
               <div className="field">
-                <label htmlFor={`amt-${back}`}>Amount</label>
+                <label htmlFor={`amt-${back}`}>{tr("Amount")}</label>
                 <input id={`amt-${back}`} name="amount" type="text" inputMode="decimal" required />
               </div>
               <div className="field">
-                <label htmlFor={`ccy-${back}`}>Currency</label>
+                <label htmlFor={`ccy-${back}`}>{tr("Currency")}</label>
                 <select id={`ccy-${back}`} name="currency" defaultValue={defaultCurrency ?? base}>
                   {CURRENCIES.map((c) => (
                     <option key={c}>{c}</option>
@@ -109,17 +110,16 @@ export function OrderCosts({
                 </select>
               </div>
               <div className="field">
-                <label htmlFor={`rate-${back}`}>
-                  Exchange rate <span className="hint">· if not {base}</span>
+                <label htmlFor={`rate-${back}`}>{tr("Exchange rate")}{" "}<span className="hint">{tr("· if not")}{" "}{base}</span>
                 </label>
                 <input id={`rate-${back}`} name="exchange_rate" type="text" inputMode="decimal" defaultValue="1" />
               </div>
               <div className="field">
-                <label htmlFor={`date-${back}`}>Date</label>
+                <label htmlFor={`date-${back}`}>{tr("Date")}</label>
                 <input id={`date-${back}`} name="incurred_on" type="date" defaultValue={todayTz()} />
               </div>
             </div>
-            <SubmitButton pendingText="Adding…">Add cost</SubmitButton>
+            <SubmitButton pendingText={tr("Adding…")}>{tr("Add cost")}</SubmitButton>
           </form>
         </details>
       )}

@@ -1,3 +1,4 @@
+import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -53,6 +54,7 @@ type Payment = {
 };
 
 export default async function InvoicePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
+  await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, role } = await getAppContext();
@@ -101,7 +103,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   return (
     <>
       <p className="small">
-        <Link href="/invoices">← Invoices</Link>
+        <Link href="/invoices">{tr("← Invoices")}</Link>
         {inv.quotation && can(role, "seeSales") && (
           <>
             {" · "}
@@ -121,21 +123,20 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
       </div>
       <p className="muted small">
         {label}
-        {inv.issue_date && <> · issued {formatDate(inv.issue_date)}</>}
-        {inv.due_date && <> · due {formatDate(inv.due_date)}</>}
-        {late > 0 && <span className="text-warn"> · {late} days overdue</span>}
-        {inv.created_by && <> · by {names.get(inv.created_by)}</>}
+        {inv.issue_date && <>{" "}{tr("· issued")}{" "}{formatDate(inv.issue_date)}</>}
+        {inv.due_date && <>{" "}{tr("· due")}{" "}{formatDate(inv.due_date)}</>}
+        {late > 0 && <span className="text-warn"> · {late}{" "}{tr("days overdue")}</span>}
+        {inv.created_by && <>{" "}{tr("· by")}{" "}{names.get(inv.created_by)}</>}
       </p>
       <Notice {...notice} />
 
       {inv.status === "cancelled" && (
         <div className="banner bad">
-          <strong>Cancelled.</strong> {inv.cancelled_reason ?? ""}
+          <strong>{tr("Cancelled.")}</strong> {inv.cancelled_reason ?? ""}
         </div>
       )}
       {inv.credit_override_by && (
-        <div className="banner warn small">
-          Issued above the client&apos;s credit limit, approved by {names.get(inv.credit_override_by)}.
+        <div className="banner warn small">{tr("Issued above the client's credit limit, approved by")}{" "}{names.get(inv.credit_override_by)}.
         </div>
       )}
 
@@ -143,46 +144,37 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         {!isDraft && (
           <>
             <SharePdfButton href={pdfHref} fileName={pdfName} title={`Invoice ${inv.number}`} />
-            <a className="btn" href={pdfHref} target="_blank" rel="noopener">
-              Open PDF
-            </a>
+            <a className="btn" href={pdfHref} target="_blank" rel="noopener">{tr("Open PDF")}</a>
           </>
         )}
         {isDraft && lines.length > 0 && (
-          <a className="btn" href={pdfHref} target="_blank" rel="noopener">
-            Preview PDF
-          </a>
+          <a className="btn" href={pdfHref} target="_blank" rel="noopener">{tr("Preview PDF")}</a>
         )}
       </div>
 
       {editable && lines.length > 0 && (
         <form action={issueInvoice} className="card">
           <input type="hidden" name="id" value={inv.id} />
-          <p className="small muted" style={{ marginTop: 0 }}>
-            Issuing gives the invoice its number and due date and locks it. If it takes the client above their credit
-            limit, only management can issue it.
-          </p>
-          <SubmitButton className="btn btn-primary btn-block" pendingText="Issuing…">
-            Issue invoice
-          </SubmitButton>
+          <p className="small muted" style={{ marginTop: 0 }}>{tr("Issuing gives the invoice its number and due date and locks it. If it takes the client above their credit limit, only management can issue it.")}</p>
+          <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Issuing…")}>{tr("Issue invoice")}</SubmitButton>
         </form>
       )}
 
       {/* ---------- Money ---------- */}
       {!isDraft && inv.status !== "cancelled" && (
         <section className="card" id="payments">
-          <h2>Payment</h2>
+          <h2>{tr("Payment")}</h2>
           <div className="totals" style={{ maxWidth: "none" }}>
             <div className="row">
-              <span>Invoice total</span>
+              <span>{tr("Invoice total")}</span>
               <span>{formatMoney(inv.total, ccy)}</span>
             </div>
             <div className="row">
-              <span>Paid</span>
+              <span>{tr("Paid")}</span>
               <span>{formatMoney(inv.amount_paid, ccy)}</span>
             </div>
             <div className={`row grand ${late > 0 ? "text-warn" : ""}`}>
-              <span>Balance due</span>
+              <span>{tr("Balance due")}</span>
               <span>{formatMoney(balance, ccy)}</span>
             </div>
           </div>
@@ -202,22 +194,18 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                       </span>
                     </span>
                     {!p.voided_at && (
-                      <a className="btn btn-small" href={`/payments/${p.id}/pdf`} target="_blank" rel="noopener">
-                        Receipt
-                      </a>
+                      <a className="btn btn-small" href={`/payments/${p.id}/pdf`} target="_blank" rel="noopener">{tr("Receipt")}</a>
                     )}
                   </div>
-                  {p.voided_at && <div className="small text-warn">Voided: {p.void_reason}</div>}
+                  {p.voided_at && <div className="small text-warn">{tr("Voided:")}{" "}{p.void_reason}</div>}
                   {!p.voided_at && can(role, "voidPayments") && (
                     <details className="small">
-                      <summary>Void this payment</summary>
+                      <summary>{tr("Void this payment")}</summary>
                       <form action={voidPayment} className="inline-form" style={{ marginTop: 6 }}>
                         <input type="hidden" name="invoice_id" value={inv.id} />
                         <input type="hidden" name="payment_id" value={p.id} />
-                        <input name="reason" type="text" placeholder="Reason, e.g. cheque bounced" required />
-                        <SubmitButton className="btn btn-small btn-danger" pendingText="…">
-                          Void
-                        </SubmitButton>
+                        <input name="reason" type="text" placeholder={tr("Reason, e.g. cheque bounced")} required />
+                        <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Void")}</SubmitButton>
                       </form>
                     </details>
                   )}
@@ -229,21 +217,21 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
           {edit && open && (
             <details style={{ marginTop: 12 }} open={payments.length === 0}>
               <summary>
-                <strong>+ Record a payment received</strong>
+                <strong>{tr("+ Record a payment received")}</strong>
               </summary>
               <form action={recordPayment} style={{ marginTop: 12 }}>
                 <input type="hidden" name="invoice_id" value={inv.id} />
                 <div className="grid grid-2">
                   <div className="field">
-                    <label htmlFor="amount">Amount ({ccy})</label>
+                    <label htmlFor="amount">{tr("Amount (")}{ccy})</label>
                     <input id="amount" name="amount" type="text" inputMode="decimal" defaultValue={fmtNum(balance)} required />
                   </div>
                   <div className="field">
-                    <label htmlFor="received_on">Date received</label>
+                    <label htmlFor="received_on">{tr("Date received")}</label>
                     <input id="received_on" name="received_on" type="date" defaultValue={todayTz()} />
                   </div>
                   <div className="field">
-                    <label htmlFor="method">How</label>
+                    <label htmlFor="method">{tr("How")}</label>
                     <select id="method" name="method" defaultValue="bank_transfer">
                       {Object.entries(PAY_METHODS).map(([k, v]) => (
                         <option key={k} value={k}>
@@ -253,19 +241,18 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                     </select>
                   </div>
                   <div className="field">
-                    <label htmlFor="reference">Reference</label>
-                    <input id="reference" name="reference" type="text" placeholder="Bank ref, cheque no., M-Pesa code" />
+                    <label htmlFor="reference">{tr("Reference")}</label>
+                    <input id="reference" name="reference" type="text" placeholder={tr("Bank ref, cheque no., M-Pesa code")} />
                   </div>
                   {ccy !== base && (
                     <div className="field">
-                      <label htmlFor="exchange_rate">
-                        Exchange rate on the day <span className="hint">· {base} per 1 {ccy}</span>
+                      <label htmlFor="exchange_rate">{tr("Exchange rate on the day")}{" "}<span className="hint">· {base}{" "}{tr("per 1")}{" "}{ccy}</span>
                       </label>
                       <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(inv.exchange_rate)} />
                     </div>
                   )}
                 </div>
-                <SubmitButton pendingText="Saving…">Record payment</SubmitButton>
+                <SubmitButton pendingText={tr("Saving…")}>{tr("Record payment")}</SubmitButton>
               </form>
             </details>
           )}
@@ -274,8 +261,8 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
 
       {/* ---------- Lines ---------- */}
       <section className="card" id="lines">
-        <h2>Items ({lines.length})</h2>
-        {lines.length === 0 && <p className="muted small">No items yet.</p>}
+        <h2>{tr("Items (")}{lines.length})</h2>
+        {lines.length === 0 && <p className="muted small">{tr("No items yet.")}</p>}
         <ul className="lines">
           {lines.map((l) => (
             <li key={l.id}>
@@ -298,27 +285,23 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                     <input type="hidden" name="invoice_id" value={inv.id} />
                     <input type="hidden" name="line_id" value={l.id} />
                     <div>
-                      <label htmlFor={`q-${l.id}`}>Qty</label>
+                      <label htmlFor={`q-${l.id}`}>{tr("Qty")}</label>
                       <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} />
                     </div>
                     <div>
-                      <label htmlFor={`p-${l.id}`}>Unit price</label>
+                      <label htmlFor={`p-${l.id}`}>{tr("Unit price")}</label>
                       <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} />
                     </div>
                     <div>
-                      <label htmlFor={`d-${l.id}`}>Disc. %</label>
+                      <label htmlFor={`d-${l.id}`}>{tr("Disc. %")}</label>
                       <input id={`d-${l.id}`} name="discount_pct" type="text" inputMode="decimal" defaultValue={fmtNum(l.discount_pct)} />
                     </div>
-                    <SubmitButton className="btn btn-small" pendingText="…">
-                      Update
-                    </SubmitButton>
+                    <SubmitButton className="btn btn-small" pendingText="…">{tr("Update")}</SubmitButton>
                   </form>
                   <form action={removeInvoiceLine}>
                     <input type="hidden" name="invoice_id" value={inv.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">
-                      Remove
-                    </SubmitButton>
+                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
                   </form>
                 </div>
               )}
@@ -329,26 +312,25 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         <div className="totals" style={{ marginTop: 12 }}>
           {n(inv.discount_total) > 0 && (
             <div className="row small muted">
-              <span>Discounts</span>
+              <span>{tr("Discounts")}</span>
               <span>− {formatMoney(inv.discount_total, ccy)}</span>
             </div>
           )}
           <div className="row">
-            <span>Subtotal</span>
+            <span>{tr("Subtotal")}</span>
             <span>{formatMoney(inv.subtotal, ccy)}</span>
           </div>
           <div className="row">
-            <span>VAT {n(inv.vat_rate)}%</span>
+            <span>{tr("VAT")}{" "}{n(inv.vat_rate)}%</span>
             <span>{formatMoney(inv.vat_amount, ccy)}</span>
           </div>
           <div className="row grand">
-            <span>Total</span>
+            <span>{tr("Total")}</span>
             <span>{formatMoney(inv.total, ccy)}</span>
           </div>
           {ccy !== base && (
             <div className="row small muted">
-              <span>
-                ≈ in {base} at {fmtNum(inv.exchange_rate)}
+              <span>{tr("≈ in")}{" "}{base}{" "}{tr("at")}{" "}{fmtNum(inv.exchange_rate)}
               </span>
               <span>{formatMoney(n(inv.total) * n(inv.exchange_rate), base)}</span>
             </div>
@@ -358,12 +340,12 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         {editable && (
           <details style={{ marginTop: 16 }} open={lines.length === 0}>
             <summary>
-              <strong>+ Add an item</strong>
+              <strong>{tr("+ Add an item")}</strong>
             </summary>
             <form action={addInvoiceLine} style={{ marginTop: 12 }}>
               <input type="hidden" name="invoice_id" value={inv.id} />
               <ProductLineFields products={products} showPrice />
-              <SubmitButton pendingText="Adding…">Add item</SubmitButton>
+              <SubmitButton pendingText={tr("Adding…")}>{tr("Add item")}</SubmitButton>
             </form>
           </details>
         )}
@@ -371,26 +353,26 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
 
       {profit && (
         <section className="card">
-          <h2>Profit on this invoice</h2>
-          <p className="muted small">Only management and finance see this. Costs are the product costs when the invoice was issued.</p>
+          <h2>{tr("Profit on this invoice")}</h2>
+          <p className="muted small">{tr("Only management and finance see this. Costs are the product costs when the invoice was issued.")}</p>
           {(() => {
             const rev = n(profit.revenue_base);
             const cost = n(profit.cost_base);
             const gp = rev - cost;
             return (
               <dl className="kv">
-                <dt>Sales (before VAT)</dt>
+                <dt>{tr("Sales (before VAT)")}</dt>
                 <dd>{formatMoney(rev, base)}</dd>
-                <dt>Cost of goods</dt>
+                <dt>{tr("Cost of goods")}</dt>
                 <dd>{formatMoney(cost, base)}</dd>
-                <dt>Gross profit</dt>
+                <dt>{tr("Gross profit")}</dt>
                 <dd>
                   <strong>{formatMoney(gp, base)}</strong> {rev > 0 && <span className="muted">({((gp / rev) * 100).toFixed(1)}%)</span>}
                 </dd>
                 {n(profit.lines_without_cost) > 0 && (
                   <>
-                    <dt>Lines without a cost</dt>
-                    <dd className="text-warn">{n(profit.lines_without_cost)} — profit is overstated</dd>
+                    <dt>{tr("Lines without a cost")}</dt>
+                    <dd className="text-warn">{n(profit.lines_without_cost)}{" "}{tr("— profit is overstated")}</dd>
                   </>
                 )}
               </dl>
@@ -398,7 +380,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
           })()}
           {inv.quotation && (
             <p className="small">
-              <Link href={`/quotations/${inv.quotation.id}#profit`}>Whole-order profit, including freight and other costs →</Link>
+              <Link href={`/quotations/${inv.quotation.id}#profit`}>{tr("Whole-order profit, including freight and other costs →")}</Link>
             </p>
           )}
         </section>
@@ -406,21 +388,21 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
 
       {/* ---------- Details ---------- */}
       <section className="card" id="details">
-        <h2>Details</h2>
+        <h2>{tr("Details")}</h2>
         <form action={saveInvoiceHeader}>
           <input type="hidden" name="id" value={inv.id} />
           <fieldset className="plain" disabled={!editable}>
             <div className="grid grid-2">
               <div className="field">
-                <label htmlFor="client_ref">Client&apos;s order / PO no.</label>
+                <label htmlFor="client_ref">{tr("Client's order / PO no.")}</label>
                 <input id="client_ref" name="client_ref" type="text" defaultValue={inv.client_ref ?? ""} />
               </div>
               <div className="field">
-                <label htmlFor="contact_name">Attention</label>
+                <label htmlFor="contact_name">{tr("Attention")}</label>
                 <input id="contact_name" name="contact_name" type="text" defaultValue={inv.contact_name ?? ""} />
               </div>
               <div className="field">
-                <label htmlFor="currency">Currency</label>
+                <label htmlFor="currency">{tr("Currency")}</label>
                 <select id="currency" name="currency" defaultValue={ccy}>
                   {CURRENCIES.map((c) => (
                     <option key={c}>{c}</option>
@@ -428,25 +410,22 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="exchange_rate">
-                  Exchange rate <span className="hint">· {base} per 1 unit</span>
+                <label htmlFor="exchange_rate">{tr("Exchange rate")}{" "}<span className="hint">· {base}{" "}{tr("per 1 unit")}</span>
                 </label>
                 <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(inv.exchange_rate)} />
               </div>
               <div className="field">
-                <label htmlFor="issue_date">
-                  Invoice date <span className="hint">· blank = the day it is issued</span>
+                <label htmlFor="issue_date">{tr("Invoice date")}{" "}<span className="hint">{tr("· blank = the day it is issued")}</span>
                 </label>
                 <input id="issue_date" name="issue_date" type="date" defaultValue={inv.issue_date ?? ""} />
               </div>
               <div className="field">
-                <label htmlFor="due_date">
-                  Due date <span className="hint">· blank = {company.invoice_due_days ?? 30} days after</span>
+                <label htmlFor="due_date">{tr("Due date")}{" "}<span className="hint">{tr("· blank =")}{" "}{company.invoice_due_days ?? 30}{" "}{tr("days after")}</span>
                 </label>
                 <input id="due_date" name="due_date" type="date" defaultValue={inv.due_date ?? ""} />
               </div>
               <div className="field">
-                <label htmlFor="payment_terms">Payment terms</label>
+                <label htmlFor="payment_terms">{tr("Payment terms")}</label>
                 <select id="payment_terms" name="payment_terms" defaultValue={inv.payment_terms ?? ""}>
                   <option value="">—</option>
                   {[...new Set([...(inv.payment_terms ? [inv.payment_terms] : []), ...PAYMENT_TERMS])].map((t) => (
@@ -455,27 +434,25 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="vat_rate">VAT %</label>
+                <label htmlFor="vat_rate">{tr("VAT %")}</label>
                 <input id="vat_rate" name="vat_rate" type="text" inputMode="decimal" defaultValue={fmtNum(inv.vat_rate)} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label htmlFor="notes">
-                  Notes <span className="hint">· printed on the invoice</span>
+                <label htmlFor="notes">{tr("Notes")}{" "}<span className="hint">{tr("· printed on the invoice")}</span>
                 </label>
                 <textarea id="notes" name="notes" defaultValue={inv.notes ?? ""} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label htmlFor="terms">Terms</label>
+                <label htmlFor="terms">{tr("Terms")}</label>
                 <textarea id="terms" name="terms" defaultValue={inv.terms ?? ""} />
               </div>
             </div>
-            {editable && <SubmitButton>Save details</SubmitButton>}
+            {editable && <SubmitButton>{tr("Save details")}</SubmitButton>}
           </fieldset>
         </form>
         {inv.issued_at && (
-          <p className="small muted">
-            Issued {formatDateTime(inv.issued_at)}
-            {inv.issued_by && <> by {names.get(inv.issued_by)}</>}
+          <p className="small muted">{tr("Issued")}{" "}{formatDateTime(inv.issued_at)}
+            {inv.issued_by && <>{" "}{tr("by")}{" "}{names.get(inv.issued_by)}</>}
           </p>
         )}
       </section>
@@ -483,17 +460,15 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
       {((edit && isDraft) || (can(role, "voidPayments") && open && n(inv.amount_paid) === 0)) && (
         <details className="card">
           <summary>
-            <strong>Cancel this invoice</strong>
+            <strong>{tr("Cancel this invoice")}</strong>
           </summary>
           <form action={cancelInvoice} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={inv.id} />
             <div className="field">
-              <label htmlFor="reason">Reason {!isDraft && <span className="hint">· required</span>}</label>
+              <label htmlFor="reason">{tr("Reason")}{" "}{!isDraft && <span className="hint">{tr("· required")}</span>}</label>
               <input id="reason" name="reason" type="text" required={!isDraft} />
             </div>
-            <SubmitButton className="btn btn-danger" pendingText="Cancelling…">
-              Cancel invoice
-            </SubmitButton>
+            <SubmitButton className="btn btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel invoice")}</SubmitButton>
           </form>
         </details>
       )}

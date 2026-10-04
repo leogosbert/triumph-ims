@@ -234,7 +234,7 @@ select tests.check(not exists (select 1 from storage.objects where name like :'d
                    and exists (select 1 from storage.objects where name = :'real' || '/logo.png'), 'demo files removed, real files kept');
 
 -- ---- 8. Who may call what -------------------------------------------------------------
-select tests.check(not has_function_privilege('anon', 'public.create_demo_company()', 'execute')
+select tests.check(not has_function_privilege('anon', 'public.create_demo_company(public.business_level)', 'execute')
                    and not has_function_privilege('anon', 'public.set_demo_role(public.app_role)', 'execute')
                    and not has_function_privilege('anon', 'public.end_demo()', 'execute')
                    and not has_function_privilege('anon', 'public.purge_demo_companies()', 'execute')
@@ -246,7 +246,7 @@ select tests.check(not has_function_privilege('authenticated', 'public.purge_dem
                    and not has_function_privilege('authenticated', 'public.demo_quote(uuid, uuid, uuid, jsonb, date, integer, text, text)', 'execute')
                    and not has_function_privilege('authenticated', 'public.demo_invoice(uuid, date, date, jsonb)', 'execute'),
                    'signed-in users cannot call the internal demo functions');
-select tests.check(has_function_privilege('authenticated', 'public.create_demo_company()', 'execute')
+select tests.check(has_function_privilege('authenticated', 'public.create_demo_company(public.business_level)', 'execute')
                    and has_function_privilege('authenticated', 'public.set_demo_role(public.app_role)', 'execute')
                    and has_function_privilege('authenticated', 'public.end_demo()', 'execute'), 'signed-in users can use the demo');
 select tests.login('m10@d.test'); set role authenticated;

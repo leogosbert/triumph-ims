@@ -3,6 +3,8 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { getAppContext } from "@/lib/context";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
+import { TourButton } from "@/components/tour/TourButton";
+import { LEVELS, type Level } from "@/lib/levels";
 
 export const metadata = { title: "Help" };
 
@@ -80,7 +82,8 @@ const GUIDES: Guide[] = [
 
 export default async function HelpPage() {
   await primeLang();
-  const { role } = await getAppContext();
+  const { role, company } = await getAppContext();
+  const level: Level = company.business_level ?? "medium";
   const mine = GUIDES.find((g) => g.role === role);
   const others = GUIDES.filter((g) => g.role !== role);
 
@@ -98,6 +101,17 @@ export default async function HelpPage() {
     <>
       <h1>{tr("Help")}</h1>
       <p className="muted small">{tr("The whole flow: client RFQ → quotation → approval → order won → supplier quotes → purchase order → goods received → delivery → proof of delivery → invoice → payment → profit. Each person does their part and the next person is told.")}</p>
+      {role !== "driver" && (
+        <section className="card help-tour" data-tour="help-tour">
+          <div>
+            <h2>{tr("Take the guided tour for your business level")}</h2>
+            <p className="small muted">
+              {tr(LEVELS[level].title)} · {tr("A short walk through the real screens: what each one does, who uses it and how it helps.")}
+            </p>
+          </div>
+          <TourButton tour={level} label="Start the tour" className="btn btn-primary btn-small" />
+        </section>
+      )}
       {mine && (
         <section className="card">
           <h2>{tr("Your role:")}{" "}{ROLE_LABELS[mine.role]}</h2>

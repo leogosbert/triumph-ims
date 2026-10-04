@@ -8,7 +8,7 @@ import { toggleFeature } from "./actions";
 /** Shared pieces of the Growth page and Settings → Features. Server components (call primeLang() first). */
 
 export function tutorialOf(f: FeatureRow): TutorialData {
-  return { title: f.name, description: f.description, audience: f.audience, benefits: f.benefits, steps: f.tutorial };
+  return { title: f.name, description: f.description, audience: f.audience, benefits: f.benefits, steps: f.tutorial, route: f.status === "live" ? f.route : null };
 }
 
 /** A guided look at a whole level: one step per live feature that comes with it. */

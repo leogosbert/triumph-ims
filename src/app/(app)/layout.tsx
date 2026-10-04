@@ -5,6 +5,7 @@ import { CompanyButton, CompanySheet, type CompanyCard } from "@/components/Comp
 import { AppLock } from "@/components/AppLock";
 import { DemoBar } from "@/components/DemoBar";
 import { IdleGuard } from "@/components/IdleGuard";
+import { TourHost } from "@/components/tour/TourHost";
 import { Icon } from "@/components/Icon";
 import { getThemePref } from "@/lib/theme";
 import { brandingUrl, getAppContext } from "@/lib/context";
@@ -92,6 +93,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {company.is_demo && (
           <DemoBar
             role={role}
+            level={company.business_level ?? null}
             hoursLeft={Math.max(1, Math.ceil((Date.parse(company.demo_expires_at ?? "") - Date.now()) / 36e5) || 48)}
           />
         )}
@@ -111,6 +113,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         items={bottomNav(role, t, features.on)}
         menu={moreMenu(role, isManager, { on: features.on, isPlatformAdmin, features: features.list })}
         menuStart={defaultCategory(role)}
+      />
+      <TourHost
+        off={features.ready ? features.list.filter((f) => !features.on(f.key)).map((f) => f.key) : []}
+        role={role}
+        level={company.business_level ?? "medium"}
+        company={company.id}
       />
     </div>
   );

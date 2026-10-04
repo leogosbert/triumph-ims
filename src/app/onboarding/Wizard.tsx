@@ -147,19 +147,24 @@ export function OnboardingWizard({
             <div className="onb-demo">
               <strong>{tr("Want to look around first?")}</strong>
               <p className="small muted">
-                {tr("The demo opens a sample company next to yours, full of made-up data. For now all three buttons open the same demo: a medium-sized supplier. Separate Small and Enterprise demos are coming soon. Leave the demo to come back here.")}
+                {tr("Each demo opens a sample company next to yours, full of made-up data for that size of business, with a short guided tour. Leave the demo to come back here.")}
               </p>
-              <form action={demoAction} className="onb-demo-btns">
-                <SubmitButton className="btn btn-small" pendingText={tr("Opening…")}>
-                  {tr("Explore Small demo")}
-                </SubmitButton>
-                <SubmitButton className="btn btn-small" pendingText={tr("Opening…")}>
-                  {tr("Explore Medium demo")}
-                </SubmitButton>
-                <SubmitButton className="btn btn-small" pendingText={tr("Opening…")}>
-                  {tr("Explore Enterprise demo")}
-                </SubmitButton>
-              </form>
+              <div className="onb-demo-btns">
+                {(
+                  [
+                    ["small", "Explore Small demo"],
+                    ["medium", "Explore Medium demo"],
+                    ["enterprise", "Explore Enterprise demo"],
+                  ] as const
+                ).map(([lvl, label]) => (
+                  <form key={lvl} action={demoAction}>
+                    <input type="hidden" name="level" value={lvl} />
+                    <SubmitButton className="btn btn-small" pendingText={tr("Opening…")}>
+                      {tr(label)}
+                    </SubmitButton>
+                  </form>
+                ))}
+              </div>
             </div>
           </>
         )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTr } from "@/lib/tr-client";
+import { startTour } from "@/components/tour/store";
 
 export type TutorialData = {
   /** Feature (or level) name. */
@@ -11,6 +12,8 @@ export type TutorialData = {
   audience?: string | null;
   benefits?: string | null;
   steps: { title: string; body: string }[];
+  /** Screen of the feature: adds "Show me where", a one-step guided tour pointing at it. */
+  route?: string | null;
 };
 
 /**
@@ -45,6 +48,27 @@ export function FeatureTutorial({
   }
   function hide() {
     setOpen(false);
+  }
+
+  const where = data.route && data.route.startsWith("/") ? data.route : null;
+  /** Close the guide, then let the tour open the feature's screen and point at its heading. */
+  function showWhere() {
+    if (!where) return;
+    hide();
+    window.setTimeout(
+      () =>
+        startTour(`where:${where}`, [
+          {
+            route: where,
+            selector: [".page-head", "main.page h1"],
+            title: data.title,
+            body: data.description || "Here is where you will find it.",
+            who: data.audience ?? undefined,
+            why: data.benefits ?? undefined,
+          },
+        ]),
+      400,
+    );
   }
 
   // Mount first, then add the "open" class on the next frame so the sheet slides in.
@@ -177,6 +201,11 @@ export function FeatureTutorial({
               </div>
             )}
 
+            {where && (
+              <button type="button" className="btn btn-small btn-ghost tsheet-where" onClick={showWhere}>
+                <span aria-hidden="true">◎</span> {tr("Show me where")}
+              </button>
+            )}
             <div className="tsheet-actions">
               <button type="button" className="btn" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
                 {tr("Back")}

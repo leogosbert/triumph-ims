@@ -7,6 +7,20 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.12",
+    date: "2026-10-06",
+    en: [
+      "Three demos: try a Small, Medium or Enterprise sample business from the sign-in page and switch between them.",
+      "Guided tours: the app walks you through the real screens step by step — start one from Help at any time.",
+      "LeMoSp ADMIN: platform admins can install a separate admin app on Android and iPhone.",
+    ],
+    sw: [
+      "Demo tatu: jaribu biashara ya mfano Ndogo, ya Kati au Kubwa kutoka ukurasa wa kuingia na ubadilishe kati yake.",
+      "Ziara za maelekezo: programu inakuongoza kwenye skrini halisi hatua kwa hatua — anza moja kutoka Msaada wakati wowote.",
+      "LeMoSp ADMIN: wasimamizi wa jukwaa wanaweza kusakinisha programu ya usimamizi kwenye Android na iPhone.",
+    ],
+  },
+  {
     version: "1.11",
     date: "2026-10-05",
     en: [

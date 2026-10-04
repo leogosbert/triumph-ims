@@ -24,6 +24,7 @@ the database itself, and each has its own branding and settings.
 | 9 | LeMoSp branding, new look (B), laptop layout, search, English/Kiswahili | Built, ready to test |
 | 10 | Demo version, two-step verification and password security, "new version" pop-up | Built — run the Stage 10 SQL |
 | 11 | Business levels, feature switches, onboarding, growth recommendations, Suggestion Box, Platform Admin | **Built — run the Stage 11 SQL** |
+| 12 | Small / Medium / Enterprise demos, guided tours, LeMoSp ADMIN installable app | **Built — run the Stage 12 SQL** |
 
 ## First-time setup
 

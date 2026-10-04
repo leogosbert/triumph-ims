@@ -158,24 +158,38 @@ export default function LoginPage() {
           <p className="small muted" style={{ marginTop: 16 }}>{tr("Joining a company? Create your account with the same email address your manager invited.")}</p>
         )}
       </div>
-      <form action={startDemo} className="demo-card">
+      <section className="demo-card" aria-labelledby="demo-card-title">
         <div>
-          <strong>{tr("Just looking?")}</strong>
-          <span>{tr("Try the demo with sample clients, quotations, stock and invoices. No sign-up needed; it deletes itself after 48 hours.")}</span>
+          <strong id="demo-card-title">{tr("Just looking?")}</strong>
+          <span>{tr("Open a demo company with sample clients, quotations, stock and invoices, and a short guided tour. Pick the size closest to your business. No sign-up needed; it deletes itself after 48 hours.")}</span>
         </div>
-        <DemoButton />
-      </form>
+        <div className="demo-levels">
+          {DEMO_LEVELS.map((l) => (
+            <form key={l.level} action={startDemo}>
+              <input type="hidden" name="level" value={l.level} />
+              <DemoButton name={l.name} line={l.line} />
+            </form>
+          ))}
+        </div>
+      </section>
       <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>
     </div>
   );
 }
 
-function DemoButton() {
+const DEMO_LEVELS: { level: "small" | "medium" | "enterprise"; name: string; line: string }[] = [
+  { level: "small", name: "Small business demo", line: "A shop or small office: a few people, simple sales, stock and payments." },
+  { level: "medium", name: "Medium business demo", line: "A growing team with corporate clients, several suppliers and approvals." },
+  { level: "enterprise", name: "Enterprise demo", line: "Many stores across regions, imports, departments and a large team." },
+];
+
+function DemoButton({ name, line }: { name: string; line: string }) {
   const tr = useTr();
   const { pending } = useFormStatus();
   return (
-    <button type="submit" className="btn btn-block demo-btn" disabled={pending}>
-      {pending ? tr("Preparing your demo…") : tr("Try the demo")}
+    <button type="submit" className="demo-level" disabled={pending} aria-busy={pending}>
+      <strong>{pending ? tr("Preparing your demo…") : tr(name)}</strong>
+      <span>{tr(line)}</span>
     </button>
   );
 }

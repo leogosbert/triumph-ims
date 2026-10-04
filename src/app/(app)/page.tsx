@@ -15,6 +15,7 @@ import type { Dict } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
 import { FirstStepsCard, GrowthCard, OnboardingCard } from "@/components/GrowthCard";
 import { loadRecommendations } from "@/lib/features";
+import { TourInvite } from "@/components/tour/TourButton";
 import { isLevel, levelRank, type Level } from "@/lib/levels";
 
 export const metadata = { title: "Home" };
@@ -114,6 +115,13 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   // Growth (Stage 11): onboarding card and recommendations for managers. Quiet before that SQL is run.
   const level: Level = company.business_level ?? "medium";
   const needsOnboarding = isManager && company.onboarding_done === false && !company.is_demo;
+  // Stage 12: "Take a 2-minute tour" for managers in the first 14 days after onboarding
+  // (until dismissed on this device; without a level date it shows until dismissed).
+  const invitedToTour = (() => {
+    if (!isManager || company.is_demo || company.onboarding_done === false) return false;
+    const since = company.level_changed_at ? Date.parse(company.level_changed_at) : NaN;
+    return Number.isFinite(since) ? Date.now() - since < 14 * 864e5 : true;
+  })();
   let growth: { featureRecs: number; featureLevel: Level | null; levelRec: Level | null } | null = null;
   if (isManager && features.ready && !company.is_demo) {
     try {
@@ -165,6 +173,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
 
       {needsOnboarding && <OnboardingCard />}
       {isManager && welcomeLevel && <FirstStepsCard level={welcomeLevel} />}
+      {invitedToTour && <TourInvite tour={level} company={company.id} />}
       {growth && <GrowthCard level={level} featureRecs={growth.featureRecs} featureLevel={growth.featureLevel} levelRec={growth.levelRec} />}
 
       {(approvals.length > 0 || poApprovals.length > 0) && (

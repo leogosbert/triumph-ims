@@ -4,14 +4,57 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ACTIVE_COMPANY_COOKIE } from "@/lib/context";
 import { str } from "@/lib/format";
+import { isLevel, type Level } from "@/lib/levels";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
 
 const COOKIE_OPTS = { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 24 * 365 };
 const ROLES = ["management", "sales", "procurement", "warehouse", "driver", "finance"];
 
-/** "Try the demo": signs in as a guest (no email needed) and builds a demo company with sample data. */
-export async function startDemo() {
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+type DbError = { code?: string; message?: string } | null | undefined;
+
+/** The demo level asked for in a form ("small" | "medium" | "enterprise"); Medium when missing or unknown. */
+function levelOf(form?: unknown): Level {
+  if (form instanceof FormData) {
+    const v = str(form, "level");
+    if (isLevel(v)) return v;
+  }
+  return "medium";
+}
+
+/** The database function (or its p_level parameter) does not exist yet: the Stage 12 SQL has not been run. */
+function missingFunction(error: DbError): boolean {
+  if (!error) return false;
+  return (
+    error.code === "PGRST202" ||
+    error.code === "42883" ||
+    error.code === "42704" ||
+    /p_level|could not find the function|does not exist|schema cache|business_level/i.test(error.message ?? "")
+  );
+}
+
+/**
+ * Builds a demo company at a level. Before the Stage 12 database update the function takes no
+ * level: then the old single (medium) demo is built instead.
+ */
+async function createDemo(supabase: Supabase, level: Level) {
+  const withLevel = await supabase.rpc("create_demo_company", { p_level: level });
+  if (!withLevel.error || !missingFunction(withLevel.error)) return withLevel;
+  return supabase.rpc("create_demo_company");
+}
+
+/** Home, with the guided tour for that level starting by itself. */
+function homeWithTour(level: Level, msg: string) {
+  return withNotice(`/?tour=${level}`, { msg });
+}
+
+/**
+ * "Try the demo": signs in as a guest (no email needed) and builds a demo company with sample data.
+ * The form may carry `level` (small | medium | enterprise); without a form the Medium demo opens.
+ */
+export async function startDemo(form?: FormData) {
+  const level = levelOf(form);
   const supabase = await createClient();
   const {
     data: { user },
@@ -29,10 +72,10 @@ export async function startDemo() {
       );
     }
   }
-  const { data, error } = await supabase.rpc("create_demo_company");
+  const { data, error } = await createDemo(supabase, level);
   if (error) redirect(withNotice("/login", { error: friendlyError(error.message) }));
   (await cookies()).set(ACTIVE_COMPANY_COOKIE, String(data), COOKIE_OPTS);
-  redirect(withNotice("/", { msg: "Welcome to the LeMoSp demo. Everything here is sample data — try anything." }));
+  redirect(homeWithTour(level, "Welcome to the LeMoSp demo. Everything here is sample data — try anything."));
 }
 
 /** Demo only: look at the app as another role (Sales, Driver, Finance …). */
@@ -45,13 +88,43 @@ export async function setDemoRole(form: FormData) {
   redirect("/");
 }
 
-/** Demo only: throw the sample data away and start again. */
+/** Demo only: throw the sample data away and start again, at the same demo level. */
 export async function restartDemo() {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("create_demo_company");
+  let level: Level = "medium";
+  try {
+    const { data: current, error: levelError } = await supabase.rpc("my_demo_level");
+    if (!levelError && isLevel(current)) level = current;
+  } catch {
+    /* before the Stage 12 update: the single medium demo */
+  }
+  const { data, error } = await createDemo(supabase, level);
   if (error) redirect(withNotice("/", { error: friendlyError(error.message) }));
   (await cookies()).set(ACTIVE_COMPANY_COOKIE, String(data), COOKIE_OPTS);
   redirect(withNotice("/", { msg: "Fresh demo data is ready." }));
+}
+
+/** Demo only: swap to the Small, Medium or Enterprise demo company, then start its tour. */
+export async function switchDemoLevel(form: FormData) {
+  const raw = str(form, "level");
+  if (!isLevel(raw)) redirect("/");
+  const level: Level = raw;
+  const supabase = await createClient();
+  let result = await supabase.rpc("switch_demo_level", { p_level: level });
+  // Before the Stage 12 update there is no switch: build the demo again instead.
+  if (result.error && missingFunction(result.error)) result = await createDemo(supabase, level);
+  if (result.error) redirect(withNotice("/", { error: friendlyError(result.error.message) }));
+  (await cookies()).set(ACTIVE_COMPANY_COOKIE, String(result.data), COOKIE_OPTS);
+  redirect(
+    homeWithTour(
+      level,
+      level === "small"
+        ? "You are now in the Small business demo."
+        : level === "enterprise"
+          ? "You are now in the Enterprise demo."
+          : "You are now in the Medium business demo.",
+    ),
+  );
 }
 
 /** Leave the demo: deletes the demo company; guests are signed out. */

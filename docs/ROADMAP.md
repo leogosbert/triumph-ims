@@ -30,9 +30,10 @@ See [PRODUCT-VISION.md](PRODUCT-VISION.md) for the philosophy. This file tracks 
 - Suggestion Box with review workflow, assignment, comments, internal improvements.
 - Platform Admin: companies, levels, feature catalogue, recommendation rules, anonymised feedback and adoption analytics.
 
-## Stage 12 — Demos & guided tours
-- Small, Medium and Enterprise demo companies with level-appropriate fictional data.
+## Stage 12 — Demos & guided tours (built — run the Stage 12 SQL)
+- Small, Medium and Enterprise demo companies with level-appropriate fictional data; switch level inside the demo.
 - Interactive guided tours on the real screens (spotlight steps), per-feature tutorials, "Explore demo" in onboarding.
+- LeMoSp ADMIN: the platform admin area installs as its own app (Android and iPhone) with its own install card.
 
 ## Stage 13 — Small-level essentials
 - Expenses with categories and receipts photos; simple profit & loss; customer and supplier statements.

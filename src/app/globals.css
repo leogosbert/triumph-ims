@@ -4680,3 +4680,389 @@ button.lvl-card:disabled {
 .onb-nav .btn {
   min-width: 110px;
 }
+
+/* ---------- Stage 12: tours ---------- */
+/* Guided tour: a dimmed screen with a spotlight cut-out around the element, and a card.
+   Phones: the card docks at the bottom, above the bottom bar. Larger screens: next to the element. */
+.tour {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  pointer-events: none;
+}
+.tour-block {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  background: rgba(6, 14, 28, 0.58);
+  transition: background-color 0.3s ease;
+}
+.tour.has-spot .tour-block {
+  background: transparent;
+}
+.tour-spot {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 14px;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 3px rgba(20, 184, 166, 0.95),
+    0 0 0 9999px rgba(6, 14, 28, 0.58);
+  opacity: 1;
+}
+.tour-spot.off {
+  opacity: 0;
+}
+.tour-spot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 2px solid #5eead4;
+  opacity: 0;
+}
+.tour-wait {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+.tour-wait-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #14b8a6;
+}
+.tour-card {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: calc(var(--nav-h) + 22px + env(safe-area-inset-bottom));
+  max-height: min(56dvh, 460px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 16px 12px;
+  border-radius: 22px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  visibility: hidden;
+  outline: none;
+}
+.tour-card.ready {
+  visibility: visible;
+}
+.tour-card.dock-top {
+  top: calc(64px + env(safe-area-inset-top));
+  bottom: auto;
+}
+@media (min-width: 640px) {
+  .tour-card,
+  .tour-card.dock-top {
+    right: auto;
+    bottom: auto;
+    width: 380px;
+    max-height: calc(100dvh - 24px);
+  }
+  .tour-card:not(.placed) {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+.tour-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tour-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0f766e;
+}
+[data-theme="dark"] .tour-kicker {
+  color: #5eead4;
+}
+.tour-count {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.tour-x {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--text);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.tour-head .tour-kicker + .tour-x {
+  margin-left: auto;
+}
+.tour-progress {
+  height: 4px;
+  margin: 10px 0 2px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.tour-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #14b8a6;
+}
+.tour-title {
+  margin: 10px 0 6px;
+  font-size: 1.12rem;
+  line-height: 1.25;
+}
+.tour-body {
+  margin: 0 0 10px;
+  font-size: 0.93rem;
+}
+.tour-meta {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.tour-meta p {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--soft);
+  font-size: 0.86rem;
+}
+.tour-meta strong {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tour-actions > :first-child {
+  margin-right: auto;
+}
+.tour-actions .btn {
+  min-height: 40px;
+}
+.tour-actions .tour-skip {
+  padding-left: 6px;
+  padding-right: 6px;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tour-block {
+    animation: fade 0.3s ease backwards;
+  }
+  .tour-spot {
+    transition:
+      top 0.45s var(--ease-out),
+      left 0.45s var(--ease-out),
+      width 0.45s var(--ease-out),
+      height 0.45s var(--ease-out),
+      opacity 0.3s ease;
+  }
+  .tour-spot:not(.off)::after {
+    animation: tour-pulse 1.8s var(--ease-out) 0.5s infinite;
+  }
+  .tour-card.ready {
+    animation: tour-in 0.42s var(--ease-spring) backwards;
+  }
+  .tour-progress span {
+    transition: width 0.45s var(--ease-out);
+  }
+  .tour-wait-dot {
+    animation: tour-blink 0.9s ease-in-out infinite alternate;
+  }
+  .tour-invite {
+    animation: rise 0.4s var(--ease-out) backwards;
+  }
+}
+@keyframes tour-in {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+    scale: 0.97;
+  }
+}
+@keyframes tour-pulse {
+  0% {
+    opacity: 0.9;
+    inset: -3px;
+  }
+  100% {
+    opacity: 0;
+    inset: -14px;
+  }
+}
+@keyframes tour-blink {
+  to {
+    opacity: 0.3;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-spot,
+  .tour-block,
+  .tour-card,
+  .tour-progress span {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* "Take the tour" in the demo bar; the level name. */
+.demo-tour {
+  white-space: nowrap;
+}
+.demo-level-name {
+  font-weight: 800;
+}
+
+/* Sign-in page: one button per demo level. */
+.demo-levels {
+  display: grid;
+  gap: 8px;
+}
+.demo-levels form {
+  margin: 0;
+}
+.demo-level {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid rgba(20, 184, 166, 0.45);
+  border-radius: 14px;
+  background: rgba(11, 31, 58, 0.45);
+  color: #e6ecf5;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    transform 0.18s var(--ease-spring);
+}
+.demo-level strong {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #5eead4;
+}
+.demo-card .demo-level span {
+  font-size: 0.82rem;
+  color: #b9c7dc;
+}
+.demo-level:hover {
+  background: rgba(20, 184, 166, 0.18);
+  border-color: #14b8a6;
+}
+.demo-level:active {
+  transform: scale(0.98);
+}
+.demo-level:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 2px;
+}
+.demo-level[disabled] {
+  opacity: 0.75;
+  cursor: progress;
+}
+
+/* Onboarding: each demo button sits in its own form. */
+.onb-demo-btns form {
+  margin: 0;
+}
+
+/* Help page: "Take the guided tour". */
+.help-tour {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  border-left: 4px solid #14b8a6;
+}
+.help-tour h2 {
+  margin: 0 0 2px;
+}
+.help-tour p {
+  margin: 0;
+}
+
+/* Home: "Take a 2-minute tour" (new companies, until dismissed). */
+.tour-invite {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 12px 0;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, #14b8a6 12%, var(--card));
+  border: 1px solid color-mix(in srgb, #14b8a6 40%, var(--line));
+  box-shadow: 0 1px 3px var(--shadow);
+}
+.tour-invite-ico {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 12px;
+  background: #14b8a6;
+  color: #0b1f3a;
+  font-size: 0.9rem;
+}
+.tour-invite-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.tour-invite-txt > span {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.tour-invite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Feature tutorial: "Show me where". */
+.tsheet-where {
+  align-self: center;
+  margin: 0 0 10px;
+}

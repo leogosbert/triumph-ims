@@ -150,7 +150,7 @@ export default function LoginPage() {
           </p>
         )}
       </div>
-      <p className="auth-foot">LeMo IMS · by LeMo Tech Solutions</p>
+      <p className="auth-foot">LeMo IMS · a LeMo Tech Solutions product</p>
     </div>
   );
 }

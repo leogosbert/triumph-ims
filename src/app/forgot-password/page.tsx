@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
           <Link href="/login">Back to sign in</Link>
         </p>
       </div>
-      <p className="auth-foot">LeMo IMS · by LeMo Tech Solutions</p>
+      <p className="auth-foot">LeMo IMS · a LeMo Tech Solutions product</p>
     </div>
   );
 }

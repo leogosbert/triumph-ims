@@ -1,5 +1,7 @@
 # LeMo IMS (first client: TRIUMPH General Suppliers)
 
+LeMo IMS is a product of **LeMo Tech Solutions** (sister product: LeMo Farm Manager). Brand files: `public/brand/`.
+
 Phone-first system for a general supply company: clients, suppliers, products, RFQs, quotations, purchasing, stock,
 deliveries, invoices and payments. It is built for many companies from day one: each company's data is kept apart by
 the database itself, and each has its own branding and settings.

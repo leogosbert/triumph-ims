@@ -76,7 +76,7 @@ export default async function MorePage() {
       </div>
       <a className="lemo-foot" href="/help">
         <img src="/brand/lemo-ims.svg" alt="LeMo IMS" />
-        <span>by LeMo Tech Solutions</span>
+        <span>a LeMo Tech Solutions product</span>
       </a>
     </>
   );

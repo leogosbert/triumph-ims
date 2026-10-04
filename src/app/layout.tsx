@@ -8,7 +8,7 @@ const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["500", "600"], variabl
 
 export const metadata: Metadata = {
   title: { default: "LeMo IMS", template: "%s · LeMo IMS" },
-  description: "LeMo IMS by LeMo Tech Solutions — sales, procurement, stock, delivery and finance for general supply companies.",
+  description: "LeMo IMS, a LeMo Tech Solutions product — sales, procurement, stock, delivery and finance for general supply companies.",
   applicationName: "LeMo IMS",
   manifest: "/manifest.webmanifest",
   icons: {

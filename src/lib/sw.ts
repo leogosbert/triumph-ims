@@ -1,6 +1,12 @@
 // Kiswahili for screen text. Keys are the exact English shown in the app.
 // Generated for Stage 9; please have a native speaker review.
 export const SW: Record<string, string> = {
+  "Appearance": "Mwonekano",
+  "Auto": "Otomatiki",
+  "Light": "Mwanga",
+  "Dark": "Giza",
+  "Auto follows your phone's light or dark setting.": "Otomatiki hufuata mpangilio wa mwanga au giza wa simu yako.",
+  "Close": "Funga",
   " & profit": " na faida",
   " has": " ina",
   " · below 12%, needs approval when quoting": " · chini ya 12%, inahitaji idhini wakati wa kunukuu",

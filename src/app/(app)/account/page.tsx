@@ -2,6 +2,7 @@ import { primeLang, tr } from "@/lib/tr";
 import { Notice } from "@/components/Notice";
 import { PasswordInput } from "@/components/PasswordInput";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ThemePicker } from "@/components/ThemePicker";
 import { signOut, switchCompany } from "@/app/actions";
 import { getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -41,6 +42,12 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
           </div>
           <SubmitButton>{tr("Save")}</SubmitButton>
         </form>
+      </section>
+
+      <section className="card">
+        <h2>{tr("Appearance")}</h2>
+        <p className="muted small">{tr("Auto follows your phone's light or dark setting.")}</p>
+        <ThemePicker />
       </section>
 
       <section className="card" id="password">

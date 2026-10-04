@@ -120,6 +120,10 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{inv.client?.name}</h1>
         <StatusBadge map={INVOICE_STATUS} status={shown} />
+        <div className="head-amount num">
+          {formatMoney(inv.status === "issued" || inv.status === "partly_paid" ? balance : inv.total, ccy)}
+          {(inv.status === "issued" || inv.status === "partly_paid") && <span>{tr("Balance due")}</span>}
+        </div>
       </div>
       <p className="muted small">
         {label}

@@ -123,6 +123,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{po.supplier?.name}</h1>
         <StatusBadge map={PO_STATUS} status={po.status} />
+        <div className="head-amount num">{formatMoney(po.total, ccy)}</div>
       </div>
       <p className="muted small">
         {po.number} · {formatDate(po.order_date)}

@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { getLang } from "@/lib/lang";
 import { LangProvider } from "@/lib/tr-client";
+import { getThemePref, THEME_SCRIPT } from "@/lib/theme";
+import { Splash, SPLASH_SCRIPT } from "@/components/Splash";
+import { NavProgress } from "@/components/NavProgress";
 import "./globals.css";
 
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
@@ -28,9 +31,21 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const lang = await getLang();
+  const theme = await getThemePref();
   return (
-    <html lang={lang} className={`${sans.variable} ${mono.variable}`}>
+    <html
+      lang={lang}
+      className={`${sans.variable} ${mono.variable}`}
+      data-theme-pref={theme}
+      data-theme={theme === "auto" ? undefined : theme}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + SPLASH_SCRIPT }} />
+      </head>
       <body>
+        <Splash />
+        <NavProgress />
         <LangProvider lang={lang === "sw" ? "sw" : "en"}>{children}</LangProvider>
       </body>
     </html>

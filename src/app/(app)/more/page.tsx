@@ -1,15 +1,50 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { Icon, type IconName } from "@/components/Icon";
+import { ThemePicker } from "@/components/ThemePicker";
 import { getAppContext } from "@/lib/context";
 import { can } from "@/lib/roles";
 
 export const metadata = { title: "More" };
 
+const ICONS: Record<string, IconName> = {
+  "/clients/new": "plus",
+  "/suppliers/new": "plus",
+  "/products/new": "plus",
+  "/clients": "clients",
+  "/suppliers": "truck",
+  "/products": "products",
+  "/sales": "sales",
+  "/purchasing": "purchasing",
+  "/finance": "finance",
+  "/invoices": "receipt",
+  "/bills": "receipt",
+  "/stock": "stock",
+  "/receiving": "inbox",
+  "/deliveries": "deliveries",
+  "/driver": "deliveries",
+  "/warehouses": "warehouse",
+  "/import": "upload",
+  "/settings/company": "building",
+  "/settings/team": "team",
+  "/activity": "activity",
+  "/help": "help",
+  "/settings/go-live": "check",
+  "/notifications": "bell",
+  "/settings/notifications": "settings",
+  "/account": "user",
+};
+
 function Tile({ href, title, sub }: { href: string; title: string; sub: string }) {
   return (
-    <Link href={href} className="tile">
-      <div className="tile-title">{title}</div>
-      <div className="tile-sub">{sub}</div>
+    <Link href={href} className="tile tile-icon">
+      <span className="tile-ico" aria-hidden>
+        <Icon name={ICONS[href] ?? "doc"} size={20} />
+      </span>
+      <span className="tile-body">
+        <span className="tile-title">{title}</span>
+        <span className="tile-sub">{sub}</span>
+      </span>
     </Link>
   );
 }
@@ -76,6 +111,10 @@ export default async function MorePage() {
         {isManager && <Tile href="/settings/notifications" title={tr("Alerts setup")} sub={tr("Connect phone push and email sending")} />}
         <Tile href="/account" title={tr("Your account")} sub={tr("Your details, password, sign out")} />
       </div>
+      <h2 style={{ marginTop: 24 }}>{tr("Appearance")}</h2>
+      <p className="muted small">{tr("Auto follows your phone's light or dark setting.")}</p>
+      <ThemePicker />
+
       <a className="lemo-foot" href="/help">
         <img src="/brand/lemo-ims.svg" alt={tr("LeMo IMS")} />
         <span>{tr("a LeMo Tech Solutions product")}</span>

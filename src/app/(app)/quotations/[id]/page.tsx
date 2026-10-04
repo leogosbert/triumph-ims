@@ -186,6 +186,7 @@ export default async function QuotationPage({
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{q.client?.name}</h1>
         <StatusBadge map={QUOTE_STATUS} status={q.status} />
+        <div className="head-amount num">{formatMoney(q.total, ccy)}</div>
       </div>
       <p className="muted small">
         {quoteNo(q)}{" "}{tr("· issued")}{" "}{formatDate(q.issue_date)}

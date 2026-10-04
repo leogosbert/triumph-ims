@@ -18,6 +18,17 @@ const PATHS = {
   cash: "M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
   chevron: "M9 6l6 6-6 6",
   back: "M15 6l-6 6 6 6",
+  user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0",
+  team: "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7M18 14a6 6 0 0 1 4 7",
+  activity: "M3 12h4l3-8 4 16 3-8h4",
+  upload: "M12 16V4M7 9l5-5 5 5M4 16v4h16v-4",
+  inbox: "M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5",
+  warehouse: "M3 21V9l9-6 9 6v12M7 21v-8h10v8M7 17h10",
+  check: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM8 12l3 3 5-6",
+  building: "M4 21V5l8-3v19M12 9h8v12M7 8h2M7 12h2M7 16h2M15 13h2M15 17h2",
+  moon: "M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z",
+  truck: "M1 7h13v10H1zM14 10h4l4 4v3h-8zM5.5 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17.5 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  receipt: "M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2zM9 8h6M9 12h6M9 16h3",
 } as const;
 
 export type IconName = keyof typeof PATHS;

@@ -73,6 +73,10 @@ export default async function BillPage({ params, searchParams }: { params: Promi
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{b.supplier?.name}</h1>
         <StatusBadge map={BILL_STATUS} status={shown} />
+        <div className="head-amount num">
+          {formatMoney(b.status === "open" || b.status === "partly_paid" ? balance : b.total, ccy)}
+          {(b.status === "open" || b.status === "partly_paid") && n(b.amount_paid) > 0 && <span>{tr("Balance due")}</span>}
+        </div>
       </div>
       <p className="muted small">
         {b.number}

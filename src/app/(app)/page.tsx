@@ -1,5 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { CountUp } from "@/components/CountUp";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { displayName, getAppContext } from "@/lib/context";
@@ -179,6 +180,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       )}
 
       <KpiGrid kpis={restKpis} currency={base} />
+      <CountUp selector=".hero-kpis .num, .stat .n" />
 
       <div className="dash-grid">
         {dash.months && dash.months.some((m) => m.sales > 0) && <SalesChart months={dash.months} currency={base} t={t} />}

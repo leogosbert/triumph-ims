@@ -1,6 +1,18 @@
 // Kiswahili for screen text. Keys are the exact English shown in the app.
 // Generated for Stage 9; please have a native speaker review.
 export const SW: Record<string, string> = {
+  "Install LeMoSp on this phone": "Sakinisha LeMoSp kwenye simu hii",
+  "Opens from your home screen like any app, full screen and faster.": "Hufunguka kutoka skrini ya mwanzo kama programu nyingine, skrini nzima na kwa kasi zaidi.",
+  "Tap the browser menu": "Gusa menyu ya kivinjari",
+  "then": "kisha",
+  "Install app": "Sakinisha programu",
+  "or": "au",
+  "Add to Home screen": "Ongeza kwenye skrini ya mwanzo",
+  "Tap": "Gusa",
+  "in Safari (on newer iPhones it is under": "kwenye Safari (kwenye iPhone mpya iko chini ya",
+  "), then": "), kisha",
+  "Not now": "Si sasa",
+  "Got it": "Sawa",
   "Appearance": "Mwonekano",
   "Auto": "Otomatiki",
   "Light": "Mwanga",

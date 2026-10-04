@@ -5,6 +5,7 @@ import { LangProvider } from "@/lib/tr-client";
 import { getThemePref, THEME_SCRIPT } from "@/lib/theme";
 import { Splash, SPLASH_SCRIPT } from "@/components/Splash";
 import { NavProgress } from "@/components/NavProgress";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import "./globals.css";
 
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
@@ -46,7 +47,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <Splash />
         <NavProgress />
-        <LangProvider lang={lang === "sw" ? "sw" : "en"}>{children}</LangProvider>
+        <LangProvider lang={lang === "sw" ? "sw" : "en"}>
+          {children}
+          <InstallPrompt />
+        </LangProvider>
       </body>
     </html>
   );

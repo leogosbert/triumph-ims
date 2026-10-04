@@ -2473,3 +2473,18 @@ a {
     transform: scaleX(0.6);
   }
 }
+
+/* Tapping the company logo opens Company details. */
+.sidenav-brand {
+  text-decoration: none;
+  border-radius: 12px;
+}
+.sidenav-brand:hover strong,
+.topbar-brand:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.topbar-brand:active,
+.sidenav-brand:active {
+  opacity: 0.8;
+}

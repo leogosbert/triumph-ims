@@ -53,10 +53,10 @@ export function SideNav({
   const pathname = usePathname();
   return (
     <aside className="sidenav" aria-label={tr("Sections")}>
-      <div className="sidenav-brand">
+      <Link href="/settings/company" className="sidenav-brand" title={company}>
         {logo ? <img src={logo} alt="" /> : <span className="mark">{initials}</span>}
         <strong>{company}</strong>
-      </div>
+      </Link>
       <nav>
         {items.map((it) => {
           const active = isActive(it, pathname);

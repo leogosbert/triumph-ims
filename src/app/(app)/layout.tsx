@@ -35,7 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <SideNav items={sideNav(role, t)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">
-          <Link href="/" className="topbar-brand" aria-label={company.name}>
+          <Link href="/settings/company" className="topbar-brand" aria-label={company.name} title={company.name}>
             {logo ? <img src={logo} alt="" /> : <span className="mark">{initials}</span>}
             <span className="who">
               <strong>{company.name}</strong>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOut } from "@/app/actions";
 import { TotpSetup } from "@/components/TotpSetup";
+import { clearAway } from "@/lib/applock";
 import { createClient } from "@/lib/supabase/client";
 import { useTr } from "@/lib/tr-client";
 
@@ -39,6 +40,7 @@ export default function TwoStepPage() {
   }, [router]);
 
   function done() {
+    clearAway();
     router.replace("/");
     router.refresh();
   }

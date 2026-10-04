@@ -3427,3 +3427,85 @@ body:has(.bottomnav) .install-arrow {
   font-size: 0.72rem;
   color: var(--muted);
 }
+
+/* ---------- App lock (password when you come back) ---------- */
+.applock {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+  background: #0b1f3a;
+  background-image: radial-gradient(70% 50% at 50% 30%, rgba(20, 184, 166, 0.14), transparent 70%);
+  overflow-y: auto;
+  animation: fade 0.25s ease-out;
+}
+.applock-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 26px 22px 18px;
+  border-radius: 24px;
+  background: var(--card);
+  color: var(--text);
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  animation: install-in 0.45s var(--ease-spring);
+}
+.applock-card form {
+  text-align: left;
+}
+.applock-logo {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
+  border-radius: 18px;
+  object-fit: contain;
+  background: #fff;
+  padding: 4px;
+  box-shadow: 0 4px 14px rgba(11, 31, 58, 0.18);
+}
+.applock-logo.mark {
+  display: grid;
+  place-items: center;
+  background: var(--brand-dark);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+.applock-card h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+.applock-who {
+  margin: 2px 0 18px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+.applock-card label {
+  display: block;
+  margin-bottom: 6px;
+}
+.applock-card .password-wrap {
+  margin-bottom: 12px;
+}
+.applock-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 0.85rem;
+}
+.applock-links .demo-link {
+  color: var(--muted);
+  font-weight: 600;
+}
+.applock-brand {
+  width: 150px;
+  opacity: 0.85;
+}

@@ -8,6 +8,7 @@ import { useFormStatus } from "react-dom";
 import { NewPasswordField } from "@/components/NewPasswordField";
 import { PasswordInput } from "@/components/PasswordInput";
 import { checkPassword } from "@/lib/password";
+import { clearAway } from "@/lib/applock";
 import { createClient } from "@/lib/supabase/client";
 import { startDemo } from "@/app/demo-actions";
 
@@ -51,6 +52,7 @@ export default function LoginPage() {
           );
           return;
         }
+        clearAway();
         // Two-step verification turned on: ask for the code next.
         const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {

@@ -15,6 +15,7 @@ export const RELEASES: Release[] = [
       "Stronger passwords: strength meter and a check against leaked passwords.",
       "Automatic sign-out when the app is left idle (set by management).",
       "This pop-up tells you when a new version is ready.",
+      "App lock: your password is asked again whenever you come back to the app (change it under Your account → Security).",
     ],
     sw: [
       "Jaribu demo: kampuni ya mfano yenye wateja, nukuu za bei, stoku na ankara — bila kujisajili.",
@@ -22,6 +23,7 @@ export const RELEASES: Release[] = [
       "Manenosiri imara zaidi: kipimo cha uimara na ukaguzi wa manenosiri yaliyovuja.",
       "Kutoka kiotomatiki programu ikiachwa bila kutumika (huwekwa na uongozi).",
       "Dirisha hili linakujulisha toleo jipya likiwa tayari.",
+      "Kufuli ya programu: nenosiri lako huombwa tena kila unaporudi kwenye programu (badilisha kwenye Akaunti yako → Usalama).",
     ],
   },
   {

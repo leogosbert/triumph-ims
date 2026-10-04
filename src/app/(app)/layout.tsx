@@ -2,6 +2,7 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { BottomNav, SideNav } from "@/components/BottomNav";
 import { CompanyButton, CompanySheet, type CompanyCard } from "@/components/CompanySheet";
+import { AppLock } from "@/components/AppLock";
 import { DemoBar } from "@/components/DemoBar";
 import { IdleGuard } from "@/components/IdleGuard";
 import { Icon } from "@/components/Icon";
@@ -98,6 +99,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       <CompanySheet card={card} />
       <IdleGuard minutes={company.idle_timeout_minutes ?? 0} />
+      <AppLock
+        email={profile.email ?? user.email ?? ""}
+        name={profile.full_name ?? ""}
+        logo={logo}
+        initials={initials}
+        lastSignIn={user.last_sign_in_at ?? null}
+        enabled={!user.is_anonymous && Boolean(profile.email ?? user.email)}
+      />
       <BottomNav items={bottomNav(role, t)} menu={moreMenu(role, isManager)} menuStart={defaultCategory(role)} />
     </div>
   );

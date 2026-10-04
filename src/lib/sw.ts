@@ -1,6 +1,20 @@
 // Kiswahili for screen text. Keys are the exact English shown in the app.
 // Generated for Stage 9; please have a native speaker review.
 export const SW: Record<string, string> = {
+  "Enter your password to continue": "Weka nenosiri lako ili kuendelea",
+  "Unlock": "Fungua",
+  "Not you? Sign out": "Si wewe? Toka",
+  "That password is not correct.": "Nenosiri hilo si sahihi.",
+  "tries left.": "majaribio yamebaki.",
+  "Too many attempts. Please wait a few minutes.": "Majaribio mengi mno. Tafadhali subiri dakika chache.",
+  "Ask for my password when I return to the app": "Niombe nenosiri ninaporudi kwenye programu",
+  "Every time I come back": "Kila ninaporudi",
+  "After 1 minute away": "Baada ya dakika 1 nikiwa nje",
+  "After 5 minutes away": "Baada ya dakika 5 nikiwa nje",
+  "After 15 minutes away": "Baada ya dakika 15 nikiwa nje",
+  "Never (not recommended)": "Kamwe (haishauriwi)",
+  "Saved for this device.": "Imehifadhiwa kwa kifaa hiki.",
+  "This setting is for this device only.": "Mpangilio huu ni kwa kifaa hiki tu.",
   "Who has two-step on": "Nani amewasha hatua mbili",
   "people. Ask everyone to turn it on under Your account → Security before you require it: anyone without it will be asked to set it up at their next sign-in.": "watu. Waombe wote waiwashe kwenye Akaunti yako → Usalama kabla ya kuilazimisha: asiye nayo ataombwa kuiweka atakapoingia tena.",
   "Reset": "Weka upya",

@@ -8,7 +8,7 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL, siteUrl } from "@/lib/supabase/env";
  * Needs these settings on the server (Netlify → Environment variables):
  *   OUTBOX_SECRET                      same text as set_outbox_secret() in the database
  *   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY phone push (generate in the app: Settings → Notifications)
- *   RESEND_API_KEY, EMAIL_FROM          email (resend.com), e.g. "TRIUMPH IMS <alerts@yourdomain.co.tz>"
+ *   RESEND_API_KEY, EMAIL_FROM          email (resend.com), e.g. "TRIUMPH Alerts <alerts@yourdomain.co.tz>"
  * Anything missing is simply skipped.
  */
 export type OutboxStatus = { secret: boolean; push: boolean; email: boolean };

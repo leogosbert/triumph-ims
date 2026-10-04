@@ -1,4 +1,4 @@
-/* LeMo IMS — Look B ("bold navy"). Phone first; a sidebar layout from 1024px.
+/* LeMo Suppliers Manager — Look B ("bold navy"). Phone first; a sidebar layout from 1024px.
    --brand and --brand-dark come from each company's settings (their colours lead inside the app). */
 :root {
   --brand: #1c4c9b;
@@ -1971,7 +1971,7 @@ p.card.muted::before {
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
 }
 [data-theme="dark"] .lemo-foot img {
-  content: url("/brand/lemo-ims-on-dark.svg");
+  content: url("/brand/lemo-sm-on-dark.svg");
 }
 [data-theme="dark"] .card,
 [data-theme="dark"] .rec-list,
@@ -2029,7 +2029,7 @@ a {
   overflow: visible;
 }
 .splash-word {
-  width: 200px;
+  width: 190px;
   height: auto;
   overflow: visible;
 }
@@ -2044,16 +2044,13 @@ a {
 }
 .sp-n1,
 .sp-n2,
-.sp-ring,
-.sp-pill,
-.sp-ims {
+.sp-ring {
   transform-box: fill-box;
   transform-origin: center;
 }
 .sp-n1,
 .sp-n2,
-.sp-pill,
-.sp-ims {
+.sp-tagline {
   opacity: 0;
 }
 .sp-n1 {
@@ -2081,9 +2078,8 @@ a {
 .sp-l4 {
   animation-delay: 1.14s;
 }
-.sp-pill,
-.sp-ims {
-  animation: sp-pop 0.45s var(--ease-spring) 1.28s forwards;
+.sp-tagline {
+  animation: sp-fade-up 0.5s var(--ease-out) 1.25s forwards;
 }
 .splash-tag {
   margin: 0;

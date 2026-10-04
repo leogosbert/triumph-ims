@@ -91,7 +91,7 @@ export default async function AlertsSetupPage({ searchParams }: { searchParams: 
           <li>
             <code>RESEND_API_KEY</code>{" "}{tr("– the key")}</li>
           <li>
-            <code>EMAIL_FROM</code> – e.g. <code>TRIUMPH IMS &lt;alerts@triumphsuppliers.co.tz&gt;</code>
+            <code>EMAIL_FROM</code> – e.g. <code>TRIUMPH Alerts &lt;alerts@triumphsuppliers.co.tz&gt;</code>
           </li>
         </ul>
         <p className="small muted">{tr("Each person gets at most one email every 5 minutes, listing their new urgent alerts. Anyone can switch emails off for themselves.")}</p>

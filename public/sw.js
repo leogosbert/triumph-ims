@@ -1,4 +1,4 @@
-/* TRIUMPH IMS service worker: lets drivers open "My deliveries" and record
+/* LeMo Suppliers Manager service worker: lets drivers open "My deliveries" and record
    proof of delivery with no signal. Only the driver screen and the app's
    static files are cached; everything else always goes to the network. */
 const CACHE = "ims-driver-v1";
@@ -91,10 +91,10 @@ self.addEventListener("push", (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch {
-    data = { title: "TRIUMPH IMS", body: event.data ? event.data.text() : "" };
+    data = { title: "LeMo Suppliers Manager", body: event.data ? event.data.text() : "" };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || "TRIUMPH IMS", {
+    self.registration.showNotification(data.title || "LeMo Suppliers Manager", {
       body: data.body || "",
       tag: data.tag,
       icon: "/icons/icon-192.png",

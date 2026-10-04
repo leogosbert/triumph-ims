@@ -32,7 +32,7 @@ export default async function WelcomePage({ searchParams }: { searchParams: Sear
 
   return (
     <div className="auth-wrap">
-      <img className="auth-logo" src="/brand/lemo-ims-on-dark.svg" alt={tr("LeMo IMS")} />
+      <img className="auth-logo" src="/brand/lemo-sm-on-dark.svg" alt={tr("LeMo Suppliers Manager")} />
       <div className="auth-card">
         <div className="brand">
           <div>
@@ -79,7 +79,7 @@ export default async function WelcomePage({ searchParams }: { searchParams: Sear
           <button className="btn btn-small" type="submit">{tr("Sign out")}</button>
         </form>
       </div>
-      <p className="auth-foot">{tr("LeMo IMS · a LeMo Tech Solutions product")}</p>
+      <p className="auth-foot">{tr("LeMo Suppliers Manager · a LeMo Tech Solutions product")}</p>
     </div>
   );
 }

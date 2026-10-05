@@ -11,7 +11,9 @@ create or replace function tests.login(p_email text) returns void language plpgs
 begin
   perform set_config('request.jwt.claims',
     json_build_object('sub', (select id from auth.users where email = p_email),
-                      'email', p_email, 'role', 'authenticated')::text, false);
+                      'email', p_email, 'role', 'authenticated',
+                      -- a fresh password sign-in ("step-up" checks, Security plus)
+                      'amr', json_build_array(json_build_object('method', 'password', 'timestamp', extract(epoch from now())::bigint)))::text, false);
 end $$;
 
 create or replace function tests.check(p_ok boolean, p_label text) returns void language plpgsql as $$

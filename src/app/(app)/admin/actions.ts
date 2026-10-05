@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { onAdminHost } from "@/lib/hosts-server";
+import { platformAdmin } from "./guard";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { isMissingSql, LEVELS, STAGE11_MISSING } from "@/components/suggestions/meta";
@@ -18,9 +19,9 @@ function explain(error: DbError): string {
 
 /** Every admin action checks again on the server; the database functions check a third time. */
 async function requireAdmin() {
-  const { supabase } = await getAppContext();
-  const { data, error } = await supabase.rpc("is_platform_admin");
-  if (error || data !== true) redirect(withNotice("/", { error: "That area is only for the LeMo Tech platform team." }));
+  // Only the signed-in person is needed (no company): works on the LeMoSp ADMIN address too.
+  const { supabase, ok } = await platformAdmin();
+  if (!ok) redirect(withNotice((await onAdminHost()) ? "/admin" : "/", { error: "That area is only for the LeMo Tech platform team." }));
   return supabase;
 }
 

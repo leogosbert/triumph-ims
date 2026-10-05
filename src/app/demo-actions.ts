@@ -44,9 +44,12 @@ async function createDemo(supabase: Supabase, level: Level) {
   return supabase.rpc("create_demo_company");
 }
 
-/** Home, with the guided tour for that level starting by itself. */
-function homeWithTour(level: Level, msg: string) {
-  return withNotice(`/?tour=${level}`, { msg });
+/**
+ * Home, with the quick guide for that level starting by itself. `fresh` (a new demo) also makes
+ * the guide forget which scales were already seen in an earlier demo.
+ */
+function homeWithTour(level: Level, msg: string, fresh = false) {
+  return withNotice(`/?tour=${level}${fresh ? "&tourfresh=1" : ""}`, { msg });
 }
 
 /**
@@ -75,7 +78,7 @@ export async function startDemo(form?: FormData) {
   const { data, error } = await createDemo(supabase, level);
   if (error) redirect(withNotice("/login", { error: friendlyError(error.message) }));
   (await cookies()).set(ACTIVE_COMPANY_COOKIE, String(data), COOKIE_OPTS);
-  redirect(homeWithTour(level, "Welcome to the LeMoSp demo. Everything here is sample data — try anything."));
+  redirect(homeWithTour(level, "Welcome to the LeMoSp demo. Everything here is sample data — try anything.", true));
 }
 
 /** Demo only: look at the app as another role (Sales, Driver, Finance …). */
@@ -121,7 +124,7 @@ export async function switchDemoLevel(form: FormData) {
       level === "small"
         ? "You are now in the Small business demo."
         : level === "enterprise"
-          ? "You are now in the Enterprise demo."
+          ? "You are now in the Large (Enterprise) demo."
           : "You are now in the Medium business demo.",
     ),
   );
@@ -140,4 +143,27 @@ export async function exitDemo() {
     redirect(withNotice("/login", { msg: "Thanks for trying LeMoSp. Create an account when you're ready." }));
   }
   redirect("/");
+}
+
+/**
+ * End of the guides ("Choose the one that fits my business"): leaves the demo and goes to where
+ * a real company is set up. Guests go to "Create account"; signed-in people go to the level
+ * set-up of their company (or to "Create your company" when they have none yet).
+ */
+export async function leaveDemoToChoose() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  await supabase.rpc("end_demo");
+  (await cookies()).delete(ACTIVE_COMPANY_COOKIE);
+  if (!user || user.is_anonymous) {
+    await supabase.auth.signOut();
+    redirect(
+      withNotice("/login?mode=signup", {
+        msg: "Create your free account. Then you choose the scale that fits your business, and you can change it at any time.",
+      }),
+    );
+  }
+  redirect("/onboarding");
 }

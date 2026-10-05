@@ -4,19 +4,30 @@ import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useFormStatus } from "react-dom";
 import { NewPasswordField } from "@/components/NewPasswordField";
 import { PasswordInput } from "@/components/PasswordInput";
 import { checkPassword } from "@/lib/password";
 import { clearAway } from "@/lib/applock";
 import { createClient } from "@/lib/supabase/client";
 import { startDemo } from "@/app/demo-actions";
+import { useAdminHost } from "@/lib/host-client";
+import { DemoScalePicker } from "@/components/DemoScalePicker";
+import { recordSignIn } from "@/app/security-actions";
+import { LEAKED_MESSAGE, timesLeaked } from "@/lib/pwned";
+
+/** Adds the sign-in to the person's history (and alerts them about a new device); never holds up signing in. */
+function logSignIn() {
+  return Promise.race([recordSignIn().catch(() => undefined), new Promise((r) => setTimeout(r, 2500))]);
+}
 
 type Mode = "signin" | "signup";
 
 export default function LoginPage() {
   const tr = useTr();
   const router = useRouter();
+  // LeMoSp ADMIN address: sign in only (no new accounts, no demos), then the admin overview.
+  const adminApp = useAdminHost();
+  const home = adminApp ? "/admin" : "/";
   const [mode, setMode] = useState<Mode>("signin");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +38,7 @@ export default function LoginPage() {
     const p = new URLSearchParams(window.location.search);
     if (p.get("error")) setError(p.get("error"));
     if (p.get("msg")) setInfo(p.get("msg"));
+    if (p.get("mode") === "signup") setMode("signup");
   }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -59,7 +71,8 @@ export default function LoginPage() {
           router.replace("/two-step");
           return;
         }
-        router.replace("/");
+        await logSignIn();
+        router.replace(home);
         router.refresh();
         return;
       }
@@ -71,6 +84,11 @@ export default function LoginPage() {
       const rule = checkPassword(password, [fullName, email]);
       if (!rule.ok) {
         setError(rule.problems[0]);
+        return;
+      }
+      // Passwords found in data breaches are refused (checked privately: only part of a hash is sent).
+      if ((await timesLeaked(password)) > 0) {
+        setError(tr(LEAKED_MESSAGE));
         return;
       }
       const { data, error } = await supabase.auth.signUp({
@@ -95,6 +113,7 @@ export default function LoginPage() {
         return;
       }
       if (data.session) {
+        await logSignIn();
         router.replace("/");
         router.refresh();
         return;
@@ -108,19 +127,27 @@ export default function LoginPage() {
 
   return (
     <div className="auth-wrap">
-      <img className="auth-logo" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
+      {adminApp ? (
+        <img className="auth-logo auth-logo-admin" src="/brand/lemosp-admin-on-dark.svg" alt="LeMoSp ADMIN" />
+      ) : (
+        <img className="auth-logo" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
+      )}
       <div className="auth-card">
         <div className="brand">
           <div>
             <h1 style={{ margin: 0 }}>{tr("Welcome back")}</h1>
-            <span className="muted small">{tr("Sales · Procurement · Stock · Delivery · Finance")}</span>
+            <span className="muted small">
+              {adminApp ? tr("For the LeMoSp platform team. Sign in with two-step verification.") : tr("Sales · Procurement · Stock · Delivery · Finance")}
+            </span>
           </div>
         </div>
 
-        <div className="tabs" role="group" aria-label={tr("Sign in or create an account")}>
-          <button type="button" aria-pressed={mode === "signin"} onClick={() => setMode("signin")}>{tr("Sign in")}</button>
-          <button type="button" aria-pressed={mode === "signup"} onClick={() => setMode("signup")}>{tr("Create account")}</button>
-        </div>
+        {!adminApp && (
+          <div className="tabs" role="group" aria-label={tr("Sign in or create an account")}>
+            <button type="button" aria-pressed={mode === "signin"} onClick={() => setMode("signin")}>{tr("Sign in")}</button>
+            <button type="button" aria-pressed={mode === "signup"} onClick={() => setMode("signup")}>{tr("Create account")}</button>
+          </div>
+        )}
 
         {error && <p className="notice notice-error" role="alert">{error}</p>}
         {info && <p className="notice notice-ok" role="status">{info}</p>}
@@ -158,38 +185,16 @@ export default function LoginPage() {
           <p className="small muted" style={{ marginTop: 16 }}>{tr("Joining a company? Create your account with the same email address your manager invited.")}</p>
         )}
       </div>
+      {!adminApp && (
       <section className="demo-card" aria-labelledby="demo-card-title">
         <div>
           <strong id="demo-card-title">{tr("Just looking?")}</strong>
-          <span>{tr("Open a demo company with sample clients, quotations, stock and invoices, and a short guided tour. Pick the size closest to your business. No sign-up needed; it deletes itself after 48 hours.")}</span>
+          <span>{tr("Try a demo company full of sample data. Pick the scale closest to your business. No sign-up needed; it deletes itself after 48 hours.")}</span>
         </div>
-        <div className="demo-levels">
-          {DEMO_LEVELS.map((l) => (
-            <form key={l.level} action={startDemo}>
-              <input type="hidden" name="level" value={l.level} />
-              <DemoButton name={l.name} line={l.line} />
-            </form>
-          ))}
-        </div>
+        <DemoScalePicker action={startDemo} tone="dark" />
       </section>
+      )}
       <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>
     </div>
-  );
-}
-
-const DEMO_LEVELS: { level: "small" | "medium" | "enterprise"; name: string; line: string }[] = [
-  { level: "small", name: "Small business demo", line: "A shop or small office: a few people, simple sales, stock and payments." },
-  { level: "medium", name: "Medium business demo", line: "A growing team with corporate clients, several suppliers and approvals." },
-  { level: "enterprise", name: "Enterprise demo", line: "Many stores across regions, imports, departments and a large team." },
-];
-
-function DemoButton({ name, line }: { name: string; line: string }) {
-  const tr = useTr();
-  const { pending } = useFormStatus();
-  return (
-    <button type="submit" className="demo-level" disabled={pending} aria-busy={pending}>
-      <strong>{pending ? tr("Preparing your demo…") : tr(name)}</strong>
-      <span>{tr(line)}</span>
-    </button>
   );
 }

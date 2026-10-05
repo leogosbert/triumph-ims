@@ -5,6 +5,7 @@ import { CompanyButton, CompanySheet, type CompanyCard } from "@/components/Comp
 import { AppLock } from "@/components/AppLock";
 import { DemoBar } from "@/components/DemoBar";
 import { IdleGuard } from "@/components/IdleGuard";
+import { PrivacyScreen } from "@/components/PrivacyScreen";
 import { TourHost } from "@/components/tour/TourHost";
 import { Icon } from "@/components/Icon";
 import { getThemePref } from "@/lib/theme";
@@ -14,9 +15,21 @@ import { getDict } from "@/lib/lang";
 import { defaultCategory, moreMenu } from "@/lib/menu";
 import { bottomNav, sideNav } from "@/lib/nav";
 import { setLanguage } from "../lang-actions";
+import { onAdminHost } from "@/lib/hosts-server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   await primeLang();
+  // LeMoSp ADMIN address: only the admin screens are served there (middleware), and they bring
+  // their own header and bottom bar. No company shell, no company data, no company needed.
+  if (await onAdminHost()) {
+    return (
+      <div className="shell adm-host">
+        <div className="main-col">
+          <main className="page">{children}</main>
+        </div>
+      </div>
+    );
+  }
   const { supabase, company, role, user, isManager, profile, memberships, features, isPlatformAdmin } = await getAppContext();
   const { lang, t } = await getDict();
   const logo = brandingUrl(supabase, company.logo_path);
@@ -101,6 +114,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       <CompanySheet card={card} />
       <IdleGuard minutes={company.idle_timeout_minutes ?? 0} />
+      <PrivacyScreen />
       <AppLock
         email={profile.email ?? user.email ?? ""}
         name={profile.full_name ?? ""}
@@ -119,6 +133,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         role={role}
         level={company.business_level ?? "medium"}
         company={company.id}
+        demo={Boolean(company.is_demo)}
       />
     </div>
   );

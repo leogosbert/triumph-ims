@@ -68,11 +68,58 @@ async function sendEmail(to: string, name: string | null, company: string, items
   return res.ok;
 }
 
+/**
+ * Automatic backups: a few companies per scheduled run, after the alerts.
+ * Each step is its own short database call (saved on its own), because Supabase stops a
+ * server call after a few seconds and a stopped call undoes everything it did:
+ * claim the next company → take its backup → … then the once-a-day "backup overdue" check.
+ * Errors never stop the alerts; quiet until the backups SQL has been run.
+ */
+async function runBackups(
+  supabase: ReturnType<typeof db>,
+  secret: string,
+  result: { backups: number; backupError: string | undefined },
+) {
+  const started = Date.now();
+  const missing = (e: { code?: string } | null) => e?.code === "PGRST202";
+  for (let i = 0; i < 3 && Date.now() - started < 6000; i++) {
+    try {
+      const claim = await supabase.rpc("claim_company_backup", { p_secret: secret });
+      if (claim.error) {
+        if (!missing(claim.error)) result.backupError = `claim: ${claim.error.message}`;
+        break;
+      }
+      const company = claim.data as string | null;
+      if (!company) break;
+      const take = await supabase.rpc("take_claimed_backup", { p_secret: secret, p_company: company });
+      if (take.error) result.backupError = `backup: ${take.error.message}`;
+      else if (take.data) result.backups++;
+    } catch (e) {
+      result.backupError = (e as Error).message;
+    }
+  }
+  try {
+    const overdue = await supabase.rpc("check_overdue_backups", { p_secret: secret });
+    if (overdue.error && !missing(overdue.error)) result.backupError = `overdue check: ${overdue.error.message}`;
+  } catch (e) {
+    result.backupError = (e as Error).message;
+  }
+}
+
 /** Collects pending alerts once and delivers them. Safe to call often. */
 export async function processOutbox(runAlerts = false) {
   const secret = process.env.OUTBOX_SECRET;
   const status = outboxStatus();
-  const result = { alerts: 0, claimed: 0, pushed: 0, emailed: 0, removed: 0, errors: [] as string[] };
+  const result = {
+    alerts: 0,
+    claimed: 0,
+    pushed: 0,
+    emailed: 0,
+    removed: 0,
+    errors: [] as string[],
+    backups: 0,
+    backupError: undefined as string | undefined,
+  };
   if (!secret) {
     result.errors.push("OUTBOX_SECRET is not set");
     return result;
@@ -82,6 +129,7 @@ export async function processOutbox(runAlerts = false) {
     const { data, error } = await supabase.rpc("run_all_alerts", { p_secret: secret });
     if (error) result.errors.push(`alerts: ${error.message}`);
     else result.alerts = Number(data ?? 0);
+    await runBackups(supabase, secret, result);
   }
   const { data, error } = await supabase.rpc("claim_outbox", { p_secret: secret, p_limit: 300 });
   if (error) {

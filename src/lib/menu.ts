@@ -1,6 +1,7 @@
 import type { IconName } from "@/components/Icon";
 import { featureForRoute, type FeatureRow } from "@/lib/features";
 import { can, type Role } from "@/lib/roles";
+import { adminUrl } from "@/lib/hosts";
 
 /**
  * `feature`: hidden when that feature is switched off (defaults to the feature of the link's route).
@@ -105,6 +106,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         isManager && { href: "/settings/team", title: "Team & roles", sub: "Invite people, change roles", icon: "team" },
         isManager && { href: "/settings/security", title: "Security", sub: "Two-step verification, automatic sign-out, password rules", icon: "lock" },
         isManager && { href: "/activity", title: "Activity log", sub: "Every change, who made it and when", icon: "activity" },
+        isManager && { href: "/settings/backups", title: "Backups", sub: "Automatic daily copies of your data, back up now, download", icon: "lock" },
         { href: "/suggestions", title: "Suggestion Box", sub: "Share an idea to improve the business", icon: "inbox", feature: "suggestions" },
         isManager && { href: "/growth", title: "Growth & recommendations", sub: "Your business level and features that could help", icon: "activity" },
         isManager && { href: "/settings/features", title: "Features & business level", sub: "Switch features on or off, change your level", icon: "check" },
@@ -113,7 +115,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         isManager && { href: "/settings/go-live", title: "Go-live checklist", sub: "What is ready and what is left", icon: "check" },
         { href: "/help", title: "Help", sub: "Short guide for your role, step by step", icon: "help" },
         { href: "/account", title: "Your account", sub: "Your details, password, appearance, sign out", icon: "user" },
-        opts.isPlatformAdmin === true && { href: "/admin", title: "Platform admin", sub: "LeMo Tech: companies, features, feedback", icon: "settings" },
+        opts.isPlatformAdmin === true && platformAdminItem(),
       ],
     },
   ];
@@ -126,6 +128,17 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
   const grow = role === "driver" ? null : growCategory(opts.features ?? []);
   if (grow) cats.push(grow);
   return cats.filter((cat) => cat.items.length > 0);
+}
+
+/**
+ * "Platform admin": LeMoSp ADMIN on its own address once NEXT_PUBLIC_ADMIN_URL is set (a plain
+ * link, since it is another site), otherwise /admin inside this app as before.
+ */
+function platformAdminItem(): MenuItem {
+  const admin = adminUrl();
+  return admin
+    ? { href: `${admin}/admin`, title: "Platform admin", sub: "LeMo Tech: companies, features, feedback", icon: "settings", plain: true }
+    : { href: "/admin", title: "Platform admin", sub: "LeMo Tech: companies, features, feedback", icon: "settings" };
 }
 
 /** The label shown under a feature the company does not have switched on. */

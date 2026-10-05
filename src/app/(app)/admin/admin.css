@@ -526,3 +526,42 @@ body:has(.adm-shell) .sp-tagline-admin {
   white-space: nowrap;
   box-shadow: 0 0 0 2px var(--card);
 }
+
+/* ---------- LeMoSp ADMIN on its own web address (src/lib/hosts.ts) ---------- */
+.adm-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.adm-signout {
+  display: inline;
+  margin: 0;
+}
+button.adm-exit {
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+/* The ADMIN lockup sits on its navy tile so it reads in light and dark themes. */
+.adm-closed-logo {
+  display: block;
+  width: 240px;
+  max-width: 85%;
+  height: auto;
+  margin: 0 auto 10px;
+  padding: 4px;
+  border-radius: 16px;
+  background: #0b1f3a;
+  box-sizing: border-box;
+}
+.adm-closed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.adm-closed-actions form {
+  margin: 0;
+}

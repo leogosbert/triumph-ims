@@ -2,6 +2,8 @@ import { primeLang, tr } from "@/lib/tr";
 import { Notice } from "@/components/Notice";
 import { NewPasswordField } from "@/components/NewPasswordField";
 import { SecurityPanel } from "@/components/SecurityPanel";
+import { StepUpForm } from "@/components/ConfirmIdentity";
+import { SignInActivity } from "@/components/SignInActivity";
 import { PasswordInput } from "@/components/PasswordInput";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ThemePicker } from "@/components/ThemePicker";
@@ -17,7 +19,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
   await primeLang();
   const notice = await readNotice(searchParams);
   const reset = (await searchParams)?.reset === "1";
-  const { profile, user, memberships, membership } = await getAppContext();
+  const { supabase, profile, user, memberships, membership } = await getAppContext();
 
   return (
     <>
@@ -60,7 +62,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
       ) : (
       <section className="card" id="password">
           <h2>{tr("Change password")}</h2>
-          <form action={changePassword}>
+          <StepUpForm action={changePassword}>
             <div className="field">
               <label htmlFor="password">{tr("New password")}</label>
               <NewPasswordField id="password" name="password" context={[profile.full_name ?? "", profile.email ?? "", membership.company.name]} />
@@ -70,12 +72,13 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
               <PasswordInput id="confirm" name="confirm" minLength={10} autoComplete="new-password" />
             </div>
             <SubmitButton>{tr("Change password")}</SubmitButton>
-          </form>
+          </StepUpForm>
         </section>
       )}
       {!user.is_anonymous && (
         <SecurityPanel lastSignIn={user.last_sign_in_at ?? null} required={Boolean(membership.company.require_mfa)} />
       )}
+      {!user.is_anonymous && <SignInActivity supabase={supabase} userId={user.id} />}
 
       {memberships.length > 1 && (
         <section className="card">

@@ -24,15 +24,42 @@ export type TourStep = {
   feature?: string | null;
   /** Who may open the screen; skipped for other roles. "staff" = everyone except drivers. */
   perm?: Permission | "manager" | "staff";
+  /** Left out of the quick guide; shown when the person asks for the full tour. */
+  optional?: boolean;
+  /** "intro" / "summary": a centred card shown on whatever screen is open (no screen change). */
+  kind?: "intro" | "summary";
 };
 
 export type TourId = Level;
+
+/** How each business level is named in the demo and the guides ("scale"). */
+export const SCALE_NAME: Record<Level, string> = {
+  small: "Small",
+  medium: "Medium",
+  enterprise: "Large (Enterprise)",
+};
+
+/** One line on who each scale is for (demo pickers). */
+export const SCALE_FOR: Record<Level, string> = {
+  small: "A shop or small office: a few people, simple sales, stock and payments.",
+  medium: "A growing team with corporate clients, several suppliers and approvals.",
+  enterprise: "Many stores across regions, imports, departments and a large team.",
+};
 
 export type Tour = { id: TourId; title: string; steps: TourStep[] };
 
 const HEAD = [".page-head", "main.page h1"];
 
 const SMALL: TourStep[] = [
+  {
+    route: "/",
+    kind: "intro",
+    feature: null,
+    title: "How LeMoSp works for a Small business",
+    body: "The Small setup is for a new or small supplier: one shop or store, a few people and a few dozen customers. It keeps only the essentials: customers, stock, quotations, deliveries, invoices and payments. This quick guide shows them on the real screens.",
+    who: "Owners who do most of the work themselves, with a small team.",
+    why: "You get organised in a day, without learning a big system.",
+  },
   {
     route: "/",
     selector: [".tower-card", ".hero"],
@@ -69,6 +96,7 @@ const SMALL: TourStep[] = [
     why: "Professional quotations in minutes, and you can see which ones still need a follow-up call.",
   },
   {
+    optional: true,
     route: "/deliveries",
     selector: [".tabs-row", ".rec-list", ...HEAD],
     perm: "seeDeliveries",
@@ -96,6 +124,7 @@ const SMALL: TourStep[] = [
     why: "You know exactly whom to call this week, and cash flow stops being a surprise.",
   },
   {
+    optional: true,
     route: "/purchase-orders",
     selector: [".tabs-row", ...HEAD],
     perm: "seePurchasing",
@@ -105,6 +134,7 @@ const SMALL: TourStep[] = [
     why: "You know what you ordered, what has arrived and what you paid, for every supplier.",
   },
   {
+    optional: true,
     route: "/suggestions",
     selector: HEAD,
     title: "Suggestion Box",
@@ -121,9 +151,25 @@ const SMALL: TourStep[] = [
     who: "The owner.",
     why: "Start simple today and switch on more tools only when your business needs them.",
   },
+  {
+    route: "/",
+    kind: "summary",
+    feature: null,
+    title: "That's the Small setup",
+    body: "Customers, stock, quotations, deliveries, invoices and payments, all in one app on your phone. When the business grows, LeMoSp suggests the next tools, and nothing you entered is ever lost.",
+  },
 ];
 
 const MEDIUM: TourStep[] = [
+  {
+    route: "/",
+    kind: "intro",
+    feature: null,
+    title: "How LeMoSp works for a Medium business",
+    body: "The Medium setup is for a growing supplier with a team, corporate clients such as mines and factories, and several suppliers. On top of the essentials it adds approvals, supplier price comparison, credit limits, several stores, batches and expiry, and money owed both ways.",
+    who: "A team with sales, procurement, stores and finance people.",
+    why: "Everyone works in one system, and managers stay in control without doing everything themselves.",
+  },
   {
     route: "/",
     selector: [".tower-card", ".hero"],
@@ -169,6 +215,7 @@ const MEDIUM: TourStep[] = [
     why: "Spending is controlled, and every purchase has a clear paper trail.",
   },
   {
+    optional: true,
     route: "/receiving",
     selector: [".rec-list", "main.page h1"],
     perm: "receiveGoods",
@@ -196,6 +243,7 @@ const MEDIUM: TourStep[] = [
     why: "Cash comes in faster and you see risky customers early.",
   },
   {
+    optional: true,
     route: "/payables",
     selector: [".stat-grid", "main.page h1"],
     perm: "seeFinance",
@@ -205,6 +253,7 @@ const MEDIUM: TourStep[] = [
     why: "You pay suppliers on time, keep good terms and never pay the same bill twice.",
   },
   {
+    optional: true,
     route: "/profit",
     selector: [".stat-grid", ".tabs-row", "main.page h1"],
     perm: "seeProfit",
@@ -214,6 +263,7 @@ const MEDIUM: TourStep[] = [
     why: "You learn which customers and products really make you money.",
   },
   {
+    optional: true,
     route: "/settings/team",
     selector: ["main.page h1", ...HEAD],
     perm: "manager",
@@ -231,9 +281,25 @@ const MEDIUM: TourStep[] = [
     who: "The owner.",
     why: "The system grows with the company instead of being replaced.",
   },
+  {
+    route: "/",
+    kind: "summary",
+    feature: null,
+    title: "That's the Medium setup",
+    body: "Requests become quotations and quotations become orders. Suppliers are compared, approvals keep spending and discounts under control, and stock, money owed and profit stay visible to managers.",
+  },
 ];
 
 const ENTERPRISE: TourStep[] = [
+  {
+    route: "/",
+    kind: "intro",
+    feature: null,
+    title: "How LeMoSp works for a Large (Enterprise) business",
+    body: "The Large (Enterprise) setup is for a big supplier with stores in several regions, imports, departments and a large team. It adds group-wide reports, landed cost on imports, several currencies, a full activity log and strict security.",
+    who: "Directors, department heads and large teams.",
+    why: "Head office sees everything in one place, with the controls that auditors and big clients expect.",
+  },
   {
     route: "/",
     selector: [".tower-card", ".hero"],
@@ -244,6 +310,7 @@ const ENTERPRISE: TourStep[] = [
     why: "No need to open twenty modules every morning to know where the business stands.",
   },
   {
+    optional: true,
     route: "/",
     selector: [".stats-block", ".carousel", ".quick-grid"],
     perm: "staff",
@@ -262,6 +329,7 @@ const ENTERPRISE: TourStep[] = [
     why: "Head office sees stock in every region without phone calls.",
   },
   {
+    optional: true,
     route: "/stock",
     selector: [".stat-grid", ".store-card", ...HEAD],
     perm: "seeStock",
@@ -316,6 +384,7 @@ const ENTERPRISE: TourStep[] = [
     why: "Nobody can silently change financial records, which protects the company and honest staff.",
   },
   {
+    optional: true,
     route: "/settings/security",
     selector: ["main.page h1", ...HEAD],
     perm: "manager",
@@ -334,6 +403,7 @@ const ENTERPRISE: TourStep[] = [
     why: "Each department gets exactly the tools it needs, no more and no less.",
   },
   {
+    optional: true,
     route: "/growth",
     selector: [".feat.soon", ".grow-level", ...HEAD],
     feature: null,
@@ -342,12 +412,19 @@ const ENTERPRISE: TourStep[] = [
     who: "Directors.",
     why: "You can plan today knowing where the platform is going.",
   },
+  {
+    route: "/",
+    kind: "summary",
+    feature: null,
+    title: "That's the Large (Enterprise) setup",
+    body: "Many stores, imports, currencies and departments run from one control tower, with real profit figures, a full activity log and strong security. Any single feature can still be switched on or off.",
+  },
 ];
 
 export const TOURS: Record<TourId, Tour> = {
   small: { id: "small", title: "Small business tour", steps: SMALL },
   medium: { id: "medium", title: "Medium business tour", steps: MEDIUM },
-  enterprise: { id: "enterprise", title: "Enterprise tour", steps: ENTERPRISE },
+  enterprise: { id: "enterprise", title: "Large (Enterprise) tour", steps: ENTERPRISE },
 };
 
 export function isTourId(v: unknown): v is TourId {
@@ -371,7 +448,10 @@ export function stepAllowed(step: TourStep, filter: TourFilter): boolean {
   return can(filter.role, p);
 }
 
-/** The steps of a tour that make sense for this company and person. */
-export function tourSteps(id: TourId, filter: TourFilter): TourStep[] {
-  return TOURS[id].steps.filter((s) => stepAllowed(s, filter));
+/**
+ * The steps of a tour that make sense for this company and person. The quick guide (default)
+ * leaves out steps marked optional; `full` keeps them.
+ */
+export function tourSteps(id: TourId, filter: TourFilter, full = false): TourStep[] {
+  return TOURS[id].steps.filter((s) => (full || !s.optional) && stepAllowed(s, filter));
 }

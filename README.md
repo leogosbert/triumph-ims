@@ -25,6 +25,7 @@ the database itself, and each has its own branding and settings.
 | 10 | Demo version, two-step verification and password security, "new version" pop-up | Built — run the Stage 10 SQL |
 | 11 | Business levels, feature switches, onboarding, growth recommendations, Suggestion Box, Platform Admin | **Built — run the Stage 11 SQL** |
 | 12 | Small / Medium / Enterprise demos, guided tours, LeMoSp ADMIN installable app | **Built — run the Stage 12 SQL** |
+| 12b | Separate LeMoSp ADMIN address, demo guides per scale, automatic backups, security plus | **Built — run the v1.13 SQL** |
 
 ## First-time setup
 

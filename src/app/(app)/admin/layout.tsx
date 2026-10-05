@@ -1,21 +1,26 @@
 import type { Metadata } from "next";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { signOut } from "@/app/actions";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { mainUrl } from "@/lib/hosts";
+import { onAdminHost } from "@/lib/hosts-server";
 import "../suggestions/suggestions.css";
 import "./admin.css";
 import { AdminBottomNav, AdminTabs } from "./AdminTabs";
 import { platformAdmin } from "./guard";
 
 /**
- * Verified admins get the "LeMoSp ADMIN" app: its own manifest (so a phone installs it as a
- * second app, separate from the company app), name and home-screen title. Everyone else keeps
- * the company app's metadata.
+ * LeMoSp ADMIN normally runs on its own web address (src/lib/hosts.ts): there the root layout
+ * already gives every page the admin name and manifest, so nothing is overridden here.
  *
- * The manifest lives under /icons/ because the sign-in middleware lets that folder through:
+ * Fallback while the admin address is not set up (/admin inside the company app's address):
+ * verified admins get the old per-page admin manifest, name and home-screen title.
+ * That manifest lives under /icons/ because the sign-in middleware lets that folder through:
  * browsers fetch manifests without cookies, so any other path would be redirected to /login.
  */
 export async function generateMetadata(): Promise<Metadata> {
+  if (await onAdminHost()) return {};
   const admin = await platformAdmin();
   if (!admin.ok) return { title: "LeMo Tech admin" };
   return {
@@ -33,8 +38,37 @@ export async function generateMetadata(): Promise<Metadata> {
 /** The admin platform is for LeMo Tech staff only. Everyone else sees a polite page and no data. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await primeLang();
-  const admin = await platformAdmin();
+  const [admin, adminHost] = await Promise.all([platformAdmin(), onAdminHost()]);
+  // On the admin address the company app is another site: link to it in full (null when unknown).
+  const companyApp = adminHost ? mainUrl() : "/";
+
   if (!admin.ok) {
+    if (adminHost) {
+      return (
+        <div className="card adm-closed">
+          <img className="adm-closed-logo" src="/brand/lemosp-admin-on-dark.svg" alt="LeMoSp ADMIN" width={240} height={82} />
+          <h1>{tr("This app is for the LeMoSp platform team")}</h1>
+          <p className="muted">{tr("Your account is not a platform admin. To work with your company, open the LeMoSp company app.")}</p>
+          <p className="small muted">{tr("Platform admins must sign in with two-step verification.")}</p>
+          {admin.missingSql && <p className="small muted">{tr("(The Stage 11 database update has not been run yet.)")}</p>}
+          <div className="adm-closed-actions">
+            {companyApp && (
+              <a href={companyApp} className="btn btn-primary">
+                {tr("Open the company app")}
+              </a>
+            )}
+            <Link href="/two-step" className="btn">
+              {tr("Two-step verification")}
+            </Link>
+            <form action={signOut}>
+              <button type="submit" className="btn">
+                {tr("Sign out")}
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="card adm-closed">
         <div className="adm-closed-icon" aria-hidden>
@@ -52,7 +86,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
   return (
     // .adm-shell switches the page into the "LeMoSp ADMIN" app: admin.css hides the company
-    // app's top bar, sidebar and bottom bar while it is on the page.
+    // app's top bar, sidebar and bottom bar while it is on the page (on the admin address the
+    // company shell is not rendered at all).
     <div className="adm-shell">
       <header className="adm-bar">
         <Link href="/admin" className="adm-brand" aria-label="LeMoSp ADMIN">
@@ -62,9 +97,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <span className="adm-name" title={admin.name}>
             {admin.name}
           </span>
-          <a href="/" className="adm-exit">
-            {tr("Open company app")}
-          </a>
+          <span className="adm-links">
+            {companyApp && (
+              <a href={companyApp} className="adm-exit" {...(adminHost ? { target: "_blank", rel: "noopener" } : {})}>
+                {tr("Open company app")}
+              </a>
+            )}
+            {adminHost && (
+              <form action={signOut} className="adm-signout">
+                <button type="submit" className="adm-exit">
+                  {tr("Sign out")}
+                </button>
+              </form>
+            )}
+          </span>
         </div>
       </header>
       <div className="adm-head">
@@ -74,7 +120,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <AdminTabs />
       {children}
       <AdminBottomNav />
-      <InstallPrompt variant="admin" />
+      {/* On the admin address the root layout shows the card on every page. */}
+      {!adminHost && <InstallPrompt variant="admin" ownAddressHint />}
     </div>
   );
 }

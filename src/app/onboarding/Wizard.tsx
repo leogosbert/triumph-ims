@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { DemoScalePicker } from "@/components/DemoScalePicker";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ACTIVITIES, LEVELS, LEVEL_ORDER, recommendLevel, type BusinessProfile, type Level } from "@/lib/levels";
 import { useTr } from "@/lib/tr-client";
@@ -149,22 +150,7 @@ export function OnboardingWizard({
               <p className="small muted">
                 {tr("Each demo opens a sample company next to yours, full of made-up data for that size of business, with a short guided tour. Leave the demo to come back here.")}
               </p>
-              <div className="onb-demo-btns">
-                {(
-                  [
-                    ["small", "Explore Small demo"],
-                    ["medium", "Explore Medium demo"],
-                    ["enterprise", "Explore Enterprise demo"],
-                  ] as const
-                ).map(([lvl, label]) => (
-                  <form key={lvl} action={demoAction}>
-                    <input type="hidden" name="level" value={lvl} />
-                    <SubmitButton className="btn btn-small" pendingText={tr("Opening…")}>
-                      {tr(label)}
-                    </SubmitButton>
-                  </form>
-                ))}
-              </div>
+              <DemoScalePicker action={demoAction} tone="light" />
             </div>
           </>
         )}

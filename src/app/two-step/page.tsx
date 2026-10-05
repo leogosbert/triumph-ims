@@ -3,15 +3,18 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOut } from "@/app/actions";
+import { recordBrowserEvent, recordSignIn } from "@/app/security-actions";
 import { TotpSetup } from "@/components/TotpSetup";
 import { clearAway } from "@/lib/applock";
 import { createClient } from "@/lib/supabase/client";
 import { useTr } from "@/lib/tr-client";
+import { useAdminHost } from "@/lib/host-client";
 
 /** Second sign-in step: enter the code from the authenticator app, or set one up when the company requires it. */
 export default function TwoStepPage() {
   const tr = useTr();
   const router = useRouter();
+  const adminApp = useAdminHost();
   const [mode, setMode] = useState<"loading" | "verify" | "setup">("loading");
   const [factorId, setFactorId] = useState("");
   const [code, setCode] = useState("");
@@ -41,7 +44,7 @@ export default function TwoStepPage() {
 
   function done() {
     clearAway();
-    router.replace("/");
+    router.replace(adminApp ? "/admin" : "/");
     router.refresh();
   }
 
@@ -56,12 +59,18 @@ export default function TwoStepPage() {
       setCode("");
       return;
     }
+    // Fully signed in now: add it to the sign-in history (never holds up the person).
+    await Promise.race([recordSignIn().catch(() => undefined), new Promise((r) => setTimeout(r, 2500))]);
     done();
   }
 
   return (
     <div className="auth-wrap">
-      <img className="auth-logo" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
+      {adminApp ? (
+        <img className="auth-logo auth-logo-admin" src="/brand/lemosp-admin-on-dark.svg" alt="LeMoSp ADMIN" />
+      ) : (
+        <img className="auth-logo" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
+      )}
       <div className="auth-card">
         <h1 style={{ marginTop: 0 }}>{tr("Two-step verification")}</h1>
         {mode === "loading" && <p className="muted">{tr("Please wait…")}</p>}
@@ -90,7 +99,12 @@ export default function TwoStepPage() {
         {mode === "setup" && (
           <>
             <p className="notice notice-ok" style={{ marginTop: 0 }}>{tr("Your company asks everyone to use two-step verification. It takes about a minute.")}</p>
-            <TotpSetup onDone={done} />
+            <TotpSetup
+              onDone={() => {
+                recordBrowserEvent("two_step_on").catch(() => undefined);
+                done();
+              }}
+            />
           </>
         )}
         <form action={signOut} style={{ marginTop: 16, textAlign: "center" }}>

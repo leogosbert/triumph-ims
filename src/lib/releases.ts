@@ -7,6 +7,24 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.13",
+    date: "2026-10-06",
+    en: [
+      "LeMoSp ADMIN now has its own web address, so it installs as a separate app next to LeMoSp.",
+      "Demo: choose Small, Medium or Large, follow the quick guide, then see the guide for another scale.",
+      "Automatic backups: your company's data is copied every night. See Settings → Backups.",
+      "More security: alerts for sign-ins from a new device, sign out of all other devices, and a password check before sensitive changes.",
+      "The app blurs when you switch away, and a security check on Settings → Security shows what to improve.",
+    ],
+    sw: [
+      "LeMoSp ADMIN sasa ina anwani yake ya mtandao, hivyo inasakinishwa kama programu tofauti kando ya LeMoSp.",
+      "Demo: chagua Ndogo, Kati au Kubwa, fuata mwongozo mfupi, kisha uone mwongozo wa kiwango kingine.",
+      "Nakala rudufu za kiotomatiki: data ya kampuni yako inanakiliwa kila usiku. Angalia Mipangilio → Nakala rudufu.",
+      "Usalama zaidi: arifa za kuingia kutoka kifaa kipya, toka kwenye vifaa vingine vyote, na kuthibitisha nenosiri kabla ya mabadiliko nyeti.",
+      "Programu hufifia ukihamia programu nyingine, na ukaguzi wa usalama kwenye Mipangilio → Usalama unaonyesha cha kuboresha.",
+    ],
+  },
+  {
     version: "1.12",
     date: "2026-10-06",
     en: [

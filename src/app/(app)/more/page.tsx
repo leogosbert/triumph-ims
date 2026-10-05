@@ -6,6 +6,7 @@ import { getAppContext } from "@/lib/context";
 import { featureForRoute } from "@/lib/features";
 import { APP_VERSION, BUILD_ID } from "@/lib/releases";
 import { can } from "@/lib/roles";
+import { adminUrl } from "@/lib/hosts";
 
 export const metadata = { title: "More" };
 
@@ -41,12 +42,12 @@ const ICONS: Record<string, IconName> = {
   "/admin": "settings",
 };
 
-function Tile({ href, title, sub, show = true }: { href: string; title: string; sub: string; show?: boolean }) {
+function Tile({ href, title, sub, show = true, icon }: { href: string; title: string; sub: string; show?: boolean; icon?: IconName }) {
   if (!show) return null;
   return (
     <Link href={href} className="tile tile-icon">
       <span className="tile-ico" aria-hidden>
-        <Icon name={ICONS[href] ?? "doc"} size={20} />
+        <Icon name={icon ?? ICONS[href] ?? "doc"} size={20} />
       </span>
       <span className="tile-body">
         <span className="tile-title">{title}</span>
@@ -131,7 +132,10 @@ export default async function MorePage() {
         {isManager && (
           <Tile href="/settings/features" title={tr("Features & business level")} sub={tr("Switch features on or off, change your level")} />
         )}
-        {isPlatformAdmin && <Tile href="/admin" title={tr("Platform admin")} sub={tr("LeMo Tech: companies, features, feedback")} />}
+        {/* LeMoSp ADMIN is its own app on its own address once NEXT_PUBLIC_ADMIN_URL is set. */}
+        {isPlatformAdmin && (
+          <Tile href={adminUrl() ? `${adminUrl()}/admin` : "/admin"} icon="settings" title={tr("Platform admin")} sub={tr("LeMo Tech: companies, features, feedback")} />
+        )}
       </div>
       <h2 style={{ marginTop: 24 }}>{tr("Appearance")}</h2>
       <p className="muted small">{tr("Auto follows your phone's light or dark setting.")}</p>

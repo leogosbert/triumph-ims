@@ -15,6 +15,8 @@ export type TourState = {
   index: number;
   /** Custom tours only (e.g. "Show me where" from a feature tutorial). */
   steps?: TourStep[];
+  /** Built-in tours: true = every step, false/missing = the quick guide. */
+  full?: boolean;
 };
 
 export function readTour(): TourState | null {
@@ -23,7 +25,7 @@ export function readTour(): TourState | null {
     if (!raw) return null;
     const v = JSON.parse(raw) as Partial<TourState> | null;
     if (!v || typeof v.id !== "string") return null;
-    return { id: v.id, index: Number(v.index) || 0, steps: Array.isArray(v.steps) ? v.steps : undefined };
+    return { id: v.id, index: Number(v.index) || 0, steps: Array.isArray(v.steps) ? v.steps : undefined, full: v.full === true };
   } catch {
     return null;
   }
@@ -47,4 +49,42 @@ export function startTour(id: string, steps?: TourStep[]) {
   } catch {
     /* very old browser: the host picks the tour up from storage on the next screen */
   }
+}
+
+/* ---------- Which scale guides this person has finished (this tab / app session) ---------- */
+
+const SEEN_KEY = "lemosp.tour.seen";
+let seenFallback: string[] = []; // when storage is blocked
+
+/** Built-in guides finished in this session ("small" | "medium" | "enterprise"). */
+export function readSeen(): string[] {
+  try {
+    const raw = window.sessionStorage.getItem(SEEN_KEY);
+    const v = raw ? (JSON.parse(raw) as unknown) : [];
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  } catch {
+    return seenFallback;
+  }
+}
+
+function writeSeen(list: string[]) {
+  seenFallback = list;
+  try {
+    window.sessionStorage.setItem(SEEN_KEY, JSON.stringify(list));
+  } catch {
+    /* kept in memory for this page only */
+  }
+}
+
+/** Remember that the guide for this scale was finished (not skipped). Returns the new list. */
+export function markSeen(id: string): string[] {
+  const list = readSeen();
+  const next = list.includes(id) ? list : [...list, id];
+  writeSeen(next);
+  return next;
+}
+
+/** A new demo was started: forget the guides seen in an earlier demo. */
+export function resetSeen() {
+  writeSeen([]);
 }

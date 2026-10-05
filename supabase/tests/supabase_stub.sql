@@ -13,7 +13,8 @@ create table auth.users (
   email text,
   raw_user_meta_data jsonb default '{}'::jsonb,
   is_anonymous boolean not null default false,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  last_sign_in_at timestamptz
 );
 create table auth.mfa_factors (
   id uuid primary key default gen_random_uuid(),

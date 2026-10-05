@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTr } from "@/lib/tr-client";
+import { isAdminHost } from "@/lib/hosts";
 
 type BIPEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 type Mode = "android-button" | "android-steps" | "ios" | null;
@@ -35,7 +36,8 @@ if (typeof window !== "undefined") {
     // Phones only: we show our own card instead of the browser's banner.
     if (!/Android/i.test(navigator.userAgent)) return;
     e.preventDefault();
-    offer = { evt: e as BIPEvent, variant: isAdminPath(location.pathname) ? "admin" : "main" };
+    // On the LeMoSp ADMIN address every page belongs to the admin app.
+    offer = { evt: e as BIPEvent, variant: isAdminHost(location.host) || isAdminPath(location.pathname) ? "admin" : "main" };
     listeners.forEach((f) => f(false));
   });
   window.addEventListener("appinstalled", () => {
@@ -62,9 +64,11 @@ const TEXT: Record<Variant, { title: string; lead: string }> = {
  * Hidden once installed, and for a week after "Not now".
  *
  * variant "main" (root layout): the company app; never shown on /admin pages.
- * variant "admin" (admin layout, verified platform admins only): the separate "LeMoSp ADMIN" app.
+ * variant "admin": the separate "LeMoSp ADMIN" app — from the root layout on the admin address
+ * (every page there), or from the admin layout when /admin still runs inside the company app's
+ * address; then `ownAddressHint` adds a line that it installs best from its own address.
  */
-export function InstallPrompt({ variant = "main" }: { variant?: Variant }) {
+export function InstallPrompt({ variant = "main", ownAddressHint = false }: { variant?: Variant; ownAddressHint?: boolean }) {
   const tr = useTr();
   const pathname = usePathname() ?? "";
   const [mode, setMode] = useState<Mode>(null);
@@ -163,6 +167,7 @@ export function InstallPrompt({ variant = "main" }: { variant?: Variant }) {
         <strong>{tr(text.title)}</strong>
         {mode === "android-button" && <span>{tr(text.lead)}</span>}
         {mode !== "android-button" && variant === "admin" && <span>{tr(text.lead)}</span>}
+        {ownAddressHint && <span className="small">{tr("LeMoSp ADMIN installs best from its own web address, once that is set up.")}</span>}
         {mode === "android-steps" && (
           <span>
             {tr("Tap the browser menu")} <b aria-hidden>⋮</b> {tr("then")} <b>{tr("Install app")}</b> {tr("or")}{" "}

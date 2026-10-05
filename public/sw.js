@@ -15,6 +15,12 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// "Update now" in the app: a new version of this file that is still waiting takes over at once.
+// (The offline driver cache keeps its name, so saved deliveries and screens are not touched.)
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "skipWaiting") self.skipWaiting();
+});
+
 // The page tells us which files it loaded, so the next offline visit has them.
 self.addEventListener("message", (event) => {
   const data = event.data || {};

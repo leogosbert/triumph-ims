@@ -43,6 +43,7 @@ const ENTITY: Record<string, string> = {
   supplier_payments: "payment to supplier",
   order_costs: "order cost",
   exchange_rates: "exchange rate",
+  company_backups: "backup",
 };
 
 const LINKS: Record<string, string> = {
@@ -129,6 +130,11 @@ function describe(row: LogRow): { title: string; changes: string[] } {
   }
   if (row.entity === "memberships" && row.action === "insert") {
     return { title: `New team member joined as ${show(d.role)}`, changes: [] };
+  }
+  if (row.entity === "company_backups") {
+    const when = typeof d.taken_at === "string" ? ` (${formatDateTime(d.taken_at)})` : "";
+    if ((row.action as string) === "download") return { title: `Downloaded a backup${when}`, changes: [] };
+    if ((row.action as string) === "backup") return { title: "Backed up the data by hand", changes: [] };
   }
   if (row.entity === "companies" && row.action === "insert") {
     return { title: `Created the company ${show(d.name)}`, changes: [] };

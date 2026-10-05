@@ -35,6 +35,13 @@ See [PRODUCT-VISION.md](PRODUCT-VISION.md) for the philosophy. This file tracks 
 - Interactive guided tours on the real screens (spotlight steps), per-feature tutorials, "Explore demo" in onboarding.
 - LeMoSp ADMIN: the platform admin area installs as its own app (Android and iPhone) with its own install card.
 
+## v1.13 — Trust & separation (built — run the v1.13 SQL)
+- LeMoSp ADMIN served from its own web address (second Netlify site from the same code) so phones install it separately.
+- Demo guides per scale with "see the guide for another scale?"; more reliable update notice.
+- Automatic in-app backups per company (nightly, kept 7 daily / 5 weekly / 12 monthly), download, overdue alerts.
+- Security plus: strict browser security headers, sign-in history and new-device alerts, sign out everywhere,
+  password re-check before sensitive changes (enforced in the database), privacy blur, security health check.
+
 ## Stage 13 — Small-level essentials
 - Expenses with categories and receipts photos; simple profit & loss; customer and supplier statements.
 - Mobile-money payment methods (M-Pesa, Tigo Pesa, Airtel Money, HaloPesa) and simple reconciliation.

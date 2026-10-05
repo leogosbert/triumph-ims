@@ -1,5 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { StepUpForm } from "@/components/ConfirmIdentity";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { displayName, requireManager, type Profile } from "@/lib/context";
@@ -129,7 +130,7 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
                     <div className="muted small">{p?.email}</div>
                   </div>
                 </div>
-                <form action={updateMember} className="inline-form">
+                <StepUpForm action={updateMember} className="inline-form">
                   <input type="hidden" name="membership_id" value={m.id} />
                   <RoleSelect name="role" value={m.role} />
                   <select name="active" defaultValue={String(m.active)} aria-label={tr("Access")}>
@@ -137,7 +138,7 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
                     <option value="false">{tr("Switched off")}</option>
                   </select>
                   <SubmitButton className="btn btn-small">{tr("Update")}</SubmitButton>
-                </form>
+                </StepUpForm>
               </li>
             );
           })}

@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { recordBrowserEvent, signOutOtherDevices } from "@/app/security-actions";
+import { useConfirmIdentity } from "@/components/ConfirmIdentity";
 import { LockPreference } from "@/components/LockPreference";
 import { TotpSetup } from "@/components/TotpSetup";
 import { createClient } from "@/lib/supabase/client";
@@ -17,6 +19,7 @@ export function SecurityPanel({ lastSignIn, required }: { lastSignIn: string | n
   const [setting, setSetting] = useState(false);
   const [msg, setMsg] = useState<{ ok?: string; err?: string }>({});
   const [busy, setBusy] = useState(false);
+  const { ensure, dialog } = useConfirmIdentity();
 
   async function load() {
     const { data } = await createClient().auth.mfa.listFactors();
@@ -32,6 +35,8 @@ export function SecurityPanel({ lastSignIn, required }: { lastSignIn: string | n
       return;
     }
     if (!window.confirm(tr("Turn off two-step verification? Signing in will need only your password."))) return;
+    // Someone holding an unlocked phone must not be able to switch it off.
+    if (!(await ensure())) return;
     setBusy(true);
     const { error } = await createClient().auth.mfa.unenroll({ factorId: id });
     setBusy(false);
@@ -39,6 +44,7 @@ export function SecurityPanel({ lastSignIn, required }: { lastSignIn: string | n
       setMsg({ err: tr("Sign out and sign in again with your code, then try once more.") });
       return;
     }
+    recordBrowserEvent("two_step_off").catch(() => undefined);
     setMsg({ ok: tr("Two-step verification is off.") });
     await load();
     router.refresh();
@@ -46,9 +52,9 @@ export function SecurityPanel({ lastSignIn, required }: { lastSignIn: string | n
 
   async function signOutOthers() {
     setBusy(true);
-    const { error } = await createClient().auth.signOut({ scope: "others" });
+    const { ok } = await signOutOtherDevices().catch(() => ({ ok: false }));
     setBusy(false);
-    setMsg(error ? { err: tr("Could not sign out the other devices. Please try again.") } : { ok: tr("Signed out on all your other phones and computers.") });
+    setMsg(!ok ? { err: tr("Could not sign out the other devices. Please try again.") } : { ok: tr("Signed out on all your other phones and computers.") });
   }
 
   const on = (factors?.length ?? 0) > 0;
@@ -81,6 +87,7 @@ export function SecurityPanel({ lastSignIn, required }: { lastSignIn: string | n
         <TotpSetup
           onDone={async () => {
             setSetting(false);
+            recordBrowserEvent("two_step_on").catch(() => undefined);
             setMsg({ ok: tr("Two-step verification is on. Keep your authenticator app safe.") });
             await load();
             router.refresh();
@@ -110,6 +117,7 @@ export function SecurityPanel({ lastSignIn, required }: { lastSignIn: string | n
       <button type="button" className="btn btn-block" onClick={signOutOthers} disabled={busy}>
         {tr("Sign out on all other devices")}
       </button>
+      {dialog}
       {lastSignIn && (
         <p className="small muted" style={{ marginBottom: 0 }}>
           {tr("Last sign-in")}: {new Date(lastSignIn).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}

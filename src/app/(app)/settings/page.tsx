@@ -60,6 +60,12 @@ export default async function SettingsPage() {
             <div className="tile-sub">{tr("Download everything as Excel (CSV) or one backup file")}</div>
           </Link>
         )}
+        {isManager && on("data_export") && (
+          <Link href="/settings/backups" className="tile">
+            <div className="tile-title">{tr("Backups")}</div>
+            <div className="tile-sub">{tr("Automatic daily copies of your data, back up now, download")}</div>
+          </Link>
+        )}
         {on("multi_currency") && (
           <Link href="/rates" className="tile">
             <div className="tile-title">{tr("Exchange rates")}</div>

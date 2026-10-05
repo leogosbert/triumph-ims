@@ -65,6 +65,7 @@ export const ROUTE_FEATURES: Record<string, string> = {
   "/activity": "activity",
   "/settings/team": "team",
   "/settings/export": "data_export",
+  "/settings/backups": "data_export",
   "/settings/security": "security_policy",
 };
 

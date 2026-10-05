@@ -10,6 +10,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { AgingChart, BarList, ControlTower, KpiGrid, SalesChart } from "@/components/Dashboard";
 import { loadDashboard } from "@/lib/dashboard";
+import { backupTowerItem } from "@/lib/backups";
 import { Icon, type IconName } from "@/components/Icon";
 import type { Dict } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
@@ -58,6 +59,11 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   await supabase.rpc("refresh_alerts", { p_company: company.id });
   const { t } = await getDict();
   const dash = await loadDashboard(supabase, company.id, role, t);
+  // Automatic backups: an orange line for managers when the last one is more than 2 days old.
+  if (isManager && !company.is_demo) {
+    const overdue = await backupTowerItem(supabase, company.id);
+    if (overdue) dash.tower.attention.unshift({ ...overdue, label: tr(overdue.label) });
+  }
   const heroKpis = dash.kpis.slice(0, 2);
   const restKpis = dash.kpis.slice(2);
   const actions = quickActions(role, t);

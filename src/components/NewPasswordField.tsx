@@ -2,21 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { checkPassword, MIN_PASSWORD, STRENGTH_LABELS } from "@/lib/password";
+import { timesLeaked } from "@/lib/pwned";
 import { useTr } from "@/lib/tr-client";
-
-/** Asks haveibeenpwned.com (k-anonymity: only the first 5 hash characters leave the phone) how often a password has leaked. */
-async function timesLeaked(pw: string): Promise<number> {
-  const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(pw));
-  const hex = Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("").toUpperCase();
-  const res = await fetch(`https://api.pwnedpasswords.com/range/${hex.slice(0, 5)}`, { headers: { "Add-Padding": "true" } });
-  if (!res.ok) return 0;
-  const tail = hex.slice(5);
-  for (const line of (await res.text()).split("\n")) {
-    const [h, n] = line.trim().split(":");
-    if (h === tail) return Number(n) || 0;
-  }
-  return 0;
-}
 
 /**
  * New-password box with a show/hide button, a strength meter, the rules that are not met yet,

@@ -5066,3 +5066,460 @@ button.lvl-card:disabled {
   align-self: center;
   margin: 0 0 10px;
 }
+
+/* ===== LeMoSp ADMIN on its own web address (root layout sets html[data-app="admin"]) =====
+   The launch screen reads "ADMIN" on every page there, sign-in included. */
+html[data-app="admin"] .sp-tagline {
+  display: none;
+}
+html[data-app="admin"] .sp-tagline-admin {
+  display: inline;
+  opacity: 0;
+  animation: sp-fade-up 0.5s var(--ease-out) 1.45s forwards;
+}
+/* ===== end LeMoSp ADMIN address ===== */
+
+/* ========== v1.13 guides: demo scale picker, scale switch, quick-guide end card, update pill ========== */
+
+/* Demo scale cards (sign-in page = dark, onboarding = light). */
+.scale-pick {
+  gap: 8px;
+}
+.scale-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+}
+.scale-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+}
+.scale-bars i {
+  display: block;
+  width: 6px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.25;
+}
+.scale-bars i:nth-child(1) {
+  height: 9px;
+}
+.scale-bars i:nth-child(2) {
+  height: 15px;
+}
+.scale-bars i:nth-child(3) {
+  height: 22px;
+}
+.scale-bars i.on {
+  opacity: 1;
+}
+.scale-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.scale-pick .demo-level .scale-go {
+  font-size: 1.4rem;
+  line-height: 1;
+  opacity: 0.6;
+}
+.scale-pick.dark .scale-bars {
+  color: #5eead4;
+}
+.demo-card .scale-pick .scale-hint,
+.scale-pick .scale-hint {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #9fb0c8;
+}
+.scale-pick.light .demo-level {
+  background: var(--card);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+.scale-pick.light .demo-level strong {
+  color: var(--text);
+}
+.scale-pick.light .demo-level span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.scale-pick.light .scale-bars {
+  color: #0f766e;
+}
+.scale-pick.light .demo-level:hover {
+  border-color: #14b8a6;
+  background: var(--hover);
+}
+.scale-pick.light .scale-hint {
+  color: var(--muted);
+}
+@media (min-width: 720px) {
+  .onb-demo .scale-pick {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .onb-demo .scale-pick .scale-card {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+  .onb-demo .scale-pick .demo-level .scale-go {
+    display: none;
+  }
+  .onb-demo .scale-pick .scale-hint {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Demo bar: current scale + "Switch scale" segmented buttons. */
+.demo-scale {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.demo-scale-label {
+  font-size: 0.78rem;
+}
+.demo-segs {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 10px;
+  background: rgba(11, 31, 58, 0.14);
+}
+.demo-segs form {
+  margin: 0;
+}
+.demo-seg {
+  min-height: 30px;
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #0b1f3a;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.demo-seg:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.45);
+}
+.demo-seg[aria-pressed="true"] {
+  background: #0b1f3a;
+  color: #5eead4;
+  cursor: default;
+}
+.demo-seg[aria-busy="true"] {
+  cursor: progress;
+  background: rgba(255, 255, 255, 0.6);
+}
+.demo-seg:focus-visible {
+  outline: 2px solid #0b1f3a;
+  outline-offset: 1px;
+}
+
+/* Quick guide: "show all steps" line on the intro card. */
+.tour-full {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.tour-full-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #0f766e;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+[data-theme="dark"] .tour-full-btn {
+  color: #5eead4;
+}
+
+/* End of a guide: "see the guide for another scale?" */
+.tour-end-wrap {
+  display: grid;
+  place-items: end center;
+  padding: 12px 10px calc(var(--nav-h) + 22px + env(safe-area-inset-bottom));
+}
+.tour-end {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+}
+.tour-end .tour-title {
+  margin-top: 10px;
+}
+.tour-end-ico {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: #14b8a6;
+  color: #0b1f3a;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+.tour-end-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tour-end-btns .btn {
+  width: 100%;
+  min-height: 44px;
+}
+.tour-end-note {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}
+.tour-end-wait {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 12px;
+  font-weight: 600;
+}
+.tour-end-wait small {
+  grid-column: 2;
+  font-weight: 400;
+  color: var(--muted);
+}
+@media (min-width: 640px) {
+  .tour-end-wrap {
+    place-items: center;
+    padding: 24px;
+  }
+  .tour-end-btns {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .tour-end-btns .btn {
+    flex: 1 1 auto;
+    width: auto;
+  }
+}
+
+/* After "Skip": one quiet line. */
+.tour-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-h) + 18px + env(safe-area-inset-bottom));
+  z-index: 66;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 9px 8px 9px 14px;
+  border-radius: 14px;
+  background: #0b1f3a;
+  color: #e6ecf5;
+  font-size: 0.84rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+.tour-toast-x {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+@media (min-width: 1024px) {
+  .tour-toast {
+    bottom: 24px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tour-end {
+    animation: tour-in 0.42s var(--ease-spring) backwards;
+  }
+  .tour-toast {
+    animation: fade 0.25s ease-out;
+  }
+}
+
+/* "Update available" pill (after "Later"): in the top bar, or floating when there is none. */
+.upd-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: #14b8a6;
+  color: #0b1f3a;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.upd-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #0b1f3a;
+}
+.upd-pill.floating {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  right: 12px;
+  z-index: 79;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+@media (max-width: 380px) {
+  .topbar-actions .upd-pill {
+    padding: 4px 9px;
+    font-size: 0.72rem;
+  }
+}
+.upd-pill[disabled] {
+  cursor: progress;
+  opacity: 0.8;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .upd-pill-dot {
+    animation: tour-blink 0.9s ease-in-out infinite alternate;
+  }
+}
+/* ========== end v1.13 guides ========== */
+
+/* ===== Security plus (v1.13): privacy screen, confirm-it's-you box, security health ===== */
+html.privacy-blur .shell {
+  filter: blur(22px);
+  transition: none;
+}
+.confirm-id {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(11, 31, 58, 0.62);
+}
+.confirm-id-card {
+  width: 100%;
+  max-width: 400px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: 20px 18px;
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.3);
+}
+.confirm-id-card h2 {
+  margin: 0 0 6px;
+}
+.confirm-id-card label {
+  display: block;
+  font-weight: 600;
+  margin: 6px 0;
+}
+.confirm-id-who {
+  margin: 0 0 8px;
+  font-weight: 600;
+  word-break: break-all;
+}
+.confirm-id-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+.confirm-id-actions .btn {
+  flex: 1;
+}
+.sec-health {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sec-health > li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.sec-health > li:first-child {
+  border-top: 0;
+}
+.sec-health .mark {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.sec-health .mark.ok { background: #16a34a; }
+.sec-health .mark.warn { background: #f59e0b; }
+.sec-health .mark.bad { background: #dc2626; }
+.sec-health .what {
+  flex: 1;
+  min-width: 0;
+}
+.sec-health .what span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.sec-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sec-events > li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+.sec-events > li:first-child {
+  border-top: 0;
+}
+.sec-events .when {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: right;
+}
+.sec-events .who {
+  min-width: 0;
+}
+.sec-events .who span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+}

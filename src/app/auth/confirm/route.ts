@@ -1,6 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
+import { recordEvent } from "@/lib/security";
 import { createClient } from "@/lib/supabase/server";
 
 /** Only allow redirects to pages inside this app. */
@@ -39,5 +40,7 @@ export async function GET(request: NextRequest) {
       )}`,
     );
   }
+  // Opening an email link signs the person in: add it to their sign-in history (new-device alert too).
+  await recordEvent(supabase, "sign_in");
   redirect(next);
 }

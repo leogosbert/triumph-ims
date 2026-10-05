@@ -1,5 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { StepUpForm } from "@/components/ConfirmIdentity";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { brandingUrl, getAppContext } from "@/lib/context";
@@ -57,7 +58,7 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
         </section>
       )}
 
-      <form action={updateCompany}>
+      <StepUpForm action={updateCompany} onlyIfChanged="bank_details,document_footer,quote_terms,po_terms,invoice_terms">
         <fieldset disabled={!isManager} style={{ border: 0, padding: 0, margin: 0 }}>
           <section className="card">
             <h2>{tr("Registration")}</h2>
@@ -180,7 +181,7 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
             <SubmitButton className="btn btn-primary btn-block">{tr("Save company details")}</SubmitButton>
           )}
         </fieldset>
-      </form>
+      </StepUpForm>
     </>
   );
 }

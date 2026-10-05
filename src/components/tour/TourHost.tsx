@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { Level } from "@/lib/levels";
 import type { Role } from "@/lib/roles";
 import { isTourId, tourSteps, type TourStep } from "@/lib/tours";
 import { useTr } from "@/lib/tr-client";
-import { readTour, TOUR_EVENT, writeTour, type TourState } from "./store";
+import { markSeen, readTour, resetSeen, TOUR_EVENT, writeTour, type TourState } from "./store";
+import { TourEndCard, TourToast } from "./TourEnd";
 
 type Rect = { top: number; left: number; width: number; height: number };
 type Pos = { top?: number; left?: number; dock?: "top" | "bottom" };
-type Active = { id: string; steps: TourStep[]; index: number; custom: boolean };
+type Active = { id: string; steps: TourStep[]; index: number; custom: boolean; full: boolean };
+type End = { id: string; seen: string[] };
 
 const PHONE = 640;
 
@@ -78,8 +80,25 @@ const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v
  * (title, text, who uses it, why it helps, Back / Next / Skip). Next opens the next screen when
  * needed. A missing element gives a centred card. Esc ends, arrow keys move.
  * Everything is wrapped so a tour can never block the app.
+ *
+ * Built-in (per-level) tours are a quick guide: an intro card, the key screens and a summary.
+ * The intro offers the full tour (steps marked optional). Finishing one shows the end card
+ * (in a demo: "see the guide for another scale?"); skipping shows one quiet line instead.
  */
-export function TourHost({ off, role, level, company }: { off: string[]; role: Role; level: Level; company: string }) {
+export function TourHost({
+  off,
+  role,
+  level,
+  company,
+  demo = false,
+}: {
+  off: string[];
+  role: Role;
+  level: Level;
+  company: string;
+  /** A demo company: the end card offers the other scales. */
+  demo?: boolean;
+}) {
   const tr = useTr();
   const router = useRouter();
   const pathname = usePathname();
@@ -87,6 +106,8 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
   const [phase, setPhase] = useState<"seek" | "show">("seek");
   const [rect, setRect] = useState<Rect | null>(null);
   const [pos, setPos] = useState<Pos | null>(null);
+  const [end, setEnd] = useState<End | null>(null);
+  const [toast, setToast] = useState(false);
   const target = useRef<Element>(null);
   const pushed = useRef<number>(null);
   const arrived = useRef<number>(null);
@@ -103,23 +124,44 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
     setPos(null);
   }
 
+  /** The person ended the tour early (×, "Skip tour", Esc). */
+  function skip() {
+    const wasBuiltIn = tour ? !tour.custom : false;
+    stop();
+    if (demo && wasBuiltIn) setToast(true);
+  }
+
+  /** "Finish" on the last step. */
+  function finish() {
+    const t = tour;
+    stop();
+    if (!t || t.custom || !isTourId(t.id)) return;
+    setEnd({ id: t.id, seen: markSeen(t.id) });
+  }
+
+  const closeEnd = useCallback(() => setEnd(null), []);
+  const closeToast = useCallback(() => setToast(false), []);
+
   function begin(state: TourState) {
     try {
+      setEnd(null);
+      setToast(false);
       const custom = Boolean(state.steps && state.steps.length > 0);
-      const steps = custom ? (state.steps as TourStep[]) : isTourId(state.id) ? tourSteps(state.id, { off, role }) : [];
+      const full = !custom && state.full === true;
+      const steps = custom ? (state.steps as TourStep[]) : isTourId(state.id) ? tourSteps(state.id, { off, role }, full) : [];
       if (steps.length === 0) {
         stop();
         return;
       }
       const index = clamp(Math.floor(state.index) || 0, 0, steps.length - 1);
-      writeTour({ id: state.id, index, steps: custom ? steps : undefined });
+      writeTour({ id: state.id, index, steps: custom ? steps : undefined, full });
       pushed.current = null;
       arrived.current = null;
       target.current = null;
       setRect(null);
       setPos(null);
       setPhase("seek");
-      setTour({ id: state.id, steps, index, custom });
+      setTour({ id: state.id, steps, index, custom, full });
     } catch {
       stop();
     }
@@ -129,10 +171,10 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
     if (!tour) return;
     if (index < 0) return;
     if (index >= tour.steps.length) {
-      stop();
+      finish();
       return;
     }
-    writeTour({ id: tour.id, index, steps: tour.custom ? tour.steps : undefined });
+    writeTour({ id: tour.id, index, steps: tour.custom ? tour.steps : undefined, full: tour.full });
     target.current = null;
     setPos(null);
     setPhase("seek");
@@ -145,7 +187,10 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
       const params = new URLSearchParams(window.location.search);
       const q = params.get("tour");
       if (q) {
+        // A brand-new demo: forget the scale guides seen in an earlier one.
+        if (params.get("tourfresh")) resetSeen();
         params.delete("tour");
+        params.delete("tourfresh");
         const rest = params.toString();
         window.history.replaceState(window.history.state, "", `${window.location.pathname}${rest ? `?${rest}` : ""}${window.location.hash}`);
         const id = q === "auto" ? level : q;
@@ -181,7 +226,8 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
     if (!tour) return;
     const step = tour.steps[tour.index];
     if (!step) return;
-    const want = step.route.split(/[?#]/)[0] || "/";
+    // Intro and summary cards appear on whatever screen is open.
+    const want = step.kind ? pathname : step.route.split(/[?#]/)[0] || "/";
     if (want !== pathname) {
       // We were on this step's screen and the person went elsewhere (browser back …): end the tour.
       if (arrived.current === tour.index) {
@@ -334,7 +380,7 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
       if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
       if (e.key === "Escape") {
         e.preventDefault();
-        stop();
+        skip();
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
         go(tour.index + 1);
@@ -358,7 +404,24 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
     }
   }, [ready, tour?.index]);
 
-  if (!tour) return null;
+  if (!tour) {
+    if (end)
+      return (
+        <TourEndCard
+          finished={end.id}
+          seen={end.seen}
+          demo={demo}
+          onClose={closeEnd}
+          onReplay={() => {
+            const id = end.id;
+            setEnd(null);
+            begin({ id, index: 0 });
+          }}
+        />
+      );
+    if (toast) return <TourToast text={tr("You can restart the guide any time from the demo bar.")} onDone={closeToast} />;
+    return null;
+  }
   const step = tour.steps[tour.index];
   if (!step) return null;
   const total = tour.steps.length;
@@ -367,6 +430,15 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
   const cardStyle = ready && pos?.top !== undefined ? ({ top: `${pos.top}px`, left: `${pos.left}px` } as React.CSSProperties) : undefined;
   const cardClass = `tour-card${ready ? " ready" : ""}${pos?.dock === "top" ? " dock-top" : ""}${pos?.top !== undefined ? " placed" : ""}`;
   const countText = tr("Step {n} of {total}").replace("{n}", String(tour.index + 1)).replace("{total}", String(total));
+  // On the intro card of a quick guide: offer the full tour when it has more steps.
+  let fullCount = 0;
+  if (step.kind === "intro" && !tour.custom && !tour.full && isTourId(tour.id)) {
+    try {
+      fullCount = tourSteps(tour.id, { off, role }, true).length;
+    } catch {
+      fullCount = 0;
+    }
+  }
 
   return (
     <div className={`tour${spot ? " has-spot" : ""}`}>
@@ -398,9 +470,9 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
         aria-hidden={ready ? undefined : true}
       >
         <div className="tour-head">
-          <span className="tour-kicker">{tour.custom ? tr("Show me where") : tr("Guided tour")}</span>
+          <span className="tour-kicker">{tour.custom ? tr("Show me where") : tour.full ? tr("Guided tour") : tr("Quick guide")}</span>
           {total > 1 && <span className="tour-count">{countText}</span>}
-          <button type="button" className="tour-x" onClick={stop} aria-label={tr("Skip tour")}>
+          <button type="button" className="tour-x" onClick={skip} aria-label={tr("Skip tour")}>
             ×
           </button>
         </div>
@@ -431,9 +503,17 @@ export function TourHost({ off, role, level, company }: { off: string[]; role: R
             )}
           </div>
         )}
+        {fullCount > total && (
+          <p className="tour-full">
+            {tr("This quick guide has {n} steps.").replace("{n}", String(total))}{" "}
+            <button type="button" className="tour-full-btn" onClick={() => begin({ id: tour.id, index: 1, full: true })}>
+              {tr("Show all {n} steps instead").replace("{n}", String(fullCount))}
+            </button>
+          </p>
+        )}
         <div className="tour-actions">
           {total > 1 ? (
-            <button type="button" className="btn btn-small btn-ghost tour-skip" onClick={stop}>
+            <button type="button" className="btn btn-small btn-ghost tour-skip" onClick={skip}>
               {tr("Skip tour")}
             </button>
           ) : (

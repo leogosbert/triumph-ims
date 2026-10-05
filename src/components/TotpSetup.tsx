@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useConfirmIdentity } from "@/components/ConfirmIdentity";
 import { createClient } from "@/lib/supabase/client";
 import { useTr } from "@/lib/tr-client";
 
@@ -18,10 +19,17 @@ export function TotpSetup({ onDone }: { onDone: () => void }) {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { ensure, dialog } = useConfirmIdentity();
 
   async function begin() {
     setBusy(true);
     setError(null);
+    // First set-up: the password is asked again, so someone holding an unlocked phone cannot
+    // add their own authenticator and lock the owner out.
+    if (!(await ensure().catch(() => false))) {
+      setBusy(false);
+      return;
+    }
     const supabase = createClient();
     try {
       // Clear any half-finished set-up from before.
@@ -67,6 +75,7 @@ export function TotpSetup({ onDone }: { onDone: () => void }) {
         <button type="button" className="btn btn-primary btn-block" onClick={begin} disabled={busy}>
           {busy ? tr("Please wait…") : tr("Set up two-step verification")}
         </button>
+        {dialog}
       </div>
     );
   }

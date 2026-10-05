@@ -193,10 +193,11 @@ accounts — nothing to copy.
    | `NEXT_PUBLIC_SITE_URL` | `https://lemosp-admin.netlify.app` (the admin address) |
    | `NEXT_PUBLIC_MAIN_URL` | the company app's address, e.g. `https://ims.triumphsuppliers.co.tz` |
    | `NEXT_PUBLIC_ADMIN_URL` | `https://lemosp-admin.netlify.app` (optional here; needed only if the admin address neither ends in `-admin` nor starts with `admin.`) |
+   | `VAPID_PUBLIC_KEY` | **copy exactly** the company site's `VAPID_PUBLIC_KEY` (the PUBLIC one only), so phones can turn on admin notifications |
 
-   Do **not** add `OUTBOX_SECRET`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `RESEND_API_KEY` or `EMAIL_FROM`:
-   alerts and emails are sent only by the company site (the admin site also refuses that job by itself, so
-   nothing is ever sent twice).
+   Do **not** add `OUTBOX_SECRET`, `VAPID_PRIVATE_KEY`, `RESEND_API_KEY` or `EMAIL_FROM` — and never copy the
+   private key: alerts and emails are sent only by the company site (the admin site also refuses that job by
+   itself, so nothing is ever sent twice).
 4. **Deploys → Trigger deploy**. Wait for "Published".
 
 **B. Point the company app to it**
@@ -217,6 +218,20 @@ accounts — nothing to copy.
    page walks you through it).
 8. Install: Android shows **Install LeMoSp ADMIN** (or Chrome menu ⋮ → **Install app**); iPhone: **Share → Add to
    Home Screen**. The home-screen icon is called **LeMoSp ADMIN**, next to **LeMoSp**.
+
+**E. Admin notifications** (database update `20261015000200_platform_notifications.sql`)
+
+LeMoSp ADMIN has its own bell (top right) and **Notifications** page: new companies, a company finishing setup or
+changing level, new app feedback, account deletions and company closures, automatic backups overdue (urgent, once
+per company per day), many sign-ins from new devices in one hour (urgent), and a **daily summary at 08:00**
+("Yesterday: N new companies, N active, N feedback items"). No amounts, clients or people's names or emails.
+Kept 180 days.
+To get them on your phone: open LeMoSp ADMIN → bell → **Turn on notifications on this device** (on each phone or
+computer you use; tick **Email me too** if you also want emails). The admin site needs only `VAPID_PUBLIC_KEY`
+(step 3, same value as the company site). The company site's scheduled job sends them (it has the private key);
+tapping one opens it in LeMoSp ADMIN. Company alerts never go to the admin app and admin alerts never go to the
+company app — except while `/admin` still runs inside the company app's address (no admin address yet): then it is
+one app on the phone, and that phone gets both.
 
 Notes: people who are not platform admins see "This app is for the LeMoSp platform team" there, never company
 data. Forgotten passwords are reset in the company app (same account for both). Each app keeps its own sign-in,
@@ -267,3 +282,45 @@ company app as before.
 **After deploying**, check once that everything still loads: sign in, open a quotation PDF, upload a logo, turn on
 phone notifications. If something is blocked, the browser console names the "Content-Security-Policy" rule —
 send us that line.
+
+## 12. Deleting accounts and companies
+
+Database update: `20261015000100_deletion.sql` (run it in the SQL editor like the others). It uses the same scheduled
+job and `OUTBOX_SECRET` as alerts (section 3).
+
+- **Delete my account** (Your account → *Delete my account*): the person confirms with their password and types
+  DELETE. Straight away they lose access to every company, are signed out on every device, their phone
+  notifications stop, and they get an email (sent by the scheduled job; needs `RESEND_API_KEY`/`EMAIL_FROM`,
+  section 3). People who use two-step verification must enter their code first. For **7 days** they can sign in and choose **Keep my account** —
+  everything comes back (except a membership a manager switched off meanwhile). Refused while they are the only manager of a company where other people work (make
+  someone else manager first). The only person in a company must close the company too (same step, or first).
+  Platform admins and demo guests cannot use it.
+- **What is deleted after 7 days:** name, email, phone, password, sign-in methods, sessions, two-step verification,
+  devices, sign-in history, notifications and settings, memberships, and their email in team invitations. The
+  sign-in account itself is anonymised and blocked (not removed), so **business records stay exactly as they were**
+  (quotations, invoices, deliveries, Activity log) and show "Deleted user". One "account deleted" line, without
+  personal details, is written to each company's Activity log. The email address can be used to sign up again.
+- **Close company account** (Settings → Company details → *Close company account*, management only): password,
+  type the exact company name. The page first offers **Download a final backup** — Tanzanian law requires keeping
+  business records (e.g. tax records) for several years; the downloaded file is the company's own copy. Straight
+  away everyone except management loses access and every member is notified; managers see only a "This company
+  will be deleted on …" screen with *Cancel closure*, *Download final backup* and *Sign out*. After **30 days** all
+  the company's data is deleted: records, backups and the company itself; from that moment nobody, management
+  included, can sign in to it or cancel. Only an anonymous row (no name) is kept so the platform can count
+  closures. People keep their own accounts. **Files** (logo, signatures, photos): newer Supabase does not let the
+  database delete them, so **Admin → Deletions** shows "Files to remove: N folders" — a platform admin presses
+  **Remove files** (allowed only for those folders). Please check that tab after closures.
+- **Platform admin → Deletions** lists scheduled and finished deletions (dates, status, company name while closing,
+  only the first letter of a person's name; cancelled requests are forgotten after 90 days). It is read-only:
+  nobody at LeMo Tech can cancel or speed one up.
+  "Not finished: retrying" means the scheduled job hit an error; it retries every hour (a very large company is
+  deleted a slice at a time over a few runs). To finish one by hand: SQL editor →
+  `select public.run_due_deletions_at(now(), 50, interval '2 minutes');`
+- **Public page** `/delete-account` (no sign-in, linked from the sign-in page; app stores ask for it) explains all
+  this. Set **`NEXT_PUBLIC_SUPPORT_EMAIL`** in Netlify → Environment variables (company site and admin site) to the
+  address people write to when they cannot sign in; without it the page says "LeMo Tech Solutions support".
+- **Irreversible.** After the 7 or 30 days nothing in the app can bring the data back. The platform team can only
+  restore from the **encrypted nightly GitHub backup** (section 6), which keeps 30 days.
+- **Remove LeMoSp from this phone** (Your account; also on the admin overview): steps to uninstall on Android and
+  iPhone, and *Clear this device and sign out* (removes the offline pages, saved settings and the driver's offline
+  deliveries — it warns first if some have not been sent). Uninstalling never deletes the account.

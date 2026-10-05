@@ -76,6 +76,7 @@ export function allowedOnAdminHost(path: string): boolean {
     under("/auth") ||
     under("/forgot-password") ||
     under("/two-step") ||
+    under("/delete-account") ||
     path === "/api/version" ||
     path === "/manifest.webmanifest" ||
     path === "/api/app-manifest" ||

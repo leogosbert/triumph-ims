@@ -5,7 +5,8 @@ import { adminUrl, allowedOnAdminHost, isAdminHost } from "@/lib/hosts";
 
 // /api/outbox is called by the scheduled job and checks its own secret.
 // /api/app-manifest is the install details (served as /manifest.webmanifest), fetched without cookies.
-const PUBLIC_PATHS = ["/login", "/auth", "/forgot-password", "/api/outbox", "/api/version", "/api/app-manifest"];
+// /delete-account explains how to delete an account; app stores require it to open without signing in.
+const PUBLIC_PATHS = ["/login", "/auth", "/forgot-password", "/api/outbox", "/api/version", "/api/app-manifest", "/delete-account"];
 
 /**
  * Keeps the sign-in session fresh and sends signed-out visitors to /login.

@@ -26,6 +26,7 @@ the database itself, and each has its own branding and settings.
 | 11 | Business levels, feature switches, onboarding, growth recommendations, Suggestion Box, Platform Admin | **Built — run the Stage 11 SQL** |
 | 12 | Small / Medium / Enterprise demos, guided tours, LeMoSp ADMIN installable app | **Built — run the Stage 12 SQL** |
 | 12b | Separate LeMoSp ADMIN address, demo guides per scale, automatic backups, security plus | **Built — run the v1.13 SQL** |
+| 12c | Delete my account, close company, remove app from phone, admin notifications | **Built — run the v1.14 SQL** |
 
 ## First-time setup
 

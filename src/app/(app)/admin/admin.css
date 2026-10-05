@@ -565,3 +565,56 @@ button.adm-exit {
 .adm-closed-actions form {
   margin: 0;
 }
+
+/* ---------- Admin notifications (bell + /admin/notifications) ---------- */
+.adm-bell {
+  flex: none;
+  color: #fff;
+  margin-right: -4px;
+}
+.adm-bell:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.adm-notes a {
+  align-items: flex-start;
+  gap: 12px;
+}
+.adm-sev {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-top: 1px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.adm-sev-urgent {
+  background: rgba(220, 38, 38, 0.14);
+  color: #b91c1c;
+}
+.adm-sev-attention {
+  background: rgba(245, 158, 11, 0.18);
+  color: #b45309;
+}
+.adm-sev-info {
+  background: rgba(20, 184, 166, 0.14);
+  color: #0f766e;
+  font-family: Georgia, serif;
+  font-style: italic;
+}
+[data-theme="dark"] .adm-sev-urgent {
+  color: #fca5a5;
+}
+[data-theme="dark"] .adm-sev-attention {
+  color: #fcd34d;
+}
+[data-theme="dark"] .adm-sev-info {
+  color: #5eead4;
+}
+.adm-notes .main {
+  flex: 1;
+}

@@ -194,7 +194,9 @@ export default function LoginPage() {
         <DemoScalePicker action={startDemo} tone="dark" />
       </section>
       )}
-      <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>
+      <p className="auth-foot">
+        {tr("LeMoSp · a LeMo Tech Solutions product")} · <Link href="/delete-account">{tr("Delete your account")}</Link>
+      </p>
     </div>
   );
 }

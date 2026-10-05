@@ -2,6 +2,8 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { BottomNav, SideNav } from "@/components/BottomNav";
 import { CompanyButton, CompanySheet, type CompanyCard } from "@/components/CompanySheet";
+import { CompanyClosing } from "@/components/CompanyClosing";
+import { ClosingGate } from "@/components/ClosingGate";
 import { AppLock } from "@/components/AppLock";
 import { DemoBar } from "@/components/DemoBar";
 import { IdleGuard } from "@/components/IdleGuard";
@@ -38,6 +40,30 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? "")
     .join("");
+  // The company is closing (Settings → Company details → Close company account): only this screen.
+  // (The LeMoSp ADMIN pages are let through: ClosingGate.)
+  if (company.closing_after) {
+    return (
+      <ClosingGate
+        closing={
+          <CompanyClosing
+            supabase={supabase}
+            company={company}
+            isManager={isManager}
+            others={memberships.filter((m) => m.company_id !== company.id)}
+            logo={logo}
+            initials={initials}
+          />
+        }
+      >
+        <div className="shell adm-host">
+          <div className="main-col">
+            <main className="page">{children}</main>
+          </div>
+        </div>
+      </ClosingGate>
+    );
+  }
   // Unread notifications (0 until the Stage 7 database update has been run).
   const { count: unread } = await supabase
     .from("notifications")

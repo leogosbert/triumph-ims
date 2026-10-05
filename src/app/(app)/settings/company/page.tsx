@@ -182,6 +182,16 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
           )}
         </fieldset>
       </StepUpForm>
+
+      {isManager && !c.is_demo && (
+        <section className="card danger-zone" id="close">
+          <h2>{tr("Close company account")}</h2>
+          <p className="small muted">{tr("Stop using LeMoSp for this company and delete all its data after 30 days.")}</p>
+          <Link href="/settings/company/close" className="btn btn-danger">
+            {tr("Close company account")}
+          </Link>
+        </section>
+      )}
     </>
   );
 }

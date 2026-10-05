@@ -164,7 +164,7 @@ select tests.check((select count(*) from information_schema.role_table_grants wh
                    'anonymous role has no table privileges');
 select tests.check((select string_agg(proname, ',' order by proname) from pg_proc
                      where pronamespace = 'public'::regnamespace and has_function_privilege('anon', oid, 'execute'))
-                   = 'check_overdue_backups,claim_company_backup,claim_outbox,drop_push_endpoints,run_all_alerts,take_claimed_backup',
+                   = 'check_overdue_backups,claim_account_emails,claim_company_backup,claim_due_deletion,claim_outbox,claim_platform_outbox,drop_push_endpoints,finish_deletion,run_all_alerts,run_platform_daily_summary,take_claimed_backup',
                    'anonymous role can only call the secret-protected scheduled-job functions');
 
 -- ---- 6. Opening stock import -----------------------------------------------------

@@ -11,6 +11,7 @@ const TABS: { href: string; label: string; short: string; icon: IconName }[] = [
   { href: "/admin/features", label: "Features", short: "Features", icon: "settings" },
   { href: "/admin/rules", label: "Growth rules", short: "Rules", icon: "activity" },
   { href: "/admin/feedback", label: "Feedback", short: "Feedback", icon: "inbox" },
+  { href: "/admin/deletions", label: "Deletions", short: "Deletions", icon: "close" },
 ];
 
 function useCurrent() {

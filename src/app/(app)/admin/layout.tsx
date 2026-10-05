@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { signOut } from "@/app/actions";
+import { Icon } from "@/components/Icon";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { mainUrl } from "@/lib/hosts";
 import { onAdminHost } from "@/lib/hosts-server";
@@ -84,6 +85,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </div>
     );
   }
+  // Admin notifications bell (0 until the platform notifications database update has been run).
+  const { data: unreadData } = await admin.supabase.rpc("platform_unread_count");
+  const unread = typeof unreadData === "number" ? unreadData : 0;
   return (
     // .adm-shell switches the page into the "LeMoSp ADMIN" app: admin.css hides the company
     // app's top bar, sidebar and bottom bar while it is on the page (on the admin address the
@@ -112,6 +116,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             )}
           </span>
         </div>
+        <Link
+          href="/admin/notifications"
+          className="icon-btn bell adm-bell"
+          aria-label={unread ? `${tr("Notifications")}, ${unread} ${tr("unread")}` : tr("Notifications")}
+        >
+          <Icon name="bell" size={23} />
+          {unread > 0 && <span className="count">{unread > 99 ? "99+" : unread}</span>}
+        </Link>
       </header>
       <div className="adm-head">
         <span className="adm-kicker">{tr("LeMo Tech")}</span>

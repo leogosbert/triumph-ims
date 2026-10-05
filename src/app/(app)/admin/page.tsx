@@ -1,4 +1,5 @@
 import { primeLang, tr } from "@/lib/tr";
+import { RemoveFromPhone } from "@/components/RemoveFromPhone";
 import Link from "next/link";
 import { LevelBadge } from "@/components/suggestions/SuggestionBadge";
 import { LEVEL_LABEL, LEVELS } from "@/components/suggestions/meta";
@@ -159,6 +160,13 @@ export default async function AdminOverviewPage() {
           </div>
         )}
       </section>
+
+      <details className="card adm-remove">
+        <summary>
+          <strong>{tr("Remove LeMoSp ADMIN from this phone")}</strong>
+        </summary>
+        <RemoveFromPhone admin />
+      </details>
     </>
   );
 }

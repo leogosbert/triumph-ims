@@ -3,6 +3,7 @@
 import { useTr } from "@/lib/tr-client";
 import { useEffect, useState } from "react";
 import { removePushSubscription, savePushSubscription } from "@/app/(app)/notifications/actions";
+import { removeAdminPushSubscription, saveAdminPushSubscription } from "@/app/(app)/admin/notifications/actions";
 
 function keyToBytes(base64: string) {
   const pad = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -12,9 +13,14 @@ function keyToBytes(base64: string) {
 
 type State = "checking" | "unsupported" | "ios-install" | "blocked" | "off" | "on" | "busy";
 
-/** Turns phone notifications on or off for this device. */
-export function PushSetup({ vapidKey }: { vapidKey: string | null }) {
+/**
+ * Turns phone notifications on or off for this device.
+ * target "admin": the LeMoSp ADMIN app (platform alerts); the phone is registered for the admin app.
+ */
+export function PushSetup({ vapidKey, target = "company" }: { vapidKey: string | null; target?: "company" | "admin" }) {
   const tr = useTr();
+  const save = target === "admin" ? saveAdminPushSubscription : savePushSubscription;
+  const remove = target === "admin" ? removeAdminPushSubscription : removePushSubscription;
   const [state, setState] = useState<State>("checking");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -32,9 +38,16 @@ export function PushSetup({ vapidKey }: { vapidKey: string | null }) {
       }
       const reg = await navigator.serviceWorker.register("/sw.js");
       const sub = await reg.pushManager.getSubscription();
+      // Admin app: make sure this phone is registered for admin alerts too (it may have been
+      // turned on earlier in the company app at the same address).
+      if (sub && target === "admin") {
+        const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
+        await save(json, navigator.userAgent).catch(() => undefined);
+      }
       setState(sub ? "on" : "off");
     })().catch(() => setState("unsupported"));
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target]);
 
   async function turnOn() {
     if (!vapidKey) return;
@@ -50,7 +63,7 @@ export function PushSetup({ vapidKey }: { vapidKey: string | null }) {
       await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyToBytes(vapidKey) });
       const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
-      const res = await savePushSubscription(json, navigator.userAgent);
+      const res = await save(json, navigator.userAgent);
       if ("error" in res && res.error) throw new Error(res.error);
       setState("on");
       setMessage("Notifications are on for this device.");
@@ -66,7 +79,7 @@ export function PushSetup({ vapidKey }: { vapidKey: string | null }) {
       const reg = await navigator.serviceWorker.getRegistration();
       const sub = await reg?.pushManager.getSubscription();
       if (sub) {
-        await removePushSubscription(sub.endpoint);
+        await remove(sub.endpoint);
         await sub.unsubscribe();
       }
       setState("off");

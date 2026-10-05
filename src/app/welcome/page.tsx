@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { acceptInvitation, createCompany, signOut } from "@/app/actions";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
+import { accountDeletionScheduled } from "@/lib/context";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Welcome" };
@@ -26,6 +27,7 @@ export default async function WelcomePage({ searchParams }: { searchParams: Sear
     .eq("user_id", user.id)
     .eq("active", true);
   if ((count ?? 0) > 0) redirect("/");
+  if (await accountDeletionScheduled(supabase)) redirect("/account-deleting");
 
   const { data } = await supabase.rpc("my_invitations");
   const invitations = (data ?? []) as Invitation[];
@@ -78,6 +80,11 @@ export default async function WelcomePage({ searchParams }: { searchParams: Sear
         <form action={signOut} style={{ marginTop: 16, textAlign: "center" }}>
           <button className="btn btn-small" type="submit">{tr("Sign out")}</button>
         </form>
+        {!user.is_anonymous && (
+          <p className="small" style={{ marginTop: 12, marginBottom: 0, textAlign: "center" }}>
+            <a href="/delete-my-account" className="muted">{tr("Delete my account")}</a>
+          </p>
+        )}
       </div>
       <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>
     </div>

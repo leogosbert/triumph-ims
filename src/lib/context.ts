@@ -46,6 +46,8 @@ export type Company = {
   business_level?: Level;
   onboarding_done?: boolean;
   level_changed_at?: string | null;
+  /** Set while the company is closing (v1.13 deletion SQL): when its data will be deleted. */
+  closing_after?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -99,10 +101,19 @@ export const getAppContext = cache(async () => {
   }
 
   const memberships = (data ?? []) as unknown as Membership[];
-  if (memberships.length === 0) redirect("/welcome");
+  if (memberships.length === 0) {
+    // Someone whose account is scheduled for deletion has no active company: show them that
+    // screen (with "Keep my account") instead of "create or join a company".
+    if (await accountDeletionScheduled(supabase)) redirect("/account-deleting");
+    redirect("/welcome");
+  }
 
   const chosen = (await cookies()).get(ACTIVE_COMPANY_COOKIE)?.value;
-  const membership = memberships.find((m) => m.company_id === chosen) ?? memberships[0];
+  // Without a choice, start in a company that is not closing.
+  const membership =
+    memberships.find((m) => m.company_id === chosen) ??
+    memberships.find((m) => m.company && !m.company.closing_after) ??
+    memberships[0];
   // The company requires two-step verification and this session has not passed it:
   // the database hides the company until then.
   if (!membership.company) redirect("/two-step");
@@ -144,6 +155,16 @@ export const getAppContext = cache(async () => {
     isPlatformAdmin,
   };
 });
+
+/** Is the signed-in person's account scheduled for deletion? False when that SQL has not been run. */
+export async function accountDeletionScheduled(supabase: Awaited<ReturnType<typeof createClient>>): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc("my_account_deletion");
+    return !error && Boolean(data);
+  } catch {
+    return false;
+  }
+}
 
 /** Same as getAppContext, but only management may continue. */
 export async function requireManager() {

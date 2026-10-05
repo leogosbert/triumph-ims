@@ -5,8 +5,10 @@ import { SecurityPanel } from "@/components/SecurityPanel";
 import { StepUpForm } from "@/components/ConfirmIdentity";
 import { SignInActivity } from "@/components/SignInActivity";
 import { PasswordInput } from "@/components/PasswordInput";
+import { RemoveFromPhone } from "@/components/RemoveFromPhone";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ThemePicker } from "@/components/ThemePicker";
+import Link from "next/link";
 import { signOut, switchCompany } from "@/app/actions";
 import { getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -101,6 +103,26 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      <section className="card" id="remove-app">
+        <h2>{tr("Remove LeMoSp from this phone")}</h2>
+        <RemoveFromPhone />
+      </section>
+
+      {!user.is_anonymous && (
+        <section className="card danger-zone" id="delete-account">
+          <h2>{tr("Delete my account")}</h2>
+          <p className="small muted">
+            {tr("Your account is deleted 7 days after you ask; until then you can keep it. Business records you created stay with your company, shown as \"Deleted user\".")}
+          </p>
+          <Link href="/delete-my-account" className="btn btn-danger">
+            {tr("Delete my account")}
+          </Link>
+          <p className="small" style={{ marginBottom: 0 }}>
+            <Link href="/delete-account">{tr("What is deleted and what is kept")}</Link>
+          </p>
         </section>
       )}
 

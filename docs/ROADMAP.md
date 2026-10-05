@@ -42,6 +42,11 @@ See [PRODUCT-VISION.md](PRODUCT-VISION.md) for the philosophy. This file tracks 
 - Security plus: strict browser security headers, sign-in history and new-device alerts, sign out everywhere,
   password re-check before sensitive changes (enforced in the database), privacy blur, security health check.
 
+## v1.14 — Leaving & admin alerts (built — run the v1.14 SQL)
+- Delete my account (7-day grace, business records kept as "Deleted user"); close company (30-day grace, then all data deleted);
+  remove the app / clear this device; public /delete-account page; admin Deletions tab with file clean-up.
+- LeMoSp ADMIN notifications: bell, list, phone push and optional email, daily summary.
+
 ## Stage 13 — Small-level essentials
 - Expenses with categories and receipts photos; simple profit & loss; customer and supplier statements.
 - Mobile-money payment methods (M-Pesa, Tigo Pesa, Airtel Money, HaloPesa) and simple reconciliation.

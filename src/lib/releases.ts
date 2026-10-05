@@ -7,6 +7,22 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.14",
+    date: "2026-10-07",
+    en: [
+      "Delete my account: under Your account. You have 7 days to change your mind.",
+      "Managers can close the company account (Settings → Company). All data is deleted after 30 days — download a final backup first.",
+      "Remove LeMoSp from this phone: simple steps, and a button that clears this device and signs you out.",
+      "LeMoSp ADMIN now has notifications: new companies, feedback, deletion requests, overdue backups and a daily summary.",
+    ],
+    sw: [
+      "Futa akaunti yangu: chini ya Akaunti yako. Una siku 7 za kubadili uamuzi.",
+      "Viongozi wanaweza kufunga akaunti ya kampuni (Mipangilio → Kampuni). Data yote inafutwa baada ya siku 30 — pakua nakala rudufu ya mwisho kwanza.",
+      "Ondoa LeMoSp kwenye simu hii: hatua rahisi, na kitufe cha kusafisha kifaa hiki na kutoka.",
+      "LeMoSp ADMIN sasa ina arifa: kampuni mpya, maoni, maombi ya kufuta, nakala rudufu zilizochelewa na muhtasari wa kila siku.",
+    ],
+  },
+  {
     version: "1.13",
     date: "2026-10-06",
     en: [

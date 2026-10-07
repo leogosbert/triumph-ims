@@ -78,6 +78,14 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       ],
     },
     {
+      key: "reports",
+      label: "Reports",
+      icon: "report",
+      items: [
+        role !== "driver" && { href: "/reports", title: "Reports", sub: "Choose a report and dates, then print or download PDF or Excel", icon: "report" },
+      ],
+    },
+    {
       key: "add",
       label: "Add new",
       icon: "plus",

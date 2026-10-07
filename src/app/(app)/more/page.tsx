@@ -40,6 +40,7 @@ const ICONS: Record<string, IconName> = {
   "/growth": "activity",
   "/settings/features": "check",
   "/admin": "settings",
+  "/reports": "report",
 };
 
 function Tile({ href, title, sub, show = true, icon }: { href: string; title: string; sub: string; show?: boolean; icon?: IconName }) {
@@ -88,6 +89,7 @@ export default async function MorePage() {
 
       <h2>{tr("Records")}</h2>
       <div className="grid grid-2" style={{ marginBottom: 20 }}>
+        {role !== "driver" && <Tile href="/reports" title={tr("Reports")} sub={tr("Choose a report and dates, then print or download PDF or Excel")} />}
         <Tile show={on("/clients")} href="/clients" title={tr("Clients")} sub={tr("Search, view and edit clients and their contacts")} />
         {can(role, "seeSuppliers") && <Tile show={on("/suppliers")} href="/suppliers" title={tr("Suppliers")} sub={tr("Search, view and edit suppliers")} />}
         <Tile show={on("/products")} href="/products" title={tr("Products")} sub={tr("Search, view and edit the catalogue")} />

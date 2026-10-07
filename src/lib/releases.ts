@@ -7,6 +7,20 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.15",
+    date: "2026-10-07",
+    en: [
+      "New Reports section (menu → Reports): 18 reports on sales, purchasing, stock, deliveries, payments, profit and your lists.",
+      "Pick any dates (today, this month, last quarter, or your own from–to dates), filter by client, supplier, store or status, and choose the columns.",
+      "Print the report, or download it as PDF or Excel. Save the reports you use often.",
+    ],
+    sw: [
+      "Sehemu mpya ya Ripoti (menyu → Ripoti): ripoti 18 za mauzo, manunuzi, stoku, uwasilishaji, malipo, faida na orodha zako.",
+      "Chagua tarehe yoyote (leo, mwezi huu, robo iliyopita, au tarehe zako kutoka–hadi), chuja kwa mteja, msambazaji, ghala au hali, na uchague safu.",
+      "Chapisha ripoti, au uipakue kama PDF au Excel. Hifadhi ripoti unazotumia mara kwa mara.",
+    ],
+  },
+  {
     version: "1.14",
     date: "2026-10-07",
     en: [

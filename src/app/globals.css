@@ -5649,3 +5649,49 @@ html.privacy-blur .shell {
   margin-bottom: 10px;
 }
 /* ===== end deletion ===== */
+
+/* ---------------------------------------------------------------------------------------------
+   Reports (/reports): choose a report, dates, filters and columns; print, PDF, Excel.
+   --------------------------------------------------------------------------------------------- */
+.rep-group { margin-bottom: 20px; }
+.rep-form { display: grid; gap: 12px; }
+.rep-period, .rep-filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.rep-field { display: grid; gap: 4px; font-size: 0.85rem; }
+.rep-field > span { color: var(--muted); font-weight: 600; }
+.rep-field select, .rep-field input { width: 100%; min-width: 0; }
+.rep-custom > summary { cursor: pointer; font-weight: 600; font-size: 0.9rem; padding: 4px 0; }
+.rep-cols { border: 0; margin: 8px 0 12px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px 12px; font-size: 0.88rem; }
+.rep-cols legend { margin-bottom: 6px; }
+.rep-submit { display: flex; gap: 8px; flex-wrap: wrap; }
+.rep-head { margin-bottom: 10px; }
+.rep-head h2 { margin: 2px 0 6px; }
+.rep-head p { margin: 2px 0; }
+.rep-company { font-weight: 800; color: var(--brand); font-size: 1.05rem; }
+.rep-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 6px 0 12px; padding: 8px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.rep-buttons { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.rep-save { display: inline-flex; gap: 6px; align-items: center; }
+.rep-save input { width: 170px; }
+table.compare.rep-table th, table.compare.rep-table td { text-align: left; }
+table.compare.rep-table th.num, table.compare.rep-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.compare.rep-table th:first-child, table.compare.rep-table td:first-child { min-width: 110px; }
+table.compare.rep-table tfoot td { font-weight: 700; border-top: 2px solid var(--text); border-bottom: 3px double var(--text); background: var(--card); }
+.rep-sort { color: inherit; text-decoration: none; }
+.rep-sort:hover { text-decoration: underline; }
+
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  /* Only the report: the menus, bars, the form and any pop-ups are left out. */
+  .no-print, .sidenav, .bottomnav, .topbar, .demo-bar { display: none !important; }
+  body * { visibility: hidden !important; }
+  .report-print, .report-print * { visibility: visible !important; }
+  .report-print .no-print, .report-print .no-print * { display: none !important; }
+  .report-print { position: absolute; left: 0; top: 0; width: 100%; border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; background: #fff !important; color: #000 !important; }
+  html.privacy-blur .shell { filter: none !important; }
+  .report-print .scroll-x { overflow: visible !important; margin: 0 !important; padding: 0 !important; }
+  .report-print table.compare { font-size: 9pt; min-width: 0; width: 100%; }
+  .report-print table.compare th, .report-print table.compare td { white-space: normal; padding: 3px 5px; position: static !important; background: none !important; color: #000 !important; border-color: #999 !important; }
+  .report-print table.compare thead { display: table-header-group; }
+  .report-print tr { break-inside: avoid; }
+  .report-print a { color: inherit !important; text-decoration: none !important; }
+  .rep-company { color: #000 !important; }
+}

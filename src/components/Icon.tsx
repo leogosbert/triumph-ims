@@ -15,6 +15,7 @@ const PATHS = {
   help: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01",
   plus: "M4 4h16v16H4zM12 8v8M8 12h8",
   doc: "M6 3h9l3 3v15H6zM9 10h6M9 14h6M9 18h3",
+  report: "M4 3h16v18H4zM8 17v-4M12 17V8M16 17v-6",
   cash: "M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
   chevron: "M9 6l6 6-6 6",
   back: "M15 6l-6 6 6 6",

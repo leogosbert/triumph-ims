@@ -47,6 +47,10 @@ See [PRODUCT-VISION.md](PRODUCT-VISION.md) for the philosophy. This file tracks 
   remove the app / clear this device; public /delete-account page; admin Deletions tab with file clean-up.
 - LeMoSp ADMIN notifications: bell, list, phone push and optional email, daily summary.
 
+## v1.15 — Reports (built — no SQL needed)
+- Reports section: 18 reports (sales, purchasing, stock, deliveries, payments, bills, profit, order costs, lists),
+  any date range or ready-made period, filters, column chooser and sort; print, PDF and Excel download; saved reports per device.
+
 ## Stage 13 — Small-level essentials
 - Expenses with categories and receipts photos; simple profit & loss; customer and supplier statements.
 - Mobile-money payment methods (M-Pesa, Tigo Pesa, Airtel Money, HaloPesa) and simple reconciliation.

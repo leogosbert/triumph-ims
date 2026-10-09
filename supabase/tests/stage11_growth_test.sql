@@ -67,8 +67,8 @@ select tests.check((select string_agg(key, ',' order by key) from public.feature
 select tests.check((select bool_and(default_level = 'small') from public.features where core or key = 'goods_received'),
   'core features and goods received belong to the small level');
 select tests.check((select count(*) from public.features) = 54, 'catalogue has 54 features (Stage 13 added reminders)');
-select tests.check((select count(*) from public.features where status = 'live') = 44
-                   and (select count(*) from public.features where status = 'planned') = 10, '44 live and 10 planned features (Stage 14 made eight more live)');
+select tests.check((select count(*) from public.features where status = 'live') = 48
+                   and (select count(*) from public.features where status = 'planned') = 6, '48 live and 6 planned features (Stage 15 part 1 made four more live)');
 select tests.check((select bool_and(jsonb_array_length(tutorial) between 2 and 4 and description is not null
                                     and audience is not null and benefits is not null) from public.features),
   'every feature has a description, audience, benefits and a 2-4 step tutorial');
@@ -79,7 +79,7 @@ select tests.check((select bool_and(not enabled) from public.company_feature_map
   'planned features are never on');
 select tests.check((select bool_and(source = 'level') from public.company_feature_map(:'co')), 'without choices everything follows the level');
 select tests.check(public.feature_enabled(:'co', 'supplier_rfqs'), 'feature_enabled: supplier comparison on at medium');
-select tests.check(not public.feature_enabled(:'co', 'budgets'), 'feature_enabled: planned feature off');
+select tests.check(not public.feature_enabled(:'co', 'ai_assistant'), 'feature_enabled: planned feature off');
 select tests.check(not public.is_platform_admin(), 'a manager is not a platform admin');
 
 -- ---- 2. Business level and feature switches ------------------------------------
@@ -101,15 +101,15 @@ select tests.blocked(format('select public.set_company_feature(%L, %L, false)', 
 select tests.blocked(format('select public.set_company_feature(%L, %L, false)', :'co', 'security_policy'), 'two-step settings are always available');
 select public.set_company_feature(:'co', 'dashboard', true);
 select tests.check((select enabled from public.company_feature_map(:'co') where key = 'dashboard'), 'switching a core feature on is harmless');
-select tests.blocked(format('select public.set_company_feature(%L, %L, true)', :'co', 'budgets'), 'planned features cannot be switched on');
+select tests.blocked(format('select public.set_company_feature(%L, %L, true)', :'co', 'ai_assistant'), 'planned features cannot be switched on');
 select tests.blocked(format('select public.set_company_feature(%L, %L, true)', :'co', 'nonsense'), 'unknown features are refused');
 select tests.blocked(format('select public.set_business_level(%L, null)', :'co'), 'a level is required');
 select tests.blocked(format('select public.set_business_level(%L, %L, %L)', :'co', 'small', '[1,2]'), 'the profile must be an object');
 
 select public.set_business_level(:'co', 'enterprise');
-select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 43,
+select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 47,
   'enterprise: all live features except the one switched off');
-select tests.check((select bool_and(not enabled) from public.company_feature_map(:'co') where default_level = 'enterprise'),
+select tests.check((select bool_and(not enabled) from public.company_feature_map(:'co') where status = 'planned'),
   'enterprise planned features stay off');
 select public.set_business_level(:'co', 'small', '{"customers": 40}');
 select tests.check(public.company_profile(:'co') ->> 'employees' = '4' and public.company_profile(:'co') ->> 'customers' = '40',
@@ -299,7 +299,7 @@ reset role;
 insert into public.recommendation_rules (key, title, metric, threshold, target_level, applies_to, message)
 values ('test_same_level', 'Same level', 'members', 1, 'medium', '{medium}', 'x');
 insert into public.recommendation_rules (key, title, metric, threshold, feature_key, applies_to, message)
-values ('test_planned', 'Planned', 'members', 1, 'budgets', '{medium}', 'x');
+values ('test_planned', 'Planned', 'members', 1, 'ai_assistant', '{medium}', 'x');
 select tests.login('boss12@g.test'); set role authenticated;
 select tests.check(public.run_growth_check(:'co', true) = 0, 'no recommendation for the current level or planned features');
 select tests.check((select count(*) from public.company_recommendations where rule_key in ('test_same_level', 'test_planned')) = 0,
@@ -518,8 +518,8 @@ select count(*) as real_sugs from public.suggestions s join public.companies c o
 select tests.login_aal('admin12@g.test', 'aal1'); set role authenticated;
 select tests.check(not public.is_platform_admin(), 'a platform admin without two-step is not recognised');
 select tests.blocked('select public.platform_overview()', 'platform tools need a two-step session');
-update public.features set benefits = 'Password only' where key = 'budgets';
-select tests.check((select benefits from public.features where key = 'budgets') <> 'Password only', 'catalogue edits need a two-step session');
+update public.features set benefits = 'Password only' where key = 'ai_assistant';
+select tests.check((select benefits from public.features where key = 'ai_assistant') <> 'Password only', 'catalogue edits need a two-step session');
 reset role;
 select tests.login_aal('admin12@g.test', 'aal2'); set role authenticated;
 select tests.check(public.is_platform_admin(), 'platform admin recognised');
@@ -541,7 +541,7 @@ select tests.check((select count(*) from public.platform_app_feedback()) = 1
                    and (select title from public.platform_app_feedback()) = 'Barcode scanning', 'app feedback: real companies, about the app only');
 select tests.check((select count(*) from public.platform_feature_adoption()) = 54
                    and (select bool_and(total_companies = :real_total) from public.platform_feature_adoption())
-                   and (select enabled_companies from public.platform_feature_adoption() where key = 'budgets') = 0,
+                   and (select enabled_companies from public.platform_feature_adoption() where key = 'ai_assistant') = 0,
   'feature adoption per feature');
 select tests.blocked(format('select * from public.company_feature_map(%L)', :'co'), 'admins get no company feature details');
 select tests.blocked(format('select public.company_metrics(%L)', :'co'), 'admins get no company figures');
@@ -555,11 +555,11 @@ select tests.blocked(format('select public.admin_set_company_feature(%L, %L, fal
 select public.admin_set_company_level(:'other', 'enterprise');
 select tests.check((select business_level from public.platform_companies() where id = :'other') = 'enterprise', 'admin changes a company level');
 select tests.check((select count(*) from public.audit_log) = 0, 'admins do not read company activity history');
-select tests.blocked(format('select public.admin_set_company_feature(%L, %L, true)', :'co', 'budgets'), 'admins cannot switch on planned features either');
+select tests.blocked(format('select public.admin_set_company_feature(%L, %L, true)', :'co', 'ai_assistant'), 'admins cannot switch on planned features either');
 
 -- Catalogue editing
-update public.features set benefits = 'Updated benefit' where key = 'budgets';
-select tests.check((select benefits from public.features where key = 'budgets') = 'Updated benefit', 'admins edit catalogue texts');
+update public.features set benefits = 'Updated benefit' where key = 'ai_assistant';
+select tests.check((select benefits from public.features where key = 'ai_assistant') = 'Updated benefit', 'admins edit catalogue texts');
 insert into public.features (key, name, module, default_level, status) values ('test_feature', 'Test feature', 'Other', 'small', 'live');
 delete from public.features where key = 'test_feature';
 update public.recommendation_rules set threshold = 3 where key = 'stores';

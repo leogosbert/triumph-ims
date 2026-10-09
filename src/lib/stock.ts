@@ -33,3 +33,19 @@ export function daysUntil(iso: string) {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Dar_es_Salaam" }).format(new Date());
   return Math.round((Date.parse(iso) - Date.parse(today)) / 864e5);
 }
+
+export const TRANSFER_STATUS: Record<string, { label: string; tone: string }> = {
+  draft: { label: "Being prepared", tone: "off" },
+  in_transit: { label: "On the way", tone: "warn" },
+  received: { label: "Received", tone: "ok" },
+  cancelled: { label: "Cancelled", tone: "off" },
+};
+
+export const REQUEST_STATUS: Record<string, { label: string; tone: string }> = {
+  draft: { label: "Draft", tone: "off" },
+  submitted: { label: "Waiting for approval", tone: "warn" },
+  approved: { label: "Approved, to order", tone: "info" },
+  rejected: { label: "Rejected", tone: "bad" },
+  ordered: { label: "Ordered", tone: "ok" },
+  cancelled: { label: "Cancelled", tone: "off" },
+};

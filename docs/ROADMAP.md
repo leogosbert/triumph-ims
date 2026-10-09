@@ -66,11 +66,25 @@ SQL: `supabase/migrations/20261016000100_stage13_small_essentials.sql`. Until it
   alerts in notifications, ready-made WhatsApp/SMS/email messages in English and Kiswahili, follow-up log with
   next date or promised payment date (overdue reminders pause until a promised date).
 
-## Stage 14 — Medium operations & CRM
-- CRM: leads, opportunities and pipeline, follow-ups, customer visits, communication history, important dates.
-- Tenders and contracts (framework prices, validity, alerts); documents library with expiry.
-- Stock transfers between stores, min/max levels, purchase requisitions, three-way match, partial deliveries/backorders.
-- Supplier performance, slow-moving stock, quotation conversion, cross-sell insights.
+## Stage 14 (v1.17) — Medium operations & CRM (built — run the two Stage 14 SQL files)
+SQL, in order: `supabase/migrations/20261017000100_stage14_crm_contracts.sql`, then
+`supabase/migrations/20261017000200_stage14_operations.sql`. Until they are run, the new screens say
+"not available yet" and everything else works as before. Running them switches the features on for Medium and
+Enterprise companies (Small companies can switch them on under Features).
+- CRM pipeline (`/crm`): opportunities for clients or prospects, stages with win chance, owner, next step and
+  follow-up alerts, calls/visits/messages history, convert prospect to client, quotation link (won or lost when the
+  quotation is accepted or rejected), important client dates with yearly reminders; CRM on the client page.
+- Tenders (`/tenders`): closing date and time with reminders, default checklist of papers, bid price, result with
+  winner and winning price. Contracts (`/contracts`): framework and supply contracts with agreed prices, "Use
+  contract prices" on draft quotations, end-of-contract alerts.
+- Documents library (`/documents`): files in a private `documents` bucket, linked to clients, suppliers, products,
+  tenders or contracts, with expiry reminders.
+- Stock transfers (`/transfers`) between stores (oldest expiry first, in transit, receive or cancel); maximum stock
+  level on products; reorder list (`/stock/reorder`) with suggested quantities to a draft PO or purchase request.
+- Purchase requests (`/requisitions`): anyone but drivers asks; management approves; procurement orders.
+- Order, receipt and bill check (`/purchasing/match`), still to deliver (`/backorders`), Business insights
+  (`/insights`: win rates, supplier punctuality, slow-moving stock, items bought together).
+- Reports: Sales pipeline, Tenders, Documents and expiry dates.
 
 ## Stage 15 — Enterprise
 - Branches/business units with consolidated head-office reporting; departmental permissions; multi-level approvals.

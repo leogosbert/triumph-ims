@@ -18,7 +18,12 @@ export async function saveProduct(form: FormData) {
   const { values, error } = parseSections(form, PRODUCT_SECTIONS);
   if (error) redirect(withNotice(back, { error }));
 
-  const res = await saveRecord(supabase, "products", company.id, id, values);
+  let res = await saveRecord(supabase, "products", company.id, id, values);
+  // Before the Stage 14 database update there is no maximum level yet: save the rest.
+  if (res.error && /max_level/.test(res.error) && !/check constraint/.test(res.error)) {
+    delete values.max_level;
+    res = await saveRecord(supabase, "products", company.id, id, values);
+  }
   if (res.error) redirect(withNotice(back, { error: friendlyError(res.error) }));
   revalidatePath("/products");
   redirect(withNotice(`/products/${res.id}`, { msg: id ? "Product saved." : "Product added." }));

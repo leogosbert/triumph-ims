@@ -15,7 +15,7 @@ type Q = { id: string; number: string; revision: number; total: number; currency
 
 export default async function PurchasingPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
   if (!can(role, "seePurchasing")) redirect("/");
   const today = todayTz();
   const cnt = { count: "exact" as const, head: true };
@@ -81,6 +81,13 @@ export default async function PurchasingPage() {
           </div>
         )}
       </div>
+      <p className="small">
+        {features.on("requisitions") && <Link href="/requisitions">{tr("Purchase requests")}</Link>}
+        {features.on("requisitions") && can(role, "seeBills") && " · "}
+        {can(role, "seeBills") && <Link href="/purchasing/match">{tr("Order, receipt and bill check")}</Link>}
+        {can(role, "seeReorder") && " · "}
+        {can(role, "seeReorder") && <Link href="/stock/reorder">{tr("What to reorder")}</Link>}
+      </p>
 
       <div className="stat-grid">
         {edit && (

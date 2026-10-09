@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney, marginPercent } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { LinkedDocuments } from "@/components/LinkedDocuments";
 import { saveProduct, saveProductCost, setProductActive } from "../actions";
 
 export const metadata = { title: "Product" };
@@ -26,7 +27,7 @@ export default async function ProductPage({
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
   const showCosts = can(role, "seeCosts");
   const editCosts = can(role, "editCosts");
 
@@ -126,6 +127,10 @@ export default async function ProductPage({
             </p>
           )}
         </section>
+      )}
+
+      {can(role, "seeDocuments") && features.on("documents") && (
+        <LinkedDocuments supabase={supabase} companyId={company.id} field="product_id" id={id} back={`/products/${id}#documents`} kind="sds" />
       )}
 
       <form action={saveProduct}>

@@ -1,5 +1,6 @@
 import type { createClient } from "@/lib/supabase/server";
 import { BILL_STATUS, COST_KINDS, INVOICE_STATUS, PAY_METHODS, daysOverdue, isOpen, methodLabel, n } from "@/lib/finance";
+import { DOC_KINDS, OPP_SOURCES, OPP_STAGES, TENDER_STATUSES } from "@/lib/crm";
 import { loadPnl } from "@/lib/pnl";
 import { namesFor } from "@/lib/people";
 import { PO_STATUS } from "@/lib/purchasing";
@@ -1268,8 +1269,213 @@ const productList: ReportDef = {
   },
 };
 
+// ---- Stage 14: pipeline, tenders, documents ---------------------------------------------------
+/** A table from the Stage 14 update that has not been run yet gives an empty report. */
+async function stage14<T>(load: () => Promise<T[]>): Promise<T[]> {
+  try {
+    return await load();
+  } catch (e) {
+    if (/does not exist|schema cache/i.test(String((e as Error)?.message ?? e))) return [];
+    throw e;
+  }
+}
+
+const OPP_STAGE_LABELS: Record<string, string> = Object.fromEntries(OPP_STAGES.map((s) => [s.key, s.label]));
+
+const pipelineReport: ReportDef = {
+  key: "pipeline",
+  title: "Sales pipeline",
+  group: "sales",
+  description: "Opportunities added in the period: stage, value, chance, next step, and why deals were lost.",
+  perm: "seeCrm",
+  feature: "crm_pipeline",
+  date: { label: "Date added" },
+  defaultPreset: "this_year",
+  filters: ["client", "status"],
+  statuses: OPP_STAGE_LABELS,
+  defaultStatuses: null,
+  defaultLabel: "All stages",
+  cols: [
+    { key: "number", label: "Number", type: "text", off: true },
+    { key: "added", label: "Date added", type: "date" },
+    { key: "party", label: "Client or prospect", type: "text" },
+    { key: "title", label: "What the client needs", type: "text" },
+    { key: "source", label: "How we found it", type: "label", off: true },
+    { key: "stage", label: "Stage", type: "label" },
+    { key: "owner", label: "Responsible", type: "text" },
+    { key: "expected", label: "Expected order date", type: "date", off: true },
+    { key: "next", label: "Next step", type: "text", off: true },
+    { key: "closed", label: "Closed on", type: "date", off: true },
+    { key: "lost_reason", label: "Why lost", type: "text", off: true },
+    { key: "currency", label: "Currency", type: "text", off: true },
+    { key: "value", label: "Value", type: "money", total: true },
+    { key: "chance", label: "Chance", type: "percent", off: true },
+    { key: "weighted", label: "Likely value", type: "money", total: true, off: true },
+  ],
+  sort: { key: "added", dir: "desc" },
+  async load(c) {
+    type O = { number: string; created_at: string; title: string; prospect_name: string | null; client_id: string | null; source: string; stage: string; owner_id: string | null; expected_close: string | null; next_action: string | null; next_on: string | null; closed_at: string | null; lost_reason: string | null; currency: string; value: number; probability: number; client: Named };
+    const rows = await stage14(() =>
+      paged<O>((a, b) =>
+        onTime(
+          c.supabase
+            .from("opportunities")
+            .select("number, created_at, title, prospect_name, client_id, source, stage, owner_id, expected_close, next_action, next_on, closed_at, lost_reason, currency, value, probability, client:clients(name)")
+            .eq("company_id", c.companyId),
+          "created_at",
+          c,
+        ).order("id").range(a, b),
+      ),
+    );
+    const names = await namesFor(c.supabase, rows.map((o) => o.owner_id));
+    return rows.map((o) => ({
+      number: o.number,
+      added: localDay(o.created_at),
+      party: one(o.client)?.name ?? o.prospect_name ?? "",
+      title: o.title,
+      source: OPP_SOURCES.find((x) => x.key === o.source)?.label ?? o.source,
+      stage: OPP_STAGE_LABELS[o.stage] ?? o.stage,
+      owner: o.owner_id ? (names.get(o.owner_id) ?? "") : "",
+      expected: o.expected_close,
+      next: [o.next_action, o.next_on].filter(Boolean).join(" · ") || null,
+      closed: o.closed_at ? localDay(o.closed_at) : null,
+      lost_reason: o.lost_reason,
+      currency: o.currency,
+      value: n(o.value),
+      chance: o.probability,
+      weighted: money((n(o.value) * o.probability) / 100),
+      _client: o.client_id ?? "",
+      _status: o.stage,
+    }));
+  },
+};
+
+const TENDER_STATUS_LABELS: Record<string, string> = Object.fromEntries(TENDER_STATUSES.map((s) => [s.key, s.label]));
+
+const tenderReport: ReportDef = {
+  key: "tenders",
+  title: "Tenders",
+  group: "sales",
+  description: "Tenders closing in the period, our price against the winning price, and the result.",
+  perm: "seeCrm",
+  feature: "tenders",
+  date: { label: "Closing date" },
+  defaultPreset: "this_year",
+  filters: ["client", "status"],
+  statuses: TENDER_STATUS_LABELS,
+  defaultStatuses: null,
+  defaultLabel: "All",
+  cols: [
+    { key: "number", label: "Number", type: "text", off: true },
+    { key: "closing", label: "Closing date", type: "date" },
+    { key: "buyer", label: "Buyer", type: "text" },
+    { key: "title", label: "Tender for", type: "text" },
+    { key: "reference", label: "Tender number", type: "text", off: true },
+    { key: "status", label: "Status", type: "label" },
+    { key: "currency", label: "Currency", type: "text", off: true },
+    { key: "our_price", label: "Our bid price", type: "money", total: true },
+    { key: "winning_price", label: "Winning price", type: "money" },
+    { key: "gap", label: "Our price vs winner", type: "percent" },
+    { key: "winner", label: "Who won", type: "text", off: true },
+    { key: "note", label: "Result note", type: "text", off: true },
+  ],
+  sort: { key: "closing", dir: "desc" },
+  async load(c) {
+    type T = { number: string; closing_at: string; title: string; buyer_name: string | null; client_id: string | null; reference: string | null; status: string; currency: string; our_price: number | null; winning_price: number | null; winner: string | null; result_note: string | null; client: Named };
+    const rows = await stage14(() =>
+      paged<T>((a, b) =>
+        onTime(
+          c.supabase
+            .from("tenders")
+            .select("number, closing_at, title, buyer_name, client_id, reference, status, currency, our_price, winning_price, winner, result_note, client:clients(name)")
+            .eq("company_id", c.companyId),
+          "closing_at",
+          c,
+        ).order("id").range(a, b),
+      ),
+    );
+    return rows.map((t) => {
+      const ours = t.our_price === null ? null : n(t.our_price);
+      const win = t.winning_price === null ? null : n(t.winning_price);
+      return {
+        number: t.number,
+        closing: localDay(t.closing_at),
+        buyer: one(t.client)?.name ?? t.buyer_name ?? "",
+        title: t.title,
+        reference: t.reference,
+        status: TENDER_STATUS_LABELS[t.status] ?? t.status,
+        currency: t.currency,
+        our_price: ours,
+        winning_price: win,
+        gap: ours !== null && win !== null && win > 0 ? Math.round(((ours - win) / win) * 1000) / 10 : null,
+        winner: t.winner,
+        note: t.result_note,
+        _client: t.client_id ?? "",
+        _status: t.status,
+      };
+    });
+  },
+};
+
+const documentReport: ReportDef = {
+  key: "documents",
+  title: "Documents and expiry dates",
+  group: "lists",
+  description: "Every document in the library with what it belongs to and when it expires.",
+  perm: "seeDocuments",
+  feature: "documents",
+  date: { label: "Expiry date" },
+  defaultPreset: "all",
+  filters: ["status"],
+  statuses: { valid: "Valid", expiring: "Expiring within 60 days", expired: "Expired", no_expiry: "Does not expire" },
+  defaultStatuses: null,
+  defaultLabel: "All",
+  cols: [
+    { key: "title", label: "Document", type: "text" },
+    { key: "kind", label: "Type", type: "label" },
+    { key: "reference", label: "Number", type: "text", off: true },
+    { key: "belongs", label: "Belongs to", type: "text" },
+    { key: "issued", label: "Issued on", type: "date", off: true },
+    { key: "expires", label: "Expires on", type: "date" },
+    { key: "days", label: "Days left", type: "int" },
+    { key: "file", label: "File attached", type: "label", off: true },
+  ],
+  sort: { key: "expires", dir: "asc" },
+  async load(c) {
+    type D = { title: string; kind: string; reference: string | null; issued_on: string | null; expires_on: string | null; file_path: string | null; product: Named; supplier: Named; client: Named };
+    const rows = await stage14(() =>
+      paged<D>((a, b) => {
+        let q = c.supabase
+          .from("documents")
+          .select("title, kind, reference, issued_on, expires_on, file_path, product:products(name), supplier:suppliers(name), client:clients(name)")
+          .eq("company_id", c.companyId)
+          .is("archived_at", null);
+        if (c.from || c.to) q = onDate(q, "expires_on", c);
+        return q.order("id").range(a, b);
+      }),
+    );
+    const today = Date.parse(`${c.today}T00:00:00Z`);
+    return rows.map((d) => {
+      const days = d.expires_on ? Math.round((Date.parse(`${d.expires_on}T00:00:00Z`) - today) / 86400000) : null;
+      return {
+        title: d.title,
+        kind: DOC_KINDS.find((k) => k.key === d.kind)?.label ?? d.kind,
+        reference: d.reference,
+        belongs: one(d.product)?.name ?? one(d.supplier)?.name ?? one(d.client)?.name ?? "",
+        issued: d.issued_on,
+        expires: d.expires_on,
+        days,
+        file: d.file_path ? "Yes" : "No",
+        _status: days === null ? "no_expiry" : days < 0 ? "expired" : days <= 60 ? "expiring" : "valid",
+      };
+    });
+  },
+};
+
 export const REPORTS: ReportDef[] = [
   quotations,
+  pipelineReport,
+  tenderReport,
   invoices,
   salesByClient,
   salesByProduct,
@@ -1290,6 +1496,7 @@ export const REPORTS: ReportDef[] = [
   clientList,
   supplierList,
   productList,
+  documentReport,
 ];
 
 export function findReport(key: string) {

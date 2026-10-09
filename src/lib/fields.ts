@@ -109,6 +109,7 @@ export const PRODUCT_SECTIONS: Section[] = [
       { key: "pack_size", label: "Pack size", type: "text" },
       { key: "selling_price", label: "Selling price (TZS)", type: "money" },
       { key: "reorder_level", label: "Reorder level", type: "number" },
+      { key: "max_level", label: "Maximum stock level", type: "number", hint: "for reorder suggestions" },
     ],
   },
   {

@@ -29,6 +29,7 @@ the database itself, and each has its own branding and settings.
 | 12c | Delete my account, close company, remove app from phone, admin notifications | **Built — run the v1.14 SQL** |
 | 12d | Reports (PDF / Excel) | Built — no SQL |
 | 13 | Expenses with receipts, profit & loss, statements, mobile money and payment check, follow-ups and reminders | **Built — run the Stage 13 SQL** |
+| 14 | CRM pipeline, tenders, contracts, documents library, stock transfers, purchase requests, reorder list, bill check, insights | **Built — run the two Stage 14 SQL files** |
 
 ## First-time setup
 

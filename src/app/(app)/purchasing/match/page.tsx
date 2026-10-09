@@ -2,7 +2,7 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
-import { formatDate } from "@/lib/format";
+import { chunk, formatDate } from "@/lib/format";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
@@ -46,15 +46,12 @@ export default async function MatchPage({ searchParams }: { searchParams: Search
     .limit(400);
   if (error) throw new Error(error.message);
   const pos = (poData ?? []) as unknown as Po[];
-  const { data: billData } = pos.length
-    ? await supabase
-        .from("supplier_bills")
-        .select("po_id, total, exchange_rate")
-        .in("po_id", pos.map((p) => p.id))
-        .neq("status", "cancelled")
-    : { data: [] };
+  const billParts = await Promise.all(
+    chunk(pos.map((p) => p.id)).map((ids) => supabase.from("supplier_bills").select("po_id, total, exchange_rate").in("po_id", ids).neq("status", "cancelled")),
+  );
+  const billData = billParts.flatMap((r) => r.data ?? []);
   const billed = new Map<string, number>();
-  for (const b of (billData ?? []) as Bill[]) billed.set(b.po_id, (billed.get(b.po_id) ?? 0) + Number(b.total) * Number(b.exchange_rate));
+  for (const b of billData as Bill[]) billed.set(b.po_id, (billed.get(b.po_id) ?? 0) + Number(b.total) * Number(b.exchange_rate));
 
   const base = company.base_currency;
   const rows = pos.map((p) => {

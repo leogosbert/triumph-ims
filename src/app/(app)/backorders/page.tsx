@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { getAppContext } from "@/lib/context";
-import { formatDate } from "@/lib/format";
+import { chunk, formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { quoteNo } from "@/lib/sales";
@@ -40,15 +40,14 @@ export default async function BackordersPage({ searchParams }: { searchParams: S
   if (error) throw new Error(error.message);
   const quotes = (qData ?? []) as unknown as Quote[];
   const lineIds = quotes.flatMap((q) => q.lines.map((l) => l.id));
-  const [{ data: dData }, { data: ohData }] = await Promise.all([
-    lineIds.length
-      ? supabase.from("delivery_lines").select("quotation_line_id, quantity, delivery:deliveries(status)").in("quotation_line_id", lineIds).limit(20000)
-      : Promise.resolve({ data: [] }),
+  const [dParts, { data: ohData }] = await Promise.all([
+    Promise.all(chunk(lineIds).map((ids) => supabase.from("delivery_lines").select("quotation_line_id, quantity, delivery:deliveries(status)").in("quotation_line_id", ids))),
     supabase.from("stock_on_hand").select("product_id, quantity").eq("company_id", company.id).limit(20000),
   ]);
+  const dData = dParts.flatMap((r) => r.data ?? []);
   const sent = new Map<string, number>();
   const preparing = new Map<string, number>();
-  for (const d of (dData ?? []) as unknown as DLine[]) {
+  for (const d of dData as unknown as DLine[]) {
     const st = d.delivery?.status;
     if (st === "failed" || st === "cancelled" || !st) continue;
     const m = st === "draft" ? preparing : sent;

@@ -27,3 +27,10 @@ export function optional(form: FormData, key: string): string | null {
   const v = str(form, key);
   return v === "" ? null : v;
 }
+
+/** Splits a long list (e.g. ids for an `.in()` filter) into pieces short enough for one request URL. */
+export function chunk<T>(list: T[], size = 150): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
+  return out;
+}

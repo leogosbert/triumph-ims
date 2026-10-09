@@ -7,6 +7,24 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.17",
+    date: "2026-10-09",
+    en: [
+      "Sales pipeline: follow every possible order from the first call to the purchase order, log calls, visits and messages, plan the next step and remember clients' important dates.",
+      "Tenders: closing dates with reminders, a checklist of the papers to prepare, and the result against the winning price. Contracts: agreed prices for a client that a quotation can use in one tap.",
+      "Documents library: licences, certificates, safety data sheets and other papers in one place, linked to clients, suppliers and products, with reminders before they expire.",
+      "Stock transfers between stores, purchase requests that management approves and procurement turns into orders, and a reorder list with suggested quantities.",
+      "Order, receipt and bill check for purchase orders, a list of accepted orders still to deliver, and Business insights for management.",
+    ],
+    sw: [
+      "Mfululizo wa mauzo: fuatilia kila oda inayowezekana kuanzia simu ya kwanza hadi oda ya ununuzi, rekodi simu, ziara na jumbe, panga hatua inayofuata na kumbuka tarehe muhimu za wateja.",
+      "Zabuni: tarehe za kufunga pamoja na vikumbusho, orodha ya nyaraka za kuandaa, na matokeo dhidi ya bei iliyoshinda. Mikataba: bei zilizokubaliwa na mteja ambazo nukuu inaweza kutumia kwa kugusa mara moja.",
+      "Maktaba ya nyaraka: leseni, vyeti, karatasi za taarifa za usalama na nyaraka nyingine mahali pamoja, zikiunganishwa na wateja, wasambazaji na bidhaa, pamoja na vikumbusho kabla hazijaisha muda.",
+      "Uhamisho wa stoo kati ya stoo, maombi ya ununuzi ambayo uongozi unaidhinisha na manunuzi wanayageuza kuwa oda, na orodha ya kuagiza tena yenye idadi zinazopendekezwa.",
+      "Ukaguzi wa oda, mapokezi na ankara za oda za ununuzi, orodha ya oda zilizokubaliwa ambazo bado kupelekwa, na Maarifa ya biashara kwa uongozi.",
+    ],
+  },
+  {
     version: "1.16.2",
     date: "2026-10-09",
     en: [

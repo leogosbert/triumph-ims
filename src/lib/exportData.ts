@@ -44,6 +44,10 @@ export const EXPORT_TABLES: { table: string; label: string }[] = [
   { table: "stock_transfer_lines", label: "Stock transfer items" },
   { table: "requisitions", label: "Purchase requests" },
   { table: "requisition_lines", label: "Purchase request items" },
+  { table: "budgets", label: "Budgets" },
+  { table: "cash_positions", label: "Cash and bank balances" },
+  { table: "vehicles", label: "Vehicles" },
+  { table: "vehicle_logs", label: "Vehicle log (fuel, services, repairs)" },
   { table: "memberships", label: "Team and roles" },
   { table: "audit_log", label: "Activity log" },
 ];

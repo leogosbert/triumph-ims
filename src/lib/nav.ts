@@ -15,9 +15,9 @@ const M = {
   clients: ["/clients"],
   products: ["/products"],
   purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers", "/requisitions"],
-  stock: ["/stock", "/warehouses", "/receiving", "/grns", "/transfers"],
-  deliveries: ["/deliveries", "/backorders"],
-  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile"],
+  stock: ["/stock", "/warehouses", "/receiving", "/grns", "/transfers", "/planning"],
+  deliveries: ["/deliveries", "/backorders", "/fleet"],
+  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow"],
   reports: ["/reports"],
   more: ["/more", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin"],
 };

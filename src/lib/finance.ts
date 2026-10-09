@@ -76,3 +76,6 @@ export function monthRange(ym?: string | null) {
   const label = new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${start}T00:00:00Z`));
   return { month: m, start, next, prev, after, label, isCurrent: m === today.slice(0, 7) };
 }
+
+/** Short month names; screens translate them with tr(). */
+export const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;

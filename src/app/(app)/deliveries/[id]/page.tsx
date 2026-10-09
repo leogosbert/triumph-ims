@@ -58,6 +58,11 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
       : Promise.resolve({ data: [] }),
   ]);
   const lines = (lineData ?? []) as unknown as Line[];
+  // Fleet plates to pick from (empty before the Stage 15 SQL or for roles that don't see the fleet).
+  const { data: fleet } = assignable
+    ? await supabase.from("vehicles").select("plate, name").eq("company_id", company.id).eq("active", true).order("plate")
+    : { data: null };
+  const plates = (fleet ?? []) as { plate: string; name: string | null }[];
   const { data: dnInvoice } =
     d.status === "delivered" && can(role, "seeInvoices")
       ? await supabase.from("invoices").select("id, number").eq("delivery_id", id).neq("status", "cancelled").maybeSingle()
@@ -273,7 +278,16 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
               </div>
               <div className="field">
                 <label htmlFor="vehicle">{tr("Vehicle")}</label>
-                <input id="vehicle" name="vehicle" type="text" defaultValue={d.vehicle ?? ""} placeholder={tr("e.g. T 123 ABC")} />
+                <input id="vehicle" name="vehicle" type="text" defaultValue={d.vehicle ?? ""} placeholder={tr("e.g. T 123 ABC")} list="fleet-plates" />
+                {plates.length > 0 && (
+                  <datalist id="fleet-plates">
+                    {plates.map((v) => (
+                      <option key={v.plate} value={v.plate}>
+                        {v.name ?? ""}
+                      </option>
+                    ))}
+                  </datalist>
+                )}
               </div>
               <div className="field">
                 <label htmlFor="planned_date">{tr("Planned date")}</label>

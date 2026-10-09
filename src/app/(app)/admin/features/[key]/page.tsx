@@ -6,6 +6,7 @@ import { LEVEL_LABEL, LEVELS } from "@/components/suggestions/meta";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { saveFeature } from "../../actions";
 import { platformAdmin } from "../../guard";
+import { loadCategories } from "../../categories";
 import { TutorialEditor } from "../TutorialEditor";
 
 export const metadata = { title: "Feature" };
@@ -24,8 +25,6 @@ type Feature = {
   sort: number;
   active: boolean;
 };
-
-const MODULES = ["Overview", "Sales", "Purchasing", "Procurement", "Inventory", "Logistics", "Finance", "Analytics", "Administration", "Improvement"];
 
 export default async function AdminFeaturePage({ params, searchParams }: { params: Promise<{ key: string }>; searchParams: SearchParams }) {
   await primeLang();
@@ -55,7 +54,8 @@ export default async function AdminFeaturePage({ params, searchParams }: { param
     title: String(s?.title ?? ""),
     body: String(s?.body ?? ""),
   }));
-  const modules = f?.module && !MODULES.includes(f.module) ? [...MODULES, f.module] : MODULES;
+  const names = (await loadCategories(admin.supabase)).list.map((c) => c.name);
+  const modules = f?.module && !names.includes(f.module) ? [...names, f.module] : names;
 
   return (
     <>
@@ -102,9 +102,11 @@ export default async function AdminFeaturePage({ params, searchParams }: { param
           <h2>{tr("Availability")}</h2>
           <div className="adm-grid2">
             <div className="field">
-              <label htmlFor="f-mod">{tr("Module")}</label>
-              <select id="f-mod" name="module" defaultValue={f?.module ?? ""}>
-                <option value="">{tr("None")}</option>
+              <label htmlFor="f-mod">{tr("Category")}</label>
+              <select id="f-mod" name="module" defaultValue={f?.module ?? ""} required>
+                <option value="" disabled>
+                  {tr("Choose a category")}
+                </option>
                 {modules.map((m) => (
                   <option key={m} value={m}>
                     {tr(m)}

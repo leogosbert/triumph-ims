@@ -17,7 +17,7 @@ const M = {
   purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers"],
   stock: ["/stock", "/warehouses", "/receiving", "/grns"],
   deliveries: ["/deliveries"],
-  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates"],
+  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile"],
   reports: ["/reports"],
   more: ["/more", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin"],
 };

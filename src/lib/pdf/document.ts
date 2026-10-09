@@ -13,8 +13,13 @@ export type DocCompany = {
   primary_color: string;
   accent_color: string;
   bank_details: string | null;
+  /** Mobile-money pay numbers (Stage 13), printed next to the bank details. */
+  mobile_money_details?: string | null;
   document_footer: string | null;
 };
+
+/** One line of an account statement (ledger mode). */
+export type LedgerRow = { date: string; doc: string; detail: string; debit: number; credit: number; balance: number };
 
 export type DocLine = {
   line_no: number;
@@ -35,8 +40,10 @@ export type DocData = {
   partyLabel: string;
   party: { name: string; lines: (string | null | undefined)[] };
   currency: string;
-  mode: "priced" | "priced-discount" | "unpriced" | "quantities";
+  mode: "priced" | "priced-discount" | "unpriced" | "quantities" | "ledger";
   lines: DocLine[];
+  /** Ledger mode (account statements): dated lines with charges, payments and the running balance. */
+  ledger?: { rows: LedgerRow[]; debitLabel: string; creditLabel: string };
   totals?: { rows: [string, number, boolean?][]; grandLabel: string; grand: number };
   blocks: { title: string; body: string | null | undefined }[];
   signature?: string | null;
@@ -161,9 +168,22 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
     : { no: M, desc: M + 22, qtyR: 392, unit: 400, priceR: 0, discR: 0, amountR: A4.w - M };
   const descWidth = cols.qtyR - 40 - cols.desc;
 
+  const ledger = d.mode === "ledger" ? d.ledger : undefined;
+  const lc = { date: M + 4, doc: M + 62, detail: M + 152, debitR: 392, creditR: 466, balR: A4.w - M - 4 };
+
   function tableHeader() {
     page.drawRectangle({ x: M, y: y - 6, width: A4.w - 2 * M, height: 20, color: dark });
     const o = { f: bold, size: 8.5, color: rgb(1, 1, 1) };
+    if (ledger) {
+      text("Date", lc.date, y, o);
+      text("Document", lc.doc, y, o);
+      text("Details", lc.detail, y, o);
+      right(ledger.debitLabel, lc.debitR, y, o);
+      right(ledger.creditLabel, lc.creditR, y, o);
+      right(`Balance (${d.currency})`, lc.balR, y, o);
+      y -= 22;
+      return;
+    }
     text("#", cols.no + 4, y, o);
     text("Description", cols.desc, y, o);
     right("Qty", cols.qtyR, y, o);
@@ -262,6 +282,19 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
 
   // ---------------- Lines ----------------
   tableHeader();
+  ledger?.rows.forEach((r, i) => {
+    const detail = wrap(r.detail, font, 8.5, lc.debitR - 70 - lc.detail);
+    const rowH = Math.max(1, detail.length) * 10.5 + 6;
+    if (y - rowH < 90) newPage(false);
+    if (i % 2 === 1) page.drawRectangle({ x: M, y: y - rowH + 9, width: A4.w - 2 * M, height: rowH, color: zebra });
+    text(r.date ? pdfDate(r.date) : "", lc.date, y, { size: 8.5 });
+    text(r.doc, lc.doc, y, { size: 8.5 });
+    detail.forEach((t, k) => text(t, lc.detail, y - k * 10.5, { size: 8.5, color: muted }));
+    if (r.debit) right(pdfMoney(r.debit, d.currency), lc.debitR, y, { size: 8.5 });
+    if (r.credit) right(pdfMoney(r.credit, d.currency), lc.creditR, y, { size: 8.5 });
+    right(pdfMoney(r.balance, d.currency), lc.balR, y, { size: 8.5, f: bold });
+    y -= rowH;
+  });
   d.lines.forEach((l, i) => {
     const descLines = wrap(l.description, font, 9, descWidth);
     const hasSku = !!l.sku;
@@ -310,6 +343,7 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
   // ---------------- Text blocks ----------------
   const blocks = [...d.blocks];
   if (d.showBank && d.company.bank_details) blocks.push({ title: "Bank details", body: d.company.bank_details });
+  if (d.showBank && d.company.mobile_money_details) blocks.push({ title: "Mobile money", body: d.company.mobile_money_details });
   for (const b of blocks) {
     if (!b.body) continue;
     const body = wrap(b.body, font, 8.5, A4.w - 2 * M);

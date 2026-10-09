@@ -67,6 +67,10 @@ export const ROUTE_FEATURES: Record<string, string> = {
   "/settings/export": "data_export",
   "/settings/backups": "data_export",
   "/settings/security": "security_policy",
+  "/expenses": "expenses",
+  "/profit-loss": "simple_pl",
+  "/statements": "statements",
+  "/reconcile": "mobile_money",
 };
 
 /** The feature a link belongs to: longest matching route prefix ("/rfqs/new" → client_rfqs). */

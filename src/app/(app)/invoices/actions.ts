@@ -193,6 +193,7 @@ export async function recordPayment(form: FormData) {
     p_reference: str(form, "reference"),
     p_exchange_rate: rate,
     p_notes: str(form, "notes"),
+    ...(form.has("provider") ? { p_provider: str(form, "method") === "mobile_money" ? str(form, "provider") || null : null } : {}),
   });
   if (error) fail(id, error.message, "#payments");
   done(id, "Payment recorded.", "#payments");

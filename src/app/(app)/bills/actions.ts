@@ -90,6 +90,7 @@ export async function payBill(form: FormData) {
     p_reference: str(form, "reference"),
     p_exchange_rate: rate,
     p_notes: str(form, "notes"),
+    ...(form.has("provider") ? { p_provider: str(form, "method") === "mobile_money" ? str(form, "provider") || null : null } : {}),
   });
   if (error) fail(`/bills/${id}#payments`, error.message);
   done(id, "Payment to supplier recorded.", "#payments");

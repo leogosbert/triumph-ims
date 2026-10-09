@@ -36,7 +36,7 @@ export default async function ClientPage({
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
 
   const [{ data: client }, { data: contactData }] = await Promise.all([
     supabase.from("clients").select("*").eq("id", id).eq("company_id", company.id).maybeSingle(),
@@ -106,6 +106,11 @@ export default async function ClientPage({
               </>
             )}
           </dl>
+          {features.on("statements") && (
+            <p className="small" style={{ margin: "8px 0 0" }}>
+              <Link href={`/clients/${client.id}/statement`}>{tr("Statement of account →")}</Link>
+            </p>
+          )}
           {invoices.length > 0 && (
             <ul className="list" style={{ marginTop: 8 }}>
               {invoices.slice(0, 10).map((i) => (

@@ -51,10 +51,20 @@ See [PRODUCT-VISION.md](PRODUCT-VISION.md) for the philosophy. This file tracks 
 - Reports section: 18 reports (sales, purchasing, stock, deliveries, payments, bills, profit, order costs, lists),
   any date range or ready-made period, filters, column chooser and sort; print, PDF and Excel download; saved reports per device.
 
-## Stage 13 — Small-level essentials
-- Expenses with categories and receipts photos; simple profit & loss; customer and supplier statements.
-- Mobile-money payment methods (M-Pesa, Tigo Pesa, Airtel Money, HaloPesa) and simple reconciliation.
-- Quotation follow-up and invoice reminders (configurable).
+## Stage 13 (v1.16) — Small-level essentials (built — run the Stage 13 SQL)
+SQL: `supabase/migrations/20261016000100_stage13_small_essentials.sql`. Until it is run, the new screens say
+"not available yet" and everything else works as before.
+- Expenses (`/expenses`) with editable categories and receipt photos (private `receipts` bucket); everyone records
+  their own, management and finance see all and can void. Expenses and "Expenses by category" reports.
+- Simple profit & loss (`/profit-loss`): month, previous month, year to date; "Profit & loss by month" report.
+- Client and supplier statements of account (`/statements`, `/clients/[id]/statement`, `/suppliers/[id]/statement`)
+  with PDF, running balance and aging at the end date.
+- Mobile money: service (M-Pesa, Mixx by Yas / Tigo Pesa, Airtel Money, HaloPesa, AzamPesa) on payments in and out
+  and on expenses; pay numbers on invoices (step-up protected, like bank details); "Check payments" (`/reconcile`)
+  to tick payments against the statement by hand or by pasting the statement.
+- Quotation follow-ups and invoice reminders: per-company timing (Settings → Company → Follow-ups and reminders),
+  alerts in notifications, ready-made WhatsApp/SMS/email messages in English and Kiswahili, follow-up log with
+  next date or promised payment date (overdue reminders pause until a promised date).
 
 ## Stage 14 — Medium operations & CRM
 - CRM: leads, opportunities and pipeline, follow-ups, customer visits, communication history, important dates.

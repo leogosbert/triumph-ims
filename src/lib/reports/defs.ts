@@ -1,5 +1,6 @@
 import type { createClient } from "@/lib/supabase/server";
-import { BILL_STATUS, COST_KINDS, INVOICE_STATUS, PAY_METHODS, daysOverdue, isOpen, n } from "@/lib/finance";
+import { BILL_STATUS, COST_KINDS, INVOICE_STATUS, PAY_METHODS, daysOverdue, isOpen, methodLabel, n } from "@/lib/finance";
+import { loadPnl } from "@/lib/pnl";
 import { namesFor } from "@/lib/people";
 import { PO_STATUS } from "@/lib/purchasing";
 import type { Permission } from "@/lib/roles";
@@ -35,6 +36,8 @@ export type LoadCtx = {
   today: string;
   /** The filters chosen (a loader may apply some itself; the rest are applied to its rows). */
   filters: Partial<Record<FilterKey, string>>;
+  /** The Stage 13 database update has been run (expenses, mobile-money services, checked payments). */
+  stage13: boolean;
 };
 
 export type GroupKey = "sales" | "purchasing" | "stock" | "finance" | "lists";
@@ -700,6 +703,7 @@ const paymentsReceived: ReportDef = {
     { key: "invoice", label: "Invoice", type: "text" },
     { key: "method", label: "Method", type: "label" },
     { key: "reference", label: "Reference", type: "text" },
+    { key: "checked", label: "Checked against statement", type: "label", off: true },
     { key: "currency", label: "Currency", type: "text", off: true },
     { key: "amount", label: "Amount", type: "money", off: true },
     { key: "amount_base", label: "Amount ({base})", type: "money", total: true },
@@ -707,10 +711,10 @@ const paymentsReceived: ReportDef = {
   ],
   sort: { key: "date", dir: "desc" },
   async load(c) {
-    type P = { number: string; received_on: string; amount: number; currency: string; exchange_rate: number; method: string; reference: string | null; voided_at: string | null; client_id: string; client: Named; invoice: { number: string } | { number: string }[] | null };
+    type P = { number: string; received_on: string; amount: number; currency: string; exchange_rate: number; method: string; provider?: string | null; reconciled_at?: string | null; reference: string | null; voided_at: string | null; client_id: string; client: Named; invoice: { number: string } | { number: string }[] | null };
     const rows = await paged<P>((a, b) =>
       onDate(
-        c.supabase.from("payments").select("number, received_on, amount, currency, exchange_rate, method, reference, voided_at, client_id, client:clients(name), invoice:invoices(number)").eq("company_id", c.companyId),
+        c.supabase.from("payments").select(`number, received_on, amount, currency, exchange_rate, method, reference, voided_at, client_id, client:clients(name), invoice:invoices(number)${c.stage13 ? ", provider, reconciled_at" : ""}`).eq("company_id", c.companyId),
         "received_on",
         c,
       ).order("id").range(a, b),
@@ -720,8 +724,9 @@ const paymentsReceived: ReportDef = {
       date: p.received_on,
       client: one(p.client)?.name ?? "",
       invoice: one(p.invoice)?.number ?? "",
-      method: PAY_METHODS[p.method] ?? p.method,
+      method: methodLabel(p.method, p.provider),
       reference: p.reference,
+      checked: p.reconciled_at ? "Yes" : "No",
       currency: p.currency,
       amount: n(p.amount),
       amount_base: money(n(p.amount) * n(p.exchange_rate)),
@@ -817,6 +822,7 @@ const supplierPayments: ReportDef = {
     { key: "bill", label: "Bill", type: "text" },
     { key: "method", label: "Method", type: "label" },
     { key: "reference", label: "Reference", type: "text" },
+    { key: "checked", label: "Checked against statement", type: "label", off: true },
     { key: "currency", label: "Currency", type: "text", off: true },
     { key: "amount", label: "Amount", type: "money", off: true },
     { key: "amount_base", label: "Amount ({base})", type: "money", total: true },
@@ -824,10 +830,10 @@ const supplierPayments: ReportDef = {
   ],
   sort: { key: "date", dir: "desc" },
   async load(c) {
-    type P = { number: string; paid_on: string; amount: number; currency: string; exchange_rate: number; method: string; reference: string | null; voided_at: string | null; supplier_id: string; supplier: Named; bill: { number: string } | { number: string }[] | null };
+    type P = { number: string; paid_on: string; amount: number; currency: string; exchange_rate: number; method: string; provider?: string | null; reconciled_at?: string | null; reference: string | null; voided_at: string | null; supplier_id: string; supplier: Named; bill: { number: string } | { number: string }[] | null };
     const rows = await paged<P>((a, b) =>
       onDate(
-        c.supabase.from("supplier_payments").select("number, paid_on, amount, currency, exchange_rate, method, reference, voided_at, supplier_id, supplier:suppliers(name), bill:supplier_bills(number)").eq("company_id", c.companyId),
+        c.supabase.from("supplier_payments").select(`number, paid_on, amount, currency, exchange_rate, method, reference, voided_at, supplier_id, supplier:suppliers(name), bill:supplier_bills(number)${c.stage13 ? ", provider, reconciled_at" : ""}`).eq("company_id", c.companyId),
         "paid_on",
         c,
       ).order("id").range(a, b),
@@ -837,8 +843,9 @@ const supplierPayments: ReportDef = {
       date: p.paid_on,
       supplier: one(p.supplier)?.name ?? "",
       bill: one(p.bill)?.number ?? "",
-      method: PAY_METHODS[p.method] ?? p.method,
+      method: methodLabel(p.method, p.provider),
       reference: p.reference,
+      checked: p.reconciled_at ? "Yes" : "No",
       currency: p.currency,
       amount: n(p.amount),
       amount_base: money(n(p.amount) * n(p.exchange_rate)),
@@ -948,6 +955,186 @@ const orderCosts: ReportDef = {
         _kind: o.kind,
       };
     });
+  },
+};
+
+
+const expenseList: ReportDef = {
+  key: "expenses",
+  title: "Expenses",
+  group: "finance",
+  description: "Every expense paid in the period: rent, fuel, wages, bank charges and the rest.",
+  perm: "manageExpenses",
+  feature: "expenses",
+  date: { label: "Date paid" },
+  defaultPreset: "this_month",
+  filters: ["category", "method", "status"],
+  statuses: { valid: "Valid", voided: "Voided" },
+  defaultStatuses: ["valid"],
+  defaultLabel: "Valid only",
+  cols: [
+    { key: "number", label: "Number", type: "text", off: true },
+    { key: "date", label: "Date", type: "date" },
+    { key: "category", label: "Spending category", type: "label" },
+    { key: "description", label: "Description", type: "text" },
+    { key: "payee", label: "Paid to", type: "text" },
+    { key: "method", label: "Method", type: "label" },
+    { key: "reference", label: "Reference", type: "text", off: true },
+    { key: "receipt", label: "Receipt photo", type: "label", off: true },
+    { key: "checked", label: "Checked against statement", type: "label", off: true },
+    { key: "recorded_by", label: "Recorded by", type: "text", off: true },
+    { key: "currency", label: "Currency", type: "text", off: true },
+    { key: "amount", label: "Amount", type: "money", off: true },
+    { key: "vat_base", label: "VAT ({base})", type: "money", total: true, off: true },
+    { key: "amount_base", label: "Amount ({base})", type: "money", total: true },
+    { key: "status", label: "Status", type: "label", off: true },
+  ],
+  sort: { key: "date", dir: "desc" },
+  async load(c) {
+    if (!c.stage13) return [];
+    type E = { number: string; spent_on: string; description: string; payee: string | null; amount: number; vat_amount: number; currency: string; exchange_rate: number; method: string; provider: string | null; reference: string | null; receipt_path: string | null; reconciled_at: string | null; voided_at: string | null; created_by: string | null; category_id: string; category: Named };
+    const rows = await paged<E>((a, b) =>
+      onDate(
+        c.supabase
+          .from("expenses")
+          .select("number, spent_on, description, payee, amount, vat_amount, currency, exchange_rate, method, provider, reference, receipt_path, reconciled_at, voided_at, created_by, category_id, category:expense_categories(name)")
+          .eq("company_id", c.companyId),
+        "spent_on",
+        c,
+      ).order("id").range(a, b),
+    );
+    const names = await namesFor(c.supabase, rows.map((e) => e.created_by));
+    return rows.map((e) => ({
+      number: e.number,
+      date: e.spent_on,
+      category: one(e.category)?.name ?? "",
+      description: e.description,
+      payee: e.payee,
+      method: methodLabel(e.method, e.provider),
+      reference: e.reference,
+      receipt: e.receipt_path ? "Yes" : "No",
+      checked: e.reconciled_at ? "Yes" : "No",
+      recorded_by: e.created_by ? (names.get(e.created_by) ?? "") : "",
+      currency: e.currency,
+      amount: n(e.amount),
+      vat_base: money(n(e.vat_amount) * n(e.exchange_rate)),
+      amount_base: money(n(e.amount) * n(e.exchange_rate)),
+      status: e.voided_at ? "Voided" : "Valid",
+      _category: e.category_id,
+      _method: e.method,
+      _status: e.voided_at ? "voided" : "valid",
+    }));
+  },
+};
+
+const expensesByCategory: ReportDef = {
+  key: "expenses-by-category",
+  title: "Expenses by category",
+  group: "finance",
+  description: "What the business spent in the period, added up by category.",
+  perm: "manageExpenses",
+  feature: "expenses",
+  date: { label: "Date paid" },
+  defaultPreset: "this_month",
+  filters: [],
+  cols: [
+    { key: "category", label: "Spending category", type: "label" },
+    { key: "count", label: "Expenses", type: "int", total: true },
+    { key: "net_base", label: "Before VAT ({base})", type: "money", total: true },
+    { key: "vat_base", label: "VAT ({base})", type: "money", total: true, off: true },
+    { key: "amount_base", label: "Amount paid ({base})", type: "money", total: true },
+    { key: "share", label: "Share", type: "percent" },
+  ],
+  sort: { key: "amount_base", dir: "desc" },
+  async load(c) {
+    if (!c.stage13) return [];
+    type E = { amount: number; vat_amount: number; exchange_rate: number; category_id: string; category: Named };
+    const rows = await paged<E>((a, b) =>
+      onDate(
+        c.supabase.from("expenses").select("amount, vat_amount, exchange_rate, category_id, category:expense_categories(name)").eq("company_id", c.companyId).is("voided_at", null),
+        "spent_on",
+        c,
+      ).order("id").range(a, b),
+    );
+    const map = new Map<string, Row & { amount_base: number; vat_base: number; net_base: number; count: number }>();
+    let total = 0;
+    for (const e of rows) {
+      const g = map.get(e.category_id) ?? { category: one(e.category)?.name ?? "", count: 0, net_base: 0, vat_base: 0, amount_base: 0, share: 0 };
+      const amt = n(e.amount) * n(e.exchange_rate);
+      const vat = n(e.vat_amount) * n(e.exchange_rate);
+      g.count += 1;
+      g.amount_base += amt;
+      g.vat_base += vat;
+      g.net_base += amt - vat;
+      total += amt;
+      map.set(e.category_id, g);
+    }
+    return [...map.values()].map((g) => ({
+      ...g,
+      amount_base: money(g.amount_base),
+      vat_base: money(g.vat_base),
+      net_base: money(g.net_base),
+      share: total > 0 ? Math.round((g.amount_base / total) * 1000) / 10 : 0,
+    }));
+  },
+  finishTotals(t) {
+    t.share = 100;
+  },
+};
+
+const profitLoss: ReportDef = {
+  key: "profit-loss",
+  title: "Profit & loss by month",
+  group: "finance",
+  description: "Sales, cost of sales, gross profit, order costs, expenses and net profit, month by month.",
+  perm: "seeProfit",
+  feature: "simple_pl",
+  date: { label: "Month" },
+  defaultPreset: "this_year",
+  filters: [],
+  cols: [
+    { key: "month", label: "Month", type: "text" },
+    { key: "sales", label: "Sales before VAT ({base})", type: "money", total: true },
+    { key: "cogs", label: "Cost of goods sold ({base})", type: "money", total: true },
+    { key: "gross", label: "Gross profit ({base})", type: "money", total: true },
+    { key: "order_costs", label: "Order costs ({base})", type: "money", total: true },
+    { key: "expenses", label: "Expenses before VAT ({base})", type: "money", total: true },
+    { key: "net", label: "Net profit ({base})", type: "money", total: true },
+    { key: "margin", label: "Net margin", type: "percent" },
+  ],
+  sort: { key: "month", dir: "asc" },
+  async load(c) {
+    const to = c.to ?? c.today;
+    const start = (c.from ?? `${to.slice(0, 4)}-01-01`).slice(0, 7);
+    const months: string[] = [];
+    for (let m = start; m <= to.slice(0, 7) && months.length < 36; ) {
+      months.push(m);
+      const [y, mm] = m.split("-").map(Number);
+      m = mm === 12 ? `${y + 1}-01` : `${y}-${String(mm + 1).padStart(2, "0")}`;
+    }
+    const nextDay = (d: string) => new Date(Date.parse(`${d}T12:00:00Z`) + 86400000).toISOString().slice(0, 10);
+    return Promise.all(
+      months.map(async (m, i) => {
+        const [y, mm] = m.split("-").map(Number);
+        const monthEnd = mm === 12 ? `${y + 1}-01-01` : `${y}-${String(mm + 1).padStart(2, "0")}-01`;
+        const from = i === 0 && c.from ? c.from : `${m}-01`;
+        const end = i === months.length - 1 ? nextDay(to) : monthEnd;
+        const p = await loadPnl(c.supabase, c.companyId, from, end < monthEnd ? end : monthEnd, c.stage13);
+        return {
+          month: m,
+          sales: money(p.sales),
+          cogs: money(p.cogs),
+          gross: money(p.gross),
+          order_costs: money(p.orderCosts),
+          expenses: money(p.expenses),
+          net: money(p.net),
+          margin: p.sales > 0 ? Math.round((p.net / p.sales) * 1000) / 10 : null,
+        };
+      }),
+    );
+  },
+  finishTotals(t) {
+    t.margin = n(t.sales) > 0 ? Math.round((n(t.net) / n(t.sales)) * 1000) / 10 : null;
   },
 };
 
@@ -1096,6 +1283,9 @@ export const REPORTS: ReportDef[] = [
   supplierBills,
   supplierPayments,
   profit,
+  profitLoss,
+  expenseList,
+  expensesByCategory,
   orderCosts,
   clientList,
   supplierList,

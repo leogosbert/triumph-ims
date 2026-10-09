@@ -5,8 +5,10 @@ import { Notice } from "@/components/Notice";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
-import { daysOverdue, INVOICE_STATUS, isOpen, n, PAY_METHODS, shownStatus } from "@/lib/finance";
+import { PayMethodFields } from "@/components/PayMethodFields";
+import { InvoiceReminderCard } from "@/components/FollowUpCards";
+import { getAppContext, stage13Ready } from "@/lib/context";
+import { daysOverdue, INVOICE_STATUS, isOpen, methodLabel, n, shownStatus } from "@/lib/finance";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { CURRENCIES, PAYMENT_TERMS } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -48,6 +50,8 @@ type Payment = {
   amount: number;
   currency: string;
   method: string;
+  provider?: string | null;
+  reconciled_at?: string | null;
   reference: string | null;
   voided_at: string | null;
   void_reason: string | null;
@@ -57,7 +61,8 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, profile, features } = await getAppContext();
+  const lang = await primeLang();
   if (!can(role, "seeInvoices")) redirect("/");
 
   const { data: inv } = await supabase
@@ -80,7 +85,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
       .order("line_no"),
     supabase
       .from("payments")
-      .select("id, number, received_on, amount, currency, method, reference, voided_at, void_reason")
+      .select(`id, number, received_on, amount, currency, method, reference, voided_at, void_reason${stage13Ready(company) ? ", provider, reconciled_at" : ""}`)
       .eq("invoice_id", id)
       .order("received_on"),
     editable ? productOptions(supabase, company.id) : Promise.resolve([]),
@@ -90,7 +95,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
       : Promise.resolve({ data: null }),
   ]);
   const lines = (lineData ?? []) as unknown as Line[];
-  const payments = (payData ?? []) as Payment[];
+  const payments = (payData ?? []) as unknown as Payment[];
   const ccy = inv.currency as string;
   const base = company.base_currency;
   const balance = n(inv.total) - n(inv.amount_paid);
@@ -193,8 +198,9 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                         {formatMoney(p.amount, p.currency)}
                       </strong>{" "}
                       <span className="small muted">
-                        {formatDate(p.received_on)} · {PAY_METHODS[p.method] ?? p.method}
+                        {formatDate(p.received_on)} · {tr(methodLabel(p.method, p.provider))}
                         {p.reference ? ` · ${p.reference}` : ""} · {p.number}
+                        {p.reconciled_at && <span className="text-ok" title={tr("checked against the statement")}> ✓</span>}
                       </span>
                     </span>
                     {!p.voided_at && (
@@ -234,20 +240,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                     <label htmlFor="received_on">{tr("Date received")}</label>
                     <input id="received_on" name="received_on" type="date" defaultValue={todayTz()} />
                   </div>
-                  <div className="field">
-                    <label htmlFor="method">{tr("How")}</label>
-                    <select id="method" name="method" defaultValue="bank_transfer">
-                      {Object.entries(PAY_METHODS).map(([k, v]) => (
-                        <option key={k} value={k}>
-                          {v}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="reference">{tr("Reference")}</label>
-                    <input id="reference" name="reference" type="text" placeholder={tr("Bank ref, cheque no., M-Pesa code")} />
-                  </div>
+                  <PayMethodFields withProvider={stage13Ready(company)} />
                   {ccy !== base && (
                     <div className="field">
                       <label htmlFor="exchange_rate">{tr("Exchange rate on the day")}{" "}<span className="hint">· {base}{" "}{tr("per 1")}{" "}{ccy}</span>
@@ -261,6 +254,27 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
             </details>
           )}
         </section>
+      )}
+
+      {stage13Ready(company) && features.on("reminders") && can(role, "followUpInvoices") && open && !isDraft && (
+        <InvoiceReminderCard
+          supabase={supabase}
+          company={company}
+          profile={profile}
+          canLog
+          lang={lang}
+          inv={{
+            id: inv.id,
+            number: inv.number,
+            client_id: inv.client_id,
+            client_name: inv.client?.name ?? "",
+            currency: ccy,
+            total: n(inv.total),
+            amount_paid: n(inv.amount_paid),
+            due_date: inv.due_date,
+            contact_name: inv.contact_name,
+          }}
+        />
       )}
 
       {/* ---------- Lines ---------- */}

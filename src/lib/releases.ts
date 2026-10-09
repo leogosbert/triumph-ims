@@ -7,6 +7,24 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.16",
+    date: "2026-10-09",
+    en: [
+      "Expenses: record rent, fuel, airtime, wages and other spending with a photo of the receipt. Everyone can record their own; management and finance see them all, by category.",
+      "Profit & loss: sales, cost of sales, expenses and net profit for the month, compared with last month and the year so far.",
+      "Statements of account for clients and suppliers, as PDF, with the running balance and what is overdue.",
+      "Mobile money: record M-Pesa, Mixx by Yas (Tigo Pesa), Airtel Money, HaloPesa or AzamPesa with the transaction code, print your pay numbers on invoices, and tick payments off against the statement (or paste the statement and let the app find them).",
+      "Follow-ups and reminders: ready-made WhatsApp, SMS or email messages in English or Kiswahili to follow up quotations and remind clients about invoices, with a log of each call and the date the client promised to pay.",
+    ],
+    sw: [
+      "Matumizi: rekodi kodi ya pango, mafuta, muda wa maongezi, mishahara na matumizi mengine pamoja na picha ya risiti. Kila mtu anaweza kurekodi yake; uongozi na fedha wanaona yote, kwa kundi.",
+      "Faida na hasara: mauzo, gharama ya mauzo, matumizi na faida halisi ya mwezi, ikilinganishwa na mwezi uliopita na mwaka hadi sasa.",
+      "Taarifa za akaunti za wateja na wasambazaji, kama PDF, zenye salio linaloendelea na kilichochelewa.",
+      "Pesa za simu: rekodi M-Pesa, Mixx by Yas (Tigo Pesa), Airtel Money, HaloPesa au AzamPesa pamoja na namba ya muamala, chapisha namba zako za malipo kwenye ankara, na hakiki malipo dhidi ya taarifa (au bandika taarifa na programu itayatafuta).",
+      "Ufuatiliaji na vikumbusho: jumbe tayari za WhatsApp, SMS au barua pepe kwa Kiingereza au Kiswahili kufuatilia nukuu za bei na kuwakumbusha wateja kuhusu ankara, pamoja na kumbukumbu ya kila simu na tarehe mteja aliyoahidi kulipa.",
+    ],
+  },
+  {
     version: "1.15",
     date: "2026-10-07",
     en: [

@@ -828,6 +828,10 @@ fieldset.plain {
   color: var(--warn);
   font-weight: 600;
 }
+.text-ok {
+  color: var(--ok);
+  font-weight: 600;
+}
 
 /* Status colours */
 .badge.tone-ok { background: var(--ok-bg); color: var(--ok); }

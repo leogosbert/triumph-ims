@@ -46,6 +46,11 @@ export type Company = {
   business_level?: Level;
   onboarding_done?: boolean;
   level_changed_at?: string | null;
+  /** Added in Stage 13: undefined until that SQL has been run (see stage13Ready). */
+  mobile_money_details?: string | null;
+  quote_followup_days?: number;
+  invoice_remind_before_days?: number;
+  invoice_overdue_every_days?: number;
   /** Set while the company is closing (v1.13 deletion SQL): when its data will be deleted. */
   closing_after?: string | null;
   created_at: string;
@@ -164,6 +169,11 @@ export async function accountDeletionScheduled(supabase: Awaited<ReturnType<type
   } catch {
     return false;
   }
+}
+
+/** Has the Stage 13 database update (expenses, mobile money, follow-ups) been run? */
+export function stage13Ready(company: Pick<Company, "quote_followup_days">) {
+  return company.quote_followup_days !== undefined;
 }
 
 /** Same as getAppContext, but only management may continue. */

@@ -29,6 +29,9 @@ export const EXPORT_TABLES: { table: string; label: string }[] = [
   { table: "supplier_bills", label: "Supplier bills" },
   { table: "supplier_payments", label: "Payments to suppliers" },
   { table: "order_costs", label: "Order and import costs" },
+  { table: "expense_categories", label: "Expense categories" },
+  { table: "expenses", label: "Expenses" },
+  { table: "followups", label: "Follow-ups and reminders" },
   { table: "memberships", label: "Team and roles" },
   { table: "audit_log", label: "Activity log" },
 ];
@@ -42,6 +45,8 @@ export async function fetchAll(supabase: Supabase, table: string, companyId: str
       .eq("company_id", companyId)
       .order(table === "product_costs" ? "product_id" : "id", { ascending: true }) // stable order for paging
       .range(from, from + 999);
+    // A table from a database update that has not been run yet: nothing to export.
+    if (error && (error.code === "PGRST205" || error.code === "42P01")) return rows;
     if (error) throw new Error(`${table}: ${error.message}`);
     rows.push(...((data ?? []) as Record<string, unknown>[]));
     if (!data || data.length < 1000) break;

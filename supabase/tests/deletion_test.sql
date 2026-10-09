@@ -632,7 +632,7 @@ select tests.check(not exists (select 1 from public.company_backups where id = :
   'company: its backups are deleted');
 select tests.check(not exists (select 1 from storage.objects where name like :'rich' || '/%')
                    and exists (select 1 from storage.objects where name = :'keep' || '/logo.png')
-                   and (select count(*) = 2 and bool_and(done_at is not null) from public.storage_cleanup where company_ref = :'rich'),
+                   and (select count(*) = 3 and bool_and(done_at is not null) from public.storage_cleanup where company_ref = :'rich'),  -- logo, delivery photos, receipts
   'company: its files are deleted (here directly), other companies'' files stay; the folders are marked done');
 select tests.check((select status = 'done' and company_name is null and requested_by is null and company_id = :'rich'
                       from public.company_closures where company_id = :'rich'),
@@ -657,7 +657,7 @@ select tests.login('files.del@d.test'); set role authenticated;
 select public.create_company('Del Files Co') as files_co \gset
 reset role;
 insert into storage.objects (bucket_id, name) values ('branding', :'files_co' || '/logo.png'),
-  ('pod', :'files_co' || '/d1/sig.png'), ('pod', :'files_co' || '/d1/photo.jpg');
+  ('pod', :'files_co' || '/d1/sig.png'), ('pod', :'files_co' || '/d1/photo.jpg'), ('receipts', :'files_co' || '/e1/receipt.jpg');
 -- Like Supabase's own protection: only the storage service (requests as a signed-in user) may delete.
 create or replace function tests.protect_storage() returns trigger language plpgsql as $$
 begin
@@ -671,8 +671,8 @@ reset role;
 select public.run_due_deletions_at(now() + interval '31 days') as files_run \gset
 select tests.check(:files_run = 1 and not exists (select 1 from public.companies where id = :'files_co'),
   'files: the company is deleted even when storage refuses');
-select tests.check((select count(*) = 2 and bool_and(done_at is null) from public.storage_cleanup where company_ref = :'files_co')
-                   and (select count(*) from storage.objects where name like :'files_co' || '/%') = 3,
+select tests.check((select count(*) = 3 and bool_and(done_at is null) from public.storage_cleanup where company_ref = :'files_co')
+                   and (select count(*) from storage.objects where name like :'files_co' || '/%') = 4,
   'files: the folders are listed as still to remove (not claimed done)');
 select id as sc_pod from public.storage_cleanup where company_ref = :'files_co' and bucket = 'pod' \gset
 select tests.login('boss.del@d.test'); set role authenticated;
@@ -686,10 +686,10 @@ select tests.check((select count(*) from storage.objects where name like :'files
   'files: a platform admin without two-step cannot see them');
 reset role;
 select tests.login_aal('admin.del@d.test', 'aal2'); set role authenticated;
-select tests.check((select count(*) from public.platform_storage_cleanup()) = 2
-                   and (public.platform_deletions() #>> '{counts,file_folders_left}')::int = 2,
-  'files: the admin sees "Files to remove: 2 folders"');
-select tests.check((select count(*) from storage.objects where name like :'files_co' || '/%') = 3
+select tests.check((select count(*) from public.platform_storage_cleanup()) = 3
+                   and (public.platform_deletions() #>> '{counts,file_folders_left}')::int = 3,
+  'files: the admin sees "Files to remove: 3 folders"');
+select tests.check((select count(*) from storage.objects where name like :'files_co' || '/%') = 4
                    and (select count(*) from storage.objects where name like :'keep' || '/%') = 0,
   'files: the admin can list only the files of folders waiting to be removed');
 delete from storage.objects where name = :'keep' || '/logo.png';

@@ -17,13 +17,7 @@ export const BILL_STATUS: Record<string, { label: string; tone: string }> = {
   overdue: { label: "Overdue", tone: "bad" },
 };
 
-export const PAY_METHODS: Record<string, string> = {
-  bank_transfer: "Bank transfer",
-  cash: "Cash",
-  mobile_money: "Mobile money",
-  cheque: "Cheque",
-  other: "Other",
-};
+export { MOBILE_MONEY, methodLabel, PAY_METHODS } from "@/lib/payMethods";
 
 export const COST_KINDS: Record<string, string> = {
   freight: "Freight",

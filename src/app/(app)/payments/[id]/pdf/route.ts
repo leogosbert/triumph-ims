@@ -1,5 +1,5 @@
 import { displayName, type Profile } from "@/lib/context";
-import { PAY_METHODS } from "@/lib/finance";
+import { methodLabel } from "@/lib/finance";
 import { buildReceiptPdf } from "@/lib/pdf/finance";
 import { loadLogo, pdfResponse } from "@/lib/pdf/load";
 import { createClient } from "@/lib/supabase/server";
@@ -48,7 +48,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       received_on: p.received_on,
       amount: Number(p.amount),
       currency: p.currency,
-      method: PAY_METHODS[p.method] ?? p.method,
+      method: methodLabel(p.method, p.provider),
       reference: p.reference,
       invoice_number: p.invoice?.number ?? "",
       invoice_total: Number(p.invoice?.total ?? 0),

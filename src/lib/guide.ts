@@ -909,6 +909,9 @@ export const GUIDE: GuideSection[] = [
           "Choose the level that fits the company now. It only decides which features start switched on; nothing is deleted when you change it.",
           "Switch any single feature on or off, for example multi-currency for a small importer.",
         ],
+        tips: [
+          "Features are grouped by category, like Sales, Inventory and Finance. LeMo Tech can also add or remove features for your company on request; those show as \"Set by LeMo admin\".",
+        ],
       },
       {
         id: "growth",

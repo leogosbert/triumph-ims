@@ -618,3 +618,62 @@ button.adm-exit {
 .adm-notes .main {
   flex: 1;
 }
+
+/* Feature categories */
+.adm-head-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.adm-cat {
+  margin-top: 18px;
+}
+.adm-cat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  margin: 14px 0 4px;
+}
+.adm-cat-head h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.adm-module .adm-cat-head h3 {
+  margin: 0;
+}
+.adm-cat-count {
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  text-transform: none;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.adm-cat-desc {
+  margin: 0 0 6px;
+}
+.adm-feature-row {
+  flex-wrap: wrap;
+}
+.adm-move select {
+  min-width: 130px;
+}
+.adm-add-feature {
+  margin-top: 12px;
+}
+.btn.adm-pressed,
+.btn.adm-pressed:disabled {
+  background: var(--brand, #1c4c9b);
+  border-color: var(--brand, #1c4c9b);
+  color: #fff;
+  opacity: 1;
+}

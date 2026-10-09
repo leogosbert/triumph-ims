@@ -6,7 +6,8 @@ import { LevelBadge } from "@/components/suggestions/SuggestionBadge";
 import { LEVEL_LABEL, LEVELS } from "@/components/suggestions/meta";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
-import { setCompanyFeature, setCompanyLevel } from "../../actions";
+import { setCompanyCategory, setCompanyFeature, setCompanyLevel } from "../../actions";
+import { groupByCategory, loadCategories } from "../../categories";
 import { platformAdmin } from "../../guard";
 
 export const metadata = { title: "Company" };
@@ -25,10 +26,37 @@ type PlatformCompany = {
 };
 
 type Feature = { key: string; name: string; module: string | null; default_level: string; status: string; active: boolean; sort: number };
+type State = { key: string; enabled: boolean; source: string };
+
+const SOURCE_LABEL: Record<string, string> = {
+  manual: "set by the company",
+  admin: "set by LeMo Tech",
+  recommendation: "from a recommendation",
+};
+
+/** On / Off / Default for one feature; the current choice is shown pressed. */
+function Switches({ current }: { current: "on" | "off" | "default" }) {
+  return (
+    <>
+      {(["on", "off", "default"] as const).map((v) => (
+        <SubmitButton
+          key={v}
+          className={`btn btn-small${current === v ? " adm-pressed" : ""}`}
+          name="enabled"
+          value={v}
+          pendingText="…"
+          disabled={current === v}
+        >
+          {tr(v === "on" ? "On" : v === "off" ? "Off" : "Default")}
+        </SubmitButton>
+      ))}
+    </>
+  );
+}
 
 /**
- * One company, as LeMo Tech sees it: only the platform summary, its level and feature switches.
- * Never the company's business data.
+ * One company, as LeMo Tech sees it: only the platform summary, its level and which features it
+ * has (app settings). Never the company's business data.
  */
 export default async function AdminCompanyPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
   await primeLang();
@@ -38,13 +66,18 @@ export default async function AdminCompanyPage({ params, searchParams }: { param
   const notice = await readNotice(searchParams);
   const { supabase } = admin;
 
-  const [{ data, error }, { data: fData }] = await Promise.all([
+  const [{ data, error }, { data: fData }, categories, { data: sData, error: sError }] = await Promise.all([
     supabase.rpc("platform_companies"),
     supabase.from("features").select("key, name, module, default_level, status, active, sort").order("sort").order("name"),
+    loadCategories(supabase),
+    supabase.rpc("admin_company_features", { p_company: id }),
   ]);
   const c = ((data ?? []) as PlatformCompany[]).find((x) => x.id === id);
   const features = ((fData ?? []) as Feature[]).filter((f) => f.status === "live" && f.active);
-  const modules = [...new Set(features.map((f) => f.module ?? "Other"))];
+  const groups = groupByCategory(categories.list, features);
+  // Which features this company has. Before the feature categories SQL is run this is null and the
+  // switches work as before, without showing the current state.
+  const states = sError || !Array.isArray(sData) ? null : new Map((sData as State[]).map((x) => [x.key, x]));
   const rank = (l: string) => LEVELS.indexOf(l as never);
 
   if (!c) {
@@ -118,46 +151,96 @@ export default async function AdminCompanyPage({ params, searchParams }: { param
       </section>
 
       <section className="card" id="features">
-        <h2>{tr("Feature switches")}</h2>
+        <h2>{tr("Features for this company")}</h2>
         <p className="muted small">
-          {tr("Turn a live feature on or off for this company only. This overrides the level default. To protect privacy, the company's current switches are not shown here, only how many features are on.")}
+          {states
+            ? tr("Add or remove features for this company only, one by one or a whole category at once. On and Off override the level default; Default gives the company what its level includes again. These are app settings, never the company's business data.")
+            : tr("Turn a live feature on or off for this company only. This overrides the level default. Run the feature categories database update to see which features the company has now and to switch whole categories.")}
         </p>
+        {states && (
+          <p className="feat-summary">
+            {tr("{on} of {live} available features are switched on.")
+              .replace("{on}", String(features.filter((f) => states.get(f.key)?.enabled).length))
+              .replace("{live}", String(features.length))}
+          </p>
+        )}
         {features.length === 0 ? (
           <p className="muted small">{tr("No live features found.")}</p>
         ) : (
-          modules.map((m) => (
-            <div key={m} className="adm-module">
-              <h3>{tr(m)}</h3>
-              <ul className="list">
-                {features
-                  .filter((f) => (f.module ?? "Other") === m)
-                  .map((f) => (
-                    <li key={f.key}>
-                      <div className="row adm-feature-row">
-                        <span>
-                          {f.name}{" "}
-                          <span className="small muted">
-                            {rank(c.business_level) >= rank(f.default_level)
-                              ? tr("· included in this level")
-                              : `· ${tr("from")} ${tr(LEVEL_LABEL[f.default_level] ?? f.default_level)}`}
+          groups.map(({ category, items }) => {
+            const onCount = states ? items.filter((f) => states.get(f.key)?.enabled).length : null;
+            return (
+              <div key={category.name} className="adm-module">
+                <div className="adm-cat-head">
+                  <h3>
+                    {tr(category.name)}
+                    {onCount !== null && (
+                      <span className="adm-cat-count">
+                        {onCount}/{items.length} {tr("on")}
+                      </span>
+                    )}
+                  </h3>
+                  {states && (
+                    <form action={setCompanyCategory} className="adm-onoff" aria-label={`${tr("Whole category")}: ${tr(category.name)}`}>
+                      <input type="hidden" name="company_id" value={c.id} />
+                      <input type="hidden" name="category" value={category.name} />
+                      <SubmitButton className="btn btn-small" name="enabled" value="on" pendingText="…">
+                        {tr("All on")}
+                      </SubmitButton>
+                      <SubmitButton className="btn btn-small" name="enabled" value="off" pendingText="…">
+                        {tr("All off")}
+                      </SubmitButton>
+                      <SubmitButton className="btn btn-small" name="enabled" value="default" pendingText="…">
+                        {tr("Default")}
+                      </SubmitButton>
+                    </form>
+                  )}
+                </div>
+                <ul className="list">
+                  {items.map((f) => {
+                    const st = states?.get(f.key);
+                    return (
+                      <li key={f.key}>
+                        <div className="row adm-feature-row">
+                          <span>
+                            {st && (
+                              <>
+                                <span className={`badge ${st.enabled ? "tone-ok" : "tone-off"}`}>{st.enabled ? tr("On") : tr("Off")}</span>{" "}
+                              </>
+                            )}
+                            {f.name}{" "}
+                            <span className="small muted">
+                              {st && st.source !== "level"
+                                ? `· ${tr(SOURCE_LABEL[st.source] ?? st.source)}`
+                                : rank(c.business_level) >= rank(f.default_level)
+                                  ? tr("· included in this level")
+                                  : `· ${tr("from")} ${tr(LEVEL_LABEL[f.default_level] ?? f.default_level)}`}
+                            </span>
                           </span>
-                        </span>
-                        <form action={setCompanyFeature} className="adm-onoff">
-                          <input type="hidden" name="company_id" value={c.id} />
-                          <input type="hidden" name="key" value={f.key} />
-                          <SubmitButton className="btn btn-small" name="enabled" value="on" pendingText="…">
-                            {tr("On")}
-                          </SubmitButton>
-                          <SubmitButton className="btn btn-small" name="enabled" value="off" pendingText="…">
-                            {tr("Off")}
-                          </SubmitButton>
-                        </form>
-                      </div>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          ))
+                          <form action={setCompanyFeature} className="adm-onoff">
+                            <input type="hidden" name="company_id" value={c.id} />
+                            <input type="hidden" name="key" value={f.key} />
+                            {st ? (
+                              <Switches current={st.source === "level" ? "default" : st.enabled ? "on" : "off"} />
+                            ) : (
+                              <>
+                                <SubmitButton className="btn btn-small" name="enabled" value="on" pendingText="…">
+                                  {tr("On")}
+                                </SubmitButton>
+                                <SubmitButton className="btn btn-small" name="enabled" value="off" pendingText="…">
+                                  {tr("Off")}
+                                </SubmitButton>
+                              </>
+                            )}
+                          </form>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })
         )}
       </section>
     </>

@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
     const email = String(new FormData(e.currentTarget).get("email") ?? "").trim().toLowerCase();
     setBusy(true);
     const { error } = await createClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent("/account?reset=1")}`,
+      redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent("/account?reset=1#password")}`,
     });
     setBusy(false);
     if (error)

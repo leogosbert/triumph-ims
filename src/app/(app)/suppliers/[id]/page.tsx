@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { LinkedDocuments } from "@/components/LinkedDocuments";
 import { saveSupplier, setSupplierActive } from "../actions";
 
 export const metadata = { title: "Supplier" };
@@ -82,6 +83,10 @@ export default async function SupplierPage({
             ))}
           </ul>
         </section>
+      )}
+
+      {can(role, "seeDocuments") && features.on("documents") && (
+        <LinkedDocuments supabase={supabase} companyId={company.id} field="supplier_id" id={id} back={`/suppliers/${id}#documents`} kind="certificate" />
       )}
 
       <form action={saveSupplier}>

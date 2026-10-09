@@ -14,6 +14,8 @@ import { daysOverdue, INVOICE_STATUS, n, openBase, shownStatus } from "@/lib/fin
 import { formatMoney } from "@/lib/money";
 import { StatusBadge } from "@/lib/sales";
 import { addContact, removeContact, saveClient, setClientActive } from "../actions";
+import { ClientCrm } from "../../crm/ClientCrm";
+import { LinkedDocuments } from "@/components/LinkedDocuments";
 
 export const metadata = { title: "Client" };
 
@@ -198,6 +200,11 @@ export default async function ClientPage({
           </details>
         )}
       </section>
+
+      <ClientCrm supabase={supabase} companyId={company.id} clientId={client.id} role={role} features={features} />
+      {can(role, "seeDocuments") && features.on("documents") && (
+        <LinkedDocuments supabase={supabase} companyId={company.id} field="client_id" id={client.id} back={`/clients/${client.id}#documents`} />
+      )}
 
       <form action={saveClient}>
         <input type="hidden" name="id" value={client.id} />

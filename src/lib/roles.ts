@@ -60,6 +60,12 @@ const PERMISSIONS = {
   reconcile: ["management", "finance"],
   followUpQuotes: ["management", "sales"],
   followUpInvoices: ["management", "finance", "sales"],
+  /** Pipeline, client activities and dates, tenders; adding and changing contracts. */
+  seeCrm: ["management", "sales"],
+  /** Contracts and contract prices can be read by finance too. */
+  seeContracts: ["management", "sales", "finance"],
+  /** The documents library: everyone except drivers. */
+  seeDocuments: ["management", "sales", "procurement", "warehouse", "finance"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

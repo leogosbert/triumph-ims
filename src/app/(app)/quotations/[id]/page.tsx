@@ -34,6 +34,7 @@ import { DELIVERY_STATUS } from "@/lib/stock";
 import { OrderCosts, type OrderCost } from "@/components/OrderCosts";
 import { INVOICE_STATUS, shownStatus } from "@/lib/finance";
 import { newInvoice } from "../../invoices/actions";
+import { applyContractPrices } from "../../contracts/actions";
 import { OrderProgress } from "@/components/OrderProgress";
 
 export const metadata = { title: "Quotation" };
@@ -122,6 +123,15 @@ export default async function QuotationPage({
   }
 
   const products = editable ? await productOptions(supabase, company.id) : [];
+  // Contract prices for this client (Stage 14): offered on drafts whose lines differ from them.
+  let contractLines = 0;
+  if (editable && features.on("contracts") && lines.length) {
+    const { data: cp, error: cpError } = await supabase.rpc("client_contract_prices", { p_client: q.client_id, p_currency: q.currency });
+    if (!cpError && Array.isArray(cp)) {
+      const priceOf = new Map((cp as { product_id: string; unit_price: number }[]).map((c) => [c.product_id, n(c.unit_price)]));
+      contractLines = lines.filter((l) => l.product_id && priceOf.has(l.product_id) && (priceOf.get(l.product_id) !== n(l.unit_price) || n(l.discount_pct) !== 0)).length;
+    }
+  }
   const buyer = can(role, "editPurchasing");
   const [{ data: srfqData }, { data: poData }] = buyer
     ? await Promise.all([
@@ -505,6 +515,17 @@ export default async function QuotationPage({
           )}
         </div>
 
+        {contractLines > 0 && (
+          <form action={applyContractPrices} className="banner small" style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <input type="hidden" name="quotation_id" value={q.id} />
+            <span style={{ flex: 1 }}>
+              {contractLines} {tr("line(s) have an agreed contract price for this client.")}
+            </span>
+            <SubmitButton className="btn btn-small btn-primary" pendingText="…">
+              {tr("Use contract prices")}
+            </SubmitButton>
+          </form>
+        )}
         {editable && (
           <details style={{ marginTop: 16 }} open={lines.length === 0}>
             <summary>

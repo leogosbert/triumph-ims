@@ -19,7 +19,7 @@ const M = {
   deliveries: ["/deliveries"],
   finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile"],
   reports: ["/reports"],
-  more: ["/more", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin"],
+  more: ["/more", "/guide", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin"],
 };
 
 /** Phone bottom bar: at most five items, most-used first for each role. */
@@ -78,8 +78,8 @@ export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn): NavItem[
   if (can(role, "seeFinance")) out.push({ href: "/finance", label: t["nav.finance"], icon: "finance", match: M.finance });
   else if (can(role, "seeInvoices")) out.push({ href: "/invoices", label: t["nav.finance"], icon: "finance", match: M.finance, feature: "invoices" });
   out.push({ href: "/reports", label: t["nav.reports"], icon: "report", match: M.reports });
-  out.push({ href: "/help", label: t["nav.help"], icon: "help", match: ["/help"] });
-  out.push({ href: "/more", label: t["nav.more"], icon: "more", match: M.more.filter((p) => p !== "/help" && p !== "/reports") });
+  out.push({ href: "/help", label: t["nav.help"], icon: "help", match: ["/help", "/guide"] });
+  out.push({ href: "/more", label: t["nav.more"], icon: "more", match: M.more.filter((p) => p !== "/help" && p !== "/guide" && p !== "/reports") });
   return out.filter((i) => on(i.feature));
 }
 

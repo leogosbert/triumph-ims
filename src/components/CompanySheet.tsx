@@ -101,6 +101,7 @@ export function CompanySheet({ card }: { card: CompanyCard }) {
     ...(card.isManager ? [{ href: "/settings/team", title: "Team & roles", sub: "Invite people, change roles", icon: "team" as IconName }] : []),
     { href: "/account", title: "Your account", sub: "Your details, password, appearance, sign out", icon: "user" },
     { href: "/help", title: "Help", sub: "Short guide for your role, step by step", icon: "help" },
+    { href: "/guide", title: "App guide", sub: "Every function, where to find it and how to use it", icon: "help" },
   ];
 
   return (

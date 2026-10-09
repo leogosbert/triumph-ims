@@ -101,6 +101,11 @@ export default async function HelpPage() {
     <>
       <h1>{tr("Help")}</h1>
       <p className="muted small">{tr("The whole flow: client RFQ → quotation → approval → order won → supplier quotes → purchase order → goods received → delivery → proof of delivery → invoice → payment → profit. Each person does their part and the next person is told.")}</p>
+      <section className="card">
+        <h2>{tr("App guide")}</h2>
+        <p className="small muted">{tr("Every function of LeMoSp: what it does, where to find it on a phone and on a laptop, and how to use it step by step.")}</p>
+        <Link href="/guide" className="btn btn-primary btn-small">{tr("Open the App guide")} →</Link>
+      </section>
       {role !== "driver" && (
         <section className="card help-tour" data-tour="help-tour">
           <div>

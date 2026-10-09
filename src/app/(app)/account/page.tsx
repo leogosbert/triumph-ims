@@ -8,6 +8,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { RemoveFromPhone } from "@/components/RemoveFromPhone";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ThemePicker } from "@/components/ThemePicker";
+import { BackgroundPicker } from "@/components/BackgroundPicker";
 import Link from "next/link";
 import { signOut, switchCompany } from "@/app/actions";
 import { getAppContext } from "@/lib/context";
@@ -54,6 +55,8 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
         <h2>{tr("Appearance")}</h2>
         <p className="muted small">{tr("Auto follows your phone's light or dark setting.")}</p>
         <ThemePicker />
+        <h3 className="bg-title">{tr("Background")}</h3>
+        <BackgroundPicker />
       </section>
 
       {user.is_anonymous ? (

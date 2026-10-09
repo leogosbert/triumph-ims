@@ -3,7 +3,7 @@
 import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { CompanyButton } from "@/components/CompanySheet";
 import { Icon } from "@/components/Icon";
 import { MenuSheet } from "@/components/MenuSheet";
@@ -61,7 +61,21 @@ export function BottomNav({ items, menu, menuStart }: { items: NavItem[]; menu: 
   );
 }
 
-/** Laptop navigation: a navy sidebar. */
+/**
+ * Laptop sidebar headings. A section the list does not name (a new one) joins the heading above it,
+ * so adding a link to sideNav() needs no change here.
+ */
+const SIDE_GROUPS: [string, string[]][] = [
+  ["Overview", ["/"]],
+  ["Operations", ["/sales", "/clients", "/purchasing", "/products", "/stock", "/deliveries", "/driver"]],
+  ["Finance & reports", ["/finance", "/invoices", "/reports"]],
+  ["Support", ["/help", "/more"]],
+];
+function sideGroup(href: string) {
+  return SIDE_GROUPS.find(([, hrefs]) => hrefs.includes(href))?.[0] ?? null;
+}
+
+/** Laptop navigation: a navy sidebar with grouped sections. */
 export function SideNav({
   items,
   company,
@@ -84,22 +98,30 @@ export function SideNav({
         <strong>{company}</strong>
       </CompanyButton>
       <nav>
-        {items.map((it) => {
+        {items.map((it, i) => {
           const active = isActive(it, pathname);
+          const group = sideGroup(it.href);
+          const heading = group && group !== items.slice(0, i).map((x) => sideGroup(x.href)).filter(Boolean).pop() ? group : null;
           const body = (
             <>
               <Icon name={it.icon} size={19} />
               {tr(String(it.label ?? ""))}
             </>
           );
-          return it.plain ? (
-            <a key={it.href} href={it.href} aria-current={active ? "page" : undefined}>
+          const link = it.plain ? (
+            <a href={it.href} aria-current={active ? "page" : undefined}>
               {body}
             </a>
           ) : (
-            <Link key={it.href} href={it.href} aria-current={active ? "page" : undefined}>
+            <Link href={it.href} aria-current={active ? "page" : undefined}>
               {body}
             </Link>
+          );
+          return (
+            <Fragment key={it.href}>
+              {heading && <span className="nav-group">{tr(heading)}</span>}
+              {link}
+            </Fragment>
           );
         })}
       </nav>

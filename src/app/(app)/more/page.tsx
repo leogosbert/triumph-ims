@@ -2,6 +2,7 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icon";
 import { ThemePicker } from "@/components/ThemePicker";
+import { BackgroundPicker } from "@/components/BackgroundPicker";
 import { getAppContext } from "@/lib/context";
 import { featureForRoute } from "@/lib/features";
 import { APP_VERSION, BUILD_ID } from "@/lib/releases";
@@ -143,6 +144,8 @@ export default async function MorePage() {
       <h2 style={{ marginTop: 24 }}>{tr("Appearance")}</h2>
       <p className="muted small">{tr("Auto follows your phone's light or dark setting.")}</p>
       <ThemePicker />
+      <h3 className="bg-title">{tr("Background")}</h3>
+      <BackgroundPicker />
 
       <a className="lemo-foot" href="/help">
         <img src="/brand/lemosp.svg" alt={tr("LeMoSp")} />

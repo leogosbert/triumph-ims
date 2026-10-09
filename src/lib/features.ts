@@ -81,6 +81,14 @@ export const ROUTE_FEATURES: Record<string, string> = {
   "/stock/reorder": "reorder_levels",
   "/purchasing/match": "supplier_bills",
   "/backorders": "deliveries",
+  "/budgets": "budgets",
+  "/cashflow": "cashflow_forecast",
+  "/planning": "demand_forecast",
+  "/fleet": "fleet_tracking",
+  "/branches": "branches",
+  "/head-office": "consolidated_reports",
+  "/approvals": "advanced_approvals",
+  "/scheduled-reports": "scheduled_reports",
 };
 
 /** The feature a link belongs to: longest matching route prefix ("/rfqs/new" → client_rfqs). */

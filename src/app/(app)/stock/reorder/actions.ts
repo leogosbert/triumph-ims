@@ -10,8 +10,9 @@ import { can } from "@/lib/roles";
 
 const BACK = "/stock/reorder";
 
-function fail(error: string): never {
-  redirect(withNotice(BACK, { error: friendlyError(error) }));
+/** The page to return to on a problem: the reorder list, or purchase planning. */
+function backOf(form: FormData) {
+  return str(form, "back") === "planning" ? `/planning?days=${Number(str(form, "days")) || 90}` : BACK;
 }
 
 /** The ticked items of one group, with their quantities. */
@@ -26,6 +27,8 @@ function picked(form: FormData) {
 
 /** Turn ticked suggestions into a purchase request (mode=request) or a draft purchase order (mode=po). */
 export async function reorderAction(form: FormData) {
+  const back = backOf(form);
+  const fail: (error: string) => never = (error) => redirect(withNotice(back, { error: friendlyError(error) }));
   const items = picked(form);
   if (items.length === 0) fail("Tick at least one item with a quantity.");
   const { supabase, company, role } = await getAppContext();
@@ -53,6 +56,7 @@ export async function reorderAction(form: FormData) {
     );
     if (lineError) fail(lineError.message);
     revalidatePath(BACK);
+    revalidatePath("/planning");
     revalidatePath("/purchase-orders");
     redirect(withNotice(`/purchase-orders/${po as string}#lines`, { msg: "Draft purchase order made at last known cost. Check the prices, then submit it." }));
   }

@@ -86,10 +86,28 @@ Enterprise companies (Small companies can switch them on under Features).
   (`/insights`: win rates, supplier punctuality, slow-moving stock, items bought together).
 - Reports: Sales pipeline, Tenders, Documents and expiry dates.
 
-## Stage 15 — Enterprise
-- Branches/business units with consolidated head-office reporting; departmental permissions; multi-level approvals.
-- Budgets vs actual, cash-flow forecasting, demand and purchase planning; scheduled reports.
-- Fleet and logistics tracking; API and accounting/payment integrations.
+## Stage 15 (v1.18) — Enterprise (built — run the two Stage 15 SQL files)
+SQL, in order: `supabase/migrations/20261018000100_stage15_planning_fleet.sql`, then
+`supabase/migrations/20261018000200_stage15_branches_approvals.sql`. Until they are run, the new screens say
+"not available yet". Running them switches the features on for Enterprise companies (others can switch them on
+under Features).
+- Budgets vs actual (`/budgets`): monthly budgets for sales, gross profit, expenses (total or per category) and net
+  profit against the profit & loss figures.
+- Cash-flow forecast (`/cashflow`): cash today plus unpaid invoices, minus supplier bills, unbilled purchase orders
+  and usual monthly expenses, week by week for 13 or 26 weeks.
+- Purchase planning (`/planning`): sales per day, days of stock, reorder point from the supplier's lead time plus a
+  week of safety stock, quantity for a month after arrival; to draft POs, purchase requests or reorder levels.
+- Vehicles (`/fleet`): insurance, inspection and service dates with reminders; fuel, service and repair log
+  (drivers add lines too); plates offered on delivery notes.
+- Branches (`/branches`): stores and people per branch; quotations, invoices, purchase orders and expenses take the
+  branch of their maker (or of the quotation); management can move a document. Head-office figures
+  (`/head-office`): sales, gross profit, expenses, purchases, money owed and stock per branch.
+- Approval steps (`/approvals`): purchase orders above each step's amount are approved in order by the step's role
+  (or management); never by the submitter, never two steps by one person; the next approver is notified.
+- Scheduled reports (`/scheduled-reports`): any report with its filters, every day, week or month, as an alert and
+  email with a link for the period just ended (sent by the existing alert job from 07:00).
+- Still to come: departmental permissions (limiting what each branch sees); API and accounting/payment
+  integrations.
 
 ## Stage 16 — Intelligence & integrations
 - AI business assistant over the company's own data (permission-checked, states period and data used).

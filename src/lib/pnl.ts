@@ -72,3 +72,68 @@ export async function loadPnl(supabase: Supabase, companyId: string, from: strin
   const gross = sales - cogs;
   return { sales, cogs, gross, orderCosts, expenses, byCategory, net: gross - orderCosts - expenses, invoices: rows.length, linesWithoutCost: missing };
 }
+
+/** The same figures for each month of a year (index 0 = January), in one set of queries. */
+export async function loadPnlMonths(supabase: Supabase, companyId: string, year: number, withExpenses: boolean): Promise<Pnl[]> {
+  const from = `${year}-01-01`;
+  const to = `${year + 1}-01-01`;
+  const [{ data: pData, error }, { data: costData }, exp] = await Promise.all([
+    supabase
+      .from("invoice_profit")
+      .select("issue_date, revenue_base, cost_base, lines_without_cost")
+      .eq("company_id", companyId)
+      .gte("issue_date", from)
+      .lt("issue_date", to)
+      .limit(50000),
+    supabase
+      .from("order_costs")
+      .select("incurred_on, amount, exchange_rate")
+      .eq("company_id", companyId)
+      .not("quotation_id", "is", null)
+      .gte("incurred_on", from)
+      .lt("incurred_on", to)
+      .limit(50000),
+    withExpenses
+      ? supabase
+          .from("expenses")
+          .select("spent_on, category_id, amount, vat_amount, exchange_rate")
+          .eq("company_id", companyId)
+          .is("voided_at", null)
+          .gte("spent_on", from)
+          .lt("spent_on", to)
+          .limit(50000)
+      : Promise.resolve({ data: [] as { spent_on: string; category_id: string; amount: number; vat_amount: number; exchange_rate: number }[] }),
+  ]);
+  if (error) throw new Error(error.message);
+  const months: Pnl[] = Array.from({ length: 12 }, () => ({
+    sales: 0,
+    cogs: 0,
+    gross: 0,
+    orderCosts: 0,
+    expenses: 0,
+    byCategory: new Map<string, number>(),
+    net: 0,
+    invoices: 0,
+    linesWithoutCost: 0,
+  }));
+  const at = (iso: string) => months[Number(iso.slice(5, 7)) - 1];
+  for (const r of (pData ?? []) as { issue_date: string; revenue_base: number; cost_base: number; lines_without_cost: number }[]) {
+    const m = at(r.issue_date);
+    m.sales += n(r.revenue_base);
+    m.cogs += n(r.cost_base);
+    m.linesWithoutCost += n(r.lines_without_cost);
+    m.invoices += 1;
+  }
+  for (const c of (costData ?? []) as { incurred_on: string; amount: number; exchange_rate: number }[]) at(c.incurred_on).orderCosts += n(c.amount) * n(c.exchange_rate);
+  for (const e of (exp.data ?? []) as { spent_on: string; category_id: string; amount: number; vat_amount: number; exchange_rate: number }[]) {
+    const m = at(e.spent_on);
+    const v = (n(e.amount) - n(e.vat_amount)) * n(e.exchange_rate);
+    m.expenses += v;
+    m.byCategory.set(e.category_id, (m.byCategory.get(e.category_id) ?? 0) + v);
+  }
+  for (const m of months) {
+    m.gross = m.sales - m.cogs;
+    m.net = m.gross - m.orderCosts - m.expenses;
+  }
+  return months;
+}

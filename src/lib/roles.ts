@@ -75,6 +75,18 @@ const PERMISSIONS = {
   seeInsights: ["management"],
   /** The documents library: everyone except drivers. */
   seeDocuments: ["management", "sales", "procurement", "warehouse", "finance"],
+  /** Budgets vs actual and the cash-flow forecast. */
+  planFinance: ["management", "finance"],
+  /** Purchase planning from sales history. */
+  planPurchases: ["management", "procurement", "warehouse"],
+  /** Fleet: seen by these roles; vehicles kept by management and warehouse; drivers add fuel and kilometres. */
+  seeFleet: ["management", "warehouse", "finance", "driver"],
+  editFleet: ["management", "warehouse"],
+  logFleet: ["management", "warehouse", "driver"],
+  /** Branches: add them, put stores and people in them, move documents between them. */
+  manageBranches: ["management"],
+  /** Approval steps for purchase orders. */
+  setApprovals: ["management"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

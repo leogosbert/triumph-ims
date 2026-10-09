@@ -8,6 +8,9 @@ import { displayName, getAppContext } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
 import { type SearchParams } from "@/lib/messages";
 import { PRESETS } from "@/lib/reports/dates";
+import { SubmitButton } from "@/components/SubmitButton";
+import { TimingFields } from "@/components/reports/TimingFields";
+import { scheduleReport } from "../../scheduled-reports/actions";
 import { findReport, MAX_ROWS, type FilterKey } from "@/lib/reports/defs";
 import { cellText, colLabel, FILTER_LABELS, filterOptions, filterText, mayOpen, parseParams, periodText, runReport, toQuery } from "@/lib/reports/run";
 
@@ -233,6 +236,30 @@ export default async function ReportPage({ params, searchParams }: { params: Pro
           </p>
         )}
       </section>
+
+      {features.on("scheduled_reports") && (
+        <details className="card no-print">
+          <summary>
+            <strong>{tr("Email me this report")}</strong>
+          </summary>
+          <form action={scheduleReport} style={{ marginTop: 12 }}>
+            <input type="hidden" name="report_key" value={def.key} />
+            <input type="hidden" name="query" value={query} />
+            <p className="small muted" style={{ marginTop: 0 }}>
+              {tr("With the filters and columns you see now. The dates move on by themselves: each time you get the period just ended.")}
+            </p>
+            <div className="field">
+              <label htmlFor="schedule-name">{tr("Name")}</label>
+              <input id="schedule-name" name="name" type="text" maxLength={80} defaultValue={tr(def.title)} />
+            </div>
+            <TimingFields id="new" frequency="weekly" weekday={1} />
+            <SubmitButton className="btn btn-small">{tr("Schedule")}</SubmitButton>{" "}
+            <Link href="/scheduled-reports" className="small">
+              {tr("My scheduled reports")}
+            </Link>
+          </form>
+        </details>
+      )}
     </>
   );
 }

@@ -15,6 +15,8 @@ import { productOptions } from "@/lib/options";
 import { PO_STATUS, SRFQ_STATUS } from "@/lib/purchasing";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
+import { BranchField } from "@/components/BranchField";
+import { branchList } from "@/lib/branches";
 import { QUOTE_STATUS, quoteNo, StatusBadge, todayTz } from "@/lib/sales";
 import {
   addQuoteLine,
@@ -75,6 +77,7 @@ export default async function QuotationPage({
     .eq("company_id", company.id)
     .maybeSingle();
   if (!q) notFound();
+  const branches = features.on("branches") ? await branchList(supabase, company.id) : [];
 
   const showCosts = can(role, "seeCosts");
   const canEdit = can(role, "editSales");
@@ -207,6 +210,7 @@ export default async function QuotationPage({
         {q.created_by && <>{" "}{tr("· by")}{" "}{names.get(q.created_by)}</>}
       </p>
       <Notice {...notice} />
+      <BranchField kind="quotation" id={q.id} branchId={q.branch_id ?? null} branches={branches} canMove={can(role, "manageBranches")} />
       {!["rejected", "cancelled", "superseded"].includes(q.status) && <OrderProgress steps={progress} />}
 
       {isDraft && q.review_note && (

@@ -148,6 +148,9 @@ export default async function StockPage({ searchParams }: { searchParams: Search
             {can(role, "seeReorder") && features.on("reorder_levels") && (
               <Link href="/stock/reorder" className="btn btn-small btn-primary">{tr("What to reorder")}</Link>
             )}
+            {can(role, "planPurchases") && features.on("demand_forecast") && (
+              <Link href="/planning" className="btn btn-small">{tr("Purchase planning")}</Link>
+            )}
           </div>
           <ul className="list">
             {low.map((p) => (

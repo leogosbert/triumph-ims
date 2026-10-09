@@ -10,6 +10,8 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
+import { BranchField } from "@/components/BranchField";
+import { branchList } from "@/lib/branches";
 import { saveExpense, voidExpense } from "../actions";
 import { ExpenseFields } from "../ExpenseFields";
 import { ReceiptPicker } from "../ReceiptPicker";
@@ -20,9 +22,10 @@ export default async function ExpensePage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
   const { data: e } = await supabase.from("expenses").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!e) notFound();
+  const branches = features.on("branches") ? await branchList(supabase, company.id) : [];
   const [{ data: catData }, names] = await Promise.all([
     supabase.from("expense_categories").select("id, name, active").eq("company_id", company.id).order("sort").order("name"),
     namesFor(supabase, [e.created_by, e.voided_by, e.reconciled_by]),
@@ -69,6 +72,7 @@ export default async function ExpensePage({ params, searchParams }: { params: Pr
         )}
       </p>
       <Notice {...notice} />
+      <BranchField kind="expense" id={e.id} branchId={e.branch_id ?? null} branches={branches} canMove={can(role, "manageBranches")} />
       {e.voided_at && (
         <div className="banner warn small">
           {tr("Voided:")} {e.void_reason} · {names.get(e.voided_by) ?? ""} · {formatDateTime(e.voided_at)}

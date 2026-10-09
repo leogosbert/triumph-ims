@@ -16,6 +16,8 @@ import { formatMoney } from "@/lib/money";
 import { productOptions } from "@/lib/options";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
+import { BranchField } from "@/components/BranchField";
+import { branchList } from "@/lib/branches";
 import { quoteNo, StatusBadge, todayTz } from "@/lib/sales";
 import {
   addInvoiceLine,
@@ -72,6 +74,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
     .eq("company_id", company.id)
     .maybeSingle();
   if (!inv) notFound();
+  const branches = features.on("branches") ? await branchList(supabase, company.id) : [];
 
   const edit = can(role, "editInvoices");
   const isDraft = inv.status === "draft";
@@ -138,6 +141,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         {inv.created_by && <>{" "}{tr("· by")}{" "}{names.get(inv.created_by)}</>}
       </p>
       <Notice {...notice} />
+      <BranchField kind="invoice" id={inv.id} branchId={inv.branch_id ?? null} branches={branches} canMove={can(role, "manageBranches")} />
 
       {inv.status === "cancelled" && (
         <div className="banner bad">

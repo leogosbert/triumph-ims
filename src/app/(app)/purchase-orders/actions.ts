@@ -156,7 +156,9 @@ export async function reviewPo(form: FormData) {
   const approve = str(form, "decision") === "approve";
   const { error } = await supabase.rpc("review_purchase_order", { p_id: id, p_approve: approve, p_note: optional(form, "note") });
   if (error) fail(id, error.message);
-  done(id, approve ? "Purchase order approved." : "Sent back with your note.");
+  if (!approve) done(id, "Sent back with your note.");
+  const { data: po } = await supabase.from("purchase_orders").select("status").eq("id", id).maybeSingle();
+  done(id, po?.status === "pending_approval" ? "Your approval is saved. The next approver has been told." : "Purchase order approved.");
 }
 
 export async function markPoSent(form: FormData) {

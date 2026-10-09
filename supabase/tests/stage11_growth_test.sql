@@ -67,14 +67,14 @@ select tests.check((select string_agg(key, ',' order by key) from public.feature
 select tests.check((select bool_and(default_level = 'small') from public.features where core or key = 'goods_received'),
   'core features and goods received belong to the small level');
 select tests.check((select count(*) from public.features) = 54, 'catalogue has 54 features (Stage 13 added reminders)');
-select tests.check((select count(*) from public.features where status = 'live') = 41
-                   and (select count(*) from public.features where status = 'planned') = 13, '41 live and 13 planned features (Stage 14 made five more live)');
+select tests.check((select count(*) from public.features where status = 'live') = 44
+                   and (select count(*) from public.features where status = 'planned') = 10, '44 live and 10 planned features (Stage 14 made eight more live)');
 select tests.check((select bool_and(jsonb_array_length(tutorial) between 2 and 4 and description is not null
                                     and audience is not null and benefits is not null) from public.features),
   'every feature has a description, audience, benefits and a 2-4 step tutorial');
 select tests.check((select count(*) from public.recommendation_rules) = 15, '15 recommendation rules');
 select tests.check((select count(*) from public.company_feature_map(:'co')) = 54, 'feature map lists the whole catalogue');
-select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 41, 'medium: all live features on');
+select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 44, 'medium: all live features on');
 select tests.check((select bool_and(not enabled) from public.company_feature_map(:'co') where status = 'planned'),
   'planned features are never on');
 select tests.check((select bool_and(source = 'level') from public.company_feature_map(:'co')), 'without choices everything follows the level');
@@ -107,7 +107,7 @@ select tests.blocked(format('select public.set_business_level(%L, null)', :'co')
 select tests.blocked(format('select public.set_business_level(%L, %L, %L)', :'co', 'small', '[1,2]'), 'the profile must be an object');
 
 select public.set_business_level(:'co', 'enterprise');
-select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 40,
+select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 43,
   'enterprise: all live features except the one switched off');
 select tests.check((select bool_and(not enabled) from public.company_feature_map(:'co') where default_level = 'enterprise'),
   'enterprise planned features stay off');

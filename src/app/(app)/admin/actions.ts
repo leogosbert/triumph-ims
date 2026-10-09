@@ -8,11 +8,12 @@ import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { isMissingSql, LEVELS, STAGE11_MISSING } from "@/components/suggestions/meta";
 import { METRIC_KEYS, OPS } from "./rules/meta";
+import { CATEGORIES_MISSING, categoryHref } from "./categories";
 
 type DbError = { code?: string | null; message?: string | null } | null;
 
-function explain(error: DbError): string {
-  if (isMissingSql(error)) return STAGE11_MISSING;
+function explain(error: DbError, missing: string = STAGE11_MISSING): string {
+  if (isMissingSql(error)) return missing;
   if (/duplicate key/i.test(error?.message ?? "")) return "That key is already used. Choose another key.";
   return friendlyError(error?.message);
 }
@@ -50,12 +51,42 @@ export async function setCompanyFeature(form: FormData) {
   if (!id) redirect("/admin/companies");
   const back = `/admin/companies/${id}`;
   const key = str(form, "key");
-  const enabled = str(form, "enabled") === "on";
+  const choice = str(form, "enabled");
+  // "default" = back to what the company's level gives (needs the feature categories SQL for the
+  // screen to show it, but the database function has always accepted it).
+  const enabled = choice === "on" ? true : choice === "off" ? false : null;
   if (!KEY_RE.test(key)) redirect(withNotice(back, { error: "Unknown feature." }));
   const { error } = await supabase.rpc("admin_set_company_feature", { p_company: id, p_key: key, p_enabled: enabled });
   if (error) redirect(withNotice(`${back}#features`, { error: explain(error) }));
   revalidatePath("/admin", "layout");
-  redirect(withNotice(`${back}#features`, { msg: enabled ? "Feature switched on for this company." : "Feature switched off for this company." }));
+  const msg =
+    enabled === true
+      ? "Feature switched on for this company."
+      : enabled === false
+        ? "Feature switched off for this company."
+        : "Feature set back to the level default for this company.";
+  redirect(withNotice(`${back}#features`, { msg }));
+}
+
+export async function setCompanyCategory(form: FormData) {
+  const supabase = await requireAdmin();
+  const id = uuid(str(form, "company_id"));
+  if (!id) redirect("/admin/companies");
+  const back = `/admin/companies/${id}`;
+  const category = str(form, "category");
+  const choice = str(form, "enabled");
+  const enabled = choice === "on" ? true : choice === "off" ? false : null;
+  if (!category) redirect(withNotice(back, { error: "Unknown category." }));
+  const { error } = await supabase.rpc("admin_set_company_category", { p_company: id, p_category: category, p_enabled: enabled });
+  if (error) redirect(withNotice(`${back}#features`, { error: explain(error, CATEGORIES_MISSING) }));
+  revalidatePath("/admin", "layout");
+  const msg =
+    enabled === true
+      ? "Every feature in the category is now on for this company."
+      : enabled === false
+        ? "Every feature in the category is now off for this company."
+        : "The category is back to the level default for this company.";
+  redirect(withNotice(`${back}#features`, { msg }));
 }
 
 /* ---------------- Features catalogue ---------------- */
@@ -65,7 +96,9 @@ export async function saveFeature(form: FormData) {
   const isNew = str(form, "is_new") === "1";
   const key = str(form, "key");
   const back = `/admin/features/${isNew ? "new" : encodeURIComponent(key)}`;
-  if (!KEY_RE.test(key) || key === "new") redirect(withNotice(back, { error: "The key must be lower-case letters, numbers and _ (e.g. stock_transfers)." }));
+  if (!KEY_RE.test(key) || key === "new" || key === "categories") {
+    redirect(withNotice(back, { error: "The key must be lower-case letters, numbers and _ (e.g. stock_transfers)." }));
+  }
 
   const name = str(form, "name");
   const description = str(form, "description");
@@ -95,7 +128,7 @@ export async function saveFeature(form: FormData) {
   const row = {
     name,
     description: description || null,
-    module: module || null,
+    module: module || "Other",
     default_level: defaultLevel,
     status,
     audience: optional(form, "audience"),
@@ -111,6 +144,65 @@ export async function saveFeature(form: FormData) {
   if (error) redirect(withNotice(back, { error: explain(error) }));
   revalidatePath("/admin", "layout");
   redirect(withNotice(`/admin/features/${encodeURIComponent(key)}`, { msg: isNew ? "Feature added." : "Feature saved." }));
+}
+
+/* ---------------- Feature categories ---------------- */
+
+export async function saveCategory(form: FormData) {
+  const supabase = await requireAdmin();
+  const oldName = str(form, "old_name") || null;
+  const name = str(form, "name").trim();
+  const description = str(form, "description").trim();
+  const sortRaw = str(form, "sort");
+  const sort = sortRaw === "" ? 100 : Number(sortRaw);
+  const back = oldName ? categoryHref(oldName) : "/admin/features/categories";
+  if (name.length < 2 || name.length > 60) redirect(withNotice(back, { error: "Give the category a name (2–60 letters)." }));
+  if (description.length > 300) redirect(withNotice(back, { error: "The description is too long (300 letters at most)." }));
+  if (!Number.isInteger(sort) || sort < 0 || sort > 100000) redirect(withNotice(back, { error: "Sort must be a whole number." }));
+  const { data, error } = await supabase.rpc("admin_save_feature_category", {
+    p_old_name: oldName,
+    p_name: name,
+    p_description: description,
+    p_sort: sort,
+  });
+  if (error) {
+    const msg = /already exists/i.test(error.message ?? "") ? "A category with that name already exists." : explain(error, CATEGORIES_MISSING);
+    redirect(withNotice(back, { error: msg }));
+  }
+  revalidatePath("/admin", "layout");
+  redirect(withNotice(categoryHref(typeof data === "string" ? data : name), { msg: oldName ? "Category saved." : "Category added." }));
+}
+
+export async function deleteCategory(form: FormData) {
+  const supabase = await requireAdmin();
+  const name = str(form, "name");
+  const moveTo = str(form, "move_to") || null;
+  const back = categoryHref(name);
+  if (form.get("confirm") !== "on") redirect(withNotice(`${back}#remove`, { error: "Tick the box to confirm removing this category." }));
+  const { data, error } = await supabase.rpc("admin_delete_feature_category", { p_name: name, p_move_to: moveTo });
+  if (error) {
+    const msg = /choose another category/i.test(error.message ?? "")
+      ? "Choose where its features should go."
+      : explain(error, CATEGORIES_MISSING);
+    redirect(withNotice(`${back}#remove`, { error: msg }));
+  }
+  revalidatePath("/admin", "layout");
+  const moved = typeof data === "number" && data > 0;
+  redirect(withNotice("/admin/features/categories", { msg: moved ? "Category removed. Its features were moved." : "Category removed." }));
+}
+
+/** Add a feature to a category (which takes it out of its old one). */
+export async function setFeatureCategory(form: FormData) {
+  const supabase = await requireAdmin();
+  const key = str(form, "key");
+  const category = str(form, "category");
+  const back = str(form, "back") ? categoryHref(str(form, "back")) : "/admin/features";
+  if (!KEY_RE.test(key)) redirect(withNotice(back, { error: "Choose a feature." }));
+  if (!category) redirect(withNotice(back, { error: "Choose a category." }));
+  const { error } = await supabase.rpc("admin_set_feature_category", { p_key: key, p_category: category });
+  if (error) redirect(withNotice(back, { error: explain(error, CATEGORIES_MISSING) }));
+  revalidatePath("/admin", "layout");
+  redirect(withNotice(back, { msg: "Feature moved." }));
 }
 
 /* ---------------- Growth rules ---------------- */

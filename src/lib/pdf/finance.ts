@@ -149,3 +149,68 @@ export function buildReceiptPdf(d: ReceiptPdfData) {
     signature: r.recorded_by ? `Received by: ${r.recorded_by}\nFor and on behalf of ${d.company.name}` : null,
   });
 }
+
+export type StatementPdfData = {
+  company: DocCompany;
+  logo: Logo;
+  kind: "client" | "supplier";
+  party: Party & { code: string | null };
+  statement: {
+    currency: string;
+    from: string;
+    to: string;
+    opening: number;
+    charged: number;
+    paid: number;
+    closing: number;
+    rows: import("./document").LedgerRow[];
+    aging: number[];
+  };
+  agingLabels: readonly string[];
+};
+
+/** Statement of account (client: invoices and payments received; supplier: bills and payments made). */
+export function buildStatementPdf(d: StatementPdfData) {
+  const s = d.statement;
+  const client = d.kind === "client";
+  const aging = d.agingLabels
+    .map((label, i) => (s.aging[i] > 0 ? `${label}: ${pdfMoney(s.aging[i], s.currency)}` : null))
+    .filter(Boolean)
+    .join("\n");
+  return buildDocumentPdf({
+    title: "STATEMENT",
+    company: d.company,
+    logo: d.logo,
+    meta: [
+      ["Period", `${pdfDate(s.from)} - ${pdfDate(s.to)}`],
+      ["Currency", s.currency],
+      [client ? "Account" : "Supplier code", d.party.code],
+      ["Printed", pdfDate(new Date().toISOString())],
+    ],
+    partyLabel: client ? "Statement for" : "Supplier",
+    party: { name: d.party.name, lines: partyLines(d.party) },
+    currency: s.currency,
+    mode: "ledger",
+    lines: [],
+    ledger: { rows: s.rows, debitLabel: client ? "Invoiced" : "Billed", creditLabel: client ? "Received" : "Paid" },
+    totals: {
+      rows: [
+        ["Balance brought forward", s.opening],
+        [client ? "Invoiced in period" : "Billed in period", s.charged],
+        [client ? "Received in period" : "Paid in period", s.paid, true],
+      ],
+      grandLabel: client ? `BALANCE DUE ${s.currency}` : `WE OWE ${s.currency}`,
+      grand: s.closing,
+    },
+    blocks: [
+      { title: "Still open, by age", body: aging || null },
+      {
+        title: client ? "Please note" : "Note",
+        body: client
+          ? "If your records differ from this statement, please let us know so we can agree the balance. Please quote the invoice numbers with your payments."
+          : "Prepared from our records of your invoices and our payments. Please tell us if anything is missing.",
+      },
+    ],
+    showBank: client,
+  });
+}

@@ -50,6 +50,17 @@ export async function updateCompany(form: FormData) {
     invoiceFields.invoice_due_days = days;
     invoiceFields.invoice_terms = optional(form, "invoice_terms");
   }
+  // Stage 13: mobile-money pay numbers and reminder timing (only on screen once that SQL is run).
+  if (form.has("mobile_money_details")) invoiceFields.mobile_money_details = optional(form, "mobile_money_details");
+  const days = (k: string, lo: number, hi: number, label: string) => {
+    if (!form.has(k)) return;
+    const v = num(k);
+    if (!(Number.isInteger(v) && v >= lo && v <= hi)) redirect(withNotice(back, { error: `${label} must be a whole number (${lo}–${hi}).` }));
+    invoiceFields[k] = v;
+  };
+  days("quote_followup_days", 0, 60, "Quotation follow-up days");
+  days("invoice_remind_before_days", 0, 30, "Reminder days before due");
+  days("invoice_overdue_every_days", 1, 90, "Overdue reminder days");
 
   const { error } = await supabase
     .from("companies")

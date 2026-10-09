@@ -1,5 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
-import type { Company } from "@/lib/context";
+import { stage13Ready, type Company } from "@/lib/context";
 import type { Features } from "@/lib/features";
 import { can, type Role } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
@@ -94,7 +94,12 @@ function compare(a: Cell, b: Cell) {
   return String(a).localeCompare(String(b), "en", { numeric: true, sensitivity: "base" });
 }
 
-export async function runReport(def: ReportDef, supabase: Supabase, company: Pick<Company, "id" | "base_currency">, p: ReportParams): Promise<ReportResult> {
+export async function runReport(
+  def: ReportDef,
+  supabase: Supabase,
+  company: Pick<Company, "id" | "base_currency" | "quote_followup_days">,
+  p: ReportParams,
+): Promise<ReportResult> {
   const loaded = await def.load({
     supabase,
     companyId: company.id,
@@ -103,6 +108,7 @@ export async function runReport(def: ReportDef, supabase: Supabase, company: Pic
     to: p.period.to,
     today: todayTz(),
     filters: p.filters,
+    stage13: stage13Ready(company),
   });
   let rows = loaded;
   for (const [k, v] of Object.entries(p.filters) as [FilterKey, string][]) {
@@ -144,7 +150,13 @@ export async function filterOptions(def: ReportDef, supabase: Supabase, companyI
     jobs.push(Promise.resolve(supabase.from("suppliers").select("id, name").eq("company_id", companyId).order("name").limit(3000)).then(({ data }) => void (out.supplier = opt(data))));
   if (def.filters.includes("warehouse"))
     jobs.push(Promise.resolve(supabase.from("warehouses").select("id, name").eq("company_id", companyId).order("name").limit(500)).then(({ data }) => void (out.warehouse = opt(data))));
-  if (def.filters.includes("category"))
+  if (def.filters.includes("category") && def.key.startsWith("expense"))
+    jobs.push(
+      Promise.resolve(supabase.from("expense_categories").select("id, name").eq("company_id", companyId).order("sort").limit(500)).then(
+        ({ data }) => void (out.category = opt(data)),
+      ),
+    );
+  else if (def.filters.includes("category"))
     jobs.push(
       Promise.resolve(supabase.from("products").select("category").eq("company_id", companyId).not("category", "is", null).limit(10000)).then(({ data }) => {
         const cats = [...new Set(((data ?? []) as { category: string }[]).map((x) => x.category).filter(Boolean))].sort();

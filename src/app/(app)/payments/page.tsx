@@ -1,8 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
-import { monthRange, n, PAY_METHODS } from "@/lib/finance";
+import { getAppContext, stage13Ready } from "@/lib/context";
+import { methodLabel, monthRange, n } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -18,6 +18,7 @@ type Row = {
   currency: string;
   exchange_rate: number;
   method: string;
+  provider?: string | null;
   reference: string | null;
   voided_at: string | null;
   client: { name: string } | null;
@@ -33,7 +34,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
 
   const { data, error } = await supabase
     .from("payments")
-    .select("id, number, received_on, amount, currency, exchange_rate, method, reference, voided_at, client:clients(name), invoice:invoices(id, number)")
+    .select(`id, number, received_on, amount, currency, exchange_rate, method, reference, voided_at, client:clients(name), invoice:invoices(id, number)${stage13Ready(company) ? ", provider" : ""}`)
     .eq("company_id", company.id)
     .gte("received_on", m.start)
     .lt("received_on", m.next)
@@ -78,7 +79,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
                     {r.client?.name}
                   </div>
                   <div className="sub">
-                    {formatDate(r.received_on)} · {r.number} · {r.invoice?.number} · {PAY_METHODS[r.method] ?? r.method}
+                    {formatDate(r.received_on)} · {r.number} · {r.invoice?.number} · {tr(methodLabel(r.method, r.provider))}
                     {r.reference ? ` · ${r.reference}` : ""}
                     {r.voided_at ? tr(" · voided") : ""}
                   </div>

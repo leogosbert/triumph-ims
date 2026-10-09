@@ -75,7 +75,7 @@ jobs:
           npx tsx scripts/pdf-sample.ts receipt sample-rct.pdf
       - name: Render page previews
         run: |
-          sudo apt-get install -y -qq poppler-utils >/dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null
           pdfinfo sample.pdf | grep Pages
           pdftoppm -r 40 -jpeg -jpegopt quality=45 sample.pdf page
           pdftoppm -r 36 -f 1 -l 1 -jpeg -jpegopt quality=40 sample-draft.pdf draft

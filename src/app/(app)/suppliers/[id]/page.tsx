@@ -26,7 +26,7 @@ export default async function SupplierPage({
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
   if (!can(role, "seeSuppliers")) redirect("/");
 
   const [{ data: supplier }, { data: linkedData }] = await Promise.all([
@@ -62,6 +62,11 @@ export default async function SupplierPage({
         )}
       </p>
       <Notice {...notice} />
+      {can(role, "seeBills") && features.on("statements") && (
+        <p className="small">
+          <Link href={`/suppliers/${supplier.id}/statement`}>{tr("Statement of account →")}</Link>
+        </p>
+      )}
 
       {linked.length > 0 && (
         <section className="card">

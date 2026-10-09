@@ -54,6 +54,12 @@ const PERMISSIONS = {
   editBills: ["management", "finance"],
   seeProfit: ["management", "finance"],
   editOrderCosts: ["management", "finance", "procurement"],
+  /** Expenses: everyone records their own; these roles see, change and void all of them. */
+  manageExpenses: ["management", "finance"],
+  /** Tick payments and expenses as checked against the bank or mobile-money statement. */
+  reconcile: ["management", "finance"],
+  followUpQuotes: ["management", "sales"],
+  followUpInvoices: ["management", "finance", "sales"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

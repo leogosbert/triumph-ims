@@ -5,7 +5,8 @@ import { Notice } from "@/components/Notice";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { QuoteFollowUpCard } from "@/components/FollowUpCards";
+import { getAppContext, stage13Ready } from "@/lib/context";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { CURRENCIES, INCOTERMS, PAYMENT_TERMS } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -63,7 +64,8 @@ export default async function QuotationPage({
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, role, user, profile, features } = await getAppContext();
+  const lang = await primeLang();
 
   const { data: q } = await supabase
     .from("quotations")
@@ -279,6 +281,28 @@ export default async function QuotationPage({
             </div>
           </form>
         </section>
+      )}
+
+      {stage13Ready(company) && features.on("reminders") && can(role, "followUpQuotes") && ["approved", "sent"].includes(q.status) && (
+        <QuoteFollowUpCard
+          supabase={supabase}
+          company={company}
+          profile={profile}
+          canLog
+          lang={lang}
+          q={{
+            id: q.id,
+            number: quoteNo(q),
+            client_id: q.client_id,
+            client_name: q.client?.name ?? "",
+            contact_name: q.contact_name,
+            currency: ccy,
+            total: n(q.total),
+            issue_date: q.issue_date,
+            valid_until: q.valid_until,
+            client_ref: q.client_ref ?? null,
+          }}
+        />
       )}
 
       {buyer && ["approved", "sent", "accepted"].includes(q.status) && (

@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
-import { BILL_STATUS, daysOverdue, isOpen, n, PAY_METHODS, shownStatus } from "@/lib/finance";
+import { PayMethodFields } from "@/components/PayMethodFields";
+import { getAppContext, stage13Ready } from "@/lib/context";
+import { BILL_STATUS, daysOverdue, isOpen, methodLabel, n, shownStatus } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -25,6 +26,8 @@ type Pay = {
   currency: string;
   exchange_rate: number;
   method: string;
+  provider?: string | null;
+  reconciled_at?: string | null;
   reference: string | null;
   voided_at: string | null;
   void_reason: string | null;
@@ -46,10 +49,10 @@ export default async function BillPage({ params, searchParams }: { params: Promi
   if (!b) notFound();
   const { data: payData } = await supabase
     .from("supplier_payments")
-    .select("id, number, paid_on, amount, currency, exchange_rate, method, reference, voided_at, void_reason")
+    .select(`id, number, paid_on, amount, currency, exchange_rate, method, reference, voided_at, void_reason${stage13Ready(company) ? ", provider, reconciled_at" : ""}`)
     .eq("bill_id", id)
     .order("paid_on");
-  const pays = (payData ?? []) as Pay[];
+  const pays = (payData ?? []) as unknown as Pay[];
 
   const edit = can(role, "editBills");
   const open = isOpen(b.status);
@@ -121,8 +124,9 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                 <div className="row">
                   <strong style={p.voided_at ? { textDecoration: "line-through" } : undefined}>{formatMoney(p.amount, p.currency)}</strong>
                   <span className="small muted">
-                    {formatDate(p.paid_on)} · {PAY_METHODS[p.method] ?? p.method}
+                    {formatDate(p.paid_on)} · {tr(methodLabel(p.method, p.provider))}
                     {p.reference ? ` · ${p.reference}` : ""} · {p.number}
+                    {p.reconciled_at && <span className="text-ok" title={tr("checked against the statement")}> ✓</span>}
                     {p.currency !== company.base_currency && ` · rate ${fmtNum(p.exchange_rate)}`}
                   </span>
                 </div>
@@ -159,20 +163,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                   <label htmlFor="paid_on">{tr("Date paid")}</label>
                   <input id="paid_on" name="paid_on" type="date" defaultValue={todayTz()} />
                 </div>
-                <div className="field">
-                  <label htmlFor="method">{tr("How")}</label>
-                  <select id="method" name="method" defaultValue="bank_transfer">
-                    {Object.entries(PAY_METHODS).map(([k, v]) => (
-                      <option key={k} value={k}>
-                        {v}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <label htmlFor="reference">{tr("Reference")}</label>
-                  <input id="reference" name="reference" type="text" placeholder={tr("TT / transfer ref")} />
-                </div>
+                <PayMethodFields withProvider={stage13Ready(company)} />
                 {ccy !== company.base_currency && (
                   <div className="field">
                     <label htmlFor="exchange_rate">{tr("Bank rate used")}{" "}<span className="hint">· {company.base_currency}{" "}{tr("per 1")}{" "}{ccy}</span>

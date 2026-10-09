@@ -3,7 +3,7 @@ import Link from "next/link";
 import { StepUpForm } from "@/components/ConfirmIdentity";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { brandingUrl, getAppContext } from "@/lib/context";
+import { brandingUrl, getAppContext, stage13Ready } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { updateCompany } from "../actions";
 import { LogoUpload } from "./LogoUpload";
@@ -58,7 +58,7 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
         </section>
       )}
 
-      <StepUpForm action={updateCompany} onlyIfChanged="bank_details,document_footer,quote_terms,po_terms,invoice_terms">
+      <StepUpForm action={updateCompany} onlyIfChanged="bank_details,mobile_money_details,document_footer,quote_terms,po_terms,invoice_terms">
         <fieldset disabled={!isManager} style={{ border: 0, padding: 0, margin: 0 }}>
           <section className="card">
             <h2>{tr("Registration")}</h2>
@@ -128,6 +128,15 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
               textarea
               hint={tr("bank, branch, account name and numbers, SWIFT")}
             />
+            {stage13Ready(c) && (
+              <Field
+                name="mobile_money_details"
+                label={tr("Mobile money pay numbers")}
+                value={c.mobile_money_details ?? null}
+                textarea
+                hint={tr("e.g. M-Pesa Lipa Namba 123456 (name), Mixx by Yas 0715 000 000; printed on invoices and reminders")}
+              />
+            )}
             <Field
               name="document_footer"
               label={tr("Footer text")}
@@ -174,6 +183,33 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
                 hint={tr("sets the due date when an invoice is issued")}
               />
               <Field name="invoice_terms" label={tr("Standard invoice terms")} value={c.invoice_terms ?? null} textarea hint={tr("printed on every invoice")} />
+            </section>
+          )}
+
+          {stage13Ready(c) && (
+            <section className="card" id="reminders">
+              <h2>{tr("Follow-ups and reminders")}</h2>
+              <p className="muted small">{tr("The app reminds your team when to follow up a quotation and when to remind a client about an invoice. Messages are sent by your team from their own phone (WhatsApp, SMS or email).")}</p>
+              <div className="grid grid-2">
+                <Field
+                  name="quote_followup_days"
+                  label={tr("Follow up sent quotations after (days)")}
+                  value={String(c.quote_followup_days ?? 3)}
+                  hint={tr("0 = no follow-up reminders")}
+                />
+                <Field
+                  name="invoice_remind_before_days"
+                  label={tr("Remind before an invoice is due (days)")}
+                  value={String(c.invoice_remind_before_days ?? 3)}
+                  hint={tr("0 = only once it is overdue")}
+                />
+                <Field
+                  name="invoice_overdue_every_days"
+                  label={tr("Repeat overdue reminders every (days)")}
+                  value={String(c.invoice_overdue_every_days ?? 7)}
+                  hint={tr("paused while a promised payment date has not passed")}
+                />
+              </div>
             </section>
           )}
 

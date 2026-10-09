@@ -1,7 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, stage13Ready } from "@/lib/context";
 import { daysOverdue, monthRange, n, openBase } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
@@ -12,7 +12,8 @@ type Inv = { id: string; number: string; total: number; amount_paid: number; exc
 
 export default async function FinancePage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
+  const ready13 = stage13Ready(company);
   if (!can(role, "seeFinance")) redirect(can(role, "seeInvoices") ? "/invoices" : "/");
   const base = company.base_currency;
   const m = monthRange();
@@ -51,6 +52,26 @@ export default async function FinancePage() {
       supabase.from("deliveries").select("id").eq("company_id", company.id).eq("status", "delivered").limit(2000),
       supabase.from("invoices").select("delivery_id").eq("company_id", company.id).neq("status", "cancelled").not("delivery_id", "is", null),
     ]);
+  const [{ data: spent }, { count: toCheck }] = ready13
+    ? await Promise.all([
+        supabase
+          .from("expenses")
+          .select("amount, exchange_rate")
+          .eq("company_id", company.id)
+          .is("voided_at", null)
+          .gte("spent_on", m.start)
+          .lt("spent_on", m.next)
+          .limit(5000),
+        supabase
+          .from("payments")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", company.id)
+          .eq("method", "mobile_money")
+          .is("voided_at", null)
+          .is("reconciled_at", null),
+      ])
+    : [{ data: [] }, { count: 0 }];
+  const expensesMonth = ((spent ?? []) as { amount: number; exchange_rate: number }[]).reduce((s, e) => s + n(e.amount) * n(e.exchange_rate), 0);
 
   const inv = (openInv ?? []) as unknown as Inv[];
   const owed = inv.reduce((s, i) => s + openBase(i), 0);
@@ -99,6 +120,20 @@ export default async function FinancePage() {
           <div className="n">{formatMoney(collected, base)}</div>
           <div className="l">{tr("Collected in")}{" "}{tr(String(m.label ?? ""))}</div>
         </Link>
+        {ready13 && features.on("expenses") && (
+          <Link href="/expenses" className="stat">
+            <div className="n">{formatMoney(expensesMonth, base)}</div>
+            <div className="l">
+              {tr("Expenses in")} {tr(m.label)}
+            </div>
+          </Link>
+        )}
+        {ready13 && features.on("mobile_money") && (toCheck ?? 0) > 0 && (
+          <Link href="/reconcile" className="stat alert">
+            <div className="n">{toCheck}</div>
+            <div className="l">{tr("Mobile-money payments to check")}</div>
+          </Link>
+        )}
       </div>
 
       {(toInvoice > 0 || (drafts ?? 0) > 0) && (
@@ -149,6 +184,12 @@ export default async function FinancePage() {
         <Tile href="/bills" title={tr("Supplier bills")} sub={tr("Record and pay suppliers' invoices")} />
         <Tile href="/payables" title={tr("Money we owe")} sub={tr("By supplier and currency")} />
         {can(role, "seeProfit") && <Tile href="/profit" title={tr("Profit")} sub={tr("By order, client, industry, salesperson")} />}
+        {features.on("expenses") && <Tile href="/expenses" title={tr("Expenses")} sub={tr("Rent, fuel, wages and other spending, with receipt photos")} />}
+        {can(role, "seeProfit") && features.on("simple_pl") && (
+          <Tile href="/profit-loss" title={tr("Profit & loss")} sub={tr("Sales, costs, expenses and net profit by month")} />
+        )}
+        {features.on("statements") && <Tile href="/statements" title={tr("Statements")} sub={tr("Client and supplier statements of account")} />}
+        {features.on("mobile_money") && <Tile href="/reconcile" title={tr("Check payments")} sub={tr("Tick payments against the M-Pesa or bank statement")} />}
         <Tile href="/rates" title={tr("Exchange rates")} sub={tr("Company rates for USD, EUR and other currencies")} />
       </div>
     </>

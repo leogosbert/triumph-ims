@@ -7,6 +7,20 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.16.2",
+    date: "2026-10-09",
+    en: [
+      "A new look on laptops: a deeper sidebar with grouped sections, a frosted top bar with your name (click it for your account and company), wider pages and quick actions as cards.",
+      "Backgrounds: choose Aurora, Grid, Waves, Mountains or Plain behind the app, drawn in your company's colours. Find it under More → Appearance or Your account.",
+      "Change password is now in the menu and when you tap the company logo. A reset link from Forgot your password? opens straight at the new-password box.",
+    ],
+    sw: [
+      "Mwonekano mpya kwenye kompyuta: menyu ya pembeni yenye makundi, upau wa juu wenye jina lako (bofya kwa akaunti na kampuni yako), kurasa pana zaidi na vitendo vya haraka kama kadi.",
+      "Mandharinyuma: chagua Aurora, Gridi, Mawimbi, Milima au Wazi nyuma ya programu, kwa rangi za kampuni yako. Ipo kwenye Zaidi → Mwonekano au Akaunti yako.",
+      "Badilisha nenosiri sasa lipo kwenye menyu na unapogusa nembo ya kampuni. Kiungo cha Umesahau nenosiri? kinafungua moja kwa moja kwenye kisanduku cha nenosiri jipya.",
+    ],
+  },
+  {
     version: "1.16.1",
     date: "2026-10-09",
     en: [

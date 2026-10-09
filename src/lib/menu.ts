@@ -143,6 +143,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         { href: "/help", title: "Help", sub: "Short guide for your role, step by step", icon: "help" },
         { href: "/guide", title: "App guide", sub: "Every function, where to find it and how to use it", icon: "help" },
         { href: "/account", title: "Your account", sub: "Your details, password, appearance, sign out", icon: "user" },
+        { href: "/account#password", title: "Change password", sub: "Put a new password for signing in", icon: "lock" },
         opts.isPlatformAdmin === true && platformAdminItem(),
       ],
     },

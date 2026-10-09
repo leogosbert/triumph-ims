@@ -10,6 +10,7 @@ import { kickOutbox } from "@/lib/outbox";
 import { DEVICE_COOKIE, isStepUpError, STEP_UP_MESSAGE } from "@/lib/security";
 import { createClient } from "@/lib/supabase/server";
 import { THEME_COOKIE } from "@/lib/theme";
+import { BG_COOKIE } from "@/lib/background";
 import { primeLang, tr } from "@/lib/tr";
 
 const COOKIE_OPTS = { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 24 * 365 };
@@ -94,7 +95,7 @@ export async function cancelCompanyClosure() {
 
 /**
  * "Clear this device and sign out" (the browser clears its own storage first): signs this
- * device out and forgets the cookies this app keeps (company, device, theme, language).
+ * device out and forgets the cookies this app keeps (company, device, theme, background, language).
  */
 export async function signOutThisDevice(): Promise<{ ok: boolean }> {
   try {
@@ -104,7 +105,7 @@ export async function signOutThisDevice(): Promise<{ ok: boolean }> {
     /* already signed out */
   }
   const jar = await cookies();
-  for (const name of [ACTIVE_COMPANY_COOKIE, DEVICE_COOKIE, THEME_COOKIE, LANG_COOKIE]) {
+  for (const name of [ACTIVE_COMPANY_COOKIE, DEVICE_COOKIE, THEME_COOKIE, BG_COOKIE, LANG_COOKIE]) {
     try {
       jar.delete(name);
     } catch {

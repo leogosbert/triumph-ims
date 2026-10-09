@@ -732,9 +732,26 @@ export const GUIDE: GuideSection[] = [
         steps: [
           "Update your name and phone.",
           "Change your password (you may be asked for the current one).",
+          "Under Appearance choose Auto, Light or Dark, and the background behind the app: Aurora, Grid, Waves, Mountains or Plain.",
           "If you work for more than one company, switch between them here.",
           "Sign out, or sign out on all other devices.",
         ],
+      },
+      {
+        id: "change-password",
+        title: "Putting a new password",
+        summary: "Change your password while signed in, or set a new one if you forgot it.",
+        phone: ["Tap the company logo", "Change password"],
+        laptop: ["More", "Change password"],
+        href: "/account#password",
+        roles: "all",
+        steps: [
+          "Open Change password. It takes you straight to the Change password box on Your account.",
+          "Type the new password, then type it again. The bar shows how strong it is.",
+          "Tap Change password. The app may ask for your current password first, to confirm it's you.",
+          "Forgot your password? On the sign-in screen tap Forgot your password?, enter your email and open the link on the same device. You land on Change password to choose a new one.",
+        ],
+        tips: ["Use at least 10 characters and mix letters, numbers and symbols. Passwords found in known leaks are refused."],
       },
       {
         id: "delete-account",

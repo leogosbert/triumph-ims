@@ -11,6 +11,8 @@ import { PrivacyScreen } from "@/components/PrivacyScreen";
 import { TourHost } from "@/components/tour/TourHost";
 import { Icon } from "@/components/Icon";
 import { getThemePref } from "@/lib/theme";
+import { getBackgroundPref } from "@/lib/background";
+import { AppBackground } from "@/components/AppBackground";
 import { brandingUrl, getAppContext } from "@/lib/context";
 import type { Key } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
@@ -92,6 +94,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     theme: await getThemePref(),
   };
 
+  const personName = profile.full_name || profile.email || user.email || "";
+  const personInitials =
+    personName
+      .split(/[\s@.]+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() ?? "")
+      .join("") || "?";
+  const background = await getBackgroundPref();
+
   const brandStyle = {
     "--brand": company.primary_color,
     "--brand-dark": company.accent_color,
@@ -99,6 +111,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="shell" style={brandStyle}>
+      <AppBackground kind={background} />
       <SideNav items={sideNav(role, t, features.on)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">
@@ -127,6 +140,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <Icon name="bell" size={23} />
               {(unread ?? 0) > 0 && <span className="count">{(unread ?? 0) > 99 ? "99+" : unread}</span>}
             </a>
+            {/* Laptops: who is signed in; opens the same company sheet as the logo. */}
+            <CompanyButton className="topbar-user" title={personName}>
+              <span className="avatar" aria-hidden="true">{personInitials}</span>
+              <span className="who">
+                <strong>{profile.full_name || tr("Your account")}</strong>
+                <span>{t[`role.${role}` as Key]}</span>
+              </span>
+            </CompanyButton>
           </div>
         </header>
         {company.is_demo && (

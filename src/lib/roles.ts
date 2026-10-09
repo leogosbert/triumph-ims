@@ -64,6 +64,15 @@ const PERMISSIONS = {
   seeCrm: ["management", "sales"],
   /** Contracts and contract prices can be read by finance too. */
   seeContracts: ["management", "sales", "finance"],
+  /** Stock transfers between stores: prepared, sent and received by these roles (everyone who sees stock can follow them). */
+  moveStock: ["management", "warehouse"],
+  /** Purchase requests: everyone except drivers asks; management approves; procurement orders. */
+  requestPurchases: ["management", "sales", "procurement", "warehouse", "finance"],
+  seeAllRequests: ["management", "procurement"],
+  /** Reorder suggestions (what to buy, how much). */
+  seeReorder: ["management", "procurement", "warehouse"],
+  /** Business insights: supplier performance, slow stock, quotation conversion, cross-selling. */
+  seeInsights: ["management"],
   /** The documents library: everyone except drivers. */
   seeDocuments: ["management", "sales", "procurement", "warehouse", "finance"],
 } as const satisfies Record<string, readonly Role[]>;

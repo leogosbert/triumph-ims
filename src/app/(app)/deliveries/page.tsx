@@ -54,6 +54,9 @@ export default async function DeliveriesPage({ searchParams }: { searchParams: S
           <Link href="/deliveries/new" className="btn btn-primary btn-small">{tr("+ Delivery note")}</Link>
         )}
       </div>
+      <p className="small">
+        <Link href="/backorders">{tr("Still to deliver")} →</Link>
+      </p>
       <Notice {...notice} />
       <nav className="tabs-row" aria-label={tr("Filter")}>
         {TABS.map((t) => (

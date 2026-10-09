@@ -19,7 +19,7 @@ export default async function StockPage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
   if (!can(role, "seeStock")) redirect("/");
   const store = typeof sp.store === "string" ? sp.store : "";
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "").toLowerCase();
@@ -60,6 +60,9 @@ export default async function StockPage({ searchParams }: { searchParams: Search
           )}
           {can(role, "seeDeliveries") && (
             <Link href="/deliveries" className="btn btn-small">{tr("Deliveries")}</Link>
+          )}
+          {features.on("stock_transfers") && stores.length > 1 && (
+            <Link href="/transfers" className="btn btn-small">{tr("Transfers")}</Link>
           )}
         </div>
       </div>
@@ -140,7 +143,12 @@ export default async function StockPage({ searchParams }: { searchParams: Search
 
       {low.length > 0 && (
         <section className="card" id="low" style={{ borderColor: "#f0d49a" }}>
-          <h2>{tr("Reorder")}</h2>
+          <div className="page-head" style={{ marginBottom: 4 }}>
+            <h2 style={{ margin: 0 }}>{tr("Reorder")}</h2>
+            {can(role, "seeReorder") && features.on("reorder_levels") && (
+              <Link href="/stock/reorder" className="btn btn-small btn-primary">{tr("What to reorder")}</Link>
+            )}
+          </div>
           <ul className="list">
             {low.map((p) => (
               <li key={p.id} className="row">

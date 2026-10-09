@@ -14,12 +14,12 @@ const M = {
   sales: ["/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
   clients: ["/clients"],
   products: ["/products"],
-  purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers"],
-  stock: ["/stock", "/warehouses", "/receiving", "/grns"],
-  deliveries: ["/deliveries"],
+  purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers", "/requisitions"],
+  stock: ["/stock", "/warehouses", "/receiving", "/grns", "/transfers"],
+  deliveries: ["/deliveries", "/backorders"],
   finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile"],
   reports: ["/reports"],
-  more: ["/more", "/guide", "/documents", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin"],
+  more: ["/more", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin"],
 };
 
 /** Phone bottom bar: at most five items, most-used first for each role. */

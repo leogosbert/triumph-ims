@@ -40,6 +40,10 @@ export const EXPORT_TABLES: { table: string; label: string }[] = [
   { table: "contracts", label: "Contracts" },
   { table: "contract_prices", label: "Contract prices" },
   { table: "documents", label: "Documents library (details; files are in storage)" },
+  { table: "stock_transfers", label: "Stock transfers" },
+  { table: "stock_transfer_lines", label: "Stock transfer items" },
+  { table: "requisitions", label: "Purchase requests" },
+  { table: "requisition_lines", label: "Purchase request items" },
   { table: "memberships", label: "Team and roles" },
   { table: "audit_log", label: "Activity log" },
 ];

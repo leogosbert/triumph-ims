@@ -7,6 +7,16 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.16.1",
+    date: "2026-10-09",
+    en: [
+      "App guide: every function of the app explained step by step, with where to find it on a phone and on a laptop and who can use it. Open it from More → App guide, from Help, or by tapping your company logo. You can search it, show only what your role can use, and print it.",
+    ],
+    sw: [
+      "Mwongozo wa programu: kila kazi ya programu imeelezwa hatua kwa hatua, pamoja na mahali pa kuipata kwenye simu na kwenye kompyuta na nani anaweza kuitumia. Ufungue kupitia Zaidi → Mwongozo wa programu, kupitia Msaada, au kwa kugusa nembo ya kampuni yako. Unaweza kutafuta ndani yake, kuonyesha tu unachoweza kutumia, na kuuchapisha.",
+    ],
+  },
+  {
     version: "1.16",
     date: "2026-10-09",
     en: [

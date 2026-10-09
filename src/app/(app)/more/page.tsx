@@ -118,6 +118,7 @@ export default async function MorePage() {
         {isManager && <Tile show={on("/settings/team")} href="/settings/team" title={tr("Team & roles")} sub={tr("Invite people, change roles")} />}
         {isManager && <Tile show={on("/activity")} href="/activity" title={tr("Activity log")} sub={tr("Every change, who made it and when")} />}
         <Tile show={on("/help")} href="/help" title={tr("Help")} sub={tr("Short guide for your role, step by step")} />
+        <Tile href="/guide" icon="help" title={tr("App guide")} sub={tr("Every function, where to find it and how to use it")} />
         {isManager && <Tile show={on("/settings/go-live")} href="/settings/go-live" title={tr("Go-live checklist")} sub={tr("What is ready and what is left")} />}
         <Tile show={on("/notifications")} href="/notifications" title={tr("Notifications")} sub={tr("Your alerts, phone notifications and emails")} />
         {isManager && <Tile show={on("/settings/notifications")} href="/settings/notifications" title={tr("Alerts setup")} sub={tr("Connect phone push and email sending")} />}

@@ -5699,3 +5699,28 @@ table.compare.rep-table tfoot td { font-weight: 700; border-top: 2px solid var(-
   .report-print a { color: inherit !important; text-decoration: none !important; }
   .rep-company { color: #000 !important; }
 }
+
+/* App guide (/guide) */
+.guide-tools { display: grid; gap: 10px; }
+.guide-tools input[type="search"] { width: 100%; }
+.guide-tool-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.guide-toc { display: flex; flex-wrap: wrap; gap: 6px; }
+.guide-toc .chip { display: inline-block; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); font-size: 0.82rem; text-decoration: none; color: var(--text); }
+.guide-section { margin: 22px 0 8px; scroll-margin-top: 70px; }
+.guide-section > h2 { margin-bottom: 2px; }
+.guide-topic { padding: 0; overflow: hidden; scroll-margin-top: 70px; }
+.guide-topic-head { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 12px 14px; background: none; border: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.guide-summary { display: block; margin-top: 2px; font-weight: 400; }
+.guide-chev { font-size: 1.3rem; line-height: 1; color: var(--brand); }
+.guide-body { padding: 0 14px 14px; border-top: 1px solid var(--line); }
+.guide-where { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 12px 0; font-size: 0.88rem; }
+.guide-where dt { color: var(--muted); font-weight: 600; }
+.guide-where dd { margin: 0; font-weight: 600; }
+.guide-steps { margin: 8px 0; padding-left: 22px; display: grid; gap: 6px; }
+.guide-tip { background: var(--soft); border-radius: 10px; padding: 8px 10px; margin: 6px 0 0; }
+@media (max-width: 420px) { .guide-where { grid-template-columns: 1fr; } .guide-where dd { margin-bottom: 6px; } }
+@media print {
+  .guide-topic { break-inside: avoid; border: 1px solid #bbb !important; margin-bottom: 8px; }
+  .guide-topic-head { padding: 6px 8px; }
+  .guide-body { padding: 0 8px 8px; }
+}

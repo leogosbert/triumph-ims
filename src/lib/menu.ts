@@ -50,6 +50,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         c("requestPurchases") && { href: "/requisitions", title: "Purchase requests", sub: "Ask for goods to buy; approve and turn into orders", icon: "inbox" },
         c("seePurchasing") && { href: "/supplier-rfqs", title: "Supplier RFQs", sub: "Ask suppliers for prices and compare", icon: "inbox" },
         c("seePurchasing") && { href: "/purchase-orders", title: "Purchase orders", sub: "Orders to suppliers, approvals", icon: "doc" },
+        c("seePurchasing") && { href: "/approvals", title: "Approval steps", sub: "Who approves purchase orders, in which order; what waits for you", icon: "check" },
         c("seeSuppliers") && { href: "/suppliers", title: "Suppliers", sub: "Search, view and edit suppliers", icon: "truck" },
         c("receiveGoods") && { href: "/receiving", title: "Receive goods", sub: "Record goods arriving against purchase orders", icon: "inbox" },
         c("seeBills") && { href: "/purchasing/match", title: "Order, receipt and bill check", sub: "Compare what was ordered, received and billed", icon: "check" },
@@ -100,6 +101,8 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       items: [
         c("seeInsights") && { href: "/insights", title: "Business insights", sub: "Win rates, supplier punctuality, slow stock, items bought together", icon: "activity" },
         role !== "driver" && { href: "/reports", title: "Reports", sub: "Choose a report and dates, then print or download PDF or Excel", icon: "report" },
+        c("planFinance") && { href: "/head-office", title: "Head-office figures", sub: "Sales, profit, expenses, money owed and stock of every branch side by side", icon: "building" },
+        role !== "driver" && { href: "/scheduled-reports", title: "Scheduled reports", sub: "Reports emailed to you every day, week or month", icon: "report" },
       ],
     },
     {
@@ -134,6 +137,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         },
         c("seeDocuments") && { href: "/documents", title: "Documents", sub: "Certificates, licences, SDS and other papers, with expiry reminders", icon: "doc" },
         isManager && { href: "/settings/team", title: "Team & roles", sub: "Invite people, change roles", icon: "team" },
+        isManager && { href: "/branches", title: "Branches", sub: "Branches or business units with their stores and people", icon: "building" },
         isManager && { href: "/settings/security", title: "Security", sub: "Two-step verification, automatic sign-out, password rules", icon: "lock" },
         isManager && { href: "/activity", title: "Activity log", sub: "Every change, who made it and when", icon: "activity" },
         isManager && { href: "/settings/backups", title: "Backups", sub: "Automatic daily copies of your data, back up now, download", icon: "lock" },

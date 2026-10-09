@@ -370,7 +370,7 @@ begin
       raise exception 'Only management can approve purchase orders.' using errcode = '42501';
     end if;
   elsif not public.has_role(po.company_id, array[st.role, 'management']::public.app_role[]) then
-    raise exception 'This step is approved by %.', st.role using errcode = '42501';
+    raise exception 'This step is for another role.' using errcode = '42501';
   end if;
   if po.submitted_by = auth.uid() then
     raise exception 'You cannot approve a purchase order you submitted yourself.' using errcode = '42501';

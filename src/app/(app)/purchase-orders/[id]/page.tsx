@@ -13,7 +13,7 @@ import { formatMoney } from "@/lib/money";
 import { productOptions } from "@/lib/options";
 import { namesFor } from "@/lib/people";
 import { PO_STATUS } from "@/lib/purchasing";
-import { can } from "@/lib/roles";
+import { can, ROLE_LABELS, type Role } from "@/lib/roles";
 import { quoteNo, StatusBadge, todayTz } from "@/lib/sales";
 import {
   addPoLine,
@@ -29,6 +29,8 @@ import {
 import { OrderCosts, type OrderCost } from "@/components/OrderCosts";
 import { BILL_STATUS, shownStatus } from "@/lib/finance";
 import { applyLandedCost } from "../../finance/actions";
+import { BranchField } from "@/components/BranchField";
+import { branchList } from "@/lib/branches";
 
 export const metadata = { title: "Purchase order" };
 
@@ -43,6 +45,8 @@ type Line = {
   received_qty: number;
   product: { sku: string } | null;
 };
+type Approval = { step: number; role: string; label: string | null; approved_by: string | null; approved_at: string | null; note: string | null };
+type Step = { step: number; role: string; min_amount: number; label: string | null };
 const n = (v: unknown) => Number(v ?? 0);
 const fmtNum = (v: unknown) => n(v).toLocaleString("en-GB", { maximumFractionDigits: 6 });
 
@@ -50,7 +54,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, role, user, features } = await getAppContext();
   if (!can(role, "seePurchasing")) redirect("/");
 
   const { data: po } = await supabase
@@ -66,6 +70,21 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
   const editable = canEdit && isDraft;
   const { data: grnData } = await supabase.from("goods_receipts").select("id, number, received_on").eq("po_id", id).order("created_at");
   const grns = (grnData ?? []) as { id: string; number: string; received_on: string }[];
+  // Approval steps (Enterprise): what this order needs and who approved; [] before the Stage 15 SQL.
+  const useSteps = features.on("advanced_approvals");
+  const [{ data: apprData }, { data: stepData }, branches] = await Promise.all([
+    supabase.from("po_approvals").select("step, role, label, approved_by, approved_at, note").eq("po_id", id).order("step"),
+    useSteps && editable ? supabase.from("approval_steps").select("step, role, min_amount, label").eq("company_id", company.id).eq("doc_type", "purchase_order").order("step") : Promise.resolve({ data: [] }),
+    features.on("branches") ? branchList(supabase, company.id) : Promise.resolve([]),
+  ]);
+  const approvals = (apprData ?? []) as Approval[];
+  const steps = (stepData ?? []) as Step[];
+  const current = po.status === "pending_approval" ? approvals.find((a) => !a.approved_at) : undefined;
+  const mayDecide =
+    po.status === "pending_approval" &&
+    po.submitted_by !== user.id &&
+    (current ? (role === current.role || role === "management") && !approvals.some((a) => a.approved_by === user.id) : can(role, "approvePOs"));
+  const stepName = (a: { role: string; label: string | null }) => `${a.label ? `${a.label} · ` : ""}${tr(ROLE_LABELS[a.role as Role] ?? a.role)}`;
   const [{ data: lineData }, { data: quote }, products, names] = await Promise.all([
     supabase
       .from("po_lines")
@@ -76,7 +95,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
       ? supabase.from("quotations").select("id, number, revision, client:clients(name)").eq("id", po.quotation_id).maybeSingle()
       : Promise.resolve({ data: null }),
     editable ? productOptions(supabase, company.id) : Promise.resolve([]),
-    namesFor(supabase, [po.created_by, po.submitted_by, po.approved_by]),
+    namesFor(supabase, [po.created_by, po.submitted_by, po.approved_by, ...approvals.map((a) => a.approved_by)]),
   ]);
   const lines = (lineData ?? []) as unknown as Line[];
   const showCosts = can(role, "editOrderCosts") && po.status !== "cancelled" && !isDraft;
@@ -136,13 +155,25 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         {po.supplier_ref && <>{" "}{tr("· their ref")}{" "}{po.supplier_ref}</>}
       </p>
       <Notice {...notice} />
+      <BranchField kind="purchase_order" id={po.id} branchId={po.branch_id ?? null} branches={branches} canMove={can(role, "manageBranches")} />
 
       {isDraft && po.review_note && (
         <div className="banner bad">
           <strong>{tr("Sent back by management:")}</strong> {po.review_note}
         </div>
       )}
-      {po.status === "pending_approval" && (
+      {po.status === "pending_approval" && current && (
+        <div className="banner warn">
+          <strong>
+            {tr("Waiting for approval")}: {tr("step")} {current.step} {tr("of")} {approvals.length} · {stepName(current)}
+          </strong>
+          {po.submitted_by && (
+            <div className="small">{tr("Submitted by")}{" "}{names.get(po.submitted_by)}{" "}{tr("on")}{" "}{formatDateTime(po.submitted_at)}
+            </div>
+          )}
+        </div>
+      )}
+      {po.status === "pending_approval" && !current && (
         <div className="banner warn">
           <strong>{tr("Waiting for management approval")}</strong>{" "}{tr("because:")}{" "}{po.approval_reason}.
           {po.submitted_by && (
@@ -167,12 +198,40 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
       {editable && lines.length > 0 && (
         <form action={submitPo} className="card">
           <input type="hidden" name="id" value={po.id} />
-          <p className="small muted" style={{ marginTop: 0 }}>{tr("POs above")}{" "}{formatMoney(company.po_approval_above, company.base_currency)}{" "}{tr("need management approval (unless you are management).")}</p>
+          {steps.length > 0 ? (
+            <p className="small muted" style={{ marginTop: 0 }}>
+              {tr("Approval steps")}:{" "}
+              {steps.map((s) => `${stepName(s)}${n(s.min_amount) > 0 ? ` (${tr("from")} ${formatMoney(s.min_amount, company.base_currency)})` : ""}`).join(" → ")}
+            </p>
+          ) : (
+            <p className="small muted" style={{ marginTop: 0 }}>{tr("POs above")}{" "}{formatMoney(company.po_approval_above, company.base_currency)}{" "}{tr("need management approval (unless you are management).")}</p>
+          )}
           <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Submitting…")}>{tr("Submit purchase order")}</SubmitButton>
         </form>
       )}
 
-      {po.status === "pending_approval" && can(role, "approvePOs") && po.submitted_by !== user.id && (
+      {approvals.length > 0 && (
+        <section className="card">
+          <h2>{tr("Approvals")}</h2>
+          <ol className="small" style={{ margin: 0, paddingLeft: 20 }}>
+            {approvals.map((a) => (
+              <li key={a.step}>
+                {stepName(a)}:{" "}
+                {a.approved_at ? (
+                  <span>
+                    ✓ {a.approved_by ? names.get(a.approved_by) : ""} · {formatDateTime(a.approved_at)}
+                    {a.note && ` · ${a.note}`}
+                  </span>
+                ) : (
+                  <span className="muted">{a === current ? tr("waiting now") : tr("after the step before")}</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {mayDecide && (
         <form action={reviewPo} className="card">
           <input type="hidden" name="id" value={po.id} />
           <h2>{tr("Your decision")}</h2>

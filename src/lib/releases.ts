@@ -7,6 +7,24 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.18",
+    date: "2026-10-09",
+    en: [
+      "Branches: put stores and people in branches; quotations, invoices, purchase orders and expenses go to the branch of the person who makes them. Head-office figures show every branch side by side.",
+      "Approval steps for purchase orders: for example finance checks every order and management approves the big ones. Each person is told when it is their turn.",
+      "Budgets vs actual for sales, profit and expenses, and a cash-flow forecast week by week from the cash you have today.",
+      "Purchase planning from what you sell: days of stock left, when to order and how much. Vehicles with insurance, inspection and service reminders and a fuel and repair log.",
+      "Scheduled reports: any report sent to you every day, week or month, as an alert and an email.",
+    ],
+    sw: [
+      "Matawi: weka stoo na watu kwenye matawi; nukuu za bei, ankara, oda za ununuzi na matumizi zinaenda kwenye tawi la mtu anayeziandaa. Takwimu za makao makuu zinaonyesha kila tawi bega kwa bega.",
+      "Hatua za kuidhinisha oda za ununuzi: kwa mfano fedha wanakagua kila oda na uongozi unaidhinisha oda kubwa. Kila mtu anaarifiwa zamu yake inapofika.",
+      "Bajeti dhidi ya halisi kwa mauzo, faida na matumizi, na utabiri wa mtiririko wa fedha wiki kwa wiki kuanzia fedha ulizonazo leo.",
+      "Mipango ya ununuzi kutokana na unachouza: siku za stoku zilizobaki, lini kuagiza na kiasi gani. Magari yenye vikumbusho vya bima, ukaguzi na huduma, na kumbukumbu ya mafuta na matengenezo.",
+      "Ripoti zilizopangwa: ripoti yoyote inakutumiwa kila siku, wiki au mwezi, kama arifa na barua pepe.",
+    ],
+  },
+  {
     version: "1.17",
     date: "2026-10-09",
     en: [

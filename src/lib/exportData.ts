@@ -48,6 +48,10 @@ export const EXPORT_TABLES: { table: string; label: string }[] = [
   { table: "cash_positions", label: "Cash and bank balances" },
   { table: "vehicles", label: "Vehicles" },
   { table: "vehicle_logs", label: "Vehicle log (fuel, services, repairs)" },
+  { table: "branches", label: "Branches" },
+  { table: "approval_steps", label: "Approval steps" },
+  { table: "po_approvals", label: "Purchase order approvals" },
+  { table: "report_schedules", label: "Scheduled reports (yours)" },
   { table: "memberships", label: "Team and roles" },
   { table: "audit_log", label: "Activity log" },
 ];

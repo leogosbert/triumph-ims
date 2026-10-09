@@ -14,12 +14,12 @@ const M = {
   sales: ["/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
   clients: ["/clients"],
   products: ["/products"],
-  purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers", "/requisitions"],
+  purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers", "/requisitions", "/approvals"],
   stock: ["/stock", "/warehouses", "/receiving", "/grns", "/transfers", "/planning"],
   deliveries: ["/deliveries", "/backorders", "/fleet"],
   finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow"],
-  reports: ["/reports"],
-  more: ["/more", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin"],
+  reports: ["/reports", "/head-office", "/scheduled-reports"],
+  more: ["/more", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
 };
 
 /** Phone bottom bar: at most five items, most-used first for each role. */

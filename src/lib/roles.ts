@@ -83,6 +83,10 @@ const PERMISSIONS = {
   seeFleet: ["management", "warehouse", "finance", "driver"],
   editFleet: ["management", "warehouse"],
   logFleet: ["management", "warehouse", "driver"],
+  /** Branches: add them, put stores and people in them, move documents between them. */
+  manageBranches: ["management"],
+  /** Approval steps for purchase orders. */
+  setApprovals: ["management"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

@@ -55,6 +55,21 @@ export const GUIDE: GuideSection[] = [
         tips: ["What you see depends on your role and on the features your company has switched on."],
       },
       {
+        id: "how-it-works",
+        title: "How it works: one order, step by step",
+        summary: "An animated walk through a whole order: customer, request, quotation, terms, purchase, delivery, invoice, payment and profit.",
+        phone: ["More", "Help", "App guide", "How it works"],
+        laptop: ["Help", "App guide", "How it works"],
+        href: "/how-it-works",
+        roles: "all",
+        steps: [
+          "Open How it works at the top of the App guide, from the demo bar, or from the sign-in page before you have an account.",
+          "Each step shows what happens in the business, what you do in LeMoSp and where to find it, with a sample document that fills itself in.",
+          "Press Next and Back, use the arrow keys, or swipe on a phone. The dots at the top jump to any step.",
+          "When you are signed in, Open this screen takes you to the real screen for that step.",
+        ],
+      },
+      {
         id: "sign-in",
         title: "Signing in and two-step verification",
         summary: "Your password, and an optional 6-digit code from an authenticator app for extra safety.",
@@ -1030,7 +1045,7 @@ export const GUIDE: GuideSection[] = [
         steps: [
           "Update your name and phone.",
           "Change your password (you may be asked for the current one).",
-          "Under Appearance choose Auto, Light or Dark, and the background behind the app: Aurora, Grid, Waves, Mountains or Plain.",
+          "Under Appearance choose Auto, Light or Dark, and the background behind the app: Architecture, Aurora, Grid, Waves, Mountains or Plain.",
           "If you work for more than one company, switch between them here.",
           "Sign out, or sign out on all other devices.",
         ],

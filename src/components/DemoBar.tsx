@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useFormStatus } from "react-dom";
 import { exitDemo, restartDemo, setDemoRole, switchDemoLevel } from "@/app/demo-actions";
 import { TourButton } from "@/components/tour/TourButton";
@@ -78,6 +79,9 @@ export function DemoBar({ role, hoursLeft, level }: { role: string; hoursLeft: n
         </span>
       </div>
       <TourButton tour={current} label="Quick guide" className="demo-link demo-tour" />
+      <Link href="/how-it-works" className="demo-link">
+        {tr("How it works")}
+      </Link>
       <form action={setDemoRole} className="demo-role">
         <label htmlFor="demo-role">{tr("View as")}</label>
         <select id="demo-role" name="role" defaultValue={role} onChange={(e) => e.currentTarget.form?.requestSubmit()}>

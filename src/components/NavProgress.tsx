@@ -3,7 +3,16 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 
-/** Thin teal bar across the top while the next screen loads, so every tap feels answered. */
+/** Marks the page as leaving (the current screen fades back) until the next one arrives. */
+function leaving(on: boolean) {
+  if (on) document.documentElement.dataset.nav = "leaving";
+  else delete document.documentElement.dataset.nav;
+}
+
+/**
+ * Thin teal bar across the top while the next screen loads, so every tap feels answered.
+ * On a link tap the current screen also fades back, and the new one rises in (globals.css).
+ */
 function Bar() {
   const pathname = usePathname();
   const search = useSearchParams();
@@ -13,6 +22,7 @@ function Bar() {
   // A new page arrived: finish the bar.
   useEffect(() => {
     setState((s) => (s === "loading" ? "done" : s));
+    leaving(false);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => setState("idle"), 400);
   }, [pathname, search]);
@@ -35,6 +45,9 @@ function Bar() {
       if (url.pathname === location.pathname && url.search === location.search) return;
       if (timer.current) clearTimeout(timer.current);
       setState("loading");
+      leaving(true);
+      // Never leave the screen faded if the next one does not come (offline, error).
+      timer.current = setTimeout(() => leaving(false), 8000);
     }
     function onSubmit(e: SubmitEvent) {
       const f = e.target as HTMLFormElement | null;
@@ -49,6 +62,7 @@ function Bar() {
     return () => {
       document.removeEventListener("click", onClick, true);
       document.removeEventListener("submit", onSubmit, true);
+      leaving(false);
     };
   }, []);
 

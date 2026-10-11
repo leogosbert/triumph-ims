@@ -109,6 +109,15 @@ under Features).
 - Still to come: departmental permissions (limiting what each branch sees); API and accounting/payment
   integrations.
 
+## v1.19 — Look, walkthrough and sign-in safety (built — no SQL)
+- Architecture background (default): a skyline in the company's colours fading upwards, also on the sign-in pages.
+  Screens fade back on a link tap and rise in when the next one arrives.
+- How it works (`/how-it-works`, public): one order in 13 animated steps, customer to profit, ending with the three
+  demos (or links back into the app when signed in). Linked from sign-in, welcome, the demo bar and the App guide.
+- English / Kiswahili switch on the sign-in, welcome and How it works pages.
+- Security: sign-in waits after 5 wrong passwords on a device (30 s, doubling, up to 15 min);
+  Cross-Origin-Resource-Policy and a stricter Permissions-Policy.
+
 ## Stage 16 — Intelligence & integrations
 - AI business assistant over the company's own data (permission-checked, states period and data used).
 - Configurable Tanzania tax (TRA EFD/VFD); WhatsApp/SMS notifications; East Africa localisation.

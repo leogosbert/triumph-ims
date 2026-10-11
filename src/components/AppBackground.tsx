@@ -1,4 +1,5 @@
 import type { BackgroundPref } from "@/lib/background";
+import { ArchitectureScene } from "@/components/ArchitectureScene";
 
 /**
  * The decorative layer behind every screen, drawn in the company's own colours (--brand, --brand-dark).
@@ -8,6 +9,7 @@ export function AppBackground({ kind }: { kind: BackgroundPref }) {
   if (kind === "plain") return null;
   return (
     <div className="app-bg" data-bg={kind} aria-hidden="true">
+      {kind === "architecture" && <ArchitectureScene />}
       {kind === "aurora" && (
         <>
           <span className="blob b1" />

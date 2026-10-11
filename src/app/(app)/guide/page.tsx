@@ -36,6 +36,10 @@ export default async function GuidePage() {
       <p className="small no-print">
         <Link href="/help">{tr("← Help")}</Link>
       </p>
+      <Link href="/how-it-works" className="tile guide-journey no-print">
+        <span className="tile-title">{tr("How it works: one order, step by step")}</span>
+        <span className="tile-sub">{tr("Follow an order from the first call with a customer to the agreed terms, delivery, payment and profit, with animations. Press Next to move on.")}</span>
+      </Link>
       <GuideView sections={sections} company={company.name} roleLabel={tr(ROLE_LABELS[role])} />
     </>
   );

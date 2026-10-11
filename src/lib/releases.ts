@@ -7,6 +7,22 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.19",
+    date: "2026-10-11",
+    en: [
+      "New look: a city skyline in your company's colours fades in behind every screen (change it under Your account → Appearance). Screens now fade and rise smoothly as you move between them.",
+      "How it works: follow one order step by step, from the first call with a customer to the agreed terms, delivery, payment and profit, with animated examples. Open it from the App guide, the demo bar or the sign-in page.",
+      "English or Kiswahili can now be chosen on the sign-in page too.",
+      "Safer sign-in: after five wrong passwords on a device, sign-in waits before the next try, and the app sends extra browser protections.",
+    ],
+    sw: [
+      "Mwonekano mpya: mandhari ya majengo ya jiji kwa rangi za kampuni yako yanafifia nyuma ya kila skrini (badilisha kwenye Akaunti yako → Mwonekano). Skrini sasa zinafifia na kuinuka taratibu unapohama kati yake.",
+      "Jinsi inavyofanya kazi: fuatilia oda moja hatua kwa hatua, kutoka simu ya kwanza na mteja hadi masharti mliyokubaliana, ufikishaji, malipo na faida, kwa mifano inayosonga. Ifungue kutoka Mwongozo wa programu, upau wa majaribio au ukurasa wa kuingia.",
+      "Kiingereza au Kiswahili sasa kinaweza kuchaguliwa pia kwenye ukurasa wa kuingia.",
+      "Kuingia kwa usalama zaidi: baada ya manenosiri matano yasiyo sahihi kwenye kifaa, kuingia kunasubiri kabla ya jaribio linalofuata, na programu inatuma kinga za ziada za kivinjari.",
+    ],
+  },
+  {
     version: "1.18",
     date: "2026-10-09",
     en: [

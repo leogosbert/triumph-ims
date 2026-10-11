@@ -1,5 +1,6 @@
 "use client";
 
+import { AppBackground } from "@/components/AppBackground";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOut } from "@/app/actions";
@@ -66,6 +67,7 @@ export default function TwoStepPage() {
 
   return (
     <div className="auth-wrap">
+      <AppBackground kind="architecture" />
       {adminApp ? (
         <img className="auth-logo auth-logo-admin" src="/brand/lemosp-admin-on-dark.svg" alt="LeMoSp ADMIN" />
       ) : (

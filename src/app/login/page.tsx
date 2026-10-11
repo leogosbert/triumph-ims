@@ -12,6 +12,8 @@ import { createClient } from "@/lib/supabase/client";
 import { startDemo } from "@/app/demo-actions";
 import { useAdminHost } from "@/lib/host-client";
 import { DemoScalePicker } from "@/components/DemoScalePicker";
+import { AppBackground } from "@/components/AppBackground";
+import { LangSwitch } from "@/components/LangSwitch";
 import { recordSignIn } from "@/app/security-actions";
 import { LEAKED_MESSAGE, timesLeaked } from "@/lib/pwned";
 
@@ -21,6 +23,38 @@ function logSignIn() {
 }
 
 type Mode = "signin" | "signup";
+
+/**
+ * Wrong passwords on this device: after 5 in a row, sign-in waits 30 seconds, doubling each time
+ * (up to 15 minutes). Supabase also limits attempts on its side; this stops guessing early and
+ * tells the person plainly. Kept in the browser only; a correct sign-in clears it.
+ */
+const FAIL_KEY = "lemosp-signin-fails";
+type Fails = { n: number; until: number };
+function readFails(): Fails {
+  try {
+    const v = JSON.parse(localStorage.getItem(FAIL_KEY) ?? "null") as Fails | null;
+    return v && typeof v.n === "number" && typeof v.until === "number" ? v : { n: 0, until: 0 };
+  } catch {
+    return { n: 0, until: 0 };
+  }
+}
+function writeFails(f: Fails | null) {
+  try {
+    if (f) localStorage.setItem(FAIL_KEY, JSON.stringify(f));
+    else localStorage.removeItem(FAIL_KEY);
+  } catch {
+    /* private mode: no memory, Supabase's own limit still applies */
+  }
+}
+function addFail(): Fails {
+  const f = readFails();
+  const n = f.n + 1;
+  const wait = n >= 5 ? Math.min(15 * 60, 30 * 2 ** (n - 5)) * 1000 : 0;
+  const next = { n, until: wait ? Date.now() + wait : 0 };
+  writeFails(next);
+  return next;
+}
 
 export default function LoginPage() {
   const tr = useTr();
@@ -53,8 +87,25 @@ export default function LoginPage() {
     setBusy(true);
     try {
       if (mode === "signin") {
+        const left = readFails().until - Date.now();
+        if (left > 0) {
+          setError(tr("Too many wrong attempts. For your security, wait {s} seconds and try again.").replace("{s}", String(Math.ceil(left / 1000))));
+          return;
+        }
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
+          if (!/confirm/i.test(error.message)) {
+            const f = addFail();
+            if (f.until) {
+              setError(
+                tr("Too many wrong attempts. For your security, wait {s} seconds and try again.").replace(
+                  "{s}",
+                  String(Math.ceil((f.until - Date.now()) / 1000)),
+                ),
+              );
+              return;
+            }
+          }
           setError(
             /confirm/i.test(error.message)
               ? "Please confirm your email first. Check your inbox for the link."
@@ -64,6 +115,7 @@ export default function LoginPage() {
           );
           return;
         }
+        writeFails(null);
         clearAway();
         // Two-step verification turned on: ask for the code next.
         const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -127,6 +179,8 @@ export default function LoginPage() {
 
   return (
     <div className="auth-wrap">
+      <AppBackground kind="architecture" />
+      <LangSwitch className="auth-lang" />
       {adminApp ? (
         <img className="auth-logo auth-logo-admin" src="/brand/lemosp-admin-on-dark.svg" alt="LeMoSp ADMIN" />
       ) : (
@@ -149,8 +203,8 @@ export default function LoginPage() {
           </div>
         )}
 
-        {error && <p className="notice notice-error" role="alert">{error}</p>}
-        {info && <p className="notice notice-ok" role="status">{info}</p>}
+        {error && <p className="notice notice-error" role="alert">{tr(error)}</p>}
+        {info && <p className="notice notice-ok" role="status">{tr(info)}</p>}
 
         <form onSubmit={onSubmit}>
           {mode === "signup" && (
@@ -193,6 +247,11 @@ export default function LoginPage() {
         </div>
         <DemoScalePicker action={startDemo} tone="dark" />
       </section>
+      )}
+      {!adminApp && (
+        <Link href="/how-it-works" className="how-link">
+          {tr("New here? See how LeMoSp works, step by step")} ›
+        </Link>
       )}
       <p className="auth-foot">
         {tr("LeMoSp · a LeMo Tech Solutions product")} · <Link href="/delete-account">{tr("Delete your account")}</Link>

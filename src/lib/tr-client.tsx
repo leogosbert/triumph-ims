@@ -9,6 +9,11 @@ export function LangProvider({ lang, children }: { lang: "en" | "sw"; children: 
   return <LangContext.Provider value={lang}>{children}</LangContext.Provider>;
 }
 
+/** The current language ("en" or "sw"). */
+export function useLang(): "en" | "sw" {
+  return useContext(LangContext);
+}
+
 /** Client-side twin of tr(): returns a translate function for the current language. */
 export function useTr(): (s: string) => string {
   const lang = useContext(LangContext);

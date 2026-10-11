@@ -1,5 +1,6 @@
 "use client";
 
+import { AppBackground } from "@/components/AppBackground";
 import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { useState } from "react";
@@ -37,6 +38,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="auth-wrap">
+      <AppBackground kind="architecture" />
       {adminApp ? (
         <img className="auth-logo auth-logo-admin" src="/brand/lemosp-admin-on-dark.svg" alt="LeMoSp ADMIN" />
       ) : (

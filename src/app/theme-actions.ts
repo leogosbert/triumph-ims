@@ -14,7 +14,7 @@ export async function setTheme(form: FormData) {
   await back();
 }
 
-/** Saves the app background (Aurora, Grid, Waves, Mountains or Plain) and returns to the same page. */
+/** Saves the app background (Architecture, Aurora, Grid, Waves, Mountains or Plain) and returns to the same page. */
 export async function setBackground(form: FormData) {
   const bg = form.get("bg");
   if (isBackgroundPref(bg)) {

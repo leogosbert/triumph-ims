@@ -1,3 +1,4 @@
+import { AppBackground } from "@/components/AppBackground";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 
@@ -17,6 +18,7 @@ export default async function DeleteAccountInfoPage() {
 
   return (
     <div className="auth-wrap">
+      <AppBackground kind="architecture" />
       <img className="auth-logo" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
       <article className="auth-card del-card del-info">
         <h1 className="del-title">{tr("Delete your LeMoSp account")}</h1>

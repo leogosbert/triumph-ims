@@ -6,8 +6,8 @@ import { adminUrl, allowedOnAdminHost, isAdminHost } from "@/lib/hosts";
 // /api/outbox is called by the scheduled job and checks its own secret.
 // /api/app-manifest is the install details (served as /manifest.webmanifest), fetched without cookies.
 // /delete-account explains how to delete an account; app stores require it to open without signing in.
-// /how-it-works is the step-by-step story of an order, for visitors before they sign up.
-const PUBLIC_PATHS = ["/how-it-works", "/login", "/auth", "/forgot-password", "/api/outbox", "/api/version", "/api/app-manifest", "/delete-account"];
+// /how-it-works and /playbooks (with their PDFs) teach the app, also to visitors before they sign up.
+const PUBLIC_PATHS = ["/how-it-works", "/playbooks", "/login", "/auth", "/forgot-password", "/api/outbox", "/api/version", "/api/app-manifest", "/delete-account"];
 
 /**
  * Keeps the sign-in session fresh and sends signed-out visitors to /login.
@@ -46,9 +46,10 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Reads the signed session token (and refreshes it when it has expired) without asking
+  // Supabase Auth over the network on every tap; see src/lib/supabase/user.ts.
+  const { data: claims } = await supabase.auth.getClaims();
+  const user = claims?.claims?.sub ? { id: claims.claims.sub } : null;
 
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 

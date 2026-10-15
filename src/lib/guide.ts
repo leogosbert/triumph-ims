@@ -70,6 +70,21 @@ export const GUIDE: GuideSection[] = [
         ],
       },
       {
+        id: "playbooks",
+        title: "Playbooks with PDFs",
+        summary: "Long step-by-step guides with examples and real business situations, each also as a PDF.",
+        phone: ["More", "Help", "Playbooks"],
+        laptop: ["Help", "Playbooks"],
+        href: "/playbooks",
+        roles: "all",
+        steps: [
+          "Open Playbooks and choose one: setting up, order to payment, numbers and decisions, getting paid, stock, routines or security.",
+          "Read it step by step with Next and Back. Each step has the actions in the app, a sample record and \"If this happens\" situations with what to do.",
+          "Chapters jumps to any part. Your place is remembered on this device.",
+          "Download PDF gives the whole playbook to print or share with your team, in English or Kiswahili.",
+        ],
+      },
+      {
         id: "sign-in",
         title: "Signing in and two-step verification",
         summary: "Your password, and an optional 6-digit code from an authenticator app for extra safety.",

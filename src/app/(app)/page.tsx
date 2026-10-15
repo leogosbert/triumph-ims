@@ -55,15 +55,64 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   const sp = (await searchParams) ?? {};
   const welcomeLevel = typeof sp.welcome === "string" && isLevel(sp.welcome) ? sp.welcome : null;
   const firstName = displayName(profile).split(" ")[0];
-  // Check for time-based alerts (at most every 30 minutes; harmless before the Stage 7 update).
-  await supabase.rpc("refresh_alerts", { p_company: company.id });
-  const { t } = await getDict();
-  const dash = await loadDashboard(supabase, company.id, role, t);
-  // Automatic backups: an orange line for managers when the last one is more than 2 days old.
-  if (isManager && !company.is_demo) {
-    const overdue = await backupTowerItem(supabase, company.id);
-    if (overdue) dash.tower.attention.unshift({ ...overdue, label: tr(overdue.label) });
-  }
+  // Check for time-based alerts (at most every 30 minutes; harmless before the Stage 7 update),
+  // then the dashboard; everything else on this screen loads at the same time.
+  type Pending = { id: string; number: string; revision: number; total: number; currency: string; client: { name: string } | null };
+  type PendingPo = { id: string; number: string; total: number; currency: string; supplier: { name: string } | null };
+  const level: Level = company.business_level ?? "medium";
+  const [{ t }, [dash, overdue], counts, approvals, poApprovals, recs] = await Promise.all([
+    getDict(),
+    (async () => {
+      await supabase.rpc("refresh_alerts", { p_company: company.id });
+      const { t: dict } = await getDict();
+      return Promise.all([
+        loadDashboard(supabase, company.id, role, dict),
+        // Automatic backups: an orange line for managers when the last one is more than 2 days old.
+        isManager && !company.is_demo ? backupTowerItem(supabase, company.id) : Promise.resolve(null),
+      ]);
+    })(),
+    isManager
+      ? Promise.all([
+          supabase.from("memberships").select("id", { count: "exact", head: true }).eq("company_id", company.id),
+          supabase.from("invitations").select("id", { count: "exact", head: true }).eq("company_id", company.id),
+          supabase.from("clients").select("id", { count: "exact", head: true }).eq("company_id", company.id),
+        ])
+      : Promise.resolve(null),
+    can(role, "approveQuotes")
+      ? supabase
+          .from("quotations")
+          .select("id, number, revision, total, currency, submitted_by, client:clients(name)")
+          .eq("company_id", company.id)
+          .eq("status", "pending_approval")
+          .neq("submitted_by", user.id)
+          .order("submitted_at")
+          .limit(10)
+          .then(({ data }) => (data ?? []) as unknown as Pending[])
+      : Promise.resolve([] as Pending[]),
+    can(role, "approvePOs")
+      ? supabase
+          .from("purchase_orders")
+          .select("id, number, total, currency, supplier:suppliers(name)")
+          .eq("company_id", company.id)
+          .eq("status", "pending_approval")
+          .neq("submitted_by", user.id)
+          .order("submitted_at")
+          .limit(10)
+          .then(({ data }) => (data ?? []) as unknown as PendingPo[])
+      : Promise.resolve([] as PendingPo[]),
+    // Growth (Stage 11): recommendations for managers. Quiet before that SQL is run.
+    isManager && features.ready && !company.is_demo
+      ? (async () => {
+          try {
+            await supabase.rpc("run_growth_check", { p_company: company.id, p_force: false });
+          } catch {
+            /* the scheduled check covers it */
+          }
+          return loadRecommendations(supabase, company.id, features, level);
+        })()
+      : Promise.resolve(null),
+  ]);
+  if (overdue) dash.tower.attention.unshift({ ...overdue, label: tr(overdue.label) });
   const heroKpis = dash.kpis.slice(0, 2);
   const restKpis = dash.kpis.slice(2);
   const actions = quickActions(role, t);
@@ -71,12 +120,8 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   const base = company.base_currency;
 
   let checklist: { done: boolean; label: string; href: string }[] = [];
-  if (isManager) {
-    const [{ count: members }, { count: invites }, { count: clientCount }] = await Promise.all([
-      supabase.from("memberships").select("id", { count: "exact", head: true }).eq("company_id", company.id),
-      supabase.from("invitations").select("id", { count: "exact", head: true }).eq("company_id", company.id),
-      supabase.from("clients").select("id", { count: "exact", head: true }).eq("company_id", company.id),
-    ]);
+  if (counts) {
+    const [{ count: members }, { count: invites }, { count: clientCount }] = counts;
     checklist = [
       {
         done: Boolean(company.tin && company.address && company.phone),
@@ -91,35 +136,6 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   }
   const remaining = checklist.filter((c) => !c.done).length;
 
-  type Pending = { id: string; number: string; revision: number; total: number; currency: string; client: { name: string } | null };
-  let approvals: Pending[] = [];
-  if (can(role, "approveQuotes")) {
-    const { data } = await supabase
-      .from("quotations")
-      .select("id, number, revision, total, currency, submitted_by, client:clients(name)")
-      .eq("company_id", company.id)
-      .eq("status", "pending_approval")
-      .neq("submitted_by", user.id)
-      .order("submitted_at")
-      .limit(10);
-    approvals = (data ?? []) as unknown as Pending[];
-  }
-  type PendingPo = { id: string; number: string; total: number; currency: string; supplier: { name: string } | null };
-  let poApprovals: PendingPo[] = [];
-  if (can(role, "approvePOs")) {
-    const { data } = await supabase
-      .from("purchase_orders")
-      .select("id, number, total, currency, supplier:suppliers(name)")
-      .eq("company_id", company.id)
-      .eq("status", "pending_approval")
-      .neq("submitted_by", user.id)
-      .order("submitted_at")
-      .limit(10);
-    poApprovals = (data ?? []) as unknown as PendingPo[];
-  }
-
-  // Growth (Stage 11): onboarding card and recommendations for managers. Quiet before that SQL is run.
-  const level: Level = company.business_level ?? "medium";
   const needsOnboarding = isManager && company.onboarding_done === false && !company.is_demo;
   // Stage 12: "Take a 2-minute tour" for managers in the first 14 days after onboarding
   // (until dismissed on this device; without a level date it shows until dismissed).
@@ -129,13 +145,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     return Number.isFinite(since) ? Date.now() - since < 14 * 864e5 : true;
   })();
   let growth: { featureRecs: number; featureLevel: Level | null; levelRec: Level | null } | null = null;
-  if (isManager && features.ready && !company.is_demo) {
-    try {
-      await supabase.rpc("run_growth_check", { p_company: company.id, p_force: false });
-    } catch {
-      /* the scheduled check covers it */
-    }
-    const recs = await loadRecommendations(supabase, company.id, features, level);
+  if (recs) {
     const featureKeys = recs.list.map((r) => r.feature_key).filter((k): k is string => Boolean(k));
     const levelsOf = new Set(
       features.list.filter((f) => featureKeys.includes(f.key) && levelRank(f.default_level) > levelRank(level)).map((f) => f.default_level),

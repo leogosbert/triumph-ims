@@ -82,6 +82,9 @@ export function DemoBar({ role, hoursLeft, level }: { role: string; hoursLeft: n
       <Link href="/how-it-works" className="demo-link">
         {tr("How it works")}
       </Link>
+      <Link href="/playbooks" className="demo-link">
+        {tr("Playbooks")}
+      </Link>
       <form action={setDemoRole} className="demo-role">
         <label htmlFor="demo-role">{tr("View as")}</label>
         <select id="demo-role" name="role" defaultValue={role} onChange={(e) => e.currentTarget.form?.requestSubmit()}>

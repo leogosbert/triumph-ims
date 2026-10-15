@@ -56,6 +56,11 @@ const common = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Screens opened in the last 30 seconds (Back, switching tabs) show at once from memory instead of
+    // waiting for the server; anything saved with a form refreshes them straight away.
+    staleTimes: { dynamic: 30, static: 180 },
+  },
   // Each deployment gets its own id so open apps can tell when a newer version is live.
   env: {
     NEXT_PUBLIC_BUILD_ID: (process.env.COMMIT_REF || process.env.GITHUB_SHA || `local-${Date.now()}`).slice(0, 12),

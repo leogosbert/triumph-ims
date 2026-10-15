@@ -253,6 +253,11 @@ export default function LoginPage() {
           {tr("New here? See how LeMoSp works, step by step")} ›
         </Link>
       )}
+      {!adminApp && (
+        <p className="auth-links">
+          <Link href="/playbooks">{tr("Playbooks: step-by-step guides and PDFs")}</Link>
+        </p>
+      )}
       <p className="auth-foot">
         {tr("LeMoSp · a LeMo Tech Solutions product")} · <Link href="/delete-account">{tr("Delete your account")}</Link>
       </p>

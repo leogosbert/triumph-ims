@@ -114,19 +114,19 @@ reset role;
 select tests.login('f17@e.test'); set role authenticated;
 select tests.blocked(format('select public.set_document_branch(%L, %L, %L)', 'invoice', :'inv', :'hq'), 'finance cannot move documents');
 -- Head office figures.
-select tests.check((select sales from public.branch_summary(:'cid', current_date - 30, current_date) where branch_id = :'aru') = 100000, 'branch sales');
-select tests.check((select staff from public.branch_summary(:'cid', current_date - 30, current_date) where branch_id = :'aru') = 2, 'branch staff');
-select tests.check((select stores from public.branch_summary(:'cid', current_date - 30, current_date) where branch_id = :'aru') = 1, 'branch stores');
-select tests.check((select owed from public.branch_summary(:'cid', current_date - 30, current_date) where branch_id = :'aru')
+select tests.check((select sales from public.branch_summary(:'cid', current_date - 30, current_date + 1) where branch_id = :'aru') = 100000, 'branch sales');
+select tests.check((select staff from public.branch_summary(:'cid', current_date - 30, current_date + 1) where branch_id = :'aru') = 2, 'branch staff');
+select tests.check((select stores from public.branch_summary(:'cid', current_date - 30, current_date + 1) where branch_id = :'aru') = 1, 'branch stores');
+select tests.check((select owed from public.branch_summary(:'cid', current_date - 30, current_date + 1) where branch_id = :'aru')
                    = (select total from public.invoices where id = :'inv'), 'branch money owed');
-select tests.check((select count(*) from public.branch_summary(:'cid', current_date - 30, current_date) where branch_id is null) = 1, 'the people with no branch are shown');
+select tests.check((select count(*) from public.branch_summary(:'cid', current_date - 30, current_date + 1) where branch_id is null) = 1, 'the people with no branch are shown');
 reset role;
 select tests.login('s17@e.test'); set role authenticated;
-select tests.blocked(format('select * from public.branch_summary(%L, current_date - 30, current_date)', :'cid'), 'sales cannot see head office figures');
+select tests.blocked(format('select * from public.branch_summary(%L, current_date - 30, current_date + 1)', :'cid'), 'sales cannot see head office figures');
 reset role;
 select tests.login('x17@x.test'); set role authenticated;
 select tests.check((select count(*) from public.branches where company_id = :'cid') = 0, 'another company sees no branches');
-select tests.blocked(format('select * from public.branch_summary(%L, current_date - 30, current_date)', :'cid'), 'another company cannot see branch figures');
+select tests.blocked(format('select * from public.branch_summary(%L, current_date - 30, current_date + 1)', :'cid'), 'another company cannot see branch figures');
 reset role;
 
 -- ---- Approval steps ----------------------------------------------------------------------------
@@ -262,7 +262,7 @@ select tests.check(exists (select 1 from public.backup_table_plan() where table_
 select tests.login_guest(:'g17'); set role authenticated;
 select public.create_demo_company('enterprise') as demo \gset
 select tests.check((select count(*) from public.branches where company_id = :'demo') = 2, 'enterprise demo has two branches');
-select tests.check((select count(*) from public.branch_summary(:'demo', current_date - 90, current_date) where branch_id is not null and sales > 0) >= 1, 'demo branches have sales');
+select tests.check((select count(*) from public.branch_summary(:'demo', current_date - 90, current_date + 1) where branch_id is not null and sales > 0) >= 1, 'demo branches have sales');
 select tests.check((select count(*) from public.approval_steps where company_id = :'demo') = 2, 'demo has approval steps');
 reset role;
 

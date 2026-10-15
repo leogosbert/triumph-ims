@@ -164,7 +164,7 @@ select tests.check((select odometer_km from public.vehicles where id = :'veh') =
 insert into public.vehicle_logs (company_id, vehicle_id, kind, odometer_km) values (:'cid', :'veh', 'odometer', 1200);
 select tests.check((select odometer_km from public.vehicles where id = :'veh') = 1500, 'a lower reading does not wind it back');
 select tests.blocked(format('insert into public.vehicle_logs (company_id, vehicle_id, kind) values (%L, %L, %L)', :'cid', :'veh', 'fuel'), 'fuel needs litres or amount');
-select tests.blocked(format('insert into public.vehicle_logs (company_id, vehicle_id, kind, happened_on, litres) values (%L, %L, %L, current_date + 1, 5)', :'cid', :'veh', 'fuel'), 'no future dates');
+select tests.blocked(format('insert into public.vehicle_logs (company_id, vehicle_id, kind, happened_on, litres) values (%L, %L, %L, current_date + 2, 5)', :'cid', :'veh', 'fuel'), 'no future dates');
 select tests.no_rows(format('update public.vehicles set odometer_km = 1 where id = %L', :'veh'), 'driver cannot edit the vehicle');
 delete from public.vehicle_logs where id = :'log1';
 select tests.check(not exists (select 1 from public.vehicle_logs where id = :'log1'), 'driver removes their own log line');

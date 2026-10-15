@@ -7,6 +7,16 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.21.3",
+    date: "2026-10-15",
+    en: [
+      "A fresher look: cool colour blends drawn from your company colours, screens that fade in, menu pills that glide and snap to where you tap, icons that magnify in the menus and quick actions, and cards that fade up as you scroll.",
+    ],
+    sw: [
+      "Mwonekano mpya: michanganyiko ya rangi tulivu kutoka rangi za kampuni yako, skrini zinazoingia kwa kufifia, vidonge vya menyu vinavyoteleza na kunasa pale unapogusa, aikoni zinazokuzwa kwenye menyu na vitendo vya haraka, na kadi zinazoibuka unaposogeza.",
+    ],
+  },
+  {
     version: "1.21.2",
     date: "2026-10-15",
     en: [

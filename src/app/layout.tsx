@@ -13,6 +13,7 @@ import "./globals.css";
 import "./look.css";
 import "./billing.css";
 import "./services.css";
+import "./polish.css";
 
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-mono", display: "swap" });

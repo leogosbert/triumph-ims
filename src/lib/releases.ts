@@ -7,6 +7,16 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.21.1",
+    date: "2026-10-15",
+    en: [
+      "Playbooks made for your company: your company's name in the examples, your TIN and level where an example shows them, and only the steps that fit your size, what you sell and the features you use. \"Show the full playbook\" shows everything, and the PDF is your company's own copy.",
+    ],
+    sw: [
+      "Miongozo iliyoandaliwa kwa ajili ya kampuni yako: jina la kampuni yako kwenye mifano, TIN na kiwango chako pale mfano unapoonyesha, na hatua zinazoendana na ukubwa wako, unachouza na vipengele unavyotumia tu. \"Onyesha mwongozo mzima\" inaonyesha kila kitu, na PDF ni nakala ya kampuni yako.",
+    ],
+  },
+  {
     version: "1.21",
     date: "2026-10-15",
     en: [

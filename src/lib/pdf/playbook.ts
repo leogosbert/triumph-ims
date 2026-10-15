@@ -81,7 +81,13 @@ export type PlaybookPdfLabels = {
   footer: string;
 };
 
-export async function playbookPdf(pb: Playbook, L: PlaybookPdfLabels, stats: { steps: number; scenarios: number }): Promise<Uint8Array> {
+export async function playbookPdf(
+  pb: Playbook,
+  L: PlaybookPdfLabels,
+  stats: { steps: number; scenarios: number },
+  /** For a company's own copy: "Made for <name>" and a line on how it was fitted. */
+  madeFor?: { line: string; note: string },
+): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   pdf.setTitle(clean(`${pb.title} - LeMoSp`));
   pdf.setAuthor("LeMoSp");
@@ -116,9 +122,20 @@ export async function playbookPdf(pb: Playbook, L: PlaybookPdfLabels, stats: { s
   y -= 18;
   cover.drawRectangle({ x: M, y: y - 4, width: 60, height: 3, color: TEAL });
   y -= 30;
-  for (const l of wrap(`${L.forWho} ${pb.audience}`, font, 11, W)) {
-    cover.drawText(l, { x: M, y, size: 11, font, color: rgb(0.75, 0.8, 0.88) });
-    y -= 16;
+  if (madeFor) {
+    for (const l of wrap(madeFor.line, bold, 14, W)) {
+      cover.drawText(l, { x: M, y, size: 14, font: bold, color: rgb(1, 1, 1) });
+      y -= 20;
+    }
+    for (const l of wrap(madeFor.note, font, 10, W)) {
+      cover.drawText(l, { x: M, y, size: 10, font, color: rgb(0.75, 0.8, 0.88) });
+      y -= 14;
+    }
+  } else {
+    for (const l of wrap(`${L.forWho} ${pb.audience}`, font, 11, W)) {
+      cover.drawText(l, { x: M, y, size: 11, font, color: rgb(0.75, 0.8, 0.88) });
+      y -= 16;
+    }
   }
   y -= 22;
   const facts: [string, string][] = [

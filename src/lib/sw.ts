@@ -2,6 +2,10 @@
 // Generated for Stage 9; please have a native speaker review.
 import { SW_SETTINGS } from "./sw-more/settings";
 import { SW_STAGE16 } from "./sw-more/stage16";
+import { SW_MAINTENANCE } from "./sw-more/maintenance";
+import { SW_PROJECTS } from "./sw-more/projects";
+import { SW_HIRE } from "./sw-more/hire";
+import { SW_SERVICES } from "./sw-more/services";
 
 export const SW: Record<string, string> = {
   "Remove LeMoSp from this phone": "Ondoa LeMoSp kwenye simu hii",
@@ -4543,6 +4547,6 @@ export const SW: Record<string, string> = {
 };
 
 // Later screens keep their Kiswahili in src/lib/sw-more/; the texts above win if a key is in both.
-for (const extra of [SW_SETTINGS, SW_STAGE16]) {
+for (const extra of [SW_SETTINGS, SW_STAGE16, SW_SERVICES, SW_MAINTENANCE, SW_PROJECTS, SW_HIRE]) {
   for (const [k, v] of Object.entries(extra)) if (!(k in SW)) SW[k] = v;
 }

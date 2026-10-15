@@ -695,3 +695,677 @@ button.adm-exit {
 .fs-bar.is-dirty { border-color: var(--warn-line); }
 .fs-bar.is-dirty > span { color: var(--warn); font-weight: 600; }
 @media (min-width: 1024px) { .fs-bar { bottom: 12px; } }
+
+/* =====================================================================
+   LeMoSp ADMIN polish (v1.22): calmer surfaces, one header row, a pill that
+   slides between sections, pages that glide in, numbers that count up and
+   bars that grow. Everything that moves stops for prefers-reduced-motion.
+   ===================================================================== */
+.adm-shell {
+  --adm-navy: #0b1f3a;
+  --adm-teal: #14b8a6;
+  --adm-shadow: 0 1px 2px rgba(11, 31, 58, 0.05), 0 8px 24px -12px rgba(11, 31, 58, 0.14);
+  --adm-shadow-hover: 0 2px 4px rgba(11, 31, 58, 0.06), 0 16px 32px -14px rgba(11, 31, 58, 0.22);
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+/* A soft light behind the top of every page. */
+.adm-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 340px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 100% at 10% 0%, rgba(20, 184, 166, 0.12), transparent 70%),
+    radial-gradient(50% 90% at 90% 0%, rgba(28, 76, 155, 0.12), transparent 70%);
+}
+
+/* ---------- Header: one row on every screen ---------- */
+.adm-bar {
+  background: linear-gradient(100deg, #0b1f3a 0%, #102a4f 55%, #0d3b4a 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 28px -10px rgba(11, 31, 58, 0.45);
+  gap: 6px;
+}
+@supports (backdrop-filter: blur(8px)) {
+  .adm-bar {
+    background: linear-gradient(100deg, rgba(11, 31, 58, 0.94) 0%, rgba(16, 42, 79, 0.94) 55%, rgba(13, 59, 74, 0.94) 100%);
+    backdrop-filter: saturate(140%) blur(12px);
+  }
+}
+.adm-brand img {
+  height: 32px;
+}
+.adm-bell {
+  margin-left: auto;
+  margin-right: 0;
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+.adm-bell .count {
+  box-shadow: 0 0 0 2px #0b1f3a;
+}
+
+/* Account menu */
+.adm-acct {
+  position: relative;
+  flex: none;
+}
+.adm-acct > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #dbe5f3;
+  transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.adm-acct > summary::-webkit-details-marker {
+  display: none;
+}
+.adm-acct > summary:hover,
+.adm-acct[open] > summary {
+  background: rgba(255, 255, 255, 0.1);
+}
+.adm-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #14b8a6, #1c4c9b);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+.adm-avatar-lg {
+  width: 40px;
+  height: 40px;
+  font-size: 0.9rem;
+}
+.adm-acct-name {
+  display: none;
+  max-width: 220px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adm-acct-chev {
+  display: none;
+  opacity: 0.7;
+  transition: transform 0.25s var(--ease-out);
+}
+.adm-acct[open] .adm-acct-chev {
+  transform: rotate(180deg);
+}
+.adm-acct-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 240px;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 40px -12px rgba(11, 31, 58, 0.35);
+  transform-origin: top right;
+}
+.adm-acct-who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  padding: 6px 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.adm-acct-who > span:last-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.adm-acct-who strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.adm-acct-who .small {
+  color: var(--muted);
+}
+.adm-acct-menu a,
+.adm-acct-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.92rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.adm-acct-menu a:hover,
+.adm-acct-menu button:hover {
+  background: var(--hover);
+}
+.adm-acct-menu form {
+  margin: 0;
+}
+.adm-acct-menu button {
+  color: var(--err);
+}
+@media (min-width: 720px) {
+  .adm-acct-name,
+  .adm-acct-chev {
+    display: inline;
+  }
+  .adm-acct > summary {
+    padding-right: 10px;
+  }
+}
+
+/* ---------- Page title ---------- */
+.adm-head {
+  margin: 4px 0 14px;
+}
+.adm-head h1 {
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+  margin-top: 6px;
+}
+@media (min-width: 1024px) {
+  .adm-head h1 {
+    font-size: 1.7rem;
+  }
+}
+
+/* ---------- Tabs with a sliding pill ---------- */
+.adm-slide {
+  isolation: isolate;
+}
+.adm-tabs.adm-slide,
+.adm-subtabs.adm-slide {
+  position: relative;
+}
+.adm-slide > a {
+  position: relative;
+  z-index: 1;
+}
+.adm-ind {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  top: 0;
+  width: var(--ind-w, 0);
+  height: var(--ind-h, 0);
+  transform: translate(var(--ind-x, 0), var(--ind-y, 0));
+  opacity: var(--ind-o, 0);
+  border-radius: 999px;
+  pointer-events: none;
+}
+.adm-slide[data-ready] .adm-ind {
+  transition:
+    transform 0.38s var(--ease-out),
+    width 0.38s var(--ease-out),
+    height 0.38s var(--ease-out),
+    opacity 0.2s;
+}
+
+/* Section tabs (laptops) and Billing sub-tabs: one quiet bar, the pill shows where you are. */
+.adm-tabs.adm-slide,
+.adm-subtabs.adm-slide {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--adm-shadow);
+  max-width: 100%;
+}
+.adm-tabs.adm-slide {
+  display: none;
+  margin-bottom: 18px;
+}
+@media (min-width: 1024px) {
+  .adm-tabs.adm-slide {
+    display: inline-flex;
+  }
+}
+.adm-tabs.adm-slide > a,
+.adm-subtabs.adm-slide > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.25s;
+}
+.adm-tabs.adm-slide > a:hover,
+.adm-subtabs.adm-slide > a:hover {
+  color: var(--text);
+}
+.adm-tabs.adm-slide > a[aria-current="page"],
+.adm-subtabs.adm-slide > a[aria-current="page"] {
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+.adm-tabs .adm-ind,
+.adm-subtabs .adm-ind {
+  background: linear-gradient(135deg, #1c4c9b, #123a7a);
+  box-shadow: 0 6px 14px -6px rgba(28, 76, 155, 0.6);
+}
+.adm-subtabs.adm-slide {
+  margin-bottom: 16px;
+}
+.adm-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Bottom bar (phones): the teal pill glides to the tapped section. */
+.adm-bottomnav a[aria-current="page"] {
+  background: transparent;
+}
+.adm-bottomnav .adm-ind {
+  border-radius: 16px;
+  background: rgba(20, 184, 166, 0.22);
+}
+.adm-bottomnav a svg {
+  transition: transform 0.3s var(--ease-spring), color 0.2s;
+}
+.adm-bottomnav a[aria-current="page"] svg {
+  transform: translateY(-1px) scale(1.08);
+}
+.adm-bottomnav a:active svg {
+  transform: scale(0.9);
+}
+
+/* ---------- Surfaces ---------- */
+.adm-shell .card,
+.adm-shell .rec-list,
+.adm-shell .stat {
+  border-color: color-mix(in srgb, var(--line) 80%, transparent);
+  box-shadow: var(--adm-shadow);
+}
+.adm-shell .card > h2:first-child,
+.adm-shell section.card > h2 {
+  font-size: 1.02rem;
+  letter-spacing: -0.005em;
+}
+.adm-shell .rec-list {
+  border-radius: 18px;
+  overflow: hidden;
+}
+.adm-shell .rec-list a {
+  transition: background 0.2s;
+  position: relative;
+}
+.adm-shell .rec-list a::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-right: 2px solid var(--chev);
+  border-top: 2px solid var(--chev);
+  transform: rotate(45deg);
+  margin-left: 2px;
+  transition: transform 0.25s var(--ease-out), border-color 0.2s;
+}
+.adm-shell .rec-list a:hover::after {
+  transform: translateX(3px) rotate(45deg);
+  border-color: var(--brand);
+}
+.adm-shell .btn {
+  transition: transform 0.15s var(--ease-out), box-shadow 0.2s, background 0.2s, border-color 0.2s;
+}
+.adm-shell .btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.adm-shell .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 8px 18px -8px rgba(28, 76, 155, 0.6);
+}
+.adm-shell .tabs-row:not(.adm-slide) a {
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.adm-shell input,
+.adm-shell select,
+.adm-shell textarea {
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.adm-shell input:focus,
+.adm-shell select:focus,
+.adm-shell textarea:focus {
+  box-shadow: 0 0 0 4px rgba(28, 76, 155, 0.12);
+}
+
+/* ---------- Overview tiles ---------- */
+.adm-stats {
+  gap: 12px;
+}
+.adm-stat {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 16px 15px;
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s;
+}
+.adm-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--adm-shadow-hover);
+}
+.adm-stat::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--tone-soft);
+  opacity: 0.55;
+}
+.adm-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: var(--tone-soft);
+  color: var(--tone);
+}
+.adm-stat .n {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.adm-stat .l {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.adm-tone-blue { --tone: #1c4c9b; --tone-soft: rgba(28, 76, 155, 0.12); }
+.adm-tone-teal { --tone: #0f766e; --tone-soft: rgba(20, 184, 166, 0.15); }
+.adm-tone-green { --tone: #067647; --tone-soft: rgba(6, 118, 71, 0.12); }
+.adm-tone-amber { --tone: #b45309; --tone-soft: rgba(245, 158, 11, 0.16); }
+.adm-tone-purple { --tone: #6d28d9; --tone-soft: rgba(109, 40, 217, 0.12); }
+.adm-tone-gray { --tone: #475467; --tone-soft: rgba(71, 84, 103, 0.12); }
+:root[data-theme="dark"] .adm-tone-blue { --tone: #93b4ec; }
+:root[data-theme="dark"] .adm-tone-teal { --tone: #5eead4; }
+:root[data-theme="dark"] .adm-tone-green { --tone: #6ee7b7; }
+:root[data-theme="dark"] .adm-tone-amber { --tone: #fcd34d; }
+:root[data-theme="dark"] .adm-tone-purple { --tone: #c4b5fd; }
+:root[data-theme="dark"] .adm-tone-gray { --tone: #cbd5e1; }
+@media (min-width: 1024px) {
+  .adm-stats {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Bars: rounder, with a soft sheen. */
+.adm-bar-track {
+  height: 10px;
+  border: 0;
+  background: color-mix(in srgb, var(--line) 70%, var(--soft));
+}
+.adm-bar-fill {
+  background: linear-gradient(90deg, #14b8a6, #2dd4bf);
+  transform-origin: left center;
+}
+.adm-fill-medium {
+  background: linear-gradient(90deg, #1c4c9b, #3b6fc4);
+}
+.adm-fill-enterprise {
+  background: linear-gradient(90deg, #0b1f3a, #1c4c9b);
+}
+
+/* Product insights: a coloured dot instead of a hard edge. */
+.adm-insight {
+  position: relative;
+  border-left: 0;
+  padding: 11px 14px 11px 34px;
+}
+.adm-insight::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 17px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+.adm-insight-warn::before {
+  background: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+}
+.adm-insight-ok::before {
+  background: #14b8a6;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.2);
+}
+
+/* Tables */
+.adm-table thead th:first-child {
+  border-radius: 10px 0 0 10px;
+}
+.adm-table thead th:last-child {
+  border-radius: 0 10px 10px 0;
+}
+.adm-table thead th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.adm-table tbody tr {
+  transition: background 0.15s;
+}
+.adm-table tbody tr:hover {
+  background: var(--hover);
+}
+.adm-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Feature switches: a gentle highlight for rows you changed. */
+.fs-changed {
+  transition: background 0.3s;
+}
+.fs-bar {
+  backdrop-filter: blur(8px);
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.3s var(--ease-out);
+}
+.fs-bar.is-dirty {
+  box-shadow: 0 10px 28px -10px rgba(180, 83, 9, 0.35);
+}
+
+/* ---------- Loading outline ---------- */
+.adm-skeleton {
+  display: grid;
+  gap: 14px;
+}
+.adm-sk-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.adm-sk {
+  display: block;
+  border-radius: 18px;
+  background: linear-gradient(90deg, var(--soft) 0%, color-mix(in srgb, var(--soft) 40%, var(--card)) 50%, var(--soft) 100%);
+  background-size: 200% 100%;
+  border: 1px solid var(--line);
+}
+.adm-sk-tile {
+  height: 96px;
+}
+.adm-sk-card {
+  height: 180px;
+}
+.adm-sk-short {
+  height: 120px;
+}
+
+/* ---------- Motion ---------- */
+@keyframes adm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes adm-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes adm-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes adm-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@keyframes adm-ring {
+  0% {
+    box-shadow: 0 0 0 2px #0b1f3a, 0 0 0 2px rgba(245, 158, 11, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 2px #0b1f3a, 0 0 0 10px rgba(245, 158, 11, 0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Each page glides in and its blocks follow one after another. */
+  .adm-page > * {
+    animation: adm-rise 0.5s var(--ease-out) both;
+  }
+  .adm-page > :nth-child(2) { animation-delay: 0.05s; }
+  .adm-page > :nth-child(3) { animation-delay: 0.1s; }
+  .adm-page > :nth-child(4) { animation-delay: 0.15s; }
+  .adm-page > :nth-child(5) { animation-delay: 0.2s; }
+  .adm-page > :nth-child(n + 6) { animation-delay: 0.25s; }
+  /* Tiles and list rows cascade. */
+  .adm-page .stat-grid > *,
+  .adm-page .rec-list > li,
+  .adm-page .adm-insights li,
+  .adm-page .bl-plan > * {
+    animation: adm-rise 0.45s var(--ease-out) both;
+  }
+  .adm-page .stat-grid > :nth-child(2),
+  .adm-page .rec-list > li:nth-child(2),
+  .adm-page .adm-insights li:nth-child(2),
+  .adm-page .bl-plan > :nth-child(2) { animation-delay: 0.06s; }
+  .adm-page .stat-grid > :nth-child(3),
+  .adm-page .rec-list > li:nth-child(3),
+  .adm-page .adm-insights li:nth-child(3),
+  .adm-page .bl-plan > :nth-child(3) { animation-delay: 0.12s; }
+  .adm-page .stat-grid > :nth-child(4),
+  .adm-page .rec-list > li:nth-child(4),
+  .adm-page .adm-insights li:nth-child(4),
+  .adm-page .bl-plan > :nth-child(4) { animation-delay: 0.18s; }
+  .adm-page .stat-grid > :nth-child(5),
+  .adm-page .rec-list > li:nth-child(5),
+  .adm-page .bl-plan > :nth-child(5) { animation-delay: 0.24s; }
+  .adm-page .stat-grid > :nth-child(n + 6),
+  .adm-page .rec-list > li:nth-child(n + 6) { animation-delay: 0.3s; }
+  /* Bars fill from the left. */
+  .adm-page .adm-bar-fill {
+    animation: adm-grow 0.9s var(--ease-out) 0.25s both;
+  }
+  .adm-acct[open] .adm-acct-menu {
+    animation: adm-pop 0.22s var(--ease-out);
+  }
+  .adm-sk {
+    animation: adm-shimmer 1.3s linear infinite;
+  }
+  .adm-bell .count {
+    animation: adm-ring 1.6s ease-out 0.6s 2;
+  }
+  .adm-head {
+    animation: adm-rise 0.5s var(--ease-out) both;
+  }
+}
+
+/* ---------- Dark theme ---------- */
+:root[data-theme="dark"] .adm-shell::before {
+  background:
+    radial-gradient(60% 100% at 10% 0%, rgba(20, 184, 166, 0.1), transparent 70%),
+    radial-gradient(50% 90% at 90% 0%, rgba(59, 111, 196, 0.14), transparent 70%);
+}
+:root[data-theme="dark"] .adm-shell {
+  --adm-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 24px -14px rgba(0, 0, 0, 0.6);
+  --adm-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 16px 32px -14px rgba(0, 0, 0, 0.7);
+}
+:root[data-theme="dark"] .adm-bar {
+  background: linear-gradient(100deg, rgba(6, 15, 30, 0.95), rgba(10, 28, 52, 0.95) 55%, rgba(8, 40, 50, 0.95));
+}
+/* Seven sections on a phone: smaller labels so neighbours never touch. */
+.adm-bottomnav {
+  padding: 0 4px;
+}
+.adm-bottomnav a {
+  margin: 6px 0;
+  font-size: 0.62rem;
+  letter-spacing: -0.01em;
+}
+.adm-bottomnav a span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adm-bottomnav a[aria-current="page"] {
+  font-weight: 500;
+}
+:root[data-theme="dark"] .adm-fill-enterprise {
+  background: linear-gradient(90deg, #3b6fc4, #93b4ec);
+}

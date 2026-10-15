@@ -8,6 +8,7 @@ import { mainUrl } from "@/lib/hosts";
 import { onAdminHost } from "@/lib/hosts-server";
 import "../suggestions/suggestions.css";
 import "./admin.css";
+import { AdminAccount } from "./AdminAccount";
 import { AdminBottomNav, AdminTabs } from "./AdminTabs";
 import { platformAdmin } from "./guard";
 
@@ -97,25 +98,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/admin" className="adm-brand" aria-label="LeMoSp ADMIN">
           <img src="/brand/lemosp-admin-bar.svg" alt="LeMoSp ADMIN" width={358} height={72} />
         </Link>
-        <div className="adm-who">
-          <span className="adm-name" title={admin.name}>
-            {admin.name}
-          </span>
-          <span className="adm-links">
-            {companyApp && (
-              <a href={companyApp} className="adm-exit" {...(adminHost ? { target: "_blank", rel: "noopener" } : {})}>
-                {tr("Open company app")}
-              </a>
-            )}
-            {adminHost && (
-              <form action={signOut} className="adm-signout">
-                <button type="submit" className="adm-exit">
-                  {tr("Sign out")}
-                </button>
-              </form>
-            )}
-          </span>
-        </div>
         <Link
           href="/admin/notifications"
           className="icon-btn bell adm-bell"
@@ -124,6 +106,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Icon name="bell" size={23} />
           {unread > 0 && <span className="count">{unread > 99 ? "99+" : unread}</span>}
         </Link>
+        <AdminAccount name={admin.name} companyApp={companyApp} newTab={adminHost} canSignOut={adminHost} />
       </header>
       <div className="adm-head">
         <span className="adm-kicker">{tr("LeMo Tech")}</span>

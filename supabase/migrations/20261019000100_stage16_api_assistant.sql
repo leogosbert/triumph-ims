@@ -63,9 +63,8 @@ begin
   if not public.has_role(p_company, array['management']::public.app_role[]) then
     raise exception 'Only management can create API keys.' using errcode = '42501';
   end if;
-  if not public.recent_auth(10) then
-    raise exception 'Please confirm it is you: sign in again, then create the key.' using errcode = '42501';
-  end if;
+  -- "Confirm it is you" first (password in the last 10 minutes), as for exporting all data.
+  perform public.require_step_up(p_company);
   if not public.feature_on(p_company, 'integrations') then
     raise exception 'Switch on Integrations & API first.' using errcode = '42501';
   end if;

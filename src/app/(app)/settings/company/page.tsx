@@ -7,6 +7,7 @@ import { brandingUrl, getAppContext, stage13Ready } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { updateCompany } from "../actions";
 import { LogoUpload } from "./LogoUpload";
+import { Hint, SettingsHead } from "../SettingsHead";
 
 export const metadata = { title: "Company details" };
 
@@ -20,18 +21,27 @@ function Field(props: {
   type?: string;
   textarea?: boolean;
   required?: boolean;
+  inputMode?: "numeric" | "decimal" | "tel" | "email" | "url" | "text";
 }) {
-  const { name, label, value, hint, type = "text", textarea, required } = props;
+  const { name, label, value, hint, type = "text", textarea, required, inputMode } = props;
+  const hintId = hint ? `${name}-hint` : undefined;
   return (
     <div className="field">
-      <label htmlFor={name}>
-        {label} {hint && <span className="hint">· {hint}</span>}
-      </label>
+      <label htmlFor={name}>{label}</label>
       {textarea ? (
-        <textarea id={name} name={name} defaultValue={value ?? ""} />
+        <textarea id={name} name={name} defaultValue={value ?? ""} aria-describedby={hintId} />
       ) : (
-        <input id={name} name={name} type={type} defaultValue={value ?? ""} required={required} />
+        <input
+          id={name}
+          name={name}
+          type={type}
+          defaultValue={value ?? ""}
+          required={required}
+          inputMode={inputMode}
+          aria-describedby={hintId}
+        />
       )}
+      {hint && <Hint id={hintId}>{hint}</Hint>}
     </div>
   );
 }
@@ -44,24 +54,63 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href="/settings">{tr("← Settings")}</Link>
-      </p>
-      <h1>{tr("Company details")}</h1>
-      {!isManager && <p className="muted">{tr("Only management can change these details.")}</p>}
+      <SettingsHead
+        title={tr("Company details")}
+        icon="building"
+        lead={
+          isManager
+            ? tr("Your registration, contact details and branding, and the rules printed on quotations, orders and invoices.")
+            : tr("Only management can change these details.")
+        }
+      />
       <Notice {...notice} />
+
+      <ul className="st-jump" aria-label={tr("Jump to")}>
+        {isManager && (
+          <li>
+            <a href="#branding">{tr("Logo")}</a>
+          </li>
+        )}
+        <li>
+          <a href="#registration">{tr("Registration")}</a>
+        </li>
+        <li>
+          <a href="#contact">{tr("Contact")}</a>
+        </li>
+        <li>
+          <a href="#documents">{tr("On your documents")}</a>
+        </li>
+        <li>
+          <a href="#quotations">{tr("Quotations")}</a>
+        </li>
+        <li>
+          <a href="#purchasing">{tr("Purchase orders")}</a>
+        </li>
+        {c.invoice_due_days !== undefined && (
+          <li>
+            <a href="#invoicing">{tr("Invoices")}</a>
+          </li>
+        )}
+        {stage13Ready(c) && (
+          <li>
+            <a href="#reminders">{tr("Follow-ups and reminders")}</a>
+          </li>
+        )}
+      </ul>
 
       {isManager && (
         <section className="card" id="branding">
           <h2>{tr("Logo")}</h2>
+          <p className="st-card-lead">{tr("Shown in the app and at the top of every document you send.")}</p>
           <LogoUpload companyId={c.id} currentUrl={logo} />
         </section>
       )}
 
       <StepUpForm action={updateCompany} onlyIfChanged="bank_details,mobile_money_details,document_footer,quote_terms,po_terms,invoice_terms">
-        <fieldset disabled={!isManager} style={{ border: 0, padding: 0, margin: 0 }}>
-          <section className="card">
+        <fieldset disabled={!isManager} className="st-plain st-form">
+          <section className="card" id="registration">
             <h2>{tr("Registration")}</h2>
+            <p className="st-card-lead">{tr("Printed on quotations, invoices and purchase orders. Check them against your certificates.")}</p>
             <Field name="name" label={tr("Trading name")} value={c.name} required />
             <Field name="legal_name" label={tr("Registered name")} value={c.legal_name} hint={tr("as on BRELA certificate")} />
             <div className="grid grid-2">
@@ -71,18 +120,19 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
             <Field name="registration_no" label={tr("Registration number")} value={c.registration_no} />
           </section>
 
-          <section className="card">
+          <section className="card" id="contact">
             <h2>{tr("Contact")}</h2>
             <Field name="address" label={tr("Address")} value={c.address} textarea />
             <div className="grid grid-2">
               <Field name="phone" label={tr("Phone")} value={c.phone} type="tel" />
               <Field name="email" label={tr("Email")} value={c.email} type="email" />
             </div>
-            <Field name="website" label={tr("Website")} value={c.website} />
+            <Field name="website" label={tr("Website")} value={c.website} inputMode="url" />
           </section>
 
-          <section className="card">
+          <section className="card" id="currencies">
             <h2>{tr("Currencies")}</h2>
+            <p className="st-card-lead">{tr("The main currency is used for totals, reports and approval limits.")}</p>
             <div className="grid grid-2">
               <div className="field">
                 <label htmlFor="base_currency">{tr("Main currency")}</label>
@@ -104,9 +154,9 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
             </div>
           </section>
 
-          <section className="card">
+          <section className="card" id="colours">
             <h2>{tr("Colours")}</h2>
-            <p className="muted small">{tr("Used in the app and on your documents.")}</p>
+            <p className="st-card-lead">{tr("Used in the app and on your documents.")}</p>
             <div className="swatches">
               <div className="field">
                 <input id="primary_color" name="primary_color" type="color" defaultValue={c.primary_color} />
@@ -149,12 +199,12 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
           <section className="card" id="quotations">
             <h2>{tr("Quotations")}</h2>
             <div className="grid grid-2">
-              <Field name="vat_rate" label={tr("VAT rate %")} value={String(c.vat_rate ?? 18)} hint={tr("0 is used automatically for exempt clients")} />
-              <Field name="quote_validity_days" label={tr("Quotations valid for (days)")} value={String(c.quote_validity_days ?? 30)} />
-              <Field name="quote_min_margin_pct" label={tr("Minimum margin %")} value={String(c.quote_min_margin_pct ?? 12)} hint={tr("below this needs approval")} />
+              <Field name="vat_rate" label={tr("VAT rate %")} value={String(c.vat_rate ?? 18)} inputMode="decimal" hint={tr("0 is used automatically for exempt clients")} />
+              <Field name="quote_validity_days" label={tr("Quotations valid for (days)")} value={String(c.quote_validity_days ?? 30)} inputMode="numeric" />
+              <Field name="quote_min_margin_pct" label={tr("Minimum margin %")} value={String(c.quote_min_margin_pct ?? 12)} inputMode="decimal" hint={tr("below this needs approval")} />
               <Field
                 name="quote_approval_above"
-                label={`Approval needed above (${c.base_currency})`}
+                label={`${tr("Approval needed above")} (${c.base_currency})`}
                 value={Number(c.quote_approval_above ?? 25000000).toLocaleString("en-GB")}
                 hint={tr("incl. VAT")}
               />
@@ -166,7 +216,7 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
             <h2>{tr("Purchase orders")}</h2>
             <Field
               name="po_approval_above"
-              label={`Approval needed above (${c.base_currency})`}
+              label={`${tr("Approval needed above")} (${c.base_currency})`}
               value={Number(c.po_approval_above ?? 2500000).toLocaleString("en-GB")}
               hint={tr("for POs raised by procurement")}
             />
@@ -180,6 +230,7 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
                 name="invoice_due_days"
                 label={tr("Clients pay within (days)")}
                 value={String(c.invoice_due_days ?? 30)}
+                  inputMode="numeric"
                 hint={tr("sets the due date when an invoice is issued")}
               />
               <Field name="invoice_terms" label={tr("Standard invoice terms")} value={c.invoice_terms ?? null} textarea hint={tr("printed on every invoice")} />
@@ -189,24 +240,27 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
           {stage13Ready(c) && (
             <section className="card" id="reminders">
               <h2>{tr("Follow-ups and reminders")}</h2>
-              <p className="muted small">{tr("The app reminds your team when to follow up a quotation and when to remind a client about an invoice. Messages are sent by your team from their own phone (WhatsApp, SMS or email).")}</p>
+              <p className="st-card-lead">{tr("The app reminds your team when to follow up a quotation and when to remind a client about an invoice. Messages are sent by your team from their own phone (WhatsApp, SMS or email).")}</p>
               <div className="grid grid-2">
                 <Field
                   name="quote_followup_days"
                   label={tr("Follow up sent quotations after (days)")}
                   value={String(c.quote_followup_days ?? 3)}
+                  inputMode="numeric"
                   hint={tr("0 = no follow-up reminders")}
                 />
                 <Field
                   name="invoice_remind_before_days"
                   label={tr("Remind before an invoice is due (days)")}
                   value={String(c.invoice_remind_before_days ?? 3)}
+                  inputMode="numeric"
                   hint={tr("0 = only once it is overdue")}
                 />
                 <Field
                   name="invoice_overdue_every_days"
                   label={tr("Repeat overdue reminders every (days)")}
                   value={String(c.invoice_overdue_every_days ?? 7)}
+                  inputMode="numeric"
                   hint={tr("paused while a promised payment date has not passed")}
                 />
               </div>
@@ -214,7 +268,10 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
           )}
 
           {isManager && (
-            <SubmitButton className="btn btn-primary btn-block">{tr("Save company details")}</SubmitButton>
+            <div className="st-savebar">
+              <span className="st-savebar-note">{tr("Changes apply to new documents from now on.")}</span>
+              <SubmitButton className="btn btn-primary">{tr("Save company details")}</SubmitButton>
+            </div>
           )}
         </fieldset>
       </StepUpForm>

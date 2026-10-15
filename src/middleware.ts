@@ -7,7 +7,8 @@ import { adminUrl, allowedOnAdminHost, isAdminHost } from "@/lib/hosts";
 // /api/app-manifest is the install details (served as /manifest.webmanifest), fetched without cookies.
 // /delete-account explains how to delete an account; app stores require it to open without signing in.
 // /how-it-works and /playbooks (with their PDFs) teach the app, also to visitors before they sign up.
-const PUBLIC_PATHS = ["/how-it-works", "/playbooks", "/login", "/auth", "/forgot-password", "/api/outbox", "/api/version", "/api/app-manifest", "/delete-account"];
+// /api/v1 is the data API for other systems; each call carries its own API key (see /integrations).
+const PUBLIC_PATHS = ["/how-it-works", "/playbooks", "/api/v1", "/login", "/auth", "/forgot-password", "/api/outbox", "/api/version", "/api/app-manifest", "/delete-account"];
 
 /**
  * Keeps the sign-in session fresh and sends signed-out visitors to /login.

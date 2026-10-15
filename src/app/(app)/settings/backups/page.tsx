@@ -8,6 +8,7 @@ import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { KEEP, KIND_LABEL, formatBytes, loadBackupStatus, type BackupRow, type BackupStatus } from "@/lib/backups";
 import { backupNow } from "./actions";
+import { SettingsHead } from "../SettingsHead";
 
 export const metadata = { title: "Backups" };
 
@@ -77,10 +78,11 @@ export default async function BackupsPage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href="/settings">{tr("← Settings")}</Link>
-      </p>
-      <h1>{tr("Backups")}</h1>
+      <SettingsHead
+        title={tr("Backups")}
+        icon="inbox"
+        lead={tr("A copy of all your company's records is taken every day. Download one any time to keep your own copy.")}
+      />
       <Notice {...notice} />
 
       {!status ? (
@@ -92,7 +94,7 @@ export default async function BackupsPage({ searchParams }: { searchParams: Sear
           <Headline status={status} />
 
           {!status.is_demo && (
-            <section className="card">
+            <section className="card" id="backup-now">
               <form action={backupNow}>
                 <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Backing up…")}>
                   {tr("Back up now")}
@@ -106,12 +108,15 @@ export default async function BackupsPage({ searchParams }: { searchParams: Sear
             </section>
           )}
 
-          <section className="card">
-            <h2>{tr("Your backups")}</h2>
+          <section className="card" id="list">
+            <div className="st-card-head">
+              <h2>{tr("Your backups")}</h2>
+              {backups.length > 0 && <span className="badge tone-off">{backups.length}</span>}
+            </div>
             {backups.length === 0 ? (
               <p className="muted small" style={{ margin: 0 }}>{tr("No backups yet.")}</p>
             ) : (
-              <ul className="list">
+              <ul className="list st-rows">
                 {backups.map((b) => (
                   <li key={b.id} className="row">
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -142,36 +147,46 @@ export default async function BackupsPage({ searchParams }: { searchParams: Sear
         </>
       )}
 
-      <section className="card">
+      <section className="card" id="how">
         <h2>{tr("How backups work")}</h2>
-        <h3 className="small" style={{ marginBottom: 4 }}>{tr("What is backed up")}</h3>
-        <p className="small muted" style={{ marginTop: 0 }}>
-          {tr("Every record of")} {company.name}
-          {tr(": company details, team and roles, clients, suppliers, products, prices and costs, RFQs, quotations, purchase orders, stock, deliveries, invoices, payments, bills and suggestions. Not included: the Activity log, notifications, and files such as logos, photos and signatures (they stay in file storage).")}
-        </p>
-        <h3 className="small" style={{ marginBottom: 4 }}>{tr("When and how long")}</h3>
-        <p className="small muted" style={{ marginTop: 0 }}>
-          {tr("A copy is taken automatically every day early in the morning (Tanzania time). We keep the last")} {KEEP.daily}{" "}
-          {tr("daily copies, the last")} {KEEP.weekly} {tr("Sunday copies, the last")} {KEEP.monthly}{" "}
-          {tr("copies from the 1st of each month, and the last")} {KEEP.manual} {tr("copies made by hand. Older copies are deleted automatically.")}
-        </p>
-        <h3 className="small" style={{ marginBottom: 4 }}>{tr("Who can see them")}</h3>
-        <p className="small muted" style={{ marginTop: 0 }}>
-          {tr("Only management. Every download is written to the Activity log.")}
-        </p>
-        <h3 className="small" style={{ marginBottom: 4 }}>{tr("Extra safety")}</h3>
-        <p className="small muted" style={{ marginTop: 0 }}>
-          {tr("LeMo Tech also keeps an encrypted copy of the whole system every night, stored in a separate place.")}
-        </p>
-        <h3 className="small" style={{ marginBottom: 4 }}>{tr("Tip: keep your own copy")}</h3>
-        <p className="small muted" style={{ marginTop: 0 }}>
-          {tr("Once a month, press Download on the newest backup and keep the file somewhere safe, e.g. a USB stick or your company email. Treat it like your bank statements: it contains your prices, clients and payments.")}
-        </p>
-        <h3 className="small" style={{ marginBottom: 4 }}>{tr("Restoring")}</h3>
-        <p className="small muted" style={{ marginTop: 0, marginBottom: 0 }}>
-          {tr("To restore, contact LeMo Tech support with the date of the backup you need. We check it with you before anything is changed.")}{" "}
-          <Link href="/settings/export">{tr("Export data")}</Link> {tr("gives you Excel (CSV) files of the same records.")}
-        </p>
+        <div className="st-faq">
+          <details open>
+            <summary>{tr("What is backed up")}</summary>
+            <p>
+              {tr("Every record of")} {company.name}
+              {tr(": company details, team and roles, clients, suppliers, products, prices and costs, RFQs, quotations, purchase orders, stock, deliveries, invoices, payments, bills and suggestions. Not included: the Activity log, notifications, and files such as logos, photos and signatures (they stay in file storage).")}
+            </p>
+          </details>
+          <details>
+            <summary>{tr("When and how long")}</summary>
+            <p>
+              {tr("A copy is taken automatically every day early in the morning (Tanzania time). We keep the last")} {KEEP.daily}{" "}
+              {tr("daily copies, the last")} {KEEP.weekly} {tr("Sunday copies, the last")} {KEEP.monthly}{" "}
+              {tr("copies from the 1st of each month, and the last")} {KEEP.manual} {tr("copies made by hand. Older copies are deleted automatically.")}
+            </p>
+          </details>
+          <details>
+            <summary>{tr("Who can see them")}</summary>
+            <p>{tr("Only management. Every download is written to the Activity log.")}</p>
+          </details>
+          <details>
+            <summary>{tr("Extra safety")}</summary>
+            <p>{tr("LeMo Tech also keeps an encrypted copy of the whole system every night, stored in a separate place.")}</p>
+          </details>
+          <details>
+            <summary>{tr("Tip: keep your own copy")}</summary>
+            <p>
+              {tr("Once a month, press Download on the newest backup and keep the file somewhere safe, e.g. a USB stick or your company email. Treat it like your bank statements: it contains your prices, clients and payments.")}
+            </p>
+          </details>
+          <details>
+            <summary>{tr("Restoring")}</summary>
+            <p>
+              {tr("To restore, contact LeMo Tech support with the date of the backup you need. We check it with you before anything is changed.")}{" "}
+              <Link href="/settings/export">{tr("Export data")}</Link> {tr("gives you Excel (CSV) files of the same records.")}
+            </p>
+          </details>
+        </div>
       </section>
     </>
   );

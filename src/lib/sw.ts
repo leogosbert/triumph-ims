@@ -5,6 +5,7 @@ import { SW_STAGE16 } from "./sw-more/stage16";
 import { SW_MAINTENANCE } from "./sw-more/maintenance";
 import { SW_PROJECTS } from "./sw-more/projects";
 import { SW_HIRE } from "./sw-more/hire";
+import { SW_TAILORED } from "./sw-more/tailored";
 import { SW_SERVICES } from "./sw-more/services";
 
 export const SW: Record<string, string> = {
@@ -4547,6 +4548,6 @@ export const SW: Record<string, string> = {
 };
 
 // Later screens keep their Kiswahili in src/lib/sw-more/; the texts above win if a key is in both.
-for (const extra of [SW_SETTINGS, SW_STAGE16, SW_SERVICES, SW_MAINTENANCE, SW_PROJECTS, SW_HIRE]) {
+for (const extra of [SW_SETTINGS, SW_STAGE16, SW_SERVICES, SW_MAINTENANCE, SW_PROJECTS, SW_HIRE, SW_TAILORED]) {
   for (const [k, v] of Object.entries(extra)) if (!(k in SW)) SW[k] = v;
 }

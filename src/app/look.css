@@ -1525,3 +1525,30 @@ a.as-row:hover, button.as-row:hover { border-color: color-mix(in srgb, var(--bra
 .as-home input:focus { outline: none; }
 .as-home:focus-within { border-color: var(--brand); }
 .as-orb.as-orb-sm { width: 22px; height: 22px; margin: 0; flex: 0 0 auto; }
+
+/* A playbook made for the reader's company. */
+.pb-made-for {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto 14px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(20, 184, 166, 0.45);
+  background: rgba(11, 31, 58, 0.72);
+  color: #dbe5f3;
+}
+.pb-made-for p {
+  margin: 2px 0;
+}
+.pb-made-for .muted {
+  color: #8fa2bd;
+}
+.pb-made-for a {
+  color: #5eead4;
+}
+.pb-made-for-name {
+  font-size: 1.05rem;
+}
+.pb-made-for-name strong {
+  color: #fff;
+}

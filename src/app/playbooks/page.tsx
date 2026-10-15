@@ -6,6 +6,8 @@ import { LangSwitch } from "@/components/LangSwitch";
 import { getLang } from "@/lib/lang";
 import { PLAYBOOKS, scenarioCount, stepCount, translatePlaybook } from "@/lib/playbooks";
 import { playbookAccess } from "@/lib/playbooks/access";
+import { recommendedFor, tailorPlaybook } from "@/lib/playbooks/personalize";
+import { playbookProfile } from "@/lib/playbooks/profile";
 
 export const metadata = {
   title: "Playbooks",
@@ -21,7 +23,12 @@ export default async function PlaybooksPage() {
   const lang = await getLang();
   const access = await playbookAccess();
   const inApp = access.signedIn;
-  const books = PLAYBOOKS.map((p) => ({ raw: p, t: translatePlaybook(p, lang === "sw" ? "sw" : "en", tr) }));
+  const profile = await playbookProfile(access.companyId);
+  const picks = profile ? recommendedFor(profile) : new Set<string>();
+  // Each playbook as it would be for this company (its size and features), the best fits first.
+  const books = PLAYBOOKS.map((p) => ({ raw: p, fit: profile ? tailorPlaybook(p, profile).pb : p, t: translatePlaybook(p, lang === "sw" ? "sw" : "en", tr) })).sort(
+    (a, b) => Number(picks.has(b.raw.id)) - Number(picks.has(a.raw.id)),
+  );
 
   return (
     <div className="auth-wrap journey-wrap pb-list-wrap">
@@ -36,10 +43,15 @@ export default async function PlaybooksPage() {
         <p className="j-eyebrow">{tr("Playbooks")}</p>
         <h1>{tr("Learn LeMoSp the practical way")}</h1>
         <p>{tr("Step-by-step guides with live examples and real business situations. Choose the playbooks your company needs and request them: once LeMo Tech gives them to your company, everyone in your team can read them on screen or download the PDF.")}</p>
+        {profile?.name && (
+          <p className="small">
+            {tr("Each playbook is made for {company}: your name in the examples, and only the steps that fit your size, what you sell and the features you use.").replace("{company}", profile.name)}
+          </p>
+        )}
         {!inApp && <p className="small">{tr("Sign in to request playbooks for your company.")}</p>}
       </div>
       <ul className="pb-cards">
-        {books.map(({ raw, t }, i) => {
+        {books.map(({ raw, fit, t }, i) => {
           const state = access.state(raw.id);
           const open = state === "granted";
           return (
@@ -51,8 +63,13 @@ export default async function PlaybooksPage() {
                 <strong>{t.title}</strong>
                 <span className="pb-card-tag">{t.tagline}</span>
                 <span className="pb-card-meta">
-                  {raw.chapters.length} {tr("chapters")} · {stepCount(raw)} {tr("steps")} · {scenarioCount(raw)} {tr("scenarios")} · ~{raw.minutes} {tr("min")}
+                  {fit.chapters.length} {tr("chapters")} · {stepCount(fit)} {tr("steps")} · {scenarioCount(fit)} {tr("scenarios")} · ~{fit.minutes} {tr("min")}
                 </span>
+                {picks.has(raw.id) && (
+                  <span className="pb-card-for">
+                    <span className="badge tone-info">★ {tr("Recommended for your company")}</span>
+                  </span>
+                )}
                 <span className="pb-card-for">{t.audience}</span>
                 <span className="pb-card-for">
                   {open ? (

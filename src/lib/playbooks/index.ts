@@ -1,5 +1,8 @@
 import type { Playbook, PlaybookStep } from "./types";
 import { SETUP } from "./setup";
+import { GOODS_BUSINESS } from "./goods-business";
+import { SERVICES_BUSINESS } from "./services-business";
+import { GOODS_AND_SERVICES } from "./goods-and-services";
 import { ORDER_TO_CASH } from "./order-to-cash";
 import { ANALYTICS } from "./analytics";
 import { GETTING_PAID } from "./getting-paid";
@@ -9,6 +12,9 @@ import { SECURITY } from "./security";
 import { CONNECT } from "./connect";
 import { ENTERPRISE } from "./enterprise";
 import { SW_SETUP } from "./sw/setup";
+import { SW_GOODS_BUSINESS } from "./sw/goods-business";
+import { SW_SERVICES_BUSINESS } from "./sw/services-business";
+import { SW_GOODS_AND_SERVICES } from "./sw/goods-and-services";
 import { SW_ORDER_TO_CASH } from "./sw/order-to-cash";
 import { SW_ANALYTICS } from "./sw/analytics";
 import { SW_GETTING_PAID } from "./sw/getting-paid";
@@ -21,7 +27,7 @@ import { SW_ENTERPRISE } from "./sw/enterprise";
 export type { Playbook, PlaybookChapter, PlaybookExample, PlaybookScenario, PlaybookStep, Tone } from "./types";
 
 /** In the order they are shown on /playbooks. */
-export const PLAYBOOKS: Playbook[] = [SETUP, ORDER_TO_CASH, ANALYTICS, GETTING_PAID, STOCK, ROUTINES, SECURITY, ENTERPRISE, CONNECT];
+export const PLAYBOOKS: Playbook[] = [SETUP, GOODS_BUSINESS, SERVICES_BUSINESS, GOODS_AND_SERVICES, ORDER_TO_CASH, ANALYTICS, GETTING_PAID, STOCK, ROUTINES, SECURITY, ENTERPRISE, CONNECT];
 
 export function findPlaybook(id: string): Playbook | null {
   return PLAYBOOKS.find((p) => p.id === id) ?? null;
@@ -33,6 +39,9 @@ export function findPlaybook(id: string): Playbook | null {
  */
 const SW_PB: Record<string, string> = {
   ...SW_SETUP,
+  ...SW_GOODS_BUSINESS,
+  ...SW_SERVICES_BUSINESS,
+  ...SW_GOODS_AND_SERVICES,
   ...SW_ORDER_TO_CASH,
   ...SW_ANALYTICS,
   ...SW_GETTING_PAID,

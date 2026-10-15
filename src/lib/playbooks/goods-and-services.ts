@@ -115,16 +115,16 @@ export const GOODS_AND_SERVICES: Playbook = {
       id: "configure",
       title: "Set up LeMoSp for goods and services",
       intro:
-        "Choose Both and LeMoSp gives you stock, deliveries and purchasing for the goods, and service jobs, maintenance and equipment for the work. Small, Medium and Enterprise are modes of one app; nothing is lost when you change.",
+        "Choose Goods and services and LeMoSp gives you stock, deliveries and purchasing for the goods, and service jobs, maintenance and equipment for the work. Small, Medium and Enterprise are modes of one app; nothing is lost when you change.",
       steps: [
         {
           id: "what-you-sell",
-          title: "Choose Both and your business level",
+          title: "Choose Goods and services and your business level",
           body:
-            "Both switches on the goods screens and the service screens together. Your level decides how much control each has; single features can still be switched on or off.",
+            "Goods and services switches on the goods screens and the service screens together. Your level decides how much control each has; single features can still be switched on or off.",
           do: [
             "Open Features & business level.",
-            "Under What you sell, choose Both.",
+            "Under What you sell, choose Goods and services.",
             "Choose your level. Medium suits most supply-and-install companies; Enterprise adds projects, timesheets, approval steps and budgets.",
             "Switch on Projects & consulting or Timesheets & billable hours on their own if you need them before Enterprise.",
           ],
@@ -135,7 +135,7 @@ export const GOODS_AND_SERVICES: Playbook = {
             kind: "Features & business level",
             title: "Maji Bora Ltd",
             lines: [
-              ["What you sell", "Both"],
+              ["What you sell", "Goods and services"],
               ["Business level", "Medium"],
               ["Service jobs", "On"],
               ["Maintenance contracts", "On"],
@@ -155,7 +155,7 @@ export const GOODS_AND_SERVICES: Playbook = {
           do: [
             "Open Company details & branding.",
             "Set the VAT rate % to 18, or 0 if you are not registered for VAT.",
-            "Set the Withholding tax rate % to 5.",
+            "Set the Withholding tax on services % to 5.",
             "Set the Minimum margin %, Clients pay within (days) and the Standard invoice terms, for example \"Installation warranty 12 months; pipes as per manufacturer's warranty.\" Press Save company details.",
           ],
           where: ["Settings", "Company details & branding"],
@@ -280,7 +280,7 @@ export const GOODS_AND_SERVICES: Playbook = {
           do: [
             "Type the client's LPO number in Client's answer and press Client accepted.",
             "Press Create purchase order for goods you do not have, or Create delivery note for goods in stock.",
-            "Open Service jobs and press New job for the installation, linked to the client and the site.",
+            "Open Service jobs and press + Job for the installation, linked to the client and the site.",
           ],
           where: ["Sales", "Quotations"],
           href: "/quotations",
@@ -331,8 +331,8 @@ export const GOODS_AND_SERVICES: Playbook = {
           do: [
             "Open the installation job: kind Installation, the site, the date and the plumbers.",
             "Add the checklist: trench depth checked, joints welded, pressure test, pump wiring checked, client trained.",
-            "On site, add materials lines for fittings used from stock, and labour lines for the hours.",
-            "The client's manager signs on the phone; the plumber presses Complete. The materials leave stock.",
+            "On site, press + Add material or work for the fittings used from stock and for the labour hours.",
+            "The client's manager signs on the phone; the plumber presses Finish and sign off. The materials leave stock.",
           ],
           where: ["Services", "Service jobs"],
           href: "/jobs",
@@ -371,7 +371,7 @@ export const GOODS_AND_SERVICES: Playbook = {
           body:
             "After installation, record the pump and the main pipework in Equipment. You then know the serial number, the warranty end and when it needs service.",
           do: [
-            "Open Equipment and press Add.",
+            "Open Equipment and press + Equipment.",
             "Choose the client and enter the item, serial number, location, install date, warranty end and service interval.",
           ],
           where: ["Services", "Equipment"],
@@ -407,12 +407,12 @@ export const GOODS_AND_SERVICES: Playbook = {
           body:
             "A client who just installed a pump is the easiest client for a maintenance contract. The visits are planned for you and become service jobs.",
           do: [
-            "Open Maintenance and press New contract.",
-            "Choose the client, the frequency (monthly, quarterly, half-yearly or yearly), the first visit date and the price per period.",
+            "Open Maintenance contracts and press + Contract.",
+            "Choose the client, how often (Every month, Every 3 months, Every 6 months or Every year), the first visit date and the price per period.",
             "Write what to check on each visit.",
             "Press Plan due visits: each visit becomes a service job two weeks ahead.",
           ],
-          where: ["Services", "Maintenance"],
+          where: ["Services", "Maintenance contracts"],
           href: "/maintenance",
           who: "Sales",
           example: {
@@ -421,7 +421,7 @@ export const GOODS_AND_SERVICES: Playbook = {
             lines: [
               ["Client", "Meru Coffee Estate"],
               ["What", "Pump and pipeline service"],
-              ["Frequency", "Half-yearly"],
+              ["How often", "Every 6 months"],
               ["Price per period", "TZS 450,000"],
             ],
             mark: 2,
@@ -437,9 +437,9 @@ export const GOODS_AND_SERVICES: Playbook = {
             "Advice such as a borehole site study or a water system design is a service too. Small advice is billed by the hour; bigger studies run as projects with milestones.",
           do: [
             "Short advice: add Consultancy hours to a quotation or a service job of kind Consultation.",
-            "Bigger studies: open Projects, press New project and choose billed by milestone or by time.",
-            "Everyone records hours in Timesheets against the project.",
-            "Press Invoice milestones or hours on the project when a milestone is done or at month end.",
+            "Bigger studies: open Projects, press + Project and choose By milestone or By time (hours).",
+            "Everyone presses Record hours in Timesheets against the project.",
+            "On the project, use Invoice the client and press Make draft invoice when a milestone is done or at month end.",
           ],
           where: ["Services", "Projects"],
           href: "/projects",
@@ -450,7 +450,7 @@ export const GOODS_AND_SERVICES: Playbook = {
             lines: [
               ["Client", "Babati Town Water Authority"],
               ["Name", "Borehole siting study"],
-              ["Billed", "By time"],
+              ["Billed", "By time (hours)"],
               ["Hours this month", "46 × TZS 80,000"],
             ],
             mark: 3,
@@ -466,7 +466,7 @@ export const GOODS_AND_SERVICES: Playbook = {
             "When an installed pump breaks, open a repair job on the same client. The equipment history shows whether it is still under warranty.",
           do: [
             "Open Equipment, find the unit and look at the warranty end.",
-            "Open Service jobs, press New job, kind Repair, and choose the technician.",
+            "Open Service jobs, press + Job, kind Repair, and choose the technician.",
             "Under warranty: do not charge the parts covered; record them on the job so the cost is known.",
           ],
           where: ["Services", "Service jobs"],
@@ -577,8 +577,8 @@ export const GOODS_AND_SERVICES: Playbook = {
           id: "hire",
           title: "Hire or rental",
           body:
-            "Pumps, generators or trench diggers you own and rent out are items of Type Hire. Hire tracks what is out and bills per day, week or month; long hires can be invoiced every month while still out.",
-          where: ["Services", "Hire"],
+            "Pumps, generators or trench diggers you own and rent out are items of Type Hire. Equipment hire tracks what is out and bills per day, week or month; long hires can be invoiced every month while still out.",
+          where: ["Services", "Equipment hire"],
           href: "/hire",
           who: "Sales and Warehouse",
           scales: "medium+",
@@ -626,7 +626,7 @@ export const GOODS_AND_SERVICES: Playbook = {
           title: "Subscription or recurring supply",
           body:
             "Regular service runs as a maintenance contract; regular goods, such as water treatment chemicals every month, run on a contract with agreed prices and a monthly delivery. Automatic recurring invoices are planned for a later phase.",
-          where: ["Services", "Maintenance"],
+          where: ["Services", "Maintenance contracts"],
           href: "/maintenance",
           who: "Sales",
           scales: "medium+",
@@ -644,7 +644,7 @@ export const GOODS_AND_SERVICES: Playbook = {
           title: "Every week",
           body: "Short checks for both sides of the business.",
           do: [
-            "Monday: What to reorder, Purchasing overview, and Plan due visits in Maintenance.",
+            "Monday: What to reorder, Purchasing overview, and Plan due visits in Maintenance contracts.",
             "Every day: delivered notes and completed jobs are invoiced the same day.",
             "Friday: timesheets complete, Money owed to us checked, certificates chased.",
           ],

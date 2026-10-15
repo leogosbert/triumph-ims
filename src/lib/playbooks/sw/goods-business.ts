@@ -90,7 +90,7 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
   "Issued by": "Imetolewa na",
   "Kinondoni Municipal Council": "Halmashauri ya Manispaa ya Kinondoni",
   "Expires": "Inaisha",
-  "30 Jun 2027": "30 Juni 2027",
+  "30 Jun 2027": "30 Jun 2027",
   "Remind before": "Kumbusha kabla ya",
   "30 days": "siku 30",
   "Register your staff and open your accounts": "Sajili wafanyakazi wako na ufungue akaunti zako",
@@ -126,8 +126,8 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
   "Under What you sell, choose Goods.": "Chini ya Unachouza, chagua Bidhaa.",
   "Choose the level that matches you today: Small for one shop or a few people, Medium for several staff and a store, Enterprise for branches, approval steps and budgets.":
     "Chagua kiwango kinachokufaa leo: Ndogo kwa duka moja au watu wachache, Kati kwa wafanyakazi kadhaa na ghala, Kubwa kwa matawi, hatua za idhini na bajeti.",
-  "Switch on single features you need even if your level does not include them, for example Batches and expiry for food or medicines.":
-    "Washa kipengele kimoja kimoja unachohitaji hata kama kiwango chako hakikijumuishi, kwa mfano Makundi na tarehe za kwisha kwa vyakula au dawa.",
+  "Switch on single features you need even if your level does not include them, for example Batches & expiry dates for food or medicines.":
+    "Washa kipengele kimoja kimoja unachohitaji hata kama kiwango chako hakikijumuishi, kwa mfano Bechi na tarehe za kuisha muda kwa vyakula au dawa.",
   "Features & business level": "Vipengele na kiwango cha biashara",
   "Management": "Uongozi",
   "Small, Medium and Enterprise are modes of one app, not separate apps. Move up or down at any time; nothing is lost.":
@@ -136,17 +136,17 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
   "Goods": "Bidhaa",
   "Business level": "Kiwango cha biashara",
   "Medium": "Kati",
-  "Batches and expiry": "Makundi na tarehe za kwisha",
+  "Batches & expiry dates": "Bechi na tarehe za kuisha muda",
   "On": "Imewashwa",
   "Service jobs": "Kazi za huduma",
   "Off": "Imezimwa",
   "You start installing what you sell": "Unaanza kufunga unachouza",
   "Clients now ask Kilimo Supplies to install the irrigation pumps it sells.":
     "Sasa wateja wanaiomba Kilimo Supplies ifunge pampu za umwagiliaji inazouza.",
-  "Open Features & business level and change What you sell to Both.":
-    "Fungua Vipengele na kiwango cha biashara na ubadilishe Unachouza kuwa Zote mbili.",
-  "Service jobs, Equipment and Maintenance appear. All your products, orders and invoices stay as they were.":
-    "Kazi za huduma, Vifaa na Matengenezo vinatokea. Bidhaa, oda na ankara zako zote zinabaki kama zilivyokuwa.",
+  "Open Features & business level and change What you sell to Goods and services.":
+    "Fungua Vipengele na kiwango cha biashara na ubadilishe Unachouza kuwa Bidhaa na huduma.",
+  "Service jobs, Maintenance contracts and Equipment appear. All your products, orders and invoices stay as they were.":
+    "Kazi za huduma, Mikataba ya matengenezo na Vifaa vinatokea. Bidhaa, oda na ankara zako zote zinabaki kama zilivyokuwa.",
   "Read the playbook \"Supply goods and services together\" before the first installation.":
     "Soma mwongozo \"Sambaza bidhaa na huduma pamoja\" kabla ya ufungaji wa kwanza.",
   "Set VAT, terms and approval limits": "Weka VAT, masharti na mipaka ya idhini",
@@ -157,8 +157,8 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
     "Weka Jina lililosajiliwa kama lilivyo kwenye cheti cha BRELA, TIN na, kama umesajiliwa kwa VAT, VRN.",
   "Set the VAT rate % to 18, or 0 if you are not registered for VAT.":
     "Weka Kiwango cha VAT % kuwa 18, au 0 kama hujasajiliwa kwa VAT.",
-  "Leave the Withholding tax rate % at 5. It only applies to service lines, so a goods business rarely sees it.":
-    "Acha Kiwango cha kodi ya zuio % kiwe 5. Kinahusu mistari ya huduma tu, kwa hiyo biashara ya bidhaa mara chache hukiona.",
+  "Leave the Withholding tax on services % at 5. It only applies to service lines, so a goods business rarely sees it.":
+    "Acha Kodi ya zuio kwenye huduma % iwe 5. Inahusu mistari ya huduma tu, kwa hiyo biashara ya bidhaa mara chache huiona.",
   "Set Clients pay within (days), Quotations valid for (days) and the Minimum margin %.":
     "Weka Wateja hulipa ndani ya (siku), Muda wa nukuu za bei (siku) na Kiwango cha chini cha faida %.",
   "Write the Standard invoice terms, for example \"Goods remain the property of Kilimo Supplies until paid in full.\" Press Save company details.":
@@ -202,7 +202,7 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
   "Switch on two-step verification for management and finance in Security.":
     "Washa uthibitishaji wa hatua mbili kwa uongozi na fedha kwenye Usalama.",
   "Team & roles": "Timu na majukumu",
-  "Invited": "Wamealikwa",
+  "Invited": "Amealikwa",
   "Neema Mushi": "Neema Mushi",
   "Hassan Said": "Hassan Said",
   "Sales": "Mauzo",
@@ -522,22 +522,23 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
   "Not every sale is goods from your shelf. Here is how LeMoSp handles the other ways a goods business can supply, and what is still to come.":
     "Si kila mauzo ni bidhaa kutoka rafuni kwako. Hivi ndivyo LeMoSp inavyoshughulikia njia nyingine ambazo biashara ya bidhaa inaweza kusambaza, na kile kinachokuja bado.",
   "Hire or rental": "Ukodishaji",
-  "If you hire out goods you own, such as tents, scaffolding or generators, mark them as Type Hire. The Hire screen tracks what is out, with whom, when it is due back, and bills every day on hire.":
-    "Ukikodisha vitu unavyomiliki, kama mahema, jukwaa za ujenzi au jenereta, viweke kama Aina Ukodishaji. Skrini ya Ukodishaji inafuatilia kilichotoka, kiko kwa nani, kinarudi lini, na inatoza kila siku ya ukodishaji.",
+  "If you hire out goods you own, such as tents, scaffolding or generators, mark them as Type Hire. The Equipment hire screen tracks what is out, with whom, when it is due back, and bills every day on hire.":
+    "Ukikodisha vitu unavyomiliki, kama mahema, jukwaa za ujenzi au jenereta, viweke kama Aina Ukodishaji. Skrini ya Ukodishaji wa vifaa inafuatilia kilichotoka, kiko kwa nani, kinarudi lini, na inatoza kila siku ya ukodishaji.",
   "In Features & business level, switch on Equipment hire.": "Kwenye Vipengele na kiwango cha biashara, washa Ukodishaji wa vifaa.",
   "Set the product's Type to Hire and receive the units you own into a store.":
     "Weka Aina ya bidhaa kuwa Ukodishaji na upokee vipande unavyomiliki kwenye ghala.",
-  "Open Hire, press New hire, choose the client, the dates and the rate per day, week or month.":
-    "Fungua Ukodishaji, bonyeza Ukodishaji mpya, chagua mteja, tarehe na kiwango kwa siku, wiki au mwezi.",
-  "When the items come back, record the return and press Make invoice.": "Vitu vikirudi, rekodi urejeshaji na ubonyeze Tengeneza ankara.",
-  "Hire": "Ukodishaji",
+  "Open Equipment hire, press + Hire, choose the client and the dates, then add the items with their rate per day, week or month.":
+    "Fungua Ukodishaji wa vifaa, bonyeza + Ukodishaji, chagua mteja na tarehe, kisha ongeza vifaa pamoja na kiwango chake kwa siku, wiki au mwezi.",
+  "When the items come back, press Record return, then Make invoice.":
+    "Vifaa vikirudi, bonyeza Rekodi kurudishwa, kisha Tengeneza ankara.",
+  "Equipment hire": "Ukodishaji wa vifaa",
   "Sales and Warehouse": "Mauzo na Ghala",
   "Indent or direct supply": "Indent au usambazaji wa moja kwa moja",
   "Indent means you take the client's order, buy from the supplier and the goods go straight to the client. Use a purchase order ticked Supplier delivers straight to the client, then Record delivery to client.":
     "Indent maana yake unapokea oda ya mteja, unanunua kwa msambazaji na bidhaa zinaenda moja kwa moja kwa mteja. Tumia oda ya ununuzi yenye alama kwenye Msambazaji anapeleka moja kwa moja kwa mteja, kisha Rekodi uwasilishaji kwa mteja.",
   "Supply and install, or contracting": "Sambaza na funga, au ukandarasi",
-  "If you also install what you sell, change What you sell to Both. You then get service jobs with materials taken from stock, and projects billed by milestone for bigger works.":
-    "Kama pia unafunga unachouza, badilisha Unachouza kuwa Zote mbili. Hapo unapata kazi za huduma zenye vifaa vinavyotoka kwenye stoku, na miradi inayotozwa kwa hatua kwa kazi kubwa.",
+  "If you also install what you sell, change What you sell to Goods and services. You then get service jobs with materials taken from stock, and projects billed by milestone for bigger works.":
+    "Kama pia unafunga unachouza, badilisha Unachouza kuwa Bidhaa na huduma. Hapo unapata kazi za huduma zenye vifaa vinavyotoka kwenye stoku, na miradi inayotozwa kwa hatua kwa kazi kubwa.",
   "Manufacturing or fabrication": "Uzalishaji au utengenezaji",
   "Manufacturing is not built into LeMoSp yet; it is planned for a later phase. For now, record raw materials and finished goods as products, take the raw materials out with Adjust stock when you produce, and add the finished goods the same way.":
     "Uzalishaji bado haujajengwa ndani ya LeMoSp; umepangwa kwa awamu ya baadaye. Kwa sasa, rekodi malighafi na bidhaa zilizokamilika kama bidhaa, toa malighafi kwa Rekebisha stoku unapozalisha, na uongeze bidhaa zilizokamilika kwa njia hiyo hiyo.",
@@ -607,4 +608,5 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
   "Review your business level in Features & business level: move up when you add stores, branches or staff.":
     "Pitia kiwango cha biashara yako kwenye Vipengele na kiwango cha biashara: panda unapoongeza maghala, matawi au wafanyakazi.",
   "Owner and Management": "Mmiliki na Uongozi",
+  "Services": "Huduma",
 };

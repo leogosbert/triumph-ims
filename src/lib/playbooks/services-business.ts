@@ -137,7 +137,7 @@ export const SERVICES_BUSINESS: Playbook = {
           id: "what-you-sell",
           title: "Choose Services and your business level",
           body:
-            "What you sell decides which screens you see. Choosing Services switches on Service jobs, Maintenance, Equipment, Projects, Timesheets and Service reports.",
+            "What you sell decides which screens you see. Choosing Services switches on Service jobs, Maintenance contracts, Equipment, Projects, Timesheets and Service reports.",
           do: [
             "Open Features & business level.",
             "Under What you sell, choose Services.",
@@ -161,7 +161,7 @@ export const SERVICES_BUSINESS: Playbook = {
             stamp: "Saved",
             tone: "ok",
           },
-          tip: "Start selling spare parts too? Change What you sell to Both. Nothing you recorded is lost.",
+          tip: "Start selling spare parts too? Change What you sell to Goods and services. Nothing you recorded is lost.",
           scales: "all",
         },
         {
@@ -173,7 +173,7 @@ export const SERVICES_BUSINESS: Playbook = {
             "Open Company details & branding.",
             "Enter the Registered name, TIN and, if VAT registered, the VRN.",
             "Set the VAT rate % to 18, or 0 if you are not registered for VAT.",
-            "Set the Withholding tax rate % to 5, the usual rate on services by residents.",
+            "Set the Withholding tax on services % to 5, the usual rate on services by residents.",
             "Set Clients pay within (days) and write the Standard invoice terms, for example \"Call-out fee is charged even if no repair is possible.\" Press Save company details.",
           ],
           where: ["Settings", "Company details & branding"],
@@ -184,7 +184,7 @@ export const SERVICES_BUSINESS: Playbook = {
             title: "Pwani Cooling Services Ltd",
             lines: [
               ["VAT rate %", "18"],
-              ["Withholding tax rate %", "5"],
+              ["Withholding tax on services %", "5"],
               ["Clients pay within (days)", "30"],
               ["Standard invoice terms", "Call-out fee charged on every visit"],
             ],
@@ -255,7 +255,7 @@ export const SERVICES_BUSINESS: Playbook = {
           body:
             "Every call from a client becomes a job, so nothing is forgotten and every job is invoiced.",
           do: [
-            "Open Service jobs and press New job.",
+            "Open Service jobs and press + Job.",
             "Choose the client and the kind of work: installation, repair, maintenance, inspection or consultation.",
             "Enter the site, contact person, date and priority, and choose the technicians.",
             "Add the checklist: the steps the technician must tick on site.",
@@ -287,7 +287,7 @@ export const SERVICES_BUSINESS: Playbook = {
             "The technician records the work while on site, not days later from memory. Materials taken from stock and hours worked go on the job as they are used.",
           do: [
             "The technician opens the job on the phone and ticks the checklist.",
-            "Add a materials line for each part used, from stock, and a labour line for the hours.",
+            "Press + Add material or work for each part used from stock and for the labour hours.",
             "Write the findings: what was wrong and what was done.",
           ],
           where: ["Services", "Service jobs"],
@@ -311,9 +311,9 @@ export const SERVICES_BUSINESS: Playbook = {
               title: "A part is needed that you do not have",
               problem: "Elia finds the compressor is dead. You have no compressor in stock.",
               fix: [
-                "Write the finding on the job and put the job On hold.",
+                "Write the finding on the job and press Put on hold.",
                 "Send the client a quotation for the compressor and the extra labour.",
-                "When the client accepts, buy the part, then reopen the job and finish it.",
+                "When the client accepts, buy the part, then press Start the job again and finish it.",
               ],
               tone: "warn",
             },
@@ -322,12 +322,12 @@ export const SERVICES_BUSINESS: Playbook = {
         },
         {
           id: "complete",
-          title: "Client signs, Complete, then Make invoice",
+          title: "Client signs off, then Make invoice",
           body:
-            "The client's signature on the phone is the proof the work was done. Completing the job takes the materials out of stock; finance then turns it into an invoice in one step.",
+            "The client's signature on the phone is the proof the work was done. Signing off the job takes the materials out of stock; finance then turns it into an invoice in one step.",
           do: [
             "The client checks the work and signs on the technician's phone with their name.",
-            "The technician presses Complete. The materials leave stock.",
+            "The technician presses Finish and sign off. The materials leave stock.",
             "Finance opens the completed job and presses Make invoice: labour, materials and the agreed price become a draft invoice.",
             "Check it and press Issue invoice.",
           ],
@@ -353,7 +353,7 @@ export const SERVICES_BUSINESS: Playbook = {
               title: "Jobs are done but never invoiced",
               problem: "At month end, eight completed jobs have no invoice and the technicians have moved on.",
               fix: [
-                "Open Service jobs and filter by Completed: these are done but not invoiced.",
+                "Open Service jobs and look at Completed, not invoiced.",
                 "Press Make invoice on each one today.",
                 "Make it a rule: finance checks completed jobs every morning.",
               ],
@@ -376,12 +376,12 @@ export const SERVICES_BUSINESS: Playbook = {
           body:
             "A maintenance contract is an agreement to service a client's equipment at a fixed frequency for a price per period. LeMoSp plans the visits so none is missed.",
           do: [
-            "Open Maintenance and press New contract.",
-            "Choose the client and the frequency: monthly, quarterly, half-yearly or yearly.",
+            "Open Maintenance contracts and press + Contract.",
+            "Choose the client and how often: Every month, Every 3 months, Every 6 months or Every year.",
             "Enter the first visit date, the price per period, the site and what to check on each visit.",
             "Press Plan due visits: each visit becomes a service job two weeks before it is due, with its checklist. Assign the technician.",
           ],
-          where: ["Services", "Maintenance"],
+          where: ["Services", "Maintenance contracts"],
           href: "/maintenance",
           who: "Sales or Management",
           example: {
@@ -390,7 +390,7 @@ export const SERVICES_BUSINESS: Playbook = {
             lines: [
               ["Client", "Bahari Apartments, Msasani"],
               ["What", "Service of 24 split AC units"],
-              ["Frequency", "Quarterly"],
+              ["How often", "Every 3 months"],
               ["Price per period", "TZS 2,400,000"],
               ["Next visit", "3 Nov 2026"],
             ],
@@ -405,7 +405,7 @@ export const SERVICES_BUSINESS: Playbook = {
               fix: [
                 "Open the contract and pause it. No new visit jobs are planned while it is paused.",
                 "Note the reason and the restart date on the contract.",
-                "Make it active again in February and press Plan due visits.",
+                "Make it Active again in February and press Plan due visits.",
               ],
               tone: "info",
             },
@@ -418,7 +418,7 @@ export const SERVICES_BUSINESS: Playbook = {
           body:
             "The register lists everything you installed or look after at each client: serial number, location, warranty and next service. Each job on a unit is kept in its history.",
           do: [
-            "Open Equipment and press Add.",
+            "Open Equipment and press + Equipment.",
             "Choose the client, enter the item, serial number and where it is.",
             "Enter the install date, warranty end and how often it needs service.",
             "Warranties ending soon and services due show at the top. Call those clients first.",
@@ -447,18 +447,18 @@ export const SERVICES_BUSINESS: Playbook = {
           id: "hire",
           title: "Hire out equipment you own",
           body:
-            "If you rent out generators, scaffolding, pumps or tools, Hire shows what is out, with whom, when it is due back, and bills every day on hire.",
+            "If you rent out generators, scaffolding, pumps or tools, Equipment hire shows what is out, with whom, when it is due back, and bills every day on hire.",
           do: [
             "In Products, set the item's Type to Hire and receive the units you own into a store.",
-            "Open Hire and press New hire: client, site, date out, date due back, and the items with the rate per day, week or month.",
-            "When the items come back, record the return, then press Make invoice.",
+            "Open Equipment hire and press + Hire: client, site, date out and date due back, then the items with the rate per day, week or month.",
+            "When the items come back, press Record return, then Make invoice.",
             "For long hires, invoice every month while the items are still out.",
           ],
-          where: ["Services", "Hire"],
+          where: ["Services", "Equipment hire"],
           href: "/hire",
           who: "Sales and Warehouse",
           example: {
-            kind: "Hire",
+            kind: "Equipment hire",
             title: "HIRE-0019",
             lines: [
               ["Client", "Dodoma Builders"],
@@ -487,8 +487,8 @@ export const SERVICES_BUSINESS: Playbook = {
           body:
             "A project can be billed at a fixed price, by milestone or by the time spent. Choose what the client agreed in the contract.",
           do: [
-            "Open Projects and press New project.",
-            "Choose the client and how it is billed: fixed, by milestone or by time.",
+            "Open Projects and press + Project.",
+            "Choose the client and How it is billed: Fixed price, By milestone or By time (hours).",
             "Enter the budget in money and hours, and the default hourly rate.",
             "For milestone billing, add each milestone with its amount, for example survey, design report, tender documents.",
           ],
@@ -516,11 +516,11 @@ export const SERVICES_BUSINESS: Playbook = {
           id: "timesheets",
           title: "Record hours in Timesheets",
           body:
-            "Every hour on a job or project is recorded, billable or not. Management sets each person's bill rate and cost per hour once, so invoices and profit use the right figures.",
+            "Every hour on a job or project is recorded, billable or not. Management sets each person's hourly rate and cost once, so invoices and profit use the right figures.",
           do: [
-            "Management opens Timesheets and sets each person's bill rate and cost per hour.",
-            "Each person opens Timesheets daily: choose the day, the job or project, the hours and what they did.",
-            "Untick billable for time the client should not pay for, such as travel included in the price.",
+            "Management opens Timesheets, then Team rates, and sets each person's Hourly rate charged and Cost per hour.",
+            "Each person opens Timesheets daily and presses Record hours: the day, the job or project, the hours and what they did.",
+            "Untick Billable to the client for time the client should not pay for, such as travel included in the price.",
           ],
           where: ["Services", "Timesheets"],
           href: "/timesheets",
@@ -532,7 +532,7 @@ export const SERVICES_BUSINESS: Playbook = {
               ["Project", "PRJ-012"],
               ["Hours", "7.5"],
               ["What was done", "Pipe network calculations"],
-              ["Bill rate", "TZS 85,000 an hour"],
+              ["Hourly rate charged", "TZS 85,000"],
               ["Cost per hour", "TZS 40,000"],
             ],
             mark: 3,
@@ -555,13 +555,13 @@ export const SERVICES_BUSINESS: Playbook = {
         },
         {
           id: "invoice-project",
-          title: "Invoice milestones or hours",
+          title: "Invoice milestones and hours",
           body:
             "Invoice each milestone as soon as it is done, or the hours not yet billed every month. Waiting until the end of a project leaves you financing the client.",
           do: [
-            "Open the project and press Invoice milestones or hours.",
-            "Tick the finished milestones, or choose the date up to which hours are billed.",
-            "A draft invoice is created; check it and press Issue invoice.",
+            "Open the project and go to Invoice the client.",
+            "Tick the finished milestones and choose Invoice billable hours up to, then press Make draft invoice.",
+            "Check the draft invoice and press Issue invoice.",
           ],
           where: ["Services", "Projects"],
           href: "/projects",
@@ -585,7 +585,7 @@ export const SERVICES_BUSINESS: Playbook = {
             "Add up the person's monthly cost: salary, NSSF, WCF and allowances. Divide by the billable hours in a month, often 120 to 140.",
             "Add overhead per hour: vehicle, fuel, tools, phone, office rent and admin staff, divided by all billable hours.",
             "Add your margin, then round.",
-            "Enter the result as the price of the Labour item and as the person's bill rate in Timesheets.",
+            "Enter the result as the price of the Labour item and as the person's Hourly rate charged in Team rates.",
           ],
           who: "Management",
           example: {
@@ -595,7 +595,7 @@ export const SERVICES_BUSINESS: Playbook = {
               ["Cost per hour (salary, NSSF)", "TZS 9,000"],
               ["Overhead per hour (van, tools, office)", "TZS 8,000"],
               ["Margin 30%", "TZS 5,100"],
-              ["Bill rate (rounded)", "TZS 22,000"],
+              ["Hourly rate charged (rounded)", "TZS 22,000"],
             ],
             mark: 3,
             stamp: "Priced",
@@ -681,8 +681,8 @@ export const SERVICES_BUSINESS: Playbook = {
           id: "hire",
           title: "Hire or rental",
           body:
-            "Equipment you own and rent out goes on the Hire screen, charged per day, week or month, with returns and late items tracked.",
-          where: ["Services", "Hire"],
+            "Equipment you own and rent out goes on the Equipment hire screen, charged per day, week or month, with returns and late items tracked.",
+          where: ["Services", "Equipment hire"],
           href: "/hire",
           who: "Sales and Warehouse",
           scales: "medium+",
@@ -691,7 +691,7 @@ export const SERVICES_BUSINESS: Playbook = {
           id: "indent",
           title: "Indent or direct supply",
           body:
-            "If a client asks you to source equipment for them, buy it on a purchase order ticked Supplier delivers straight to the client and press Record delivery to client when it arrives. It never enters your store. Change What you sell to Both if this becomes regular.",
+            "If a client asks you to source equipment for them, buy it on a purchase order ticked Supplier delivers straight to the client and press Record delivery to client when it arrives. It never enters your store. Change What you sell to Goods and services if this becomes regular.",
           where: ["Purchasing", "Purchase orders"],
           href: "/purchase-orders",
           who: "Procurement",
@@ -730,7 +730,7 @@ export const SERVICES_BUSINESS: Playbook = {
           title: "Subscription or recurring service",
           body:
             "Cleaning, security guarding and regular servicing are best run as maintenance contracts: the visits are planned and become jobs. Automatic recurring invoices are planned for a later phase.",
-          where: ["Services", "Maintenance"],
+          where: ["Services", "Maintenance contracts"],
           href: "/maintenance",
           who: "Sales",
           scales: "medium+",
@@ -749,7 +749,7 @@ export const SERVICES_BUSINESS: Playbook = {
           body: "Short checks that keep work and money moving.",
           do: [
             "Every morning: finance invoices yesterday's completed jobs.",
-            "Monday: Maintenance, press Plan due visits and assign technicians.",
+            "Monday: Maintenance contracts, press Plan due visits and assign technicians.",
             "Friday: everyone's timesheets are complete for the week.",
             "Friday: Money owed to us, reminders logged, certificates chased.",
           ],

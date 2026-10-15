@@ -74,7 +74,7 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Owner or Management": "Mmiliki au Uongozi",
   "Renew soon": "Huisha karibuni",
   "Business licence": "Leseni ya biashara",
-  "Expires 30 Jun 2027": "Inaisha 30 Juni 2027",
+  "Expires 30 Jun 2027": "Inaisha 30 Jun 2027",
   "CRB registration": "Usajili wa CRB",
   "Expires 31 Dec 2026": "Inaisha 31 Des 2026",
   "OSHA workplace registration": "Usajili wa sehemu ya kazi OSHA",
@@ -100,8 +100,8 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Tell LeMoSp you sell services and it switches on service jobs, maintenance, equipment, projects and timesheets, and hides what a services business does not need. Small, Medium and Enterprise are modes of one app; changing level never removes data.":
     "Iambie LeMoSp kwamba unauza huduma nayo inawasha kazi za huduma, matengenezo, vifaa, miradi na rejista za saa, na inaficha kile ambacho biashara ya huduma haihitaji. Ndogo, Kati na Kubwa ni njia za programu moja; kubadilisha kiwango hakufuti data kamwe.",
   "Choose Services and your business level": "Chagua Huduma na kiwango cha biashara yako",
-  "What you sell decides which screens you see. Choosing Services switches on Service jobs, Maintenance, Equipment, Projects, Timesheets and Service reports.":
-    "Unachouza kinaamua skrini zipi unaziona. Kuchagua Huduma kunawasha Kazi za huduma, Matengenezo, Vifaa, Miradi, Rejista za saa na Ripoti za huduma.",
+  "What you sell decides which screens you see. Choosing Services switches on Service jobs, Maintenance contracts, Equipment, Projects, Timesheets and Service reports.":
+    "Unachouza kinaamua skrini zipi unaziona. Kuchagua Huduma kunawasha Kazi za huduma, Mikataba ya matengenezo, Vifaa, Miradi, Rejista za saa na Ripoti za huduma.",
   "Open Features & business level.": "Fungua Vipengele na kiwango cha biashara.",
   "Under What you sell, choose Services.": "Chini ya Unachouza, chagua Huduma.",
   "Choose your level: Small for a few people, Medium for teams of technicians, Enterprise for branches, approval steps and budgets.":
@@ -110,8 +110,8 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
     "Washa au zima kipengele kimoja kimoja, kwa mfano Ukodishaji wa vifaa kama pia unakodisha mashine.",
   "Features & business level": "Vipengele na kiwango cha biashara",
   "Management": "Uongozi",
-  "Start selling spare parts too? Change What you sell to Both. Nothing you recorded is lost.":
-    "Unaanza kuuza vipuri pia? Badilisha Unachouza kuwa Zote mbili. Hakuna ulichorekodi kinachopotea.",
+  "Start selling spare parts too? Change What you sell to Goods and services. Nothing you recorded is lost.":
+    "Unaanza kuuza vipuri pia? Badilisha Unachouza kuwa Bidhaa na huduma. Hakuna ulichorekodi kinachopotea.",
   "Saved": "Imehifadhiwa",
   "What you sell": "Unachouza",
   "Services": "Huduma",
@@ -129,13 +129,13 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
     "Weka Jina lililosajiliwa, TIN na, kama umesajiliwa kwa VAT, VRN.",
   "Set the VAT rate % to 18, or 0 if you are not registered for VAT.":
     "Weka Kiwango cha VAT % kuwa 18, au 0 kama hujasajiliwa kwa VAT.",
-  "Set the Withholding tax rate % to 5, the usual rate on services by residents.":
-    "Weka Kiwango cha kodi ya zuio % kuwa 5, kiwango cha kawaida kwa huduma za wakazi.",
+  "Set the Withholding tax on services % to 5, the usual rate on services by residents.":
+    "Weka Kodi ya zuio kwenye huduma % kuwa 5, kiwango cha kawaida kwa huduma za wakazi.",
   "Set Clients pay within (days) and write the Standard invoice terms, for example \"Call-out fee is charged even if no repair is possible.\" Press Save company details.":
     "Weka Wateja hulipa ndani ya (siku) na uandike Masharti ya kawaida ya ankara, kwa mfano \"Ada ya kuitwa inatozwa hata kama ukarabati hauwezekani.\" Bonyeza Hifadhi taarifa za kampuni.",
   "Company details": "Maelezo ya kampuni",
   "VAT rate %": "Kiwango cha VAT %",
-  "Withholding tax rate %": "Kiwango cha kodi ya zuio %",
+  "Withholding tax on services %": "Kodi ya zuio kwenye huduma %",
   "Clients pay within (days)": "Wateja hulipa ndani ya (siku)",
   "Standard invoice terms": "Masharti ya kawaida ya ankara",
   "Call-out fee charged on every visit": "Ada ya kuitwa inatozwa kila ziara",
@@ -180,7 +180,7 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Create the job and send the technicians": "Unda kazi na utume mafundi",
   "Every call from a client becomes a job, so nothing is forgotten and every job is invoiced.":
     "Kila simu kutoka kwa mteja inakuwa kazi, ili hakuna kinachosahaulika na kila kazi inatolewa ankara.",
-  "Open Service jobs and press New job.": "Fungua Kazi za huduma na ubonyeze Kazi mpya.",
+  "Open Service jobs and press + Job.": "Fungua Kazi za huduma na ubonyeze + Kazi.",
   "Choose the client and the kind of work: installation, repair, maintenance, inspection or consultation.":
     "Chagua mteja na aina ya kazi: ufungaji, ukarabati, matengenezo, ukaguzi au ushauri.",
   "Enter the site, contact person, date and priority, and choose the technicians.":
@@ -205,8 +205,8 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "The technician records the work while on site, not days later from memory. Materials taken from stock and hours worked go on the job as they are used.":
     "Fundi anarekodi kazi akiwa eneo la kazi, si siku kadhaa baadaye kwa kukumbuka. Vifaa vilivyochukuliwa kutoka stoku na saa zilizofanyiwa kazi vinaingia kwenye kazi vinapotumika.",
   "The technician opens the job on the phone and ticks the checklist.": "Fundi anafungua kazi kwenye simu na kuweka alama kwenye orodha ya ukaguzi.",
-  "Add a materials line for each part used, from stock, and a labour line for the hours.":
-    "Ongeza mstari wa vifaa kwa kila kipuri kilichotumika, kutoka stoku, na mstari wa nguvu kazi kwa saa.",
+  "Press + Add material or work for each part used from stock and for the labour hours.":
+    "Bonyeza + Ongeza kifaa au kazi kwa kila kipuri kilichotumika kutoka stoku na kwa saa za nguvu kazi.",
   "Write the findings: what was wrong and what was done.": "Andika matokeo: nini kilikuwa kibovu na nini kimefanyika.",
   "Technician": "Fundi",
   "In progress": "Inaendelea",
@@ -218,15 +218,17 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Leaking valve replaced, gas refilled": "Vali inayovuja imebadilishwa, gesi imejazwa",
   "A part is needed that you do not have": "Kinahitajika kipuri usicho nacho",
   "Elia finds the compressor is dead. You have no compressor in stock.": "Elia anagundua kompresa imekufa. Huna kompresa kwenye stoku.",
-  "Write the finding on the job and put the job On hold.": "Andika matokeo kwenye kazi na uweke kazi Imesimamishwa.",
+  "Write the finding on the job and press Put on hold.": "Andika matokeo kwenye kazi na ubonyeze Simamisha.",
   "Send the client a quotation for the compressor and the extra labour.": "Mtumie mteja nukuu ya bei ya kompresa na nguvu kazi ya ziada.",
-  "When the client accepts, buy the part, then reopen the job and finish it.": "Mteja akikubali, nunua kipuri, kisha fungua kazi tena na uimalize.",
-  "Client signs, Complete, then Make invoice": "Mteja anasaini, Kamilisha, kisha Tengeneza ankara",
-  "The client's signature on the phone is the proof the work was done. Completing the job takes the materials out of stock; finance then turns it into an invoice in one step.":
-    "Saini ya mteja kwenye simu ndio uthibitisho kwamba kazi imefanyika. Kukamilisha kazi kunatoa vifaa kwenye stoku; kisha fedha wanaigeuza kuwa ankara kwa hatua moja.",
+  "When the client accepts, buy the part, then press Start the job again and finish it.":
+    "Mteja akikubali, nunua kipuri, kisha bonyeza Anza kazi tena na uimalize.",
+  "Client signs off, then Make invoice": "Mteja anathibitisha, kisha Tengeneza ankara",
+  "The client's signature on the phone is the proof the work was done. Signing off the job takes the materials out of stock; finance then turns it into an invoice in one step.":
+    "Saini ya mteja kwenye simu ndio uthibitisho kwamba kazi imefanyika. Kuthibitisha kukamilika kwa kazi kunatoa vifaa kwenye stoku; kisha fedha wanaigeuza kuwa ankara kwa hatua moja.",
   "The client checks the work and signs on the technician's phone with their name.":
     "Mteja anakagua kazi na kusaini kwenye simu ya fundi pamoja na jina lake.",
-  "The technician presses Complete. The materials leave stock.": "Fundi anabonyeza Kamilisha. Vifaa vinatoka kwenye stoku.",
+  "The technician presses Finish and sign off. The materials leave stock.":
+    "Fundi anabonyeza Maliza na uthibitishe. Vifaa vinatoka kwenye stoku.",
   "Finance opens the completed job and presses Make invoice: labour, materials and the agreed price become a draft invoice.":
     "Fedha wanafungua kazi iliyokamilika na kubonyeza Tengeneza ankara: nguvu kazi, vifaa na bei iliyokubaliwa vinakuwa rasimu ya ankara.",
   "Check it and press Issue invoice.": "Ihakiki na ubonyeze Toa ankara.",
@@ -240,8 +242,7 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Jobs are done but never invoiced": "Kazi zimefanyika lakini hazijatolewa ankara",
   "At month end, eight completed jobs have no invoice and the technicians have moved on.":
     "Mwishoni mwa mwezi, kazi nane zilizokamilika hazina ankara na mafundi wameshahamia kazi nyingine.",
-  "Open Service jobs and filter by Completed: these are done but not invoiced.":
-    "Fungua Kazi za huduma na uchuje kwa Imekamilika: hizi zimefanyika lakini hazijatolewa ankara.",
+  "Open Service jobs and look at Completed, not invoiced.": "Fungua Kazi za huduma na uangalie Imekamilika, bado haijatolewa ankara.",
   "Press Make invoice on each one today.": "Bonyeza Tengeneza ankara kwa kila moja leo.",
   "Make it a rule: finance checks completed jobs every morning.": "Ifanye kanuni: fedha wanakagua kazi zilizokamilika kila asubuhi.",
 
@@ -252,21 +253,20 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Record maintenance contracts": "Rekodi mikataba ya matengenezo",
   "A maintenance contract is an agreement to service a client's equipment at a fixed frequency for a price per period. LeMoSp plans the visits so none is missed.":
     "Mkataba wa matengenezo ni makubaliano ya kuhudumia vifaa vya mteja kwa muda maalum unaojirudia kwa bei ya kila kipindi. LeMoSp inapanga ziara ili hakuna inayokosekana.",
-  "Open Maintenance and press New contract.": "Fungua Matengenezo na ubonyeze Mkataba mpya.",
-  "Choose the client and the frequency: monthly, quarterly, half-yearly or yearly.":
-    "Chagua mteja na mara ngapi: kila mwezi, kila robo mwaka, kila nusu mwaka au kila mwaka.",
+  "Open Maintenance contracts and press + Contract.": "Fungua Mikataba ya matengenezo na ubonyeze + Mkataba.",
+  "Choose the client and how often: Every month, Every 3 months, Every 6 months or Every year.":
+    "Chagua mteja na mara ngapi: Kila mwezi, Kila miezi 3, Kila miezi 6 au Kila mwaka.",
   "Enter the first visit date, the price per period, the site and what to check on each visit.":
     "Weka tarehe ya ziara ya kwanza, bei ya kila kipindi, eneo na nini cha kukagua kila ziara.",
   "Press Plan due visits: each visit becomes a service job two weeks before it is due, with its checklist. Assign the technician.":
-    "Bonyeza Panga ziara zinazokaribia: kila ziara inakuwa kazi ya huduma wiki mbili kabla ya tarehe yake, pamoja na orodha yake ya ukaguzi. Mpangie fundi.",
-  "Maintenance": "Matengenezo",
+    "Bonyeza Panga ziara zinazodaiwa: kila ziara inakuwa kazi ya huduma wiki mbili kabla ya tarehe yake, pamoja na orodha yake ya ukaguzi. Mpangie fundi.",
   "Maintenance contract": "Mkataba wa matengenezo",
-  "Active": "Inaendelea",
+  "Active": "Inatumika",
   "Bahari Apartments, Msasani": "Bahari Apartments, Msasani",
   "What": "Nini",
   "Service of 24 split AC units": "Huduma ya AC 24 za aina ya split",
-  "Frequency": "Mara ngapi",
-  "Quarterly": "Kila robo mwaka",
+  "How often": "Mara ngapi",
+  "Every 3 months": "Kila miezi 3",
   "Price per period": "Bei kwa kila kipindi",
   "Next visit": "Ziara inayofuata",
   "3 Nov 2026": "3 Nov 2026",
@@ -276,11 +276,11 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Open the contract and pause it. No new visit jobs are planned while it is paused.":
     "Fungua mkataba na uusimamishe. Hakuna kazi mpya za ziara zinazopangwa ukiwa umesimamishwa.",
   "Note the reason and the restart date on the contract.": "Andika sababu na tarehe ya kuanza tena kwenye mkataba.",
-  "Make it active again in February and press Plan due visits.": "Uanzishe tena Februari na ubonyeze Panga ziara zinazokaribia.",
+  "Make it Active again in February and press Plan due visits.": "Uweke Inatumika tena Februari na ubonyeze Panga ziara zinazodaiwa.",
   "Keep an equipment register": "Tunza rejista ya vifaa",
   "The register lists everything you installed or look after at each client: serial number, location, warranty and next service. Each job on a unit is kept in its history.":
     "Rejista inaorodhesha kila kitu ulichofunga au unachohudumia kwa kila mteja: namba ya utambulisho, mahali, dhamana na huduma inayofuata. Kila kazi kwenye kifaa inatunzwa kwenye historia yake.",
-  "Open Equipment and press Add.": "Fungua Vifaa na ubonyeze Ongeza.",
+  "Open Equipment and press + Equipment.": "Fungua Vifaa na ubonyeze + Kifaa.",
   "Choose the client, enter the item, serial number and where it is.": "Chagua mteja, weka kifaa, namba ya utambulisho na kilipo.",
   "Enter the install date, warranty end and how often it needs service.":
     "Weka tarehe ya ufungaji, mwisho wa dhamana na mara ngapi kinahitaji huduma.",
@@ -300,15 +300,16 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Next service": "Huduma inayofuata",
   "3 Dec 2026": "3 Des 2026",
   "Hire out equipment you own": "Kodisha vifaa unavyomiliki",
-  "If you rent out generators, scaffolding, pumps or tools, Hire shows what is out, with whom, when it is due back, and bills every day on hire.":
-    "Ukikodisha jenereta, jukwaa za ujenzi, pampu au zana, Ukodishaji unaonyesha kilichotoka, kiko kwa nani, kinarudi lini, na unatoza kila siku ya ukodishaji.",
+  "If you rent out generators, scaffolding, pumps or tools, Equipment hire shows what is out, with whom, when it is due back, and bills every day on hire.":
+    "Ukikodisha jenereta, jukwaa za ujenzi, pampu au zana, Ukodishaji wa vifaa unaonyesha kilichotoka, kiko kwa nani, kinarudi lini, na unatoza kila siku ya ukodishaji.",
   "In Products, set the item's Type to Hire and receive the units you own into a store.":
     "Kwenye Bidhaa, weka Aina ya kifaa kuwa Ukodishaji na upokee vipande unavyomiliki kwenye ghala.",
-  "Open Hire and press New hire: client, site, date out, date due back, and the items with the rate per day, week or month.":
-    "Fungua Ukodishaji na ubonyeze Ukodishaji mpya: mteja, eneo, tarehe ya kutoka, tarehe ya kurudi, na vifaa pamoja na kiwango kwa siku, wiki au mwezi.",
-  "When the items come back, record the return, then press Make invoice.": "Vifaa vikirudi, rekodi urejeshaji, kisha bonyeza Tengeneza ankara.",
+  "Open Equipment hire and press + Hire: client, site, date out and date due back, then the items with the rate per day, week or month.":
+    "Fungua Ukodishaji wa vifaa na ubonyeze + Ukodishaji: mteja, eneo, tarehe ya kutoka na tarehe ya kurudi, kisha vifaa pamoja na kiwango kwa siku, wiki au mwezi.",
+  "When the items come back, press Record return, then Make invoice.":
+    "Vifaa vikirudi, bonyeza Rekodi kurudishwa, kisha Tengeneza ankara.",
   "For long hires, invoice every month while the items are still out.": "Kwa ukodishaji wa muda mrefu, toa ankara kila mwezi vifaa vikiwa bado nje.",
-  "Hire": "Ukodishaji",
+  "Equipment hire": "Ukodishaji wa vifaa",
   "Sales and Warehouse": "Mauzo na Ghala",
   "Late": "Imechelewa",
   "Dodoma Builders": "Dodoma Builders",
@@ -328,9 +329,9 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Start a project and choose how it is billed": "Anzisha mradi na uchague jinsi unavyotozwa",
   "A project can be billed at a fixed price, by milestone or by the time spent. Choose what the client agreed in the contract.":
     "Mradi unaweza kutozwa kwa bei maalum, kwa hatua au kwa muda uliotumika. Chagua kile mteja alichokubali kwenye mkataba.",
-  "Open Projects and press New project.": "Fungua Miradi na ubonyeze Mradi mpya.",
-  "Choose the client and how it is billed: fixed, by milestone or by time.":
-    "Chagua mteja na jinsi unavyotozwa: bei maalum, kwa hatua au kwa muda.",
+  "Open Projects and press + Project.": "Fungua Miradi na ubonyeze + Mradi.",
+  "Choose the client and How it is billed: Fixed price, By milestone or By time (hours).":
+    "Chagua mteja na Jinsi unavyotozwa: Bei maalum, Kwa hatua au Kwa muda (saa).",
   "Enter the budget in money and hours, and the default hourly rate.": "Weka bajeti kwa pesa na saa, na kiwango cha kawaida kwa saa.",
   "For milestone billing, add each milestone with its amount, for example survey, design report, tender documents.":
     "Kwa kutoza kwa hatua, ongeza kila hatua na kiasi chake, kwa mfano upimaji, ripoti ya usanifu, nyaraka za zabuni.",
@@ -348,14 +349,14 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Tender documents": "Nyaraka za zabuni",
   "TZS 7,000,000 · Open": "TZS 7,000,000 · Wazi",
   "Record hours in Timesheets": "Rekodi saa kwenye Rejista za saa",
-  "Every hour on a job or project is recorded, billable or not. Management sets each person's bill rate and cost per hour once, so invoices and profit use the right figures.":
-    "Kila saa kwenye kazi au mradi inarekodiwa, iwe ya kutoza au la. Uongozi unaweka kiwango cha kutoza na gharama kwa saa ya kila mtu mara moja, ili ankara na faida zitumie takwimu sahihi.",
-  "Management opens Timesheets and sets each person's bill rate and cost per hour.":
-    "Uongozi unafungua Rejista za saa na kuweka kiwango cha kutoza na gharama kwa saa ya kila mtu.",
-  "Each person opens Timesheets daily: choose the day, the job or project, the hours and what they did.":
-    "Kila mtu anafungua Rejista za saa kila siku: anachagua siku, kazi au mradi, saa na alichofanya.",
-  "Untick billable for time the client should not pay for, such as travel included in the price.":
-    "Ondoa alama ya kutoza kwa muda ambao mteja hapaswi kulipia, kama safari iliyojumuishwa kwenye bei.",
+  "Every hour on a job or project is recorded, billable or not. Management sets each person's hourly rate and cost once, so invoices and profit use the right figures.":
+    "Kila saa kwenye kazi au mradi inarekodiwa, iwe ya kutoza au la. Uongozi unaweka kiwango cha saa na gharama ya kila mtu mara moja, ili ankara na faida zitumie takwimu sahihi.",
+  "Management opens Timesheets, then Team rates, and sets each person's Hourly rate charged and Cost per hour.":
+    "Uongozi unafungua Rejista za saa, kisha Viwango vya timu, na kuweka Kiwango cha saa kinachotozwa na Gharama kwa saa ya kila mtu.",
+  "Each person opens Timesheets daily and presses Record hours: the day, the job or project, the hours and what they did.":
+    "Kila mtu anafungua Rejista za saa kila siku na kubonyeza Rekodi saa: siku, kazi au mradi, saa na alichofanya.",
+  "Untick Billable to the client for time the client should not pay for, such as travel included in the price.":
+    "Ondoa alama ya Inatozwa kwa mteja kwa muda ambao mteja hapaswi kulipia, kama safari iliyojumuishwa kwenye bei.",
   "Timesheets": "Rejista za saa",
   "Everyone; Management sets rates": "Kila mtu; Uongozi unaweka viwango",
   "Timesheet": "Rejista ya saa",
@@ -364,8 +365,7 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Hours": "Saa",
   "What was done": "Kilichofanyika",
   "Pipe network calculations": "Hesabu za mtandao wa mabomba",
-  "Bill rate": "Kiwango cha kutoza",
-  "TZS 85,000 an hour": "TZS 85,000 kwa saa",
+  "Hourly rate charged": "Kiwango cha saa kinachotozwa",
   "Cost per hour": "Gharama kwa saa",
   "The project is using more hours than budgeted": "Mradi unatumia saa nyingi kuliko bajeti",
   "PRJ-012 had a budget of 400 hours; 360 are used and the design report is not finished.":
@@ -375,13 +375,13 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
     "Ongea na mteja mapema kama wigo wa kazi umeongezeka: kubalianeni nyongeza na uongeze hatua kwa ajili yake.",
   "If the overrun is your own, finish the work and note the lesson for the next quotation.":
     "Kama kuzidi ni kosa lako mwenyewe, maliza kazi na uandike funzo kwa ajili ya nukuu ya bei inayofuata.",
-  "Invoice milestones or hours": "Toa ankara ya hatua au saa",
+  "Invoice milestones and hours": "Toa ankara za hatua na saa",
   "Invoice each milestone as soon as it is done, or the hours not yet billed every month. Waiting until the end of a project leaves you financing the client.":
     "Toa ankara ya kila hatua mara inapokamilika, au ya saa ambazo hazijatozwa kila mwezi. Kusubiri hadi mwisho wa mradi kunakufanya umfadhili mteja.",
-  "Open the project and press Invoice milestones or hours.": "Fungua mradi na ubonyeze Toa ankara ya hatua au saa.",
-  "Tick the finished milestones, or choose the date up to which hours are billed.":
-    "Weka alama kwenye hatua zilizokamilika, au chagua tarehe ambayo saa zinatozwa hadi hapo.",
-  "A draft invoice is created; check it and press Issue invoice.": "Rasimu ya ankara inaundwa; ihakiki na ubonyeze Toa ankara.",
+  "Open the project and go to Invoice the client.": "Fungua mradi na uende kwenye Mtumie mteja ankara.",
+  "Tick the finished milestones and choose Invoice billable hours up to, then press Make draft invoice.":
+    "Weka alama kwenye hatua zilizokamilika na uchague Weka kwenye ankara saa za kutoza hadi, kisha bonyeza Andaa rasimu ya ankara.",
+  "Check the draft invoice and press Issue invoice.": "Hakiki rasimu ya ankara na ubonyeze Toa ankara.",
   "Finance": "Fedha",
 
   // Chapter: pricing and getting paid
@@ -396,14 +396,14 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Add overhead per hour: vehicle, fuel, tools, phone, office rent and admin staff, divided by all billable hours.":
     "Ongeza gharama za uendeshaji kwa saa: gari, mafuta, zana, simu, kodi ya ofisi na wafanyakazi wa utawala, ukigawanya kwa saa zote za kutoza.",
   "Add your margin, then round.": "Ongeza faida yako, kisha kadiria.",
-  "Enter the result as the price of the Labour item and as the person's bill rate in Timesheets.":
-    "Weka jibu kama bei ya kitu cha Nguvu kazi na kama kiwango cha kutoza cha mtu huyo kwenye Rejista za saa.",
+  "Enter the result as the price of the Labour item and as the person's Hourly rate charged in Team rates.":
+    "Weka jibu kama bei ya kitu cha Nguvu kazi na kama Kiwango cha saa kinachotozwa cha mtu huyo kwenye Viwango vya timu.",
   "Hourly rate": "Kiwango kwa saa",
   "Priced": "Bei imewekwa",
   "Cost per hour (salary, NSSF)": "Gharama kwa saa (mshahara, NSSF)",
   "Overhead per hour (van, tools, office)": "Gharama za uendeshaji kwa saa (gari, zana, ofisi)",
   "Margin 30%": "Faida 30%",
-  "Bill rate (rounded)": "Kiwango cha kutoza (kilichokadiriwa)",
+  "Hourly rate charged (rounded)": "Kiwango cha saa kinachotozwa (kilichokadiriwa)",
   "Choose fixed price, time and materials, or call-out fee": "Chagua bei maalum, muda na vifaa, au ada ya kuitwa",
   "A fixed price suits work you know well, like a standard AC service. Time and materials suits repairs where you cannot know the problem in advance. A call-out fee covers the cost of going to the site at all.":
     "Bei maalum inafaa kazi unayoijua vizuri, kama huduma ya kawaida ya AC. Muda na vifaa inafaa ukarabati ambao huwezi kujua tatizo mapema. Ada ya kuitwa inafidia gharama ya kwenda eneo la kazi hata kidogo.",
@@ -455,11 +455,11 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Many services companies also supply in other ways. Here is how LeMoSp handles each one, and what is still to come.":
     "Kampuni nyingi za huduma pia husambaza kwa njia nyingine. Hivi ndivyo LeMoSp inavyoshughulikia kila moja, na kile kinachokuja bado.",
   "Hire or rental": "Ukodishaji",
-  "Equipment you own and rent out goes on the Hire screen, charged per day, week or month, with returns and late items tracked.":
-    "Vifaa unavyomiliki na kukodisha vinaingia kwenye skrini ya Ukodishaji, vikitozwa kwa siku, wiki au mwezi, huku urejeshaji na vilivyochelewa vikifuatiliwa.",
+  "Equipment you own and rent out goes on the Equipment hire screen, charged per day, week or month, with returns and late items tracked.":
+    "Vifaa unavyomiliki na kukodisha vinaingia kwenye skrini ya Ukodishaji wa vifaa, vikitozwa kwa siku, wiki au mwezi, huku urejeshaji na vilivyochelewa vikifuatiliwa.",
   "Indent or direct supply": "Indent au usambazaji wa moja kwa moja",
-  "If a client asks you to source equipment for them, buy it on a purchase order ticked Supplier delivers straight to the client and press Record delivery to client when it arrives. It never enters your store. Change What you sell to Both if this becomes regular.":
-    "Mteja akikuomba umtafutie vifaa, vinunue kwa oda ya ununuzi yenye alama kwenye Msambazaji anapeleka moja kwa moja kwa mteja na ubonyeze Rekodi uwasilishaji kwa mteja vikifika. Haviingii ghalani kwako kamwe. Badilisha Unachouza kuwa Zote mbili kama hili likiwa la kawaida.",
+  "If a client asks you to source equipment for them, buy it on a purchase order ticked Supplier delivers straight to the client and press Record delivery to client when it arrives. It never enters your store. Change What you sell to Goods and services if this becomes regular.":
+    "Mteja akikuomba umtafutie vifaa, vinunue kwa oda ya ununuzi yenye alama kwenye Msambazaji anapeleka moja kwa moja kwa mteja na ubonyeze Rekodi uwasilishaji kwa mteja vikifika. Haviingii ghalani kwako kamwe. Badilisha Unachouza kuwa Bidhaa na huduma kama hili likiwa la kawaida.",
   "Purchasing": "Ununuzi",
   "Purchase orders": "Oda za ununuzi",
   "Procurement": "Manunuzi",
@@ -486,8 +486,8 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Every week": "Kila wiki",
   "Short checks that keep work and money moving.": "Ukaguzi mfupi unaofanya kazi na pesa ziendelee kusonga.",
   "Every morning: finance invoices yesterday's completed jobs.": "Kila asubuhi: fedha wanatoa ankara za kazi zilizokamilika jana.",
-  "Monday: Maintenance, press Plan due visits and assign technicians.":
-    "Jumatatu: Matengenezo, bonyeza Panga ziara zinazokaribia na uwapangie mafundi.",
+  "Monday: Maintenance contracts, press Plan due visits and assign technicians.":
+    "Jumatatu: Mikataba ya matengenezo, bonyeza Panga ziara zinazodaiwa na uwapangie mafundi.",
   "Friday: everyone's timesheets are complete for the week.": "Ijumaa: rejista za saa za kila mtu zimekamilika kwa wiki.",
   "Friday: Money owed to us, reminders logged, certificates chased.":
     "Ijumaa: Madeni ya wateja, vikumbusho vimerekodiwa, vyeti vimefuatiliwa.",

@@ -1,6 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import { RemoveFromPhone } from "@/components/RemoveFromPhone";
 import Link from "next/link";
+import { Icon } from "@/components/Icon";
+import { CountUp } from "./CountUp";
 import { LevelBadge } from "@/components/suggestions/SuggestionBadge";
 import { LEVEL_LABEL, LEVELS } from "@/components/suggestions/meta";
 import { platformAdmin } from "./guard";
@@ -51,30 +53,26 @@ export default async function AdminOverviewPage() {
       {!ov.error && (
         <>
           <div className="stat-grid adm-stats">
-            <div className="stat">
-              <div className="n">{fmt(o.companies_total)}</div>
-              <div className="l">{tr("Companies")}</div>
-            </div>
-            <div className="stat">
-              <div className="n">{fmt(o.users_total)}</div>
-              <div className="l">{tr("Users")}</div>
-            </div>
-            <div className="stat">
-              <div className="n">{fmt(o.active_companies_30d)}</div>
-              <div className="l">{tr("Active companies (30 days)")}</div>
-            </div>
-            <div className="stat">
-              <div className="n">{fmt(o.suggestions_30d)}</div>
-              <div className="l">{tr("Suggestions (30 days)")}</div>
-            </div>
-            <div className="stat">
-              <div className="n">{fmt(o.open_recommendations)}</div>
-              <div className="l">{tr("Open growth recommendations")}</div>
-            </div>
-            <div className="stat">
-              <div className="n">{fmt(o.demo_companies)}</div>
-              <div className="l">{tr("Demo companies")}</div>
-            </div>
+            {(
+              [
+                ["building", "Companies", o.companies_total, "blue"],
+                ["team", "Users", o.users_total, "teal"],
+                ["activity", "Active companies (30 days)", o.active_companies_30d, "green"],
+                ["inbox", "Suggestions (30 days)", o.suggestions_30d, "amber"],
+                ["check", "Open growth recommendations", o.open_recommendations, "purple"],
+                ["help", "Demo companies", o.demo_companies, "gray"],
+              ] as const
+            ).map(([icon, label, v, tone]) => (
+              <div key={label} className={`stat adm-stat adm-tone-${tone}`}>
+                <span className="adm-stat-icon" aria-hidden>
+                  <Icon name={icon} size={20} />
+                </span>
+                <div className="n">
+                  <CountUp value={Number(v) || 0} />
+                </div>
+                <div className="l">{tr(label)}</div>
+              </div>
+            ))}
           </div>
 
           <section className="card">

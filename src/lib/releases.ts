@@ -7,6 +7,16 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.21.2",
+    date: "2026-10-15",
+    en: [
+      "LeMoSp ADMIN looks neater and feels smoother: a one-row header with an account menu, a pill that slides between sections, pages that glide in, numbers that count up, bars that grow and a calm outline while a page loads.",
+    ],
+    sw: [
+      "LeMoSp ADMIN inaonekana nadhifu zaidi na inaenda laini: kichwa cha mstari mmoja chenye menyu ya akaunti, kidonge kinachoteleza kati ya sehemu, kurasa zinazoingia taratibu, namba zinazohesabika, mistari inayokua na muhtasari tulivu ukurasa unapopakia.",
+    ],
+  },
+  {
     version: "1.21.1",
     date: "2026-10-15",
     en: [

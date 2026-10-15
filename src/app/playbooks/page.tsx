@@ -5,19 +5,22 @@ import { Icon } from "@/components/Icon";
 import { LangSwitch } from "@/components/LangSwitch";
 import { getLang } from "@/lib/lang";
 import { PLAYBOOKS, scenarioCount, stepCount, translatePlaybook } from "@/lib/playbooks";
-import { createClient } from "@/lib/supabase/server";
-import { getSessionUser } from "@/lib/supabase/user";
+import { playbookAccess } from "@/lib/playbooks/access";
 
 export const metadata = {
   title: "Playbooks",
-  description: "Step-by-step LeMoSp playbooks with examples and real business scenarios: setting up, order to payment, numbers and decisions, getting paid, stock, routines and security.",
+  description: "Step-by-step LeMoSp playbooks with examples and real business scenarios. Each company requests the playbooks it needs from LeMo Tech.",
 };
 
-/** Public list of the playbooks (src/lib/playbooks), each with "Read" and "Download PDF". */
+/**
+ * The list of playbooks (src/lib/playbooks). Everyone sees the list; a playbook opens once LeMo Tech has
+ * given it to the company (requested from here or from Services & prices).
+ */
 export default async function PlaybooksPage() {
   await primeLang();
   const lang = await getLang();
-  const inApp = Boolean(await getSessionUser(await createClient()));
+  const access = await playbookAccess();
+  const inApp = access.signedIn;
   const books = PLAYBOOKS.map((p) => ({ raw: p, t: translatePlaybook(p, lang === "sw" ? "sw" : "en", tr) }));
 
   return (
@@ -32,27 +35,45 @@ export default async function PlaybooksPage() {
       <div className="j-intro">
         <p className="j-eyebrow">{tr("Playbooks")}</p>
         <h1>{tr("Learn LeMoSp the practical way")}</h1>
-        <p>{tr("Step-by-step guides with live examples and real business situations. Read them on screen with animations, or download each one as a PDF to print and share with your team.")}</p>
+        <p>{tr("Step-by-step guides with live examples and real business situations. Choose the playbooks your company needs and request them: once LeMo Tech gives them to your company, everyone in your team can read them on screen or download the PDF.")}</p>
+        {!inApp && <p className="small">{tr("Sign in to request playbooks for your company.")}</p>}
       </div>
       <ul className="pb-cards">
-        {books.map(({ raw, t }, i) => (
-          <li key={raw.id} style={{ "--i": i, "--c": raw.color } as React.CSSProperties}>
-            <Link href={`/playbooks/${raw.id}`} className="pb-card">
-              <span className="pb-card-icon">
-                <Icon name={raw.icon} size={24} />
-              </span>
-              <strong>{t.title}</strong>
-              <span className="pb-card-tag">{t.tagline}</span>
-              <span className="pb-card-meta">
-                {raw.chapters.length} {tr("chapters")} · {stepCount(raw)} {tr("steps")} · {scenarioCount(raw)} {tr("scenarios")} · ~{raw.minutes} {tr("min")}
-              </span>
-              <span className="pb-card-for">{t.audience}</span>
-            </Link>
-            <a className="pb-card-pdf" href={`/playbooks/${raw.id}/pdf`} download>
-              ⬇ {tr("PDF")}
-            </a>
-          </li>
-        ))}
+        {books.map(({ raw, t }, i) => {
+          const state = access.state(raw.id);
+          const open = state === "granted";
+          return (
+            <li key={raw.id} style={{ "--i": i, "--c": raw.color } as React.CSSProperties} className={open ? undefined : "pb-locked"}>
+              <Link href={inApp ? `/playbooks/${raw.id}` : "/login"} className="pb-card">
+                <span className="pb-card-icon">
+                  <Icon name={open ? raw.icon : "lock"} size={24} />
+                </span>
+                <strong>{t.title}</strong>
+                <span className="pb-card-tag">{t.tagline}</span>
+                <span className="pb-card-meta">
+                  {raw.chapters.length} {tr("chapters")} · {stepCount(raw)} {tr("steps")} · {scenarioCount(raw)} {tr("scenarios")} · ~{raw.minutes} {tr("min")}
+                </span>
+                <span className="pb-card-for">{t.audience}</span>
+                <span className="pb-card-for">
+                  {open ? (
+                    <span className="badge tone-ok">{tr("Your company has this playbook")}</span>
+                  ) : state === "requested" ? (
+                    <span className="badge tone-warn">{tr("Requested: waiting for LeMo Tech")}</span>
+                  ) : state === "declined" ? (
+                    <span className="badge tone-bad">{tr("Not given yet: you can ask again")}</span>
+                  ) : (
+                    <span className="badge tone-info">{inApp ? tr("Tap to see it and request it") : tr("Sign in to request")}</span>
+                  )}
+                </span>
+              </Link>
+              {open && (
+                <a className="pb-card-pdf" href={`/playbooks/${raw.id}/pdf`} download>
+                  ⬇ {tr("PDF")}
+                </a>
+              )}
+            </li>
+          );
+        })}
       </ul>
       <p className="auth-links">
         <Link href="/how-it-works">{tr("New here? See how LeMoSp works, step by step")} ›</Link>

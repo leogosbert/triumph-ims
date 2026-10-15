@@ -50,6 +50,12 @@ export async function updateCompany(form: FormData) {
     invoiceFields.invoice_due_days = days;
     invoiceFields.invoice_terms = optional(form, "invoice_terms");
   }
+  // Goods and services (v1.21): withholding tax on services (only on screen once that SQL is run).
+  if (form.has("wht_rate")) {
+    const wht = num("wht_rate");
+    if (!(wht >= 0 && wht <= 30)) redirect(withNotice(back, { error: "Withholding tax must be between 0 and 30." }));
+    invoiceFields.wht_rate = wht;
+  }
   // Stage 13: mobile-money pay numbers and reminder timing (only on screen once that SQL is run).
   if (form.has("mobile_money_details")) invoiceFields.mobile_money_details = optional(form, "mobile_money_details");
   const days = (k: string, lo: number, hi: number, label: string) => {

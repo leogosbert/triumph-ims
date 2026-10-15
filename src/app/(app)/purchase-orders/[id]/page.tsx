@@ -18,6 +18,8 @@ import { quoteNo, StatusBadge, todayTz } from "@/lib/sales";
 import {
   addPoLine,
   cancelPo,
+  recordDirectSupply,
+  setPoDirect,
   confirmPo,
   markPoSent,
   removePoLine,
@@ -274,7 +276,50 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         </section>
       )}
 
-      {(can(role, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status)) || grns.length > 0 ? (
+      {po.quotation_id && po.direct_to_client !== undefined && can(role, "receiveGoods") && !["received", "closed", "cancelled"].includes(po.status) && (
+        <section className="card" id="direct">
+          <h2>{tr("Direct supply to the client")}</h2>
+          {!po.direct_to_client ? (
+            <form action={setPoDirect}>
+              <input type="hidden" name="id" value={po.id} />
+              <input type="hidden" name="direct" value="on" />
+              <p className="small muted">{tr("If the supplier delivers straight to your client, the goods never enter your store. Mark the order here and record the delivery when it happens.")}</p>
+              <SubmitButton className="btn btn-small">{tr("Supplier delivers straight to the client")}</SubmitButton>
+            </form>
+          ) : (
+            <>
+              <p className="small">{tr("The supplier delivers straight to the client of the quotation. Recording the delivery closes this order and the client's delivery note; your stock does not change.")}</p>
+              {["approved", "sent", "confirmed", "partially_received"].includes(po.status) && (
+                <form action={recordDirectSupply}>
+                  <input type="hidden" name="id" value={po.id} />
+                  <div className="grid grid-2">
+                    <div className="field">
+                      <label htmlFor="delivered_on">{tr("Delivered on")}</label>
+                      <input id="delivered_on" name="delivered_on" type="date" defaultValue={today} max={today} />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="received_by">{tr("Received by (client)")}</label>
+                      <input id="received_by" name="received_by" type="text" maxLength={120} placeholder={tr("Name of the person who received")} />
+                    </div>
+                    <div className="field" style={{ gridColumn: "1 / -1" }}>
+                      <label htmlFor="direct_note">{tr("Note")}</label>
+                      <input id="direct_note" name="note" type="text" maxLength={1000} placeholder={tr("e.g. Supplier's delivery note DN-5521, all in good order")} />
+                    </div>
+                  </div>
+                  <SubmitButton>{tr("Record delivery to client")}</SubmitButton>
+                </form>
+              )}
+              <form action={setPoDirect} style={{ marginTop: 10 }}>
+                <input type="hidden" name="id" value={po.id} />
+                <input type="hidden" name="direct" value="off" />
+                <SubmitButton className="btn btn-small" pendingText="…">{tr("No, the goods come to our store")}</SubmitButton>
+              </form>
+            </>
+          )}
+        </section>
+      )}
+
+      {(can(role, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status) && !po.direct_to_client) || grns.length > 0 ? (
         <section className="card">
           <h2>{tr("Goods received")}</h2>
           {grns.length === 0 && <p className="muted small">{tr("Nothing received yet.")}</p>}

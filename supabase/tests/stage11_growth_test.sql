@@ -66,16 +66,16 @@ select tests.check((select string_agg(key, ',' order by key) from public.feature
                    = 'activity,dashboard,data_export,notifications,security_policy,suggestions,team', 'seven core features');
 select tests.check((select bool_and(default_level = 'small') from public.features where core or key = 'goods_received'),
   'core features and goods received belong to the small level');
-select tests.check((select count(*) from public.features) = 54, 'catalogue has 54 features (Stage 13 added reminders)');
-select tests.check((select count(*) from public.features where status = 'planned') = 0, 'all 54 features live (Stage 16 added the assistant and integrations)');
+select tests.check((select count(*) from public.features) = 62, 'catalogue has 62 features (goods and services added 8)');
+select tests.check((select count(*) from public.features where status = 'planned') = 0, 'all 62 features live');
 -- Every feature is live since Stage 16; the rules for planned features are tested with the assistant marked planned again.
 reset role; update public.features set status = 'planned' where key = 'ai_assistant'; set role authenticated;
 select tests.check((select bool_and(jsonb_array_length(tutorial) between 2 and 4 and description is not null
                                     and audience is not null and benefits is not null) from public.features),
   'every feature has a description, audience, benefits and a 2-4 step tutorial');
 select tests.check((select count(*) from public.recommendation_rules) = 15, '15 recommendation rules');
-select tests.check((select count(*) from public.company_feature_map(:'co')) = 54, 'feature map lists the whole catalogue');
-select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 44, 'medium: all live features on');
+select tests.check((select count(*) from public.company_feature_map(:'co')) = 62, 'feature map lists the whole catalogue');
+select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 50, 'medium: all live features on');
 select tests.check((select bool_and(not enabled) from public.company_feature_map(:'co') where status = 'planned'),
   'planned features are never on');
 select tests.check((select bool_and(source = 'level') from public.company_feature_map(:'co')), 'without choices everything follows the level');
@@ -88,7 +88,7 @@ select public.set_business_level(:'co', 'small', '{"employees": 4, "imports": fa
 select tests.check((select business_level = 'small' and onboarding_done and level_changed_at is not null
                      from public.companies where id = :'co') and public.company_profile(:'co') ->> 'employees' = '4',
   'set_business_level: small, onboarded, profile saved');
-select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 24, 'small: 24 features on (19 + the five Stage 13 features)');
+select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 25, 'small: 25 features on (19 + five Stage 13 + services on quotes)');
 select tests.check((select enabled from public.company_feature_map(:'co') where key = 'goods_received'), 'small: goods received on');
 select tests.check((select enabled from public.company_feature_map(:'co') where key = 'customers'), 'small: customers on');
 select tests.check(not (select enabled from public.company_feature_map(:'co') where key = 'supplier_rfqs'), 'small: supplier comparison off');
@@ -108,7 +108,7 @@ select tests.blocked(format('select public.set_business_level(%L, null)', :'co')
 select tests.blocked(format('select public.set_business_level(%L, %L, %L)', :'co', 'small', '[1,2]'), 'the profile must be an object');
 
 select public.set_business_level(:'co', 'enterprise');
-select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 52,
+select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 60,
   'enterprise: all live features except the one switched off');
 select tests.check((select bool_and(not enabled) from public.company_feature_map(:'co') where status = 'planned'),
   'enterprise planned features stay off');
@@ -150,7 +150,7 @@ reset role;
 
 -- Other members and other companies
 select tests.login('sales12@g.test'); set role authenticated;
-select tests.check((select count(*) from public.company_feature_map(:'co')) = 54, 'members can read the feature map');
+select tests.check((select count(*) from public.company_feature_map(:'co')) = 62, 'members can read the feature map');
 select tests.check((select count(*) from public.company_features where company_id = :'co') = 2, 'members can read the company''s switches');
 select tests.check((select count(*) from public.company_profiles) = 0, 'sales cannot read the business profile');
 select tests.blocked(format('select public.company_profile(%L)', :'co'), 'sales cannot ask for the business profile');
@@ -540,7 +540,7 @@ select tests.check((select members = 6 and business_level = 'medium' and onboard
 select tests.check((select sum(n) from public.platform_feedback_stats()) = :real_sugs, 'feedback statistics cover real companies only');
 select tests.check((select count(*) from public.platform_app_feedback()) = 1
                    and (select title from public.platform_app_feedback()) = 'Barcode scanning', 'app feedback: real companies, about the app only');
-select tests.check((select count(*) from public.platform_feature_adoption()) = 54
+select tests.check((select count(*) from public.platform_feature_adoption()) = 62
                    and (select bool_and(total_companies = :real_total) from public.platform_feature_adoption())
                    and (select enabled_companies from public.platform_feature_adoption() where key = 'ai_assistant') = 0,
   'feature adoption per feature');

@@ -36,7 +36,7 @@ const fill = (s: string, vars: Record<string, string | number>) =>
 
 export default async function SettingsPage() {
   await primeLang();
-  const { supabase, company, isManager, features } = await getAppContext();
+  const { supabase, company, isManager, features, role } = await getAppContext();
   const on = features.on;
   const showTeam = isManager && on("team");
   const showBackups = isManager && on("data_export");
@@ -114,6 +114,20 @@ export default async function SettingsPage() {
           title: tr("Company details & branding"),
           sub: isManager ? tr("Name, TIN, VRN, logo, colours, bank details") : tr("View your company's details"),
           chip: companyChip,
+          show: true,
+        },
+        {
+          href: "/settings/billing",
+          icon: "receipt",
+          title: tr("Plan & billing"),
+          sub: tr("Your LeMoSp plan, invoices from LeMo Tech and how to pay"),
+          show: role === "management" || role === "finance",
+        },
+        {
+          href: "/services",
+          icon: "inbox",
+          title: tr("Services & prices"),
+          sub: tr("Training, setup, add-ons and playbooks from LeMo Tech"),
           show: true,
         },
         {

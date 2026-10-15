@@ -3,11 +3,15 @@ import { getLang } from "@/lib/lang";
 import { findPlaybook, scenarioCount, stepCount, translatePlaybook } from "@/lib/playbooks";
 import { playbookPdf } from "@/lib/pdf/playbook";
 import { SW } from "@/lib/sw";
+import { playbookAccess } from "@/lib/playbooks/access";
 
-/** A playbook as a PDF, in the reader's language. Public, like the playbook itself. */
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+/** A playbook as a PDF, in the reader's language. Only for companies LeMo Tech has given it to. */
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const raw = findPlaybook((await params).id);
   if (!raw) return new NextResponse("Not found", { status: 404 });
+  if ((await playbookAccess()).state(raw.id) !== "granted") {
+    return NextResponse.redirect(new URL(`/playbooks/${raw.id}`, req.url), 303);
+  }
   const sw = (await getLang()) === "sw";
   const t = (s: string) => (sw ? (SW[s] ?? s) : s);
   const pb = translatePlaybook(raw, sw ? "sw" : "en", t);

@@ -188,3 +188,34 @@ export async function cancelPo(form: FormData) {
   if (error) fail(id, error.message);
   done(id, "Purchase order cancelled.");
 }
+
+/** Direct supply: the supplier delivers straight to the client of the linked quotation. */
+export async function setPoDirect(form: FormData) {
+  const { supabase, company } = await getAppContext();
+  const id = str(form, "id");
+  const on = str(form, "direct") === "on";
+  const { data, error } = await supabase
+    .from("purchase_orders")
+    .update({ direct_to_client: on })
+    .eq("id", id)
+    .eq("company_id", company.id)
+    .select("id");
+  if (error || !data?.length) fail(id, error?.message ?? "0 rows", "#direct");
+  done(id, on ? "Marked for direct delivery to the client." : "The goods will come to your store.", "#direct");
+}
+
+/** The supplier delivered to the client: the order is closed and the client's delivery note is recorded. */
+export async function recordDirectSupply(form: FormData) {
+  const { supabase } = await getAppContext();
+  const id = str(form, "id");
+  const { data, error } = await supabase.rpc("record_direct_supply", {
+    p_po: id,
+    p_delivered_on: optional(form, "delivered_on"),
+    p_received_by: optional(form, "received_by"),
+    p_note: optional(form, "note"),
+  });
+  if (error) fail(id, error.message, "#direct");
+  revalidatePath("/deliveries");
+  revalidatePath("/purchase-orders");
+  redirect(withNotice(`/deliveries/${data}`, { msg: "Delivery to the client recorded. Nothing went through your store." }));
+}

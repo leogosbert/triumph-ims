@@ -7,6 +7,24 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.21",
+    date: "2026-10-15",
+    en: [
+      "Goods and services: tell LeMoSp whether you sell goods, services or both. Products can be goods, a service, labour, consultancy or hire; one quotation and one invoice can hold the pipes and the installation, and the invoice shows the withholding tax a client may deduct.",
+      "Service jobs: plan installation, repair and maintenance at client sites, give technicians a checklist on their phone, record materials and hours, get the client's signature and make the invoice in one tap.",
+      "Maintenance contracts, an installed-equipment register with warranties and service dates, projects with milestones, timesheets with rates, equipment hire, and service reports.",
+      "Direct supply: when the supplier delivers straight to your client, record it on the purchase order; the goods never pass through your store.",
+      "Services & prices: see what LeMo Tech offers (training, setup, add-ons, playbooks) and request it in the app. Plan & billing shows your plan, your LeMoSp invoices and how to pay. Playbooks are now given on request, including three new ones for goods, service and goods-and-services businesses.",
+    ],
+    sw: [
+      "Bidhaa na huduma: iambie LeMoSp kama unauza bidhaa, huduma au vyote. Bidhaa zinaweza kuwa bidhaa, huduma, kazi ya mikono, ushauri au ukodishaji; nukuu moja na ankara moja vinaweza kuwa na mabomba na ufungaji wake, na ankara inaonyesha kodi ya zuio ambayo mteja anaweza kukata.",
+      "Kazi za huduma: panga ufungaji, matengenezo na ukarabati kwa wateja, wape mafundi orodha ya ukaguzi kwenye simu zao, rekodi vifaa na saa, pata sahihi ya mteja na utengeneze ankara kwa mguso mmoja.",
+      "Mikataba ya matengenezo, daftari la vifaa vilivyofungwa pamoja na dhamana na tarehe za huduma, miradi yenye hatua, rejista za muda zenye viwango, ukodishaji wa vifaa, na ripoti za huduma.",
+      "Ugavi wa moja kwa moja: msambazaji akipeleka moja kwa moja kwa mteja wako, rekodi kwenye agizo la ununuzi; bidhaa hazipiti stoo yako.",
+      "Huduma na bei: ona kile LeMo Tech inatoa (mafunzo, usanidi, nyongeza, miongozo) na uombe ndani ya programu. Mpango na malipo unaonyesha mpango wako, ankara zako za LeMoSp na jinsi ya kulipa. Miongozo sasa inatolewa kwa ombi, ikiwemo mitatu mipya kwa biashara za bidhaa, huduma na bidhaa pamoja na huduma.",
+    ],
+  },
+  {
     version: "1.20",
     date: "2026-10-15",
     en: [

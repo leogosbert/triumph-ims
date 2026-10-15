@@ -18,6 +18,7 @@ const M = {
   stock: ["/stock", "/warehouses", "/receiving", "/grns", "/transfers", "/planning"],
   deliveries: ["/deliveries", "/backorders", "/fleet"],
   finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow"],
+  services: ["/jobs", "/maintenance", "/equipment", "/projects", "/timesheets", "/hire", "/service-reports"],
   reports: ["/reports", "/head-office", "/scheduled-reports"],
   more: ["/more", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
 };
@@ -59,7 +60,7 @@ export function bottomNav(role: Role, t: Dict, on: FeatureCheck = allOn): NavIte
 }
 
 /** Laptop sidebar: every section the role can open (and the company has switched on). */
-export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn): NavItem[] {
+export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services = false): NavItem[] {
   if (role === "driver") {
     return [
       { href: "/driver", label: t["nav.myDeliveries"], icon: "deliveries", match: ["/driver"], plain: true },
@@ -75,6 +76,8 @@ export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn): NavItem[
   out.push({ href: "/products", label: t["nav.products"], icon: "products", match: M.products, feature: "products" });
   if (can(role, "seeStock")) out.push({ href: "/stock", label: t["nav.stock"], icon: "stock", match: M.stock, feature: "inventory" });
   if (can(role, "seeDeliveries")) out.push({ href: "/deliveries", label: t["nav.deliveries"], icon: "deliveries", match: M.deliveries, feature: "deliveries" });
+  // Service jobs and the other service screens (only once the goods-and-services update is in and switched on).
+  if (services && role !== "procurement") out.push({ href: "/jobs", label: t["nav.services"], icon: "tools", match: M.services });
   if (can(role, "seeFinance")) out.push({ href: "/finance", label: t["nav.finance"], icon: "finance", match: M.finance });
   else if (can(role, "seeInvoices")) out.push({ href: "/invoices", label: t["nav.finance"], icon: "finance", match: M.finance, feature: "invoices" });
   out.push({ href: "/reports", label: t["nav.reports"], icon: "report", match: M.reports });

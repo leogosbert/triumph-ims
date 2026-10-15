@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { DemoScalePicker } from "@/components/DemoScalePicker";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ACTIVITIES, LEVELS, LEVEL_ORDER, recommendLevel, type BusinessProfile, type Level } from "@/lib/levels";
+import { BUSINESS_TYPES } from "@/lib/services";
 import { useTr } from "@/lib/tr-client";
 
 type Action = (form: FormData) => void | Promise<void>;
@@ -41,7 +42,10 @@ export function OnboardingWizard({
   ready,
   finishAction,
   demoAction,
+  initialSell = "goods",
 }: {
+  /** What the company sells (goods, services or both); saved with the level. */
+  initialSell?: "goods" | "services" | "both";
   companyName: string;
   initial: BusinessProfile;
   currentLevel: Level;
@@ -53,6 +57,7 @@ export function OnboardingWizard({
   const tr = useTr();
   const [step, setStep] = useState(0);
   const [activities, setActivities] = useState<string[]>(initial.activities ?? []);
+  const [sell, setSell] = useState<"goods" | "services" | "both">(initialSell);
   const startNumbers: Record<string, string> = {};
   for (const q of NUMBER_QUESTIONS) {
     const v = initial[q.key];
@@ -87,7 +92,7 @@ export function OnboardingWizard({
     if (yesNo[q.key] !== null) (profile as Record<string, unknown>)[q.key] = yesNo[q.key];
   }
   if (activities.includes("importer") && yesNo.imports === null) profile.imports = true;
-  if (activities.includes("service_provider") && yesNo.services === null) profile.services = true;
+  if ((activities.includes("service_provider") || sell !== "goods") && yesNo.services === null) profile.services = true;
   const rec = recommendLevel(profile, tr);
   const level = chosen ?? rec.level;
 
@@ -157,6 +162,18 @@ export function OnboardingWizard({
 
         {step === 1 && (
           <>
+            <p className="muted">{tr("What do you sell?")}</p>
+            <div className="sj-types" role="radiogroup" aria-label={tr("What do you sell?")} style={{ marginBottom: 16 }}>
+              {Object.entries(BUSINESS_TYPES).map(([k, t]) => (
+                <label key={k} className="sj-type">
+                  <input type="radio" name="sell" value={k} checked={sell === k} onChange={() => setSell(k as typeof sell)} />
+                  <span>
+                    <strong>{tr(t.label)}</strong>
+                    <span className="small muted">{tr(t.hint)}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
             <p className="muted">{tr("Choose all that apply. Many suppliers do several of these.")}</p>
             <div className="onb-chips" role="group" aria-label={tr("Business activities")}>
               {ACTIVITIES.map((a) => (
@@ -249,6 +266,7 @@ export function OnboardingWizard({
               <form action={finishAction} className="onb-finish">
                 <input type="hidden" name="level" value={level} />
                 <input type="hidden" name="profile" value={JSON.stringify(profile)} />
+                <input type="hidden" name="business_type" value={sell} />
                 <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Setting up…")}>
                   {level === "small"
                     ? tr("Start with Small level")

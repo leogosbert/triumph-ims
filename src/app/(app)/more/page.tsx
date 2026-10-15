@@ -7,6 +7,7 @@ import { getAppContext } from "@/lib/context";
 import { featureForRoute } from "@/lib/features";
 import { APP_VERSION, BUILD_ID } from "@/lib/releases";
 import { can } from "@/lib/roles";
+import { canSeeAllService } from "@/lib/services";
 import { adminUrl } from "@/lib/hosts";
 
 export const metadata = { title: "More" };
@@ -65,6 +66,7 @@ export default async function MorePage() {
   // A tile is shown only when its feature is switched on (drivers always keep /driver).
   const on = (href: string) => (role === "driver" && href === "/driver") || features.on(featureForRoute(href));
   const addClient = can(role, "editClients") && on("/clients/new");
+  const servicesOn = features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled);
   const addSupplier = can(role, "editSuppliers") && on("/suppliers/new");
   const addProduct = can(role, "editProducts") && on("/products/new");
 
@@ -103,6 +105,9 @@ export default async function MorePage() {
         {can(role, "receiveGoods") && <Tile show={on("/receiving")} href="/receiving" title={tr("Receive goods")} sub={tr("Record goods arriving against purchase orders")} />}
         {can(role, "seeDeliveries") && <Tile show={on("/deliveries")} href="/deliveries" title={tr("Deliveries")} sub={tr("Delivery notes and proof of delivery")} />}
         {role === "driver" && <Tile show={on("/driver")} href="/driver" title={tr("My deliveries")} sub={tr("Deliveries assigned to you, record proof of delivery")} />}
+        {servicesOn && role !== "procurement" && (
+          <Tile href="/jobs" title={tr(canSeeAllService(role) ? "Service jobs" : "My jobs")} sub={tr("Installation, repair and maintenance at client sites, sign-off and invoice")} />
+        )}
         {can(role, "manageWarehouses") && <Tile show={on("/warehouses")} href="/warehouses" title={tr("Stores")} sub={tr("Warehouses and store locations")} />}
         {can(role, "importData") && (
           <Tile show={on("/import")} href="/import" title={tr("Import from spreadsheet")} sub={tr("Load many records at once from the template")} />

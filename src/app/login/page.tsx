@@ -255,7 +255,7 @@ export default function LoginPage() {
       )}
       {!adminApp && (
         <p className="auth-links">
-          <Link href="/playbooks">{tr("Playbooks: step-by-step guides and PDFs")}</Link>
+          <Link href="/pricing">{tr("Prices")}</Link> · <Link href="/playbooks">{tr("Playbooks: step-by-step guides and PDFs")}</Link>
         </p>
       )}
       <p className="auth-foot">

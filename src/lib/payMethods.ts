@@ -8,6 +8,9 @@ export const PAY_METHODS: Record<string, string> = {
   other: "Other",
 };
 
+/** A client's withholding tax certificate, recorded as part payment of an invoice (v1.21, client payments only). */
+export const WITHHOLDING_LABEL = "Withholding tax certificate";
+
 /** Mobile-money services (Stage 13). Kept in step with public.mobile_money_providers(). */
 export const MOBILE_MONEY: Record<string, string> = {
   mpesa: "M-Pesa",
@@ -21,5 +24,6 @@ export const MOBILE_MONEY: Record<string, string> = {
 /** "M-Pesa" for a mobile-money payment whose service is known, otherwise the method ("Bank transfer"). */
 export function methodLabel(method: string, provider?: string | null) {
   if (method === "mobile_money" && provider && MOBILE_MONEY[provider]) return MOBILE_MONEY[provider];
+  if (method === "withholding_tax") return WITHHOLDING_LABEL;
   return PAY_METHODS[method] ?? method;
 }

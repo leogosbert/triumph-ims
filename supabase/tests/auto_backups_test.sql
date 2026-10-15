@@ -209,7 +209,8 @@ select tests.blocked(format('select public.take_claimed_backup(%L, %L)', 'wrong'
 select tests.blocked('select public.check_overdue_backups(''wrong'')', 'scheduled run: wrong secret refused (overdue check)');
 select public.set_outbox_secret('a-test-secret-that-is-long-enough') as msg \gset
 set role anon;
-select public.claim_company_backup('a-test-secret-that-is-long-enough') as claimed \gset
+-- \gset unsets a null (nothing due, e.g. just after midnight), so keep it a string.
+select coalesce(public.claim_company_backup('a-test-secret-that-is-long-enough')::text, '') as claimed \gset
 select tests.check(nullif(:'claimed', '') is null
                    or public.take_claimed_backup('a-test-secret-that-is-long-enough', nullif(:'claimed', '')::uuid) is not null,
   'scheduled run: claim and take work with the secret (as the server)');

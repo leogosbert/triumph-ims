@@ -234,6 +234,15 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
                 hint={tr("sets the due date when an invoice is issued")}
               />
               <Field name="invoice_terms" label={tr("Standard invoice terms")} value={c.invoice_terms ?? null} textarea hint={tr("printed on every invoice")} />
+              {c.wht_rate !== undefined && (
+                <Field
+                  name="wht_rate"
+                  label={tr("Withholding tax on services %")}
+                  value={String(c.wht_rate ?? 5)}
+                  inputMode="decimal"
+                  hint={tr("what clients may withhold from your services (5% for residents in Tanzania); shown on invoices with services")}
+                />
+              )}
             </section>
           )}
 

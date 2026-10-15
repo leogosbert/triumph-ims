@@ -24,7 +24,7 @@ function Input({ f, value, disabled }: { f: FieldDef; value: unknown; disabled: 
           {!f.required && <option value="">—</option>}
           {all.map((o) => (
             <option key={o} value={o}>
-              {o}
+              {f.labels?.[o] ? tr(f.labels[o]) : o}
             </option>
           ))}
         </select>

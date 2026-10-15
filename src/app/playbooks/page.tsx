@@ -21,7 +21,7 @@ export default async function PlaybooksPage() {
   const books = PLAYBOOKS.map((p) => ({ raw: p, t: translatePlaybook(p, lang === "sw" ? "sw" : "en", tr) }));
 
   return (
-    <div className="auth-wrap journey-wrap">
+    <div className="auth-wrap journey-wrap pb-list-wrap">
       <AppBackground kind="architecture" />
       <header className="j-head">
         <Link href={inApp ? "/" : "/login"} className="j-logo" aria-label={tr("LeMoSp")}>

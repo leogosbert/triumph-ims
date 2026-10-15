@@ -229,10 +229,12 @@ export async function playbookPdf(pb: Playbook, L: PlaybookPdfLabels, stats: { s
     y = top - h - 10;
   };
 
+  const banded = new Set<unknown>();
   pb.chapters.forEach((ch, ci) => {
     // Each chapter starts on a new page with a coloured band.
     if (ci > 0 || y < TOP) newPage();
     chapterPages.push(pageNo());
+    banded.add(page);
     page.drawRectangle({ x: 0, y: A4.h - 150, width: A4.w, height: 150, color: accent });
     page.drawText(clean(`${L.chapter} ${ci + 1}`.toUpperCase()), { x: M, y: A4.h - 70, size: 10, font: bold, color: rgb(1, 1, 1), opacity: 0.85 });
     let cy = A4.h - 98;
@@ -311,8 +313,11 @@ export async function playbookPdf(pb: Playbook, L: PlaybookPdfLabels, stats: { s
   const head = clean(`LeMoSp  ·  ${pb.title}`);
   pages.forEach((p, i) => {
     if (i === 0) return;
-    p.drawText(head.length > 90 ? `${head.slice(0, 87)}...` : head, { x: M, y: A4.h - 32, size: 8.5, font, color: MUTED });
-    p.drawLine({ start: { x: M, y: A4.h - 40 }, end: { x: A4.w - M, y: A4.h - 40 }, thickness: 0.5, color: LINE });
+    // Chapter pages open with the coloured band, which takes the place of the header.
+    if (!banded.has(p)) {
+      p.drawText(head.length > 90 ? `${head.slice(0, 87)}...` : head, { x: M, y: A4.h - 32, size: 8.5, font, color: MUTED });
+      p.drawLine({ start: { x: M, y: A4.h - 40 }, end: { x: A4.w - M, y: A4.h - 40 }, thickness: 0.5, color: LINE });
+    }
     p.drawLine({ start: { x: M, y: 40 }, end: { x: A4.w - M, y: 40 }, thickness: 0.5, color: LINE });
     p.drawText(clean(L.footer), { x: M, y: 26, size: 8, font, color: MUTED });
     const n = clean(`${L.page} ${i + 1} / ${pages.length}`);

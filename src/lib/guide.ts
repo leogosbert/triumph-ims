@@ -217,7 +217,7 @@ export const GUIDE: GuideSection[] = [
           "Tap + New product and enter the name, SKU, category, brand, unit and selling price.",
           "Set a reorder level so the app warns you when stock runs low.",
           "For chemicals and lubricants, record hazard details and whether the safety data sheet (SDS) is on file.",
-          "Open a product to see its stock, costs and price history.",
+          "Open a product to see its stock and costs. Price changes show in the Activity log.",
         ],
       },
       {
@@ -922,7 +922,7 @@ export const GUIDE: GuideSection[] = [
         roles: "managers",
         feature: "team",
         steps: [
-          "Press Invite someone, enter their email and choose a role. They get an email to join.",
+          "Press Invite someone, enter their email and choose a role. Then send them the app address: they sign up with that same email to join.",
           "Change someone's role at any time.",
           "Switch access off the day someone leaves. Their past work stays on record.",
         ],
@@ -977,7 +977,7 @@ export const GUIDE: GuideSection[] = [
         href: "/activity",
         roles: "managers",
         feature: "activity",
-        steps: ["Open the Activity log and search or filter by person, record or date."],
+        steps: ["Open the Activity log: it lists the latest 200 changes, newest first, with who made each one."],
       },
       {
         id: "backups",

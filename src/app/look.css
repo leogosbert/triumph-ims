@@ -1439,3 +1439,11 @@
   overflow: hidden;
   border-radius: 24px;
 }
+/* The playbook list: one column as wide as the screen, so the card grid wraps on phones. */
+.pb-list-wrap {
+  grid-template-columns: minmax(0, 1fr);
+}
+.pb-list-wrap > * {
+  justify-self: center;
+  max-width: min(100%, 1040px);
+}

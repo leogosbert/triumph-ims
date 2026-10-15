@@ -118,6 +118,21 @@ under Features).
 - Security: sign-in waits after 5 wrong passwords on a device (30 s, doubling, up to 15 min);
   Cross-Origin-Resource-Policy and a stricter Permissions-Policy.
 
-## Stage 16 — Intelligence & integrations
-- AI business assistant over the company's own data (permission-checked, states period and data used).
+## v1.20 — Speed, playbooks, assistant and integrations (built — SQL: `20261019000100_stage16_api_assistant.sql`)
+- Faster navigation: sessions read from the signed token (no Auth round trip per tap), layout and home queries in
+  parallel, router cache (`staleTimes`), links prefetched on hover / touch.
+- Playbooks (`/playbooks`, public): long step-by-step guides with animated sample records, "If this happens"
+  scenarios, chapter navigation, progress kept per device, English / Kiswahili, and a PDF for each.
+- Business assistant (`/assistant`, feature `ai_assistant`): questions in English or Kiswahili answered from the
+  company's records with the person's own access (money owed and owing, sales, profit, reorder, expiry, best clients
+  and products, quotations, approvals, deliveries, payment-reminder drafts). Optional AI wording when the server has
+  `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`; only the facts of the answer are sent, 40 questions per person per day.
+- Integrations & API (`/integrations`, feature `integrations`): monthly accounting CSVs (invoices, payments, supplier
+  bills, expenses); API keys (management, step-up, hashed, shown once, switch off); read-only data API
+  `GET /api/v1/{clients|suppliers|products|stock|quotations|invoices|payments|purchase_orders}` with
+  `since`, `limit`, `offset`.
+- Settings and account screens redesigned (grouped hub with status chips, sticky save bars, language on Account).
+- Every catalogue feature is now live.
+
+## Stage 17 — More intelligence & integrations
 - Configurable Tanzania tax (TRA EFD/VFD); WhatsApp/SMS notifications; East Africa localisation.

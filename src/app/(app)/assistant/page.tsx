@@ -5,10 +5,13 @@ import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { aiConfigured, EXAMPLE_QUESTIONS } from "@/lib/assistant";
 import { getAppContext } from "@/lib/context";
 import { askAssistant } from "./actions";
+import type { SearchParams } from "@/lib/messages";
 
 export const metadata = { title: "Business assistant" };
 
-export default async function AssistantPage() {
+export default async function AssistantPage({ searchParams }: { searchParams: SearchParams }) {
+  const sp = (await searchParams) ?? {};
+  const initial = typeof sp.q === "string" ? sp.q.slice(0, 500) : "";
   await primeLang();
   const { role, features } = await getAppContext();
   if (role === "driver") redirect("/");
@@ -30,7 +33,7 @@ export default async function AssistantPage() {
         {tr("Ask about your business in plain words, in English or Kiswahili. Answers come from your company's own records, only what your role may see, with links to the records behind them.")}
         {aiConfigured() ? ` ${tr("A secure AI service words the answers; only the figures in the answer are sent to it.")}` : ""}
       </p>
-      <AssistantChat ask={askAssistant} examples={[...EXAMPLE_QUESTIONS]} />
+      <AssistantChat ask={askAssistant} examples={[...EXAMPLE_QUESTIONS]} initial={initial} />
     </>
   );
 }

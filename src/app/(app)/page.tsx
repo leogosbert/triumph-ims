@@ -185,6 +185,15 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       <div className="hero-overlap">
         <Notice {...notice} />
         <ControlTower tower={dash.tower} t={t} />
+        {features.on("ai_assistant") && (
+          <form action="/assistant" className="as-home" role="search">
+            <span className="as-orb as-orb-sm" aria-hidden="true" />
+            <input name="q" maxLength={500} placeholder={tr("Ask the assistant, for example: who owes us money?")} aria-label={tr("Ask the assistant")} />
+            <button type="submit" className="btn btn-primary btn-small">
+              {tr("Ask")}
+            </button>
+          </form>
+        )}
       </div>
 
       {needsOnboarding && <OnboardingCard />}

@@ -1517,3 +1517,11 @@ a.as-row:hover, button.as-row:hover { border-color: color-mix(in srgb, var(--bra
 .int-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
 .int-new { border: 2px solid var(--ok); background: var(--ok-bg); }
 .int-new p { margin: 0 0 10px; }
+.as-home {
+  display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 8px 8px 8px 12px;
+  border-radius: 999px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 6px 18px var(--shadow);
+}
+.as-home input { flex: 1; min-width: 0; border: 0; background: transparent; box-shadow: none; padding: 6px 0; }
+.as-home input:focus { outline: none; }
+.as-home:focus-within { border-color: var(--brand); }
+.as-orb.as-orb-sm { width: 22px; height: 22px; margin: 0; flex: 0 0 auto; }

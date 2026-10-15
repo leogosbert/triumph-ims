@@ -9,13 +9,14 @@ type Turn = { id: number; q: string; a?: Answer; failed?: boolean };
 const KEY = "lemosp-assistant";
 
 /** The conversation: tap a suggestion or type; each answer shows its figures, records and any draft. */
-export function AssistantChat({ ask, examples }: { ask: (q: string) => Promise<Answer>; examples: string[] }) {
+export function AssistantChat({ ask, examples, initial }: { ask: (q: string) => Promise<Answer>; examples: string[]; initial?: string }) {
   const tr = useTr();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState("");
   const [pending, start] = useTransition();
   const [copied, setCopied] = useState<number | null>(null);
   const end = useRef<HTMLDivElement>(null);
+  const asked = useRef(false);
 
   // The conversation stays while the tab is open (not on the server, not on other devices).
   useEffect(() => {
@@ -50,6 +51,15 @@ export function AssistantChat({ ask, examples }: { ask: (q: string) => Promise<A
       }
     });
   };
+
+  // A question typed on the home screen (/assistant?q=…) is asked once on arrival.
+  useEffect(() => {
+    if (!initial || asked.current) return;
+    asked.current = true;
+    send(initial);
+    window.history.replaceState(null, "", "/assistant");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initial]);
 
   const copy = async (id: number, draft: string) => {
     try {

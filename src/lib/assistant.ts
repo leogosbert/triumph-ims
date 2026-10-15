@@ -50,18 +50,18 @@ type Ctx = { supabase: Supabase; company: Company; role: Role };
 
 const TOPICS: [Topic, RegExp][] = [
   ["remind", /remind|reminder|draft|write .*(email|message)|kumbusha|ukumbusho|andika (barua|ujumbe)/],
-  ["we_owe", /we owe|do we owe|payable|supplier.*(owe|bill|pay)|bills? (due|to pay)|tunadaiwa|tunawadai?wa|madeni ya wasambazaji/],
-  ["owed", /owe|owing|debtor|receivable|unpaid|overdue|late pay|not paid|wanadaiwa|wanaodaiwa|deni|madeni|hawajalipa/],
+  ["we_owe", /we owe|do we owe|payable|supplier.*(owe|bill|pay)|bills? (due|to pay)|tunadaiwa|tunawadaiwa|wasambazaji.*(deni|dai|lipa)|madeni ya wasambazaji/],
+  ["owed", /owe|owing|debtor|receivable|unpaid|overdue|late pay|not paid|anadaiwa|wanadaiwa|wanaodaiwa|anatudai|deni|madeni|hawajalipa|ankara zilizochelewa/],
   ["profit", /profit|margin|earn|faida/],
   ["sales", /sales|sold|revenue|turnover|invoiced|mauzo|tumeuza/],
-  ["expiry", /expir|best before|kuisha muda|muda wa matumizi/],
-  ["reorder", /reorder|low stock|run(ning)? (out|low)|out of stock|order more|what to buy|stock|inventory|stoku|kuagiza|bidhaa zinazoisha/],
-  ["top_clients", /(best|top|biggest|main|largest) (client|customer)|who buys most|wateja (bora|wakubwa)/],
+  ["expiry", /expir|best before|kuisha muda|inaisha muda|zinaisha muda|muda wa matumizi/],
+  ["reorder", /reorder|low stock|run(ning)? (out|low)|out of stock|order more|what to buy|stock|inventory|stoku|kuagiza|tuagize|agiza tena|bidhaa zinazoisha/],
+  ["top_clients", /(best|top|biggest|main|largest) (client|customer)|who buys most|wateja (wetu )?(bora|wakubwa)/],
   ["top_products", /(best|top)[ -]?sell|(best|top|most) (product|item)|sells? most|bidhaa (bora|zinazouzwa)/],
   ["approvals", /approv|waiting for me|idhini|kuidhinisha/],
   ["quotes", /quot|offer|nukuu|bei tulizotoa/],
   ["deliveries", /deliver|dispatch|backorder|on the way|driver|usafirishaji|kufikisha|mzigo/],
-  ["summary", /summary|overview|how (is|are) (the )?(business|we|things)|how.*doing|today|this week|status|muhtasari|hali ya biashara|leo/],
+  ["summary", /summary|overview|how (is|are) (the )?(business|we|things)|how.*doing|today|this week|status|muhtasari|hali ya biashara|inaendeleaje|tunaendeleaje|leo/],
 ];
 
 export function detectTopic(question: string): Topic {

@@ -44,6 +44,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
         ready={ready}
         finishAction={finishOnboarding}
         demoAction={startDemo}
+        initialSell={company.business_type ?? "goods"}
       />
       <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>
     </div>

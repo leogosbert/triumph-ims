@@ -134,5 +134,21 @@ under Features).
 - Settings and account screens redesigned (grouped hub with status chips, sticky save bars, language on Account).
 - Every catalogue feature is now live.
 
+## v1.21 — Goods and services, billing and playbooks on request (built — SQL: `20261020000100_services_billing.sql`, `20261021000100_service_business.sql`)
+- Price book and LeMo Tech billing: public `/pricing`, `/services` (request training, setup, add-ons, playbooks),
+  `/settings/billing` (plan, next-bill estimate, LeMoSp invoices as PDF, how to pay). LeMoSp ADMIN → Billing &
+  services: requests, per-company terms and status, invoices (issue, payment, void), price book, LeMo Tech details.
+- Playbooks are given on request (`has_playbook`, `company_playbooks`); three new playbooks for goods, service and
+  goods-and-services businesses, with company registration and set-up considerations and other supply models.
+- What you sell (`companies.business_type`: goods / services / both) at onboarding and in Features; item types
+  goods / service / labour / consultancy / hire; services stay off delivery notes and purchase orders; withholding
+  tax (`companies.wht_rate`) on invoices and as a payment method.
+- Service jobs (`/jobs`): technicians, checklist, materials (FIFO from stock on completion), hours, client signature,
+  invoice. Maintenance contracts (`/maintenance`, visits become jobs), equipment register (`/equipment`), projects
+  with milestones (`/projects`), timesheets and team rates (`/timesheets`), equipment hire (`/hire`), service
+  reports (`/service-reports`). Direct supply: purchase orders delivered straight to the client.
+- Admin feature switches: sliding On / Off / Default selector with one Save.
+- Later: manufacturing / fabrication (bills of materials) and route sales for distributors.
+
 ## Stage 17 — More intelligence & integrations
 - Configurable Tanzania tax (TRA EFD/VFD); WhatsApp/SMS notifications; East Africa localisation.

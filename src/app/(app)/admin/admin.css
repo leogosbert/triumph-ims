@@ -677,3 +677,21 @@ button.adm-exit {
   color: #fff;
   opacity: 1;
 }
+
+/* Company features: sliding On / Off / Default selectors with one Save button. */
+.fseg { position: relative; display: inline-grid; grid-template-columns: repeat(3, 1fr); background: var(--soft); border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px; flex: none; min-width: 186px; }
+.fseg button { position: relative; z-index: 1; border: 0; background: none; font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 999px; color: var(--muted); cursor: pointer; transition: color 0.2s; }
+.fseg button.is-on { color: #fff; font-weight: 600; }
+.fseg-thumb { position: absolute; z-index: 0; top: 2px; bottom: 2px; left: 2px; width: calc((100% - 4px) / 3); border-radius: 999px; background: var(--brand); transform: translateX(calc(var(--fseg-i) * 100%)); transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s; }
+.fseg-thumb-on { background: var(--ok); }
+.fseg-thumb-off { background: var(--err); }
+.fseg-thumb-default { background: var(--brand); }
+@media (prefers-reduced-motion: reduce) { .fseg-thumb, .fseg button { transition: none; } }
+.fs-cat-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.fs-changed { background: var(--warn-bg); border-radius: 10px; }
+.fs-dot { color: var(--warn); }
+.fs-bar { position: sticky; bottom: calc(var(--nav-h) + 8px); z-index: 5; display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; padding: 10px 12px; border-radius: 14px; background: var(--card); border: 1px solid var(--line-strong); box-shadow: 0 6px 20px var(--shadow); }
+.fs-bar > span { margin-right: auto; font-size: 14px; color: var(--muted); }
+.fs-bar.is-dirty { border-color: var(--warn-line); }
+.fs-bar.is-dirty > span { color: var(--warn); font-weight: 600; }
+@media (min-width: 1024px) { .fs-bar { bottom: 12px; } }

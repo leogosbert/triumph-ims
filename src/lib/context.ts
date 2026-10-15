@@ -52,6 +52,9 @@ export type Company = {
   quote_followup_days?: number;
   invoice_remind_before_days?: number;
   invoice_overdue_every_days?: number;
+  /** Added with goods and services (v1.21): undefined until that SQL has been run. */
+  business_type?: "goods" | "services" | "both";
+  wht_rate?: number;
   /** Set while the company is closing (v1.13 deletion SQL): when its data will be deleted. */
   closing_after?: string | null;
   created_at: string;

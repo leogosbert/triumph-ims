@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MOBILE_MONEY, PAY_METHODS } from "@/lib/payMethods";
+import { MOBILE_MONEY, PAY_METHODS, WITHHOLDING_LABEL } from "@/lib/payMethods";
 import { useTr } from "@/lib/tr-client";
 
 /**
@@ -13,6 +13,7 @@ export function PayMethodFields({
   provider = null,
   reference = null,
   withProvider = true,
+  withholding = false,
   disabled = false,
 }: {
   method?: string;
@@ -20,6 +21,8 @@ export function PayMethodFields({
   reference?: string | null;
   /** False before the Stage 13 database update (the service cannot be saved yet). */
   withProvider?: boolean;
+  /** Offer "Withholding tax certificate" (client payments, after the goods-and-services update). */
+  withholding?: boolean;
   disabled?: boolean;
 }) {
   const tr = useTr();
@@ -31,7 +34,9 @@ export function PayMethodFields({
       ? tr("Cheque number")
       : m === "cash"
         ? tr("Receipt number (if any)")
-        : tr("Bank reference");
+        : m === "withholding_tax"
+          ? tr("Certificate number")
+          : tr("Bank reference");
   return (
     <>
       <div className="field">
@@ -42,8 +47,14 @@ export function PayMethodFields({
               {tr(v)}
             </option>
           ))}
+          {withholding && <option value="withholding_tax">{tr(WITHHOLDING_LABEL)}</option>}
         </select>
       </div>
+      {m === "withholding_tax" && (
+        <p className="hint small muted" style={{ gridColumn: "1 / -1" }}>
+          {tr("The client paid less because they withheld tax on the services and gave you a certificate. Record the certificate amount here; you claim it against your income tax.")}
+        </p>
+      )}
       {mobile && withProvider && (
         <div className="field">
           <label htmlFor="provider">{tr("Mobile-money service")}</label>

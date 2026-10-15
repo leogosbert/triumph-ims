@@ -273,3 +273,34 @@ export async function deleteRule(form: FormData) {
   revalidatePath("/admin", "layout");
   redirect(withNotice("/admin/rules", { msg: "Rule deleted. Recommendations it created have been removed." }));
 }
+
+/** Several feature switches for one company, saved together (the sliding selectors + Save). */
+export async function saveCompanyFeatures(form: FormData) {
+  const supabase = await requireAdmin();
+  const id = uuid(str(form, "company_id"));
+  if (!id) redirect("/admin/companies");
+  const back = `/admin/companies/${id}#features`;
+  let changes: Record<string, string> = {};
+  try {
+    changes = JSON.parse(str(form, "changes") || "{}");
+  } catch {
+    redirect(withNotice(back, { error: "Nothing to save." }));
+  }
+  const list = Object.entries(changes).filter(([k, v]) => KEY_RE.test(k) && (v === "on" || v === "off" || v === "default"));
+  if (list.length === 0) redirect(withNotice(back, { msg: "Nothing to save." }));
+  if (list.length > 200) redirect(withNotice(back, { error: "Too many changes at once." }));
+  const failed: string[] = [];
+  let firstError: DbError = null;
+  for (const [key, v] of list) {
+    const { error } = await supabase.rpc("admin_set_company_feature", { p_company: id, p_key: key, p_enabled: v === "on" ? true : v === "off" ? false : null });
+    if (error) {
+      failed.push(key);
+      firstError ??= error;
+    }
+  }
+  revalidatePath("/admin", "layout");
+  if (failed.length) {
+    redirect(withNotice(back, { error: `${list.length - failed.length}/${list.length} saved. ${explain(firstError)}` }));
+  }
+  redirect(withNotice(back, { msg: list.length === 1 ? "1 feature change saved." : `${list.length} feature changes saved.` }));
+}

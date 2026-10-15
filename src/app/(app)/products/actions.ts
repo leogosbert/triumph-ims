@@ -24,6 +24,11 @@ export async function saveProduct(form: FormData) {
     delete values.max_level;
     res = await saveRecord(supabase, "products", company.id, id, values);
   }
+  // Before the goods-and-services database update there is no item type yet: save the rest.
+  if (res.error && /item_type/.test(res.error) && !/check constraint/.test(res.error)) {
+    delete values.item_type;
+    res = await saveRecord(supabase, "products", company.id, id, values);
+  }
   if (res.error) redirect(withNotice(back, { error: friendlyError(res.error) }));
   revalidatePath("/products");
   redirect(withNotice(`/products/${res.id}`, { msg: id ? "Product saved." : "Product added." }));

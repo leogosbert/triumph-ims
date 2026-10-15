@@ -45,7 +45,7 @@ export const CATEGORIES = [
   "Other",
 ];
 
-export const UNITS = ["pcs", "set", "drum", "pail", "litre", "kg", "bag", "m", "roll", "box", "carton"];
+export const UNITS = ["pcs", "set", "drum", "pail", "litre", "kg", "bag", "m", "roll", "box", "carton", "hour", "day", "week", "month", "visit", "job", "trip"];
 
 export const INCOTERMS = ["EXW", "FCA", "FOB", "CFR", "CIF", "CPT", "CIP", "DAP", "DPU", "DDP"];
 
@@ -59,3 +59,12 @@ export const CONTACT_KINDS = [
   { value: "technical", label: "Technical" },
   { value: "other", label: "Other" },
 ] as const;
+
+/** What an item is (products.item_type). Only goods are used up from stock and go on delivery notes. */
+export const ITEM_TYPE_LABELS: Record<string, string> = {
+  goods: "Goods",
+  service: "Service",
+  labour: "Labour",
+  consultancy: "Consultancy",
+  hire: "Hire (equipment you rent out)",
+};

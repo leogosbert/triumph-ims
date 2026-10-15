@@ -9,6 +9,7 @@ import { QuoteFollowUpCard } from "@/components/FollowUpCards";
 import { getAppContext, stage13Ready } from "@/lib/context";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { CURRENCIES, INCOTERMS, PAYMENT_TERMS } from "@/lib/lists";
+import { canPlanService } from "@/lib/services";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { productOptions } from "@/lib/options";
@@ -350,6 +351,16 @@ export default async function QuotationPage({
             </form>
             <Link href={`/purchase-orders/new?quotation=${q.id}`} className="btn">{tr("Create purchase order")}</Link>
           </div>
+        </section>
+      )}
+
+      {q.status === "accepted" && canPlanService(role) && features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled) && (
+        <section className="card">
+          <h2>{tr("Installation and service work")}</h2>
+          <p className="muted small">{tr("Plan the installation or other work on this order as a service job: technicians, checklist, materials and the client's sign-off.")}</p>
+          <Link href={`/jobs/new?quotation=${q.id}`} className="btn">
+            {tr("Create service job")}
+          </Link>
         </section>
       )}
 

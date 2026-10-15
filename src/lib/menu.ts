@@ -2,6 +2,7 @@ import type { IconName } from "@/components/Icon";
 import { featureForRoute, type FeatureRow } from "@/lib/features";
 import { can, type Role } from "@/lib/roles";
 import { adminUrl } from "@/lib/hosts";
+import { canPlanService, canSeeAllService } from "@/lib/services";
 
 /**
  * `feature`: hidden when that feature is switched off (defaults to the feature of the link's route).
@@ -23,6 +24,8 @@ export type MenuOptions = {
   features?: FeatureRow[];
 };
 
+const SERVICE_FEATURES = new Set(["service_jobs", "maintenance_contracts", "equipment_register", "projects", "timesheets", "hire_rentals", "service_reports"]);
+
 export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {}): MenuCategory[] {
   const on = opts.on ?? (() => true);
   const c = (perm: Parameters<typeof can>[1]) => can(role, perm);
@@ -40,6 +43,20 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         c("seeCrm") && { href: "/tenders", title: "Tenders", sub: "Bids with closing dates, checklist of papers, results", icon: "doc" },
         c("seeContracts") && { href: "/contracts", title: "Contracts", sub: "Framework agreements and agreed prices", icon: "doc" },
         c("seeSales") && { href: "/sales", title: "Sales overview", sub: "Client RFQs, quotations, approvals", icon: "sales" },
+      ],
+    },
+    {
+      key: "services",
+      label: "Services",
+      icon: "tools",
+      items: [
+        role !== "procurement" && { href: "/jobs", title: canSeeAllService(role) ? "Service jobs" : "My jobs", sub: "Installation, repair and maintenance at client sites, sign-off and invoice", icon: "tools" },
+        canSeeAllService(role) && { href: "/maintenance", title: "Maintenance contracts", sub: "Regular visits planned for you, every month, quarter or year", icon: "check" },
+        role !== "driver" && { href: "/equipment", title: "Equipment", sub: "What you installed at each client: serial, warranty, next service", icon: "settings" },
+        role !== "driver" && { href: "/projects", title: "Projects", sub: "Consulting and project work with milestones, budget and hours", icon: "activity" },
+        { href: "/timesheets", title: "Timesheets", sub: "Hours worked on jobs and projects, billable or not", icon: "clock" },
+        canSeeAllService(role) && { href: "/hire", title: "Equipment hire", sub: "What is out on hire, due back, and invoices per day, week or month", icon: "truck" },
+        canSeeAllService(role) && { href: "/service-reports", title: "Service reports", sub: "Services against goods, profit per job, late work, workload", icon: "report" },
       ],
     },
     {
@@ -114,6 +131,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         c("seeCrm") && { href: "/crm/new", title: "+ New opportunity", sub: "A possible order to follow up", icon: "plus" },
         c("editSales") && { href: "/rfqs/new", title: "+ New client RFQ", sub: "Record a request from a client", icon: "plus" },
         c("editSales") && { href: "/quotations/new", title: "+ New quotation", sub: "Prepare prices for a client", icon: "plus" },
+        canPlanService(role) && { href: "/jobs/new", title: "+ New service job", sub: "Installation, repair, maintenance or consultation", icon: "plus" },
         c("requestPurchases") && { href: "/requisitions/new", title: "+ New purchase request", sub: "Ask for goods to be bought", icon: "plus" },
         c("editPurchasing") && { href: "/purchase-orders/new", title: "+ New purchase order", sub: "Order from a supplier", icon: "plus" },
         c("editInvoices") && { href: "/invoices/new", title: "+ New invoice", sub: "Bill a client", icon: "plus" },
@@ -153,7 +171,9 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         isManager && { href: "/settings/go-live", title: "Go-live checklist", sub: "What is ready and what is left", icon: "check" },
         { href: "/help", title: "Help", sub: "Short guide for your role, step by step", icon: "help" },
         { href: "/guide", title: "App guide", sub: "Every function, where to find it and how to use it", icon: "help" },
-        { href: "/playbooks", title: "Playbooks", sub: "Step-by-step guides with examples and business situations, as PDFs too", icon: "doc" },
+        { href: "/playbooks", title: "Playbooks", sub: "Step-by-step guides with examples and business situations; request the ones you need", icon: "doc" },
+        { href: "/services", title: "Services & prices", sub: "Training, setup, add-ons and playbooks from LeMo Tech", icon: "inbox" },
+        c("seeFinance") && { href: "/settings/billing", title: "Plan & billing", sub: "Your LeMoSp plan, invoices and how to pay", icon: "receipt" },
         { href: "/how-it-works", title: "How it works", sub: "One order, from the first call to the profit, step by step", icon: "activity" },
         { href: "/account", title: "Your account", sub: "Your details, password, appearance, sign out", icon: "user" },
         { href: "/account#password", title: "Change password", sub: "Put a new password for signing in", icon: "lock" },
@@ -161,8 +181,14 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       ],
     },
   ];
-  // Drivers always keep their deliveries screen.
-  const visible = (i: MenuItem) => (role === "driver" && i.href === "/driver") || on(i.feature ?? featureForRoute(i.href));
+  // Drivers always keep their deliveries screen. The service screens show only once their features exist and are on.
+  const known = new Set((opts.features ?? []).map((f) => f.key));
+  const visible = (i: MenuItem) => {
+    if (role === "driver" && i.href === "/driver") return true;
+    const key = i.feature ?? featureForRoute(i.href);
+    if (key && SERVICE_FEATURES.has(key) && !known.has(key)) return false;
+    return on(key);
+  };
   const cats: MenuCategory[] = drafts.map((cat) => ({
     ...cat,
     items: cat.items.filter((i): i is MenuItem => Boolean(i)).filter(visible),

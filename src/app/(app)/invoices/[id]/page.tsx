@@ -12,6 +12,7 @@ import { daysOverdue, INVOICE_STATUS, isOpen, methodLabel, n, shownStatus } from
 import { formatDate, formatDateTime } from "@/lib/format";
 import { CURRENCIES, PAYMENT_TERMS } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
+import { withholding } from "@/lib/services";
 import { formatMoney } from "@/lib/money";
 import { productOptions } from "@/lib/options";
 import { namesFor } from "@/lib/people";
@@ -98,6 +99,11 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
       : Promise.resolve({ data: null }),
   ]);
   const lines = (lineData ?? []) as unknown as Line[];
+  // Services on the invoice and the withholding tax a client may deduct (after the goods-and-services update).
+  const { data: svcData, error: svcError } = await supabase.from("invoice_lines").select("line_total, is_service").eq("invoice_id", id);
+  const whtReady = !svcError && company.wht_rate !== undefined;
+  const servicesTotal = whtReady ? ((svcData ?? []) as { line_total: number; is_service: boolean }[]).filter((l) => l.is_service).reduce((t, l) => t + n(l.line_total), 0) : 0;
+  const whtAmount = withholding(servicesTotal, company.wht_rate);
   const payments = (payData ?? []) as unknown as Payment[];
   const ccy = inv.currency as string;
   const base = company.base_currency;
@@ -244,7 +250,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                     <label htmlFor="received_on">{tr("Date received")}</label>
                     <input id="received_on" name="received_on" type="date" defaultValue={todayTz()} />
                   </div>
-                  <PayMethodFields withProvider={stage13Ready(company)} />
+                  <PayMethodFields withProvider={stage13Ready(company)} withholding={whtReady} />
                   {ccy !== base && (
                     <div className="field">
                       <label htmlFor="exchange_rate">{tr("Exchange rate on the day")}{" "}<span className="hint">· {base}{" "}{tr("per 1")}{" "}{ccy}</span>
@@ -350,6 +356,28 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
             <span>{tr("Total")}</span>
             <span>{formatMoney(inv.total, ccy)}</span>
           </div>
+          {servicesTotal > 0 && (
+            <>
+              <div className="row small muted">
+                <span>{tr("Of which services (before VAT)")}</span>
+                <span>{formatMoney(servicesTotal, ccy)}</span>
+              </div>
+              {whtAmount > 0 && (
+                <>
+                  <div className="row small muted">
+                    <span>
+                      {tr("Withholding tax the client may deduct")} {n(company.wht_rate)}%
+                    </span>
+                    <span>− {formatMoney(whtAmount, ccy)}</span>
+                  </div>
+                  <div className="row small">
+                    <span>{tr("Client pays if they withhold")}</span>
+                    <span>{formatMoney(n(inv.total) - whtAmount, ccy)}</span>
+                  </div>
+                </>
+              )}
+            </>
+          )}
           {ccy !== base && (
             <div className="row small muted">
               <span>{tr("≈ in")}{" "}{base}{" "}{tr("at")}{" "}{fmtNum(inv.exchange_rate)}

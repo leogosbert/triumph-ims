@@ -1,0 +1,108 @@
+/* Goods and services (v1.21): service jobs, sign-off, checklists, business type. Prefix sj-. */
+.sj-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px 14px;
+}
+.sj-checklist {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+}
+.sj-checklist li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line, rgba(0, 0, 0, 0.08));
+}
+.sj-checklist li:last-child {
+  border-bottom: 0;
+}
+.sj-checklist input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  margin-top: 1px;
+}
+.sj-checklist .done {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+.sj-progress {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--line, rgba(0, 0, 0, 0.08));
+  overflow: hidden;
+  margin: 6px 0 10px;
+}
+.sj-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--brand, #1c4c9b);
+}
+.sj-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.sj-actions form {
+  margin: 0;
+}
+.sj-sig {
+  position: relative;
+  border: 1px dashed var(--line-strong, rgba(0, 0, 0, 0.25));
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+.sj-sig canvas {
+  display: block;
+  width: 100%;
+  height: 180px;
+  touch-action: none;
+}
+.sj-sig .btn {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+.sj-sig-img {
+  max-width: 260px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.1));
+  border-radius: 8px;
+  background: #fff;
+}
+.sj-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  font-weight: 600;
+}
+.sj-types {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+.sj-type {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.1));
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 400;
+}
+.sj-type:has(input:checked) {
+  border-color: var(--brand, #1c4c9b);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand, #1c4c9b) 25%, transparent);
+}
+.sj-type input {
+  margin-top: 3px;
+}
+.sj-type strong {
+  display: block;
+}

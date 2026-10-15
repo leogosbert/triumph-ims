@@ -48,6 +48,11 @@ export async function finishOnboarding(form: FormData) {
       }),
     );
   }
+  // What the company sells switches the service screens on or off (skipped before the goods-and-services update).
+  const sell = String(form.get("business_type") ?? "");
+  if (["goods", "services", "both"].includes(sell)) {
+    await supabase.rpc("set_business_type", { p_company: company.id, p_type: sell });
+  }
   revalidatePath("/", "layout");
   const msg =
     level === "small"

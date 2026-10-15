@@ -8,6 +8,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { changeLevel } from "../../growth/actions";
 import { FeatureList, Stage11Notice } from "../../growth/parts";
 import { LevelPicker } from "./LevelPicker";
+import { BusinessTypePicker } from "./BusinessTypePicker";
 import { SettingsHead } from "../SettingsHead";
 
 export const metadata = { title: "Features & business level" };
@@ -53,6 +54,16 @@ export default async function FeaturesSettingsPage({ searchParams }: { searchPar
         </p>
         <LevelPicker current={level} action={changeLevel} disabled={!features.ready} />
       </section>
+
+      {company.business_type !== undefined && (
+        <section className="grow-section" id="sell">
+          <h2>{tr("What you sell")}</h2>
+          <p className="st-card-lead">
+            {tr("Goods, services or both. Services add service jobs, maintenance contracts, equipment, projects, timesheets and hire; you can still switch each one on or off below.")}
+          </p>
+          <BusinessTypePicker current={company.business_type} />
+        </section>
+      )}
 
       {features.ready && (
         <>

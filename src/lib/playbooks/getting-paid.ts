@@ -498,6 +498,50 @@ export const GETTING_PAID: Playbook = {
           ],
           scales: "all",
         },
+        {
+          id: "before-next-order",
+          title: "Check the client's account before the next order",
+          body:
+            "The best moment to collect old money is when the client wants something new. Before you accept a new order on credit, look at what they already owe and how late it is.",
+          do: [
+            "Open Clients and tap the client. The Account card shows Owed to us, Overdue and Credit available.",
+            "Press Statement of account → to see every open invoice with its age.",
+            "If nothing is overdue and the order fits under the credit limit, go ahead as usual.",
+            "If money is overdue, call the client before you confirm: ask for the overdue amount first, or for payment with the new order.",
+            "For a client who keeps paying late, change the Payment terms to 50% advance or 100% advance and press Save changes. New quotations then show those terms.",
+          ],
+          where: ["Clients"],
+          href: "/clients",
+          who: "Sales, Finance and Management",
+          example: {
+            kind: "Client account",
+            title: "Dodoma Builders",
+            lines: [
+              ["Owed to us", "TZS 7,800,000"],
+              ["Overdue", "TZS 5,900,000"],
+              ["Credit available", "TZS 200,000"],
+              ["New LPO", "TZS 3,540,000"],
+            ],
+            mark: 1,
+            stamp: "Collect first",
+            tone: "bad",
+          },
+          scenarios: [
+            {
+              title: "A late payer sends a big new order",
+              problem: "Dodoma Builders owes TZS 5,900,000 that is more than 60 days late and sends a new LPO for TZS 3,540,000.",
+              fix: [
+                "Thank them for the order, then say clearly: we can deliver as soon as the overdue TZS 5,900,000 is settled.",
+                "Offer a way forward: part of the old debt now and the rest on a promised date. Log the promise on the invoices with + Log a reminder or promise to pay.",
+                "Prepare the quotation and the goods, but dispatch only when the agreed payment is recorded.",
+                "If management decides to deliver anyway, the invoice above the credit limit needs a manager to issue it, so the decision is on record.",
+              ],
+              tone: "bad",
+            },
+          ],
+          tip: "Salespeople see the client's account too. Ask them to look at it before they promise a delivery date to a client who owes money.",
+          scales: "all",
+        },
       ],
     },
     {

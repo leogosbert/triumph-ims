@@ -4536,7 +4536,7 @@ export const SW: Record<string, string> = {
   "One order, from the first call to the profit, step by step": "Oda moja, kutoka simu ya kwanza hadi faida, hatua kwa hatua",
   "Playbooks with PDFs": "Miongozo ya kazi pamoja na PDF",
   "Long step-by-step guides with examples and real business situations, each also as a PDF.": "Miongozo mirefu ya hatua kwa hatua yenye mifano na hali halisi za biashara, kila mmoja pia kama PDF.",
-  "Open Playbooks and choose one: setting up, order to payment, numbers and decisions, getting paid, stock, routines or security.": "Fungua Miongozo ya kazi na uchague mmoja: kusanidi, oda hadi malipo, takwimu na maamuzi, kulipwa, stoku, ratiba au usalama.",
+  "Open Playbooks and choose one: setting up, order to payment, numbers and decisions, getting paid, stock, routines, security, running a bigger business, or connecting and automating.": "Fungua Miongozo ya kazi na uchague mmoja: kusanidi, oda hadi malipo, takwimu na maamuzi, kulipwa, stoku, ratiba, usalama, kuendesha biashara kubwa, au kuunganisha na kuendesha kwa mfumo.",
   "Read it step by step with Next and Back. Each step has the actions in the app, a sample record and \"If this happens\" situations with what to do.": "Usome hatua kwa hatua kwa Ifuatayo na Rudi. Kila hatua ina vitendo kwenye programu, kumbukumbu ya mfano na hali za \"Hili likitokea\" pamoja na cha kufanya.",
   "Chapters jumps to any part. Your place is remembered on this device.": "Sura inakupeleka sehemu yoyote. Mahali ulipofikia panakumbukwa kwenye kifaa hiki.",
   "Download PDF gives the whole playbook to print or share with your team, in English or Kiswahili.": "Pakua PDF inakupa mwongozo mzima wa kuchapisha au kushirikisha timu yako, kwa Kiingereza au Kiswahili.",

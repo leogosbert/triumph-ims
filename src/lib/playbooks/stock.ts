@@ -79,6 +79,61 @@ export const STOCK: Playbook = {
           scales: "all",
         },
         {
+          id: "suppliers",
+          title: "Record each supplier with their terms and lead time",
+          body:
+            "The supplier record feeds every purchase order, bill and statement. Its lead time is what Purchase planning uses to tell you when to order, and its currency is what their orders and bills are in.",
+          do: [
+            "Open Suppliers and press + New supplier.",
+            "Enter the Supplier name, Country, City and TIN / tax no. Leave Supplier ID blank to number it automatically.",
+            "Under Contact, enter the Contact person, Email and Phone / WhatsApp.",
+            "Under What they supply, list the Products supplied, Brands and Certificates held.",
+            "Under Terms, choose the Currency, Payment terms and Incoterms, and enter the Lead time (days) and the Minimum order. Tick Bank details received once you have them in writing.",
+            "Press Add supplier. Later, the supplier's page shows Main supplier for (each product with its Last cost) and Statement of account →.",
+          ],
+          where: ["Purchasing", "Suppliers"],
+          href: "/suppliers",
+          who: "Procurement or Management",
+          example: {
+            kind: "Supplier",
+            title: "Dar Office Supplies",
+            lines: [
+              ["Country", "Tanzania, Dar es Salaam"],
+              ["Currency", "TZS"],
+              ["Payment terms", "Net 30"],
+              ["Lead time (days)", "3"],
+              ["Products supplied", "Paper, toner, office files"],
+            ],
+            mark: 3,
+            stamp: "Added",
+            tone: "ok",
+          },
+          scenarios: [
+            {
+              title: "A supplier asks you to pay into a new bank account",
+              problem: "You receive an email that looks like it is from Dar Office Supplies, asking you to pay the next bill into a different account.",
+              fix: [
+                "Do not pay until you have called the supplier on the number you already have on their record, not the number in the email.",
+                "If the change is real, ask for it on their letterhead, signed and stamped, and write the date you confirmed it in the supplier's Notes.",
+                "Management checks the Activity log for any change to the supplier's details.",
+              ],
+              tone: "bad",
+            },
+            {
+              title: "You stop buying from a supplier",
+              problem: "Coast Hygiene Ltd delivered late all year and you have moved to another supplier.",
+              fix: [
+                "Open the supplier and press Archive supplier. Their orders, bills and statement stay on record.",
+                "Open each product they were Main supplier for and choose the new Main supplier, then press Save purchasing details.",
+                "If you buy from them again, open the archived supplier and press Restore supplier.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "Set the real lead time, not the one the supplier promises. Business insights shows how late each supplier really is.",
+          scales: "all",
+        },
+        {
           id: "stores",
           title: "Add every store where you keep goods",
           body:
@@ -145,6 +200,49 @@ export const STOCK: Playbook = {
       intro:
         "Every shilling saved when buying is a shilling of profit. Ask for the goods in writing, compare suppliers, approve big orders and count every cost of an import.",
       steps: [
+        {
+          id: "purchasing-overview",
+          title: "Start the day on the Purchasing overview",
+          body:
+            "The Purchasing overview gathers what procurement must act on: orders won from clients that nobody is buying for yet, orders waiting for approval or confirmation, and deliveries that are late.",
+          do: [
+            "Open Purchasing. The tiles at the top count Supplier RFQs collecting prices, POs waiting for approval, Approved, not yet confirmed and Deliveries late.",
+            "Won orders to buy for lists accepted client quotations with no supplier RFQ or PO yet. Open each one and press Request supplier quotes or Create purchase order.",
+            "POs waiting for approval lists orders a manager must approve.",
+            "Expected deliveries lists what is on order and when it is due. Call the supplier for anything late.",
+            "Use + Ask suppliers for a new supplier RFQ, or + PO for a new purchase order.",
+          ],
+          where: ["Purchasing"],
+          href: "/purchasing",
+          who: "Procurement and Management",
+          example: {
+            kind: "Purchasing",
+            title: "Wednesday, 08:15",
+            lines: [
+              ["Supplier RFQs collecting prices", "3"],
+              ["POs waiting for approval", "1"],
+              ["Approved, not yet confirmed", "2"],
+              ["Deliveries late", "1"],
+              ["Won orders to buy for", "QT-2026-0042 · Kilimanjaro Hotels Ltd"],
+            ],
+            mark: 4,
+            stamp: "Buy now",
+            tone: "warn",
+          },
+          scenarios: [
+            {
+              title: "A won order sat for a week without a purchase order",
+              problem: "Kilimanjaro Hotels accepted QT-2026-0042 last Monday. Nobody ordered the toner, and the client expects delivery in 5 days.",
+              fix: [
+                "It shows under Won orders to buy for. Open the quotation and press Create purchase order, choose Dar Office Supplies and submit.",
+                "Ask the supplier for the fastest date and enter it as the Confirmed delivery date when they confirm.",
+                "Make Won orders to buy for the first thing procurement looks at every morning, so it is empty by 10:00.",
+              ],
+              tone: "warn",
+            },
+          ],
+          scales: "all",
+        },
         {
           id: "purchase-request",
           title: "Ask for goods with a purchase request",
@@ -223,7 +321,7 @@ export const STOCK: Playbook = {
               problem: "Dar Office Supplies is cheapest for paper; Mwanza Stationers is cheapest for toner. Award & create PO makes one order for one supplier.",
               fix: [
                 "Press Award & create PO under Dar Office Supplies, then remove the toner lines from that draft PO.",
-                "Open Purchase orders, press + New purchase order, choose Mwanza Stationers and add the toner at their price.",
+                "Open Purchase orders, press + New PO, choose Mwanza Stationers and add the toner at their price.",
                 "Submit both orders as usual.",
               ],
               tone: "info",
@@ -237,7 +335,7 @@ export const STOCK: Playbook = {
           body:
             "A purchase order is your written promise to buy, with quantities, prices and terms. Orders above your approval amount wait for management, so big spending is always seen.",
           do: [
-            "Open Purchase orders and press + New purchase order, or start from a supplier RFQ, What to reorder or a purchase request.",
+            "Open Purchase orders and press + New PO, or start from a supplier RFQ, What to reorder or a purchase request.",
             "Check the items, prices, Deliver to, Payment terms and Required by.",
             "Press Submit purchase order. Above the approval amount it shows Waiting for management approval.",
             "Management opens it and presses Approve, or Send back for changes with a note.",
@@ -652,6 +750,59 @@ export const STOCK: Playbook = {
           ],
           tip: "Only management and warehouse staff can send and receive transfers.",
           scales: "medium+",
+        },
+        {
+          id: "still-to-deliver",
+          title: "Deliver what clients are still waiting for",
+          body:
+            "When an order goes out in parts, the rest must not be forgotten. Still to deliver lists every accepted quotation whose goods have not all gone out, with the stock you have now, so the store knows what it can send today.",
+          do: [
+            "Open Still to deliver. Each accepted quotation shows its client and, for each item, ordered, delivered, being prepared and in stock.",
+            "Stock ready means you can send everything that is left. Short of stock means some items are not in the stores yet.",
+            "For a quotation with Stock ready, press Make a delivery note for the rest. The delivery note has only what is still outstanding.",
+            "Choose the store, driver and vehicle on the delivery note and press Dispatch now.",
+            "For Short of stock, open the quotation to see its purchase orders and when the goods are due, and tell the client.",
+          ],
+          where: ["Deliveries", "Still to deliver"],
+          href: "/backorders",
+          who: "Warehouse, Sales and Management",
+          example: {
+            kind: "Still to deliver",
+            title: "Kilimanjaro Hotels Ltd",
+            lines: [
+              ["QT-2026-0042", "accepted 12 Oct 2026"],
+              ["Toner HP 85A", "ordered 10 · delivered 6 · in stock 4"],
+              ["A4 paper, box of 5 reams", "ordered 50 · delivered 50"],
+              ["Status", "Stock ready"],
+            ],
+            mark: 1,
+            stamp: "Make a delivery note for the rest",
+            tone: "info",
+          },
+          scenarios: [
+            {
+              title: "The rest arrived from the supplier, but nobody sent it",
+              problem: "The last 4 toners for Kilimanjaro Hotels arrived on Tuesday. On Friday the client calls: where are they?",
+              fix: [
+                "Open Still to deliver: the hotel's quotation shows Stock ready.",
+                "Press Make a delivery note for the rest, choose the driver and press Dispatch now.",
+                "Make Still to deliver part of the warehouse's morning: every Stock ready line should leave the same day.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "Two clients wait for the same goods",
+              problem: "Arusha Medical Stores and Zanzibar Resorts both wait for gloves. 100 boxes arrive; together they need 160.",
+              fix: [
+                "Both quotations show the gloves in stock, but you cannot send both in full.",
+                "Agree with management who gets what, usually by the oldest accepted date or the more important client.",
+                "Make a delivery note for the first client and change the quantity to what you agreed, then dispatch. The rest stays on Still to deliver.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "The quantities in stock count the whole company. Check the From store on the delivery note: if the goods are in another store, move them first with a stock transfer.",
+          scales: "all",
         },
         {
           id: "vehicles",

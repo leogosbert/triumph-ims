@@ -100,8 +100,8 @@ begin
   end if;
   update public.api_keys set revoked_at = now(), revoked_by = auth.uid() where id = p_id;
   insert into public.audit_log (company_id, actor_id, action, entity, entity_id, details)
-  values (k.company_id, auth.uid(), 'update', 'api_keys', k.id::text,
-          jsonb_build_object('name', k.name, 'prefix', k.prefix, 'revoked_at', jsonb_build_object('from', null, 'to', now())));
+  -- Shown in the Activity log as "Removed API key <name>": a switched-off key never works again.
+  values (k.company_id, auth.uid(), 'delete', 'api_keys', k.id::text, jsonb_build_object('name', k.name, 'prefix', k.prefix));
 end;
 $$;
 

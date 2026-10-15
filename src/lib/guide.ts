@@ -78,7 +78,7 @@ export const GUIDE: GuideSection[] = [
         href: "/playbooks",
         roles: "all",
         steps: [
-          "Open Playbooks and choose one: setting up, order to payment, numbers and decisions, getting paid, stock, routines or security.",
+          "Open Playbooks and choose one: setting up, order to payment, numbers and decisions, getting paid, stock, routines, security, running a bigger business, or connecting and automating.",
           "Read it step by step with Next and Back. Each step has the actions in the app, a sample record and \"If this happens\" situations with what to do.",
           "Chapters jumps to any part. Your place is remembered on this device.",
           "Download PDF gives the whole playbook to print or share with your team, in English or Kiswahili.",

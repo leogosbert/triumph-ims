@@ -6,6 +6,8 @@ import { GETTING_PAID } from "./getting-paid";
 import { STOCK } from "./stock";
 import { ROUTINES } from "./routines";
 import { SECURITY } from "./security";
+import { CONNECT } from "./connect";
+import { ENTERPRISE } from "./enterprise";
 import { SW_SETUP } from "./sw/setup";
 import { SW_ORDER_TO_CASH } from "./sw/order-to-cash";
 import { SW_ANALYTICS } from "./sw/analytics";
@@ -13,11 +15,13 @@ import { SW_GETTING_PAID } from "./sw/getting-paid";
 import { SW_STOCK } from "./sw/stock";
 import { SW_ROUTINES } from "./sw/routines";
 import { SW_SECURITY } from "./sw/security";
+import { SW_CONNECT } from "./sw/connect";
+import { SW_ENTERPRISE } from "./sw/enterprise";
 
 export type { Playbook, PlaybookChapter, PlaybookExample, PlaybookScenario, PlaybookStep, Tone } from "./types";
 
 /** In the order they are shown on /playbooks. */
-export const PLAYBOOKS: Playbook[] = [SETUP, ORDER_TO_CASH, ANALYTICS, GETTING_PAID, STOCK, ROUTINES, SECURITY];
+export const PLAYBOOKS: Playbook[] = [SETUP, ORDER_TO_CASH, ANALYTICS, GETTING_PAID, STOCK, ROUTINES, SECURITY, ENTERPRISE, CONNECT];
 
 export function findPlaybook(id: string): Playbook | null {
   return PLAYBOOKS.find((p) => p.id === id) ?? null;
@@ -35,6 +39,8 @@ const SW_PB: Record<string, string> = {
   ...SW_STOCK,
   ...SW_ROUTINES,
   ...SW_SECURITY,
+  ...SW_CONNECT,
+  ...SW_ENTERPRISE,
 };
 
 /** The playbook in the chosen language (text without a translation stays in English). */

@@ -22,6 +22,7 @@ export const SW_STAGE16: Record<string, string> = {
   Clear: "Futa",
   "Ask the assistant, for example: who owes us money?": "Uliza msaidizi, kwa mfano: nani anadaiwa na sisi?",
   "Ask the assistant": "Uliza msaidizi",
+  "All company settings in one place, with the status of each": "Mipangilio yote ya kampuni mahali pamoja, pamoja na hali ya kila mmoja",
   "How is the business doing?": "Biashara inaendeleaje?",
   "Who owes us money?": "Nani anadaiwa na sisi?",
   "What do we owe suppliers?": "Tunadaiwa kiasi gani na wasambazaji?",
@@ -113,8 +114,8 @@ export const SW_STAGE16: Record<string, string> = {
     "Tafadhali panga malipo, au tujulishe kama kuna jambo lisilo sawa ili tukusaidie. Maelezo yetu ya benki na pesa za simu yako kwenye kila ankara.",
   "Thank you for your business.": "Asante kwa biashara yako.",
   "Payment reminder for": "Ukumbusho wa malipo kwa",
-  "Copy the text into an email or WhatsApp. To send the reminder from the app, open the invoice and press Send reminder.":
-    "Nakili maandishi kwenye barua pepe au WhatsApp. Kutuma ukumbusho kutoka kwenye programu, fungua ankara na ubonyeze Tuma ukumbusho.",
+  "Copy the text into an email or WhatsApp. To send the reminder from the app, open the invoice and use Remind the client.":
+    "Nakili maandishi kwenye barua pepe au WhatsApp. Kutuma ukumbusho kutoka kwenye programu, fungua ankara na utumie Mkumbushe mteja.",
   "How the business is doing": "Hali ya biashara",
   "The main points right now. Tap a line to open it.": "Mambo makuu kwa sasa. Gusa mstari kuufungua.",
   "I can help with these": "Ninaweza kusaidia kwa haya",

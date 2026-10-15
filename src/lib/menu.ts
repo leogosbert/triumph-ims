@@ -130,6 +130,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       label: "Company & account",
       icon: "building",
       items: [
+        isManager && { href: "/settings", title: "Settings", sub: "All company settings in one place, with the status of each", icon: "settings" },
         {
           href: "/settings/company",
           title: "Company details & branding",

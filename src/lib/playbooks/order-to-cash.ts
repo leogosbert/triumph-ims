@@ -167,7 +167,7 @@ export const ORDER_TO_CASH: Playbook = {
             "Say what the client needs, choose the client (or type the name of a new prospect), the expected value and the expected order date.",
             "Choose who is responsible and the next step with its date. You are reminded on that day.",
             "After each call, visit or message, open the opportunity and press + Log a call, visit or message.",
-            "Move it along the stages: Lead, Qualified, Quotation sent, Negotiation.",
+            "Move it along the stages with the buttons under Move to: Lead, Qualified, Quoted, Negotiation.",
           ],
           where: ["Sales", "Pipeline"],
           href: "/crm",
@@ -210,6 +210,113 @@ export const ORDER_TO_CASH: Playbook = {
           scales: "medium+",
         },
         {
+          id: "crm-log",
+          title: "Log every call and visit, then win or lose the opportunity",
+          body:
+            "The history of an opportunity lets anyone in the team pick it up. Each call, visit or message is saved with what was agreed and the next step, and the opportunity ends as won or lost, with the reason.",
+          do: [
+            "Open the opportunity and press + Log a call, visit or message.",
+            "Under What, choose Call, Visit, Meeting, WhatsApp, SMS, Email or Note, and set When.",
+            "Write What was said or agreed, then the Next step and Next step on. Press Save in the history. The reminder moves to the new date.",
+            "When the client moves forward, press the next stage under Move to.",
+            "If the client goes elsewhere, open Mark as lost, write why (price, delivery time, competitor) and press Lost. If they come back later, press Reopen.",
+            "On Pipeline, Follow up today lists the next steps due. Switch between Mine and Everyone, and open Won & lost to see the Win rate and Value won of the last 6 months.",
+          ],
+          where: ["Sales", "Pipeline"],
+          href: "/crm",
+          who: "Sales and Management",
+          example: {
+            kind: "Calls and visits",
+            title: "Kilimanjaro Hotels Ltd",
+            lines: [
+              ["What", "Visit"],
+              ["When", "14 Oct 2026"],
+              ["What was said or agreed", "Asha wants samples of the 20 L soap"],
+              ["Next step", "Send samples"],
+              ["Next step on", "17 Oct 2026"],
+            ],
+            mark: 3,
+            stamp: "Saved in the history",
+            tone: "info",
+          },
+          scenarios: [
+            {
+              title: "The salesperson in charge leaves the company",
+              problem: "Baraka looked after twelve opportunities, including Zanzibar Resorts, and resigned this week.",
+              fix: [
+                "On Pipeline, choose Everyone and open each of Baraka's opportunities.",
+                "Press Edit details, choose another person under Responsible and save. The reminders now go to them.",
+                "Read the history under Calls and visits before calling the client, so they do not have to explain everything again.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "The client chose a competitor",
+              problem: "Dodoma Builders tells you they bought their cleaning supplies from another company because it delivers on the same day.",
+              fix: [
+                "Open the opportunity, open Mark as lost and write: delivery time, competitor delivers same day. Press Lost.",
+                "If a quotation was linked, press Client rejected on it with the same reason, so both records agree.",
+                "Once a quarter, read the reasons under Won & lost. If delivery time keeps coming up, fix delivery, not price.",
+              ],
+              tone: "bad",
+            },
+            {
+              title: "The order comes in without a quotation in the app",
+              problem: "Zanzibar Resorts sends an LPO straight away, based on last year's price list.",
+              fix: [
+                "Press Start a quotation on the opportunity, add the items at the agreed prices and submit it.",
+                "Press Client accepted with their LPO number. The opportunity is marked won by itself.",
+                "Never deliver without the quotation: the delivery note and the invoice are made from it.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "Log the call while you are still in the car. A note written the same day is worth ten written on Friday.",
+          scales: "medium+",
+        },
+        {
+          id: "client-dates",
+          title: "Important dates and the client's history",
+          body:
+            "Clients remember who remembered them. On each client's page the app keeps their opportunities, calls and visits, contracts and important dates, and reminds you a few days before each date.",
+          do: [
+            "Open Clients and tap the client. Scroll to Important dates.",
+            "Open + Add a date. Under What, write for example Procurement manager's birthday, and choose the Type: Birthday, Anniversary, Renewal, Licence, Holiday or Other.",
+            "Enter the Date and Remind me (days before). Tick Every year for birthdays and anniversaries, then press Save date.",
+            "Below, Opportunities lists the client's possible orders (press + Opportunity to add one), and Calls and visits lists every logged contact.",
+            "The Account card shows Owed to us, Overdue and Credit available before you promise anything on credit.",
+          ],
+          where: ["Clients"],
+          href: "/clients",
+          who: "Sales and Management",
+          example: {
+            kind: "Important dates",
+            title: "Arusha Medical Stores",
+            lines: [
+              ["What", "Mr Kimaro's birthday"],
+              ["Type", "Birthday"],
+              ["Date", "3 Nov"],
+              ["Remind me (days before)", "3"],
+              ["Every year", "Yes"],
+            ],
+            stamp: "Save date",
+            tone: "ok",
+          },
+          scenarios: [
+            {
+              title: "A client's framework contract renews in January",
+              problem: "Arusha Medical Stores renews its supplier list every January. Last year you heard about it too late.",
+              fix: [
+                "Add a date with the Type Renewal on 1 Dec, with Remind me (days before) set to 14, and tick Every year.",
+                "When the reminder comes, open the client, check their Calls and visits and their sales this year, and book a visit.",
+                "If you have a contract with them, Contracts also reminds you before it ends.",
+              ],
+              tone: "info",
+            },
+          ],
+          scales: "medium+",
+        },
+        {
           id: "tender-advert",
           title: "Tenders: when the client buys by tender",
           body:
@@ -237,6 +344,60 @@ export const ORDER_TO_CASH: Playbook = {
             tone: "warn",
           },
           tip: "You are reminded before the tender closes, more often in the last two days. The full story of a won tender is in the last chapter.",
+          scales: "medium+",
+        },
+        {
+          id: "tender-result",
+          title: "Tender papers, the decision to bid and the result",
+          body:
+            "Most tenders are lost on papers, not on price: one missing certificate and the bid is out. The checklist shows who prepares what, and the result you record teaches you how to price the next one.",
+          do: [
+            "Open the tender. Under Checklist, tick each paper when it is ready. Add your own steps with Add a step, e.g. Samples to the buyer, and remove those that do not apply.",
+            "Choose who is Responsible with Edit details, and fill in How to submit, Bid security and the Site visit / pre-bid meeting if there is one.",
+            "If you decide not to take part, open We will not bid, write why and press Not bidding. Press Prepare a bid after all if you change your mind.",
+            "After submitting, enter Our bid price and press Mark as submitted.",
+            "When the result is out, press We won, or open We lost and fill in Who won, Winning price and Why we lost, then press Record as lost. The tender then shows how much higher you were than the winner.",
+            "If the buyer cancels the tender, open Cancelled by the buyer and press Cancelled. A wrong result can be fixed with Correct the result.",
+          ],
+          where: ["Sales", "Tenders"],
+          href: "/tenders",
+          who: "Sales and Management",
+          example: {
+            kind: "Tender",
+            title: "TND-2026-0006",
+            lines: [
+              ["Buyer", "Dodoma District Hospital"],
+              ["Checklist", "9 of 9 papers ready"],
+              ["Our bid price", "TZS 41,300,000"],
+              ["Winning price", "TZS 38,900,000"],
+              ["Result", "Lost: we were 6.2% higher"],
+            ],
+            mark: 4,
+            stamp: "Record as lost",
+            tone: "bad",
+          },
+          scenarios: [
+            {
+              title: "The tender closes in two days and papers are missing",
+              problem: "The bid closes on Thursday at 10:00. The tax clearance certificate and the bid security are still not ready.",
+              fix: [
+                "Tenders shows it under Closing within 2 days. Open it and look at the Checklist: 2 papers are not ticked.",
+                "Call whoever is Responsible for each paper today. Ask the bank for the bid security letter in the morning.",
+                "If a paper cannot be ready in time, decide early: open We will not bid, write the reason and press Not bidding, so nobody wastes more time on it.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "The tender is not for products you sell",
+              problem: "A tender from a regional council asks for building works together with cleaning supplies. You only supply goods.",
+              fix: [
+                "Open We will not bid, write: not our products, works included, and press Not bidding.",
+                "The reason stays on record, so next year you know why you did not bid.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "Reports → Tenders lists every tender with Our price vs winner. After a year you know how close to the winning price you usually are.",
           scales: "medium+",
         },
       ],
@@ -291,6 +452,26 @@ export const ORDER_TO_CASH: Playbook = {
               fix: [
                 "Type it as a line that is not in the catalogue; it is marked not in catalogue.",
                 "If you will sell it again, ask whoever manages products to add it under Products so it has a SKU, a price and a cost.",
+              ],
+              tone: "info",
+            },
+            {
+              title: "The client moves the deadline or cancels the request",
+              problem: "Asha writes that the hotel's budget is delayed: they now need prices by the end of the month, and may drop the soap.",
+              fix: [
+                "Press Edit RFQ details, change Quote due by and press Save. The reminder moves to the new date.",
+                "Press Remove on any item the client no longer wants.",
+                "If the whole request is dropped, press Cancel this RFQ. It stays on record under Lost / cancelled.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "The client wants two options",
+              problem: "Kilimanjaro Hotels asks for one price with HP original toner and one with a compatible brand.",
+              fix: [
+                "Press Create quotation from these items for the first option and price it.",
+                "Back on the RFQ, press Create another quotation for the second option, change the toner line and price it.",
+                "Send both. When the client chooses, press Client accepted on one and Client rejected on the other, with the reason.",
               ],
               tone: "info",
             },
@@ -1086,6 +1267,27 @@ export const ORDER_TO_CASH: Playbook = {
             stamp: "Draft",
             tone: "info",
           },
+          scenarios: [
+            {
+              title: "Goods leave that belong to no quotation",
+              problem: "Zanzibar Resorts asks for two free sample jerrycans of soap before they order.",
+              fix: [
+                "Open Deliveries and press + Delivery note. Choose the client and add the items with + Add an item.",
+                "Write in Notes for the driver and client that these are free samples, then dispatch as usual, so the stock goes out properly.",
+                "It then waits on Invoices under Delivered, not yet invoiced. Tell finance it was free samples, so nobody bills the client by mistake.",
+              ],
+              tone: "info",
+            },
+            {
+              title: "The delivery note was made by mistake",
+              problem: "Two delivery notes were created for the same order, and only one will go.",
+              fix: [
+                "Open the extra one while it is still being prepared and press Cancel delivery note.",
+                "A dispatched delivery note cannot be cancelled: if the goods did not leave, the driver or the office records it as a failed delivery so the goods go back into stock.",
+              ],
+              tone: "warn",
+            },
+          ],
           scales: "all",
         },
         {
@@ -1141,6 +1343,7 @@ export const ORDER_TO_CASH: Playbook = {
             "Before leaving, the driver opens Deliveries while there is signal, so the list is saved on the phone.",
             "At the site, press Record delivery: type the receiver's name, let them sign and take a photo.",
             "Press Confirm delivery. The delivery note becomes Delivered and ready to invoice.",
+            "In the office, the delivery note now shows the proof, and Signed delivery note gives the PDF with the receiver's name and signature, to send with the invoice.",
           ],
           where: ["Deliveries"],
           href: "/driver",
@@ -1276,6 +1479,58 @@ export const ORDER_TO_CASH: Playbook = {
             },
           ],
           tip: "The app has no credit notes. To correct an issued invoice, cancel it with a reason and issue a correct one.",
+          scales: "all",
+        },
+        {
+          id: "inv-other",
+          title: "Advance, whole-order and blank invoices",
+          body:
+            "Usually you invoice each delivery from its delivery note. Some orders need something else: an advance before you buy, one invoice for the whole order, or a charge that is not on any quotation.",
+          do: [
+            "For an advance or a whole-order invoice, open the accepted quotation and, under Invoices, press Create invoice. Adjust the lines on the draft, then press Issue invoice.",
+            "Later, press Invoice the rest on the same quotation for what has not been invoiced yet.",
+            "For a charge that belongs to no quotation, open Invoices, press + Invoice and then Create blank invoice. Choose the client and add the items with + Add an item.",
+            "Once it is issued, management and finance see Profit on this invoice: sales before VAT, cost of goods and gross profit, with a link to the whole order's profit.",
+          ],
+          where: ["Finance", "Invoices"],
+          href: "/invoices",
+          who: "Finance or Management",
+          example: {
+            kind: "Invoice",
+            title: "INV-2026-0061",
+            lines: [
+              ["Client", "Zanzibar Resorts"],
+              ["For", "50% advance on QT-2026-0051"],
+              ["Total", "TZS 2,950,000"],
+              ["Then", "Invoice the rest after delivery"],
+            ],
+            mark: 1,
+            stamp: "Issued",
+            tone: "info",
+          },
+          scenarios: [
+            {
+              title: "The client asks for one invoice for three deliveries",
+              problem: "Arusha Medical Stores received its order in three deliveries but wants one invoice at the end of the month.",
+              fix: [
+                "Do not invoice the delivery notes one by one.",
+                "When the last delivery is made, open the accepted quotation and press Create invoice. Check that the quantities match the three delivery notes, then issue it.",
+                "Attach the three signed delivery notes when you send the invoice PDF.",
+              ],
+              tone: "info",
+            },
+            {
+              title: "You need to bill a transport charge",
+              problem: "Dodoma Builders agreed to pay TZS 150,000 for a special delivery to a site outside town. It was not on the quotation.",
+              fix: [
+                "Open Invoices, press + Invoice, then Create blank invoice and choose Dodoma Builders.",
+                "Press + Add an item, describe it as Transport to site, enter the price and add it.",
+                "Fill in the Client's order / PO no. if they gave one, then press Issue invoice.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "Never invoice the same goods twice: an advance invoice plus an invoice from each delivery note would bill the client double. Choose one way per order.",
           scales: "all",
         },
       ],
@@ -1541,9 +1796,11 @@ export const ORDER_TO_CASH: Playbook = {
           body:
             "For each purchase order, the check compares what you ordered, what arrived on the GRNs and what the supplier billed. Pay only for what arrived.",
           do: [
-            "Open Order, receipt and bill check.",
+            "Open Order, receipt and bill check. Each purchase order shows what was ordered, received and billed.",
             "Billed more than received: talk to the supplier before you pay.",
             "Received, not billed: ask the supplier for the bill, so what you owe is complete.",
+            "Billed less than received: check that the bill is complete, or that a second bill is coming.",
+            "Waiting for goods: ordered, but nothing received or billed yet. A bill for goods that never arrived shows as Billed more than received.",
           ],
           where: ["Purchasing", "Order, receipt and bill check"],
           href: "/purchasing/match",
@@ -1611,6 +1868,102 @@ export const ORDER_TO_CASH: Playbook = {
           ],
           tip: "The money-out side of Check payments ticks supplier payments and expenses against your statement in the same way.",
           scales: "medium+",
+        },
+        {
+          id: "bill-other",
+          title: "Bills without a purchase order, and correcting a bill",
+          body:
+            "Some suppliers bill you for things you did not order on a purchase order, such as a transporter or a repair. Record them with + Bill so Money we owe stays complete. A wrong bill is corrected or cancelled, never deleted.",
+          do: [
+            "Open Supplier bills and press + Bill.",
+            "Choose the supplier, then enter the Supplier's invoice no., Invoice date, Due date, Amount before VAT and VAT amount, as on their paper. Press Save bill.",
+            "If the bill was typed wrong and nothing is paid yet, open it, correct the figures under Details and press Save. If it should not be there at all, press Cancel this bill.",
+            "If a payment to the supplier was wrong, management opens the bill and uses Void this payment with the reason. The amount is owed again.",
+          ],
+          where: ["Finance", "Supplier bills"],
+          href: "/bills",
+          who: "Finance",
+          example: {
+            kind: "Supplier bill",
+            title: "BILL-2026-0023",
+            lines: [
+              ["Supplier", "Mwanza Stationers"],
+              ["Supplier's invoice no.", "MS-1187"],
+              ["Amount before VAT", "TZS 400,000"],
+              ["VAT amount", "TZS 72,000"],
+              ["Bill total", "TZS 472,000"],
+            ],
+            mark: 4,
+            stamp: "Saved",
+            tone: "info",
+          },
+          scenarios: [
+            {
+              title: "The supplier sends a corrected invoice",
+              problem: "Dar Office Supplies replaces DOS-INV-9902 (50 boxes) with a new invoice for 48 boxes after the short delivery.",
+              fix: [
+                "If nothing is paid on the old bill, open it and press Cancel this bill, and write in the new bill's Notes that it replaces DOS-INV-9902.",
+                "Open the purchase order and press Record supplier's invoice again with the new number and amounts.",
+                "Order, receipt and bill check now shows the order under Matches.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "You paid the wrong supplier bill",
+              problem: "Finance recorded TZS 2,448,500 on Coastal Cleaning Supplies' bill, but the money went to Dar Office Supplies.",
+              fix: [
+                "Management opens the wrong bill and presses Void this payment, with the reason: belongs to Dar Office Supplies.",
+                "Open the right bill and press + Record a payment to the supplier with the same date and reference.",
+                "If the payment was already ticked on Check payments, tick the new one too.",
+              ],
+              tone: "bad",
+            },
+          ],
+          tip: "A bill with payments can no longer be changed. Void the payments first if the bill itself is wrong.",
+          scales: "medium+",
+        },
+        {
+          id: "money-out-check",
+          title: "Check money out against the statement",
+          body:
+            "Money paid to suppliers and for expenses must also match your bank and M-Pesa statements. Checking it catches payments typed twice, or money that left the account without a record.",
+          do: [
+            "Open Check payments and choose Money out (suppliers and expenses).",
+            "Choose the Payment method, the service and the Month, then press Show.",
+            "Press Paste a statement, paste the statement (or load a CSV / text file) and press Find and tick.",
+            "Tick the rest by hand after finding them on the statement, then press Mark ticked as checked.",
+            "Lines left To check need an answer: a payment recorded twice, a wrong amount, or a payment that never happened.",
+          ],
+          where: ["Finance", "Check payments"],
+          href: "/reconcile",
+          who: "Finance",
+          example: {
+            kind: "Check payments",
+            title: "Money out · Bank transfer · October 2026",
+            lines: [
+              ["Supplier payments", "14"],
+              ["Expenses", "22"],
+              ["Found in the statement", "33"],
+              ["To check", "3"],
+            ],
+            mark: 3,
+            stamp: "Investigate",
+            tone: "warn",
+          },
+          scenarios: [
+            {
+              title: "Money left the bank but nothing was recorded",
+              problem: "The bank statement shows TZS 850,000 paid to a garage on 9 October. There is no expense or supplier payment for it.",
+              fix: [
+                "Ask who paid it and for what. Here it was a truck repair paid by the driver's supervisor.",
+                "Record it as an expense with + Expense, category Repairs & maintenance, with the bank reference and a photo of the garage invoice.",
+                "Paste the statement again: the new line is now found and ticked.",
+              ],
+              tone: "warn",
+            },
+          ],
+          tip: "Once a payment or expense is checked against the statement, its amount, date and payment details can no longer be changed.",
+          scales: "all",
         },
       ],
     },
@@ -1685,6 +2038,60 @@ export const ORDER_TO_CASH: Playbook = {
               tone: "info",
             },
           ],
+          scales: "all",
+        },
+        {
+          id: "expense-control",
+          title: "Keep expenses complete and correct",
+          body:
+            "Missing or wrong expenses make net profit look better than it is. Management and finance see every expense of the month, by category, with a count of those without a receipt photo. Everyone else sees My expenses.",
+          do: [
+            "Open Expenses. Use ← Earlier and Later → to move between months, and choose a category to see only that one.",
+            "By category shows where the money went this month. The tile without a receipt photo tells you whose receipts to chase.",
+            "To add a missing receipt, open the expense and press Add receipt photo, or Replace receipt for a better photo.",
+            "To correct a typing mistake, open the expense, change the Details and press Save.",
+            "To remove an expense that should not be there, management or finance opens it, opens Void this expense, writes the reason and presses Void. It stays on record, struck through.",
+            "Management can press Edit categories to rename the categories, add one with New category name and Add, or Switch off one you no longer use.",
+          ],
+          where: ["More", "Expenses"],
+          href: "/expenses",
+          who: "Management and Finance",
+          example: {
+            kind: "Expenses",
+            title: "October 2026",
+            lines: [
+              ["Transport & fuel", "TZS 1,840,000"],
+              ["Salaries & wages", "TZS 6,200,000"],
+              ["Rent", "TZS 1,500,000"],
+              ["Expenses", "TZS 10,320,000"],
+              ["without a receipt photo", "4"],
+            ],
+            mark: 4,
+            stamp: "Chase receipts",
+            tone: "warn",
+          },
+          scenarios: [
+            {
+              title: "The same fuel was recorded twice",
+              problem: "Juma recorded TZS 120,000 of fuel on Monday, and the office recorded the same receipt again on Tuesday.",
+              fix: [
+                "Open both expenses and compare the receipt photos and Paid to.",
+                "Management or finance opens the second one, opens Void this expense, writes: recorded twice, same receipt as Monday, and presses Void.",
+                "The month's totals and Profit & loss drop by TZS 120,000 at once.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "A staff member paid for the business from their own pocket",
+              problem: "Neema paid TZS 35,000 for printer paper at a shop near the office with her own money.",
+              fix: [
+                "Neema records it with + New expense, the receipt photo, Paid to the shop and what it was for.",
+                "Finance sees it under Expenses and refunds her. Write in Notes how and when she was refunded.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "When the receipt shows VAT, enter it under of which VAT: Profit & loss counts expenses without VAT. An expense in another currency also asks for the Exchange rate.",
           scales: "all",
         },
       ],
@@ -1767,10 +2174,61 @@ export const ORDER_TO_CASH: Playbook = {
     // ------------------------------------------------------------------ 15
     {
       id: "ch-special",
-      title: "Three special orders from start to end",
+      title: "Foreign currency and special orders",
       intro:
-        "Not every order is a simple local one. Here are three common cases: an import paid in US dollars, a rush order with no time to compare suppliers, and a tender that becomes a contract.",
+        "Not every order is a simple local one. First keep your exchange rates right, then follow three common cases: an import paid in US dollars, a rush order with no time to compare suppliers, and a tender that becomes a contract.",
       steps: [
+        {
+          id: "rates",
+          title: "Keep the exchange rates up to date",
+          body:
+            "Quotations, purchase orders, invoices, bills and costs in a foreign currency take the rate from Exchange rates, and can only differ from it by up to 10%. An old rate makes margins, approval limits and credit limits wrong.",
+          do: [
+            "Open Exchange rates. Only management and finance can change them.",
+            "Under Add or update a rate, type the Currency as a 3-letter code such as USD, EUR or KES.",
+            "Under How many, enter the shillings for 1 unit, for example 2600 for USD, and press Save rate.",
+            "Each rate shows when it was Updated. Update it when the bank rate moves, for example every Monday.",
+            "Press Remove only for a currency you no longer use.",
+          ],
+          where: ["Finance", "Exchange rates"],
+          href: "/rates",
+          who: "Finance or Management",
+          example: {
+            kind: "Exchange rates",
+            title: "Monday 12 Oct 2026",
+            lines: [
+              ["USD", "TZS 2,600 per 1 unit"],
+              ["EUR", "TZS 2,830 per 1 unit"],
+              ["KES", "TZS 20.10 per 1 unit"],
+              ["Updated", "12 Oct 2026"],
+            ],
+            stamp: "Save rate",
+            tone: "ok",
+          },
+          scenarios: [
+            {
+              title: "The shilling drops suddenly",
+              problem: "The bank now sells dollars at 2,880, but Exchange rates still says 2,600. A new USD purchase order at 2,880 is refused: it is more than 10% away.",
+              fix: [
+                "Finance updates USD on Exchange rates to 2,880 and presses Save rate.",
+                "Make or save the purchase order again: it now takes the new rate.",
+                "Check open quotations priced from USD goods: the cost in shillings went up by about 11%. Revise those still waiting for an answer.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "A supplier quotes in euros for the first time",
+              problem: "A German pump maker quotes in EUR, and EUR is not on Exchange rates yet.",
+              fix: [
+                "Finance adds EUR under Add or update a rate with today's bank rate.",
+                "Enter the supplier's prices in EUR on the supplier RFQ. Compare prices converts them to TZS.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "Foreign-currency documents need the Multiple currencies feature. Management switches it on in Features & business level.",
+          scales: "medium+",
+        },
         {
           id: "usd-import",
           title: "A USD import order with duty and clearing",

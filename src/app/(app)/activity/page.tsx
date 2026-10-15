@@ -44,6 +44,7 @@ const ENTITY: Record<string, string> = {
   order_costs: "order cost",
   exchange_rates: "exchange rate",
   company_backups: "backup",
+  api_keys: "API key",
 };
 
 const LINKS: Record<string, string> = {

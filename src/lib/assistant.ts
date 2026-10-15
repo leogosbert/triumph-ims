@@ -510,7 +510,7 @@ async function remind(ctx: Ctx, question: string): Promise<Answer> {
   return {
     topic: "remind",
     title: `${tr("Payment reminder for")} ${cname}`,
-    text: tr("Copy the text into an email or WhatsApp. To send the reminder from the app, open the invoice and press Send reminder."),
+    text: tr("Copy the text into an email or WhatsApp. To send the reminder from the app, open the invoice and use Remind the client."),
     draft,
     rows: mine.map((i) => ({ label: i.number ?? "", value: formatMoney(n(i.total) - n(i.amount_paid), i.currency), href: `/invoices/${i.id}` })),
     links: [{ label: tr("Statement"), href: `/statements?party=client&id=${cid}` }],

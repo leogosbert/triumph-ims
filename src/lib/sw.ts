@@ -1,5 +1,8 @@
 // Kiswahili for screen text. Keys are the exact English shown in the app.
 // Generated for Stage 9; please have a native speaker review.
+import { SW_SETTINGS } from "./sw-more/settings";
+import { SW_STAGE16 } from "./sw-more/stage16";
+
 export const SW: Record<string, string> = {
   "Remove LeMoSp from this phone": "Ondoa LeMoSp kwenye simu hii",
   "Delete my account": "Futa akaunti yangu",
@@ -3168,7 +3171,7 @@ export const SW: Record<string, string> = {
   "Tap + New product and enter the name, SKU, category, brand, unit and selling price.": "Gusa + Bidhaa mpya na uweke jina, SKU, kundi, chapa, kipimo na bei ya kuuza.",
   "Set a reorder level so the app warns you when stock runs low.": "Weka kiwango cha kuagiza tena ili programu ikuonye stoku ikipungua.",
   "For chemicals and lubricants, record hazard details and whether the safety data sheet (SDS) is on file.": "Kwa kemikali na vilainishi, rekodi taarifa za hatari na kama karatasi ya taarifa za usalama (SDS) ipo.",
-  "Open a product to see its stock, costs and price history.": "Fungua bidhaa kuona stoku yake, gharama na historia ya bei.",
+  "Open a product to see its stock and costs. Price changes show in the Activity log.": "Fungua bidhaa kuona stoku yake na gharama. Mabadiliko ya bei yanaonekana kwenye Kumbukumbu ya shughuli.",
   "Import from a spreadsheet": "Ingiza kutoka lahajedwali",
   "Load many clients, suppliers or products at once from Excel.": "Pakia wateja, wasambazaji au bidhaa wengi kwa mara moja kutoka Excel.",
   "Download the template, fill it in Excel and save it.": "Pakua kiolezo, kijaze kwenye Excel na ukihifadhi.",
@@ -3325,7 +3328,7 @@ export const SW: Record<string, string> = {
   "Set the follow-up and reminder days.": "Weka siku za ufuatiliaji na vikumbusho.",
   "Other roles can view the company's details but not change them.": "Majukumu mengine yanaweza kuona maelezo ya kampuni lakini hayawezi kuyabadilisha.",
   "Invite people and give each one a role: Management, Sales, Procurement, Warehouse, Driver or Finance.": "Alika watu na umpe kila mmoja jukumu: Uongozi, Mauzo, Manunuzi, Ghala, Dereva au Fedha.",
-  "Press Invite someone, enter their email and choose a role. They get an email to join.": "Bonyeza Alika mtu, weka barua pepe yake na uchague jukumu. Anapata barua pepe ya kujiunga.",
+  "Press Invite someone, enter their email and choose a role. Then send them the app address: they sign up with that same email to join.": "Bonyeza Alika mtu, weka barua pepe yake na uchague jukumu. Kisha mtumie anwani ya programu: ajisajili kwa barua pepe hiyo hiyo ili kujiunga.",
   "Change someone's role at any time.": "Badilisha jukumu la mtu wakati wowote.",
   "Switch access off the day someone leaves. Their past work stays on record.": "Zima ufikiaji siku mtu anapoondoka. Kazi yake ya nyuma inabaki kwenye kumbukumbu.",
   "Business level and features": "Kiwango cha biashara na vipengele",
@@ -3341,7 +3344,7 @@ export const SW: Record<string, string> = {
   "Require two-step verification for everyone, and set automatic sign-out after a time without use.": "Lazimisha uthibitishaji wa hatua mbili kwa kila mtu, na weka kutoka kiotomatiki baada ya muda bila matumizi.",
   "See the team's sign-in history.": "Ona historia ya kuingia ya timu.",
   "Every change in the app: who did it and when.": "Kila badiliko kwenye programu: nani alilifanya na lini.",
-  "Open the Activity log and search or filter by person, record or date.": "Fungua Kumbukumbu ya shughuli na utafute au uchuje kwa mtu, kumbukumbu au tarehe.",
+  "Open the Activity log: it lists the latest 200 changes, newest first, with who made each one.": "Fungua Kumbukumbu ya shughuli: inaonyesha mabadiliko 200 ya karibuni, ya karibuni kwanza, na nani aliyefanya kila moja.",
   "The company's data is copied automatically every night.": "Data ya kampuni inanakiliwa yenyewe kila usiku.",
   "See when the last backup ran.": "Ona nakala rudufu ya mwisho ilifanyika lini.",
   "Press Back up now, or Download a copy.": "Bonyeza Hifadhi nakala sasa, au Pakua nakala.",
@@ -4504,4 +4507,42 @@ export const SW: Record<string, string> = {
   "Account created. We've sent you an email: open the link in it to confirm, then sign in.": "Akaunti imeundwa. Tumekutumia barua pepe: fungua kiungo ndani yake kuthibitisha, kisha uingie.",
   "An account with this email already exists. Please sign in.": "Akaunti yenye barua pepe hii tayari ipo. Tafadhali ingia.",
   "Too many emails have been sent in the last hour. Please wait a while and try again, or ask your administrator.": "Barua pepe nyingi zimetumwa saa iliyopita. Tafadhali subiri kidogo kisha ujaribu tena, au muulize msimamizi wako.",
+  // v1.20: playbooks
+  "If this happens": "Hili likitokea",
+  "Chapters": "Sura",
+  "Download PDF": "Pakua PDF",
+  "Chapter": "Sura",
+  "Who:": "Nani:",
+  "Step by step": "Hatua kwa hatua",
+  "Tip": "Kidokezo",
+  "All playbooks": "Miongozo yote ya kazi",
+  "Playbooks": "Miongozo ya kazi",
+  "Playbook": "Mwongozo wa kazi",
+  "Learn LeMoSp the practical way": "Jifunze LeMoSp kwa vitendo",
+  "Step-by-step guides with live examples and real business situations. Read them on screen with animations, or download each one as a PDF to print and share with your team.": "Miongozo ya hatua kwa hatua yenye mifano hai na hali halisi za biashara. Isome kwenye skrini kwa michoro inayosonga, au pakua kila mmoja kama PDF uchapishe na uwashirikishe timu yako.",
+  "chapters": "sura",
+  "steps": "hatua",
+  "scenarios": "hali za mfano",
+  "min": "dak",
+  "Example": "Mfano",
+  "What to do": "Cha kufanya",
+  "For:": "Kwa:",
+  "minutes to read": "dakika za kusoma",
+  "Read the playbooks": "Soma miongozo ya kazi",
+  "Playbooks: step-by-step guides and PDFs": "Miongozo ya kazi: hatua kwa hatua na PDF",
+  "Playbooks: long step-by-step guides, with PDFs": "Miongozo ya kazi: miongozo mirefu ya hatua kwa hatua, pamoja na PDF",
+  "Set up the app, run an order from request to payment, use your numbers to decide, get paid on time, control stock, daily routines and security. With examples and real business situations.": "Sanidi programu, endesha oda kuanzia ombi hadi malipo, tumia takwimu zako kufanya maamuzi, lipwa kwa wakati, dhibiti stoku, ratiba za kila siku na usalama. Pamoja na mifano na hali halisi za biashara.",
+  "Step-by-step guides with examples and business situations, as PDFs too": "Miongozo ya hatua kwa hatua yenye mifano na hali za biashara, pia kama PDF",
+  "One order, from the first call to the profit, step by step": "Oda moja, kutoka simu ya kwanza hadi faida, hatua kwa hatua",
+  "Playbooks with PDFs": "Miongozo ya kazi pamoja na PDF",
+  "Long step-by-step guides with examples and real business situations, each also as a PDF.": "Miongozo mirefu ya hatua kwa hatua yenye mifano na hali halisi za biashara, kila mmoja pia kama PDF.",
+  "Open Playbooks and choose one: setting up, order to payment, numbers and decisions, getting paid, stock, routines, security, running a bigger business, or connecting and automating.": "Fungua Miongozo ya kazi na uchague mmoja: kusanidi, oda hadi malipo, takwimu na maamuzi, kulipwa, stoku, ratiba, usalama, kuendesha biashara kubwa, au kuunganisha na kuendesha kwa mfumo.",
+  "Read it step by step with Next and Back. Each step has the actions in the app, a sample record and \"If this happens\" situations with what to do.": "Usome hatua kwa hatua kwa Ifuatayo na Rudi. Kila hatua ina vitendo kwenye programu, kumbukumbu ya mfano na hali za \"Hili likitokea\" pamoja na cha kufanya.",
+  "Chapters jumps to any part. Your place is remembered on this device.": "Sura inakupeleka sehemu yoyote. Mahali ulipofikia panakumbukwa kwenye kifaa hiki.",
+  "Download PDF gives the whole playbook to print or share with your team, in English or Kiswahili.": "Pakua PDF inakupa mwongozo mzima wa kuchapisha au kushirikisha timu yako, kwa Kiingereza au Kiswahili.",
 };
+
+// Later screens keep their Kiswahili in src/lib/sw-more/; the texts above win if a key is in both.
+for (const extra of [SW_SETTINGS, SW_STAGE16]) {
+  for (const [k, v] of Object.entries(extra)) if (!(k in SW)) SW[k] = v;
+}

@@ -3,11 +3,12 @@ import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { requireManager } from "@/lib/context";
 import { loadRecommendations, type FeatureRow } from "@/lib/features";
-import type { Level } from "@/lib/levels";
+import { LEVELS, type Level } from "@/lib/levels";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { changeLevel } from "../../growth/actions";
 import { FeatureList, Stage11Notice } from "../../growth/parts";
 import { LevelPicker } from "./LevelPicker";
+import { SettingsHead } from "../SettingsHead";
 
 export const metadata = { title: "Features & business level" };
 
@@ -31,18 +32,23 @@ export default async function FeaturesSettingsPage({ searchParams }: { searchPar
 
   return (
     <>
-      <div className="page-head">
-        <h1>{tr("Features & business level")}</h1>
-      </div>
-      <p className="muted small">
-        <Link href="/settings">{tr("Settings")}</Link> · <Link href="/growth">{tr("Growth & recommendations")}</Link>
-      </p>
+      <SettingsHead
+        title={tr("Features & business level")}
+        icon="settings"
+        lead={
+          <>
+            {tr("Choose the tools your company sees. Switching something off hides it; your records stay.")}{" "}
+            <Link href="/growth">{tr("Growth & recommendations")}</Link>
+          </>
+        }
+        side={features.ready ? <span className="badge tone-info">{tr(LEVELS[level].title)}</span> : undefined}
+      />
       <Notice {...notice} />
       {!features.ready && <Stage11Notice />}
 
-      <section className="grow-section">
+      <section className="grow-section" id="level">
         <h2>{tr("Business level")}</h2>
-        <p className="muted small">
+        <p className="st-card-lead">
           {tr("The level sets which tools you see first. It is not a judgement of your company, and changing it never deletes data.")}
         </p>
         <LevelPicker current={level} action={changeLevel} disabled={!features.ready} />

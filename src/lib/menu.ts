@@ -99,6 +99,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       label: "Reports",
       icon: "report",
       items: [
+        role !== "driver" && { href: "/assistant", title: "Business assistant", sub: "Ask about your business in plain words and get answers with the records behind them", icon: "help" },
         c("seeInsights") && { href: "/insights", title: "Business insights", sub: "Win rates, supplier punctuality, slow stock, items bought together", icon: "activity" },
         role !== "driver" && { href: "/reports", title: "Reports", sub: "Choose a report and dates, then print or download PDF or Excel", icon: "report" },
         c("planFinance") && { href: "/head-office", title: "Head-office figures", sub: "Sales, profit, expenses, money owed and stock of every branch side by side", icon: "building" },
@@ -129,6 +130,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       label: "Company & account",
       icon: "building",
       items: [
+        isManager && { href: "/settings", title: "Settings", sub: "All company settings in one place, with the status of each", icon: "settings" },
         {
           href: "/settings/company",
           title: "Company details & branding",
@@ -140,6 +142,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         isManager && { href: "/branches", title: "Branches", sub: "Branches or business units with their stores and people", icon: "building" },
         isManager && { href: "/settings/security", title: "Security", sub: "Two-step verification, automatic sign-out, password rules", icon: "lock" },
         isManager && { href: "/activity", title: "Activity log", sub: "Every change, who made it and when", icon: "activity" },
+        c("seeFinance") && { href: "/integrations", title: "Integrations & API", sub: "Accounting export, API keys for other systems", icon: "upload" },
         isManager && { href: "/settings/backups", title: "Backups", sub: "Automatic daily copies of your data, back up now, download", icon: "lock" },
         !c("manageExpenses") && { href: "/expenses", title: "My expenses", sub: "Money you spent for the business", icon: "cash" },
         { href: "/suggestions", title: "Suggestion Box", sub: "Share an idea to improve the business", icon: "inbox", feature: "suggestions" },
@@ -150,6 +153,8 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         isManager && { href: "/settings/go-live", title: "Go-live checklist", sub: "What is ready and what is left", icon: "check" },
         { href: "/help", title: "Help", sub: "Short guide for your role, step by step", icon: "help" },
         { href: "/guide", title: "App guide", sub: "Every function, where to find it and how to use it", icon: "help" },
+        { href: "/playbooks", title: "Playbooks", sub: "Step-by-step guides with examples and business situations, as PDFs too", icon: "doc" },
+        { href: "/how-it-works", title: "How it works", sub: "One order, from the first call to the profit, step by step", icon: "activity" },
         { href: "/account", title: "Your account", sub: "Your details, password, appearance, sign out", icon: "user" },
         { href: "/account#password", title: "Change password", sub: "Put a new password for signing in", icon: "lock" },
         opts.isPlatformAdmin === true && platformAdminItem(),

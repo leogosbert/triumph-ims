@@ -35,7 +35,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     );
   }
   const { supabase, company, role, user, isManager, profile, memberships, features, isPlatformAdmin } = await getAppContext();
-  const { lang, t } = await getDict();
+  // Everything else the frame needs, at the same time.
+  const [{ lang, t }, { count: unread }, theme, background] = await Promise.all([
+    getDict(),
+    // Unread notifications (0 until the Stage 7 database update has been run).
+    supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("read_at", null),
+    getThemePref(),
+    getBackgroundPref(),
+  ]);
   const logo = brandingUrl(supabase, company.logo_path);
   const initials = company.name
     .split(/\s+/)
@@ -66,12 +73,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </ClosingGate>
     );
   }
-  // Unread notifications (0 until the Stage 7 database update has been run).
-  const { count: unread } = await supabase
-    .from("notifications")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .is("read_at", null);
 
   const card: CompanyCard = {
     name: company.name,
@@ -91,7 +92,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .filter((m) => m.company_id !== company.id)
       .map((m) => ({ id: m.company_id, name: m.company.name, role: t[`role.${m.role}` as Key] })),
     lang: lang === "sw" ? "sw" : "en",
-    theme: await getThemePref(),
+    theme,
   };
 
   const personName = profile.full_name || profile.email || user.email || "";
@@ -102,7 +103,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .slice(0, 2)
       .map((w) => w[0]?.toUpperCase() ?? "")
       .join("") || "?";
-  const background = await getBackgroundPref();
 
   const brandStyle = {
     "--brand": company.primary_color,
@@ -136,10 +136,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <span aria-current={lang === "en" ? "true" : undefined}>{tr("EN")}</span>·<span aria-current={lang === "sw" ? "true" : undefined}>{tr("SW")}</span>
               </button>
             </form>
-            <a href="/notifications" className="icon-btn bell" aria-label={`${t["shell.notifications"]}${unread ? `, ${unread} ${t["shell.unread"]}` : ""}`}>
+            <Link href="/notifications" className="icon-btn bell" aria-label={`${t["shell.notifications"]}${unread ? `, ${unread} ${t["shell.unread"]}` : ""}`}>
               <Icon name="bell" size={23} />
               {(unread ?? 0) > 0 && <span className="count">{(unread ?? 0) > 99 ? "99+" : unread}</span>}
-            </a>
+            </Link>
             {/* Laptops: who is signed in; opens the same company sheet as the logo. */}
             <CompanyButton className="topbar-user" title={personName}>
               <span className="avatar" aria-hidden="true">{personInitials}</span>

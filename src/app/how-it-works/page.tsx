@@ -32,6 +32,9 @@ export default async function HowItWorksPage() {
         <Link href="/guide" className="btn btn-primary">
           {tr("Open the App guide")}
         </Link>
+        <Link href="/playbooks" className="btn">
+          {tr("Read the playbooks")}
+        </Link>
         <Link href="/" className="btn">
           {tr("Back to the app")}
         </Link>
@@ -42,6 +45,9 @@ export default async function HowItWorksPage() {
       <h2>{tr("Now try it yourself")}</h2>
       <p>{tr("Open a demo company full of sample data and try each step yourself. Pick the scale closest to your business. No sign-up needed; it deletes itself after 48 hours.")}</p>
       <DemoScalePicker action={startDemo} tone="dark" />
+      <p className="j-end-signin">
+        <Link href="/playbooks">{tr("Read the playbooks")} ›</Link>
+      </p>
       <p className="j-end-signin">
         {tr("Already have an account?")} <Link href="/login">{tr("Sign in")}</Link>
       </p>

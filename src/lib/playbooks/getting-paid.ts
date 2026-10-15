@@ -1,0 +1,976 @@
+import type { Playbook } from "./types";
+
+/**
+ * Playbook: getting paid on time. Terms and credit limits, clear invoices, reminders, promises to pay,
+ * money owed by age, statements, recording payments (bank, cash, cheque, mobile money), checking them
+ * against the statement, and the hard cases (disputes, bounced cheques, wrong entries, foreign money).
+ * Kiswahili: src/lib/playbooks/sw/getting-paid.ts.
+ */
+export const GETTING_PAID: Playbook = {
+  id: "getting-paid",
+  title: "Get paid on time",
+  tagline: "Clear terms, clear invoices, polite reminders and every shilling checked against the bank and M-Pesa.",
+  audience: "Owners, finance staff and anyone who follows up clients for money.",
+  minutes: 25,
+  icon: "cash",
+  color: "#16a34a",
+  chapters: [
+    {
+      id: "set-up",
+      title: "Set up before you sell on credit",
+      intro:
+        "Most late payments start before the invoice is written: unclear terms, no pay numbers on the invoice, no limit on how much a client can owe. Fix these once and every invoice after works for you.",
+      steps: [
+        {
+          id: "pay-details",
+          title: "Put your bank and mobile-money numbers on every invoice",
+          body:
+            "A client who has to call you to ask where to pay will pay later. When your bank details and pay numbers are printed on the invoice and in every reminder, paying is one step for them.",
+          do: [
+            "Open Company details & branding.",
+            "Under Bank details, write the bank, branch, account name and account numbers. Add the SWIFT code if clients pay from abroad.",
+            "Under Mobile money pay numbers, write each number with its name, for example M-Pesa Lipa Namba 123456 (your company name).",
+            "Set Clients pay within (days). This sets the due date when an invoice is issued, for example 30.",
+            "Under Standard invoice terms, write your rules in one or two lines, for example \"Payment within 30 days. Please quote the invoice number as the reference.\"",
+            "Press Save company details.",
+          ],
+          where: ["More", "Company details & branding"],
+          href: "/settings/company",
+          who: "Management",
+          example: {
+            kind: "Company details",
+            title: "Invoices",
+            lines: [
+              ["Bank details", "CRDB Bank, Kariakoo branch, A/C 0150 1234 5678 00"],
+              ["Mobile money pay numbers", "M-Pesa Lipa Namba 123456"],
+              ["Clients pay within (days)", "30"],
+              ["Standard invoice terms", "Please quote the invoice number as the reference."],
+            ],
+            mark: 1,
+            stamp: "Saved",
+            tone: "ok",
+          },
+          tip: "Use one account per currency. If you have a USD account, add it as a separate line so clients do not send dollars to your shilling account.",
+          scales: "all",
+        },
+        {
+          id: "reminder-settings",
+          title: "Decide when the app reminds you",
+          body:
+            "LeMoSp tells your team when an invoice is about to fall due and keeps reminding while it is overdue. The messages are sent by your team from their own phone, so nothing goes to a client without someone seeing it first.",
+          do: [
+            "Open Company details & branding and go to Follow-ups and reminders.",
+            "Set Remind before an invoice is due (days), for example 3. Put 0 to be reminded only once it is overdue.",
+            "Set Repeat overdue reminders every (days), for example 7. These are paused while a promised payment date has not passed.",
+            "Press Save company details.",
+          ],
+          where: ["More", "Company details & branding"],
+          href: "/settings/company",
+          who: "Management",
+          example: {
+            kind: "Follow-ups and reminders",
+            title: "Company details",
+            lines: [
+              ["Remind before an invoice is due (days)", "3"],
+              ["Repeat overdue reminders every (days)", "7"],
+              ["Who is told", "Finance and Management"],
+            ],
+            stamp: "Saved",
+            tone: "info",
+          },
+          tip: "A friendly note three days before the due date gets more money in than an angry one thirty days after it.",
+          scales: "all",
+        },
+        {
+          id: "client-terms",
+          title: "Agree payment terms with each client",
+          body:
+            "Write the terms you agreed on the client's record, so every quotation and invoice for them starts with the right terms. A new client should earn credit: start with an advance and give more time once they have paid well.",
+          do: [
+            "Open Clients and tap the client.",
+            "Under Terms, choose the Payment terms: Cash on delivery, 100% advance, 50% advance, Net 7, Net 15, Net 30, Net 45 or Net 60.",
+            "Choose the Currency the client is billed in.",
+            "Add a contact of type Finance with phone and email. Reminders go to the finance contact first.",
+            "Press Save changes.",
+          ],
+          where: ["Clients"],
+          href: "/clients",
+          who: "Management, Sales or Finance",
+          example: {
+            kind: "Client",
+            title: "Kilimanjaro Hotels Ltd",
+            lines: [
+              ["Payment terms", "Net 30"],
+              ["Currency", "TZS"],
+              ["Finance contact", "Neema Lyimo, Accounts"],
+              ["Phone / WhatsApp", "0754 123 456"],
+            ],
+            mark: 0,
+            stamp: "Saved",
+            tone: "info",
+          },
+          scenarios: [
+            {
+              title: "A new client wants 60 days on their first order",
+              problem: "Mwanza Stationers has never bought from you and asks for Net 60 on an order of TZS 4,720,000.",
+              fix: [
+                "Set their Payment terms to 50% advance for the first orders.",
+                "Explain that longer terms come after two or three orders paid on time.",
+                "After they have paid well, open the client and change the terms to Net 30, then press Save changes.",
+              ],
+              tone: "warn",
+            },
+          ],
+          tip: "The due date of an invoice comes from Clients pay within (days) in company details. If a client has longer terms, change the Due date on the invoice before you issue it.",
+          scales: "all",
+        },
+        {
+          id: "credit-limit",
+          title: "Set a credit limit for clients who buy on credit",
+          body:
+            "A credit limit is the most a client may owe you at one time. When a new invoice would take them above it, only management can issue it, so nobody gives away more credit by accident.",
+          do: [
+            "Open Clients and tap the client.",
+            "Enter the Credit limit (TZS). Only management and finance can set it.",
+            "Press Save changes.",
+            "The client's page now shows Owed to us, Overdue and Credit available.",
+          ],
+          where: ["Clients"],
+          href: "/clients",
+          who: "Management or Finance",
+          example: {
+            kind: "Client account",
+            title: "Zanzibar Resorts",
+            lines: [
+              ["Credit limit", "TZS 10,000,000"],
+              ["Owed to us", "TZS 8,500,000"],
+              ["Overdue", "TZS 2,100,000"],
+              ["Credit available", "TZS 1,500,000"],
+            ],
+            mark: 3,
+            stamp: "Watch",
+            tone: "warn",
+          },
+          scenarios: [
+            {
+              title: "A good client reaches their limit",
+              problem:
+                "Zanzibar Resorts owes TZS 8,500,000 with a limit of TZS 10,000,000. A new invoice of TZS 2,950,000 would take them to TZS 11,450,000.",
+              fix: [
+                "Finance cannot issue the invoice; the app says only management can.",
+                "Open the client and look at Overdue. Here TZS 2,100,000 is late.",
+                "Call the client: ask them to pay the overdue TZS 2,100,000 first. Once it is recorded, the new invoice fits under the limit.",
+                "If the client is reliable and you agree to more credit, management issues the invoice. It shows Issued above the client's credit limit, approved by, with the manager's name.",
+                "If this happens often, raise the Credit limit on the client page and press Save changes.",
+              ],
+              tone: "warn",
+            },
+          ],
+          tip: "A simple rule: limit = what the client buys in one month times the number of months of credit you give.",
+          scales: "medium+",
+        },
+      ],
+    },
+    {
+      id: "invoice",
+      title: "Clear invoices that get paid",
+      intro:
+        "A client's accounts office pays an invoice only when it matches their order, their delivery note and their records. Get these details right and the invoice moves through their approval without coming back.",
+      steps: [
+        {
+          id: "create-invoice",
+          title: "Make the invoice from the delivery",
+          body:
+            "Invoicing straight from the delivery note means the quantities are the ones the client signed for. Issuing the invoice gives it its number and due date and locks it.",
+          do: [
+            "Open Invoices and press + Invoice.",
+            "Under Delivered, not yet invoiced, press Invoice it next to the delivery note. Or open the accepted quotation and press Create invoice. For anything else use Create blank invoice.",
+            "Under Details, fill in the Client's order / PO no. and Attention (the person who approves payment).",
+            "Check the Payment terms and the Due date. Leave the Due date blank to use your usual number of days.",
+            "Check the items, prices and VAT, then press Save details.",
+            "Press Issue invoice.",
+          ],
+          where: ["Finance", "Invoices"],
+          href: "/invoices",
+          who: "Finance or Management",
+          example: {
+            kind: "Invoice",
+            title: "INV-2026-0118",
+            lines: [
+              ["Client", "Kilimanjaro Hotels Ltd"],
+              ["Client's order / PO no.", "KHL-PO-7781"],
+              ["Total", "TZS 2,360,000"],
+              ["Due date", "14 Nov 2026"],
+            ],
+            mark: 1,
+            stamp: "Issued",
+            tone: "info",
+          },
+          scenarios: [
+            {
+              title: "A government client pays after 90 days",
+              problem:
+                "Dodoma District Hospital orders medical consumables for TZS 23,600,000 (TZS 20,000,000 plus VAT). Their payments take about 90 days, but your usual terms are 30 days.",
+              fix: [
+                "Before you deliver, get their LPO number and make sure the delivery note is signed and stamped. Government accounts will not pay without both.",
+                "On the draft invoice, enter the LPO number in Client's order / PO no.",
+                "Set the Due date to 90 days after the invoice date, so the invoice is not marked overdue in week five and the team does not chase too early.",
+                "Press Issue invoice and share the PDF with the accounts office. Keep a copy of their receiving stamp.",
+                "Plan for the wait: before you buy the goods, check that you can pay your supplier while TZS 23,600,000 is outstanding for three months.",
+                "From day 60, call the accounts office every two weeks and use + Log a reminder or promise to pay to record who you spoke to and what they said.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "The client says the PO number is missing",
+              problem: "Kilimanjaro Hotels returns the invoice: their accounts office cannot pay without the PO number on it.",
+              fix: [
+                "If the invoice is still a draft, enter the number in Client's order / PO no. and press Save details.",
+                "If it is issued and nothing is paid yet, management cancels it with the reason \"PO number missing\" under Cancel this invoice, then you make a new one with the number.",
+                "Next time, fill in the PO number when the client accepts the quotation, so it follows the order to the invoice.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "Invoice the same day the goods are delivered. Every day you wait is a day added to when you get paid.",
+          scales: "all",
+        },
+        {
+          id: "share-invoice",
+          title: "Send the invoice to the person who pays",
+          body:
+            "The invoice PDF carries your logo, VAT details, the due date, your bank details and your pay numbers. Send it to the accounts office, not only to the person who ordered.",
+          do: [
+            "Open the issued invoice.",
+            "Press Share PDF to send it by WhatsApp or email from your phone, or Open PDF to download or print it.",
+            "Send it to the client's finance contact and copy the person who ordered.",
+            "For clients who need paper, print it and get a received stamp on your copy.",
+          ],
+          where: ["Finance", "Invoices"],
+          href: "/invoices",
+          who: "Finance",
+          example: {
+            kind: "Invoice PDF",
+            title: "INV-2026-0118",
+            lines: [
+              ["Balance due", "TZS 2,360,000"],
+              ["Pay by", "14 Nov 2026"],
+              ["Bank", "CRDB A/C 0150 1234 5678 00"],
+              ["M-Pesa", "Lipa Namba 123456"],
+              ["Reference", "INV-2026-0118"],
+            ],
+            mark: 4,
+            stamp: "Sent",
+            tone: "ok",
+          },
+          scales: "all",
+        },
+      ],
+    },
+    {
+      id: "follow-up",
+      title: "Remind clients the friendly way",
+      intro:
+        "LeMoSp tells you who to remind and writes the message for you, in English or Kiswahili. You check it, send it from your own phone and note what the client said.",
+      steps: [
+        {
+          id: "who-to-remind",
+          title: "See who needs a reminder today",
+          body:
+            "You do not need to search for late invoices. The bell and the Home screen show which invoices fall due soon and which are overdue.",
+          do: [
+            "Look at the bell at the top right. Invoices due soon and overdue invoices arrive there for Finance and Management.",
+            "On Home, overdue invoices are listed among the critical items. Tap a line to open the list behind it.",
+            "On Invoices, overdue invoices show the Overdue badge and how many days late they are.",
+          ],
+          where: ["Home screen"],
+          href: "/",
+          who: "Finance and Management",
+          example: {
+            kind: "Notification",
+            title: "Invoice overdue",
+            lines: [
+              ["Client", "Arusha Medical Stores"],
+              ["Invoice", "INV-2026-0094"],
+              ["Balance due", "TZS 1,180,000"],
+              ["Late", "8 days overdue"],
+            ],
+            stamp: "Remind",
+            tone: "bad",
+          },
+          tip: "Turn on phone notifications on the Notifications page, so alerts arrive even when the app is closed.",
+          scales: "all",
+        },
+        {
+          id: "send-reminder",
+          title: "Send a ready-made reminder by WhatsApp, SMS or email",
+          body:
+            "Each unpaid invoice has a Remind the client card with a polite message that already includes the invoice number, the amount, the due date, what was paid so far and how to pay.",
+          do: [
+            "Open the invoice and go to Remind the client.",
+            "Choose the Language: English or Kiswahili.",
+            "Under Send to, choose the contact. The finance contact comes first.",
+            "Read the message and change it if you want.",
+            "Press WhatsApp (choose contact), SMS or Email. The message opens on your phone ready to send. Or press Copy and paste it anywhere.",
+          ],
+          where: ["Finance", "Invoices", "open an invoice"],
+          href: "/invoices",
+          who: "Finance, Sales or Management",
+          example: {
+            kind: "Reminder",
+            title: "INV-2026-0094",
+            lines: [
+              ["Dear", "Mr Mollel,"],
+              ["Invoice", "INV-2026-0094 for TZS 1,180,000"],
+              ["Was due on", "7 October 2026 (8 days ago)"],
+              ["You can pay by", "M-Pesa Lipa Namba 123456"],
+              ["Reference", "INV-2026-0094"],
+            ],
+            mark: 2,
+            stamp: "Sent by WhatsApp",
+            tone: "info",
+          },
+          scenarios: [
+            {
+              title: "The client's accountant only reads Kiswahili",
+              problem: "The owner of Dodoma Builders asked you to write to their accountant, who prefers Kiswahili.",
+              fix: [
+                "On Remind the client, choose Kiswahili under Language.",
+                "Check the message: it starts with Ndugu and gives the amount, the due date and how to pay.",
+                "Send it by WhatsApp to the accountant.",
+              ],
+              tone: "info",
+            },
+            {
+              title: "No phone number for the client",
+              problem: "The card says there is no phone or email saved for this client.",
+              fix: [
+                "Open the client from the invoice and press + Add a contact.",
+                "Choose the type Finance and enter the name, phone and email, then press Add contact.",
+                "Go back to the invoice. The contact now shows under Send to.",
+              ],
+              tone: "warn",
+            },
+          ],
+          tip: "Send reminders in the morning, early in the week. Accounts offices plan payments on Monday and Tuesday.",
+          scales: "all",
+        },
+        {
+          id: "log-promise",
+          title: "Write down what the client said, and any promise to pay",
+          body:
+            "A promise that is not written down is forgotten by both sides. Log every call and message; when the client gives a date, the app pauses reminders until then and shows the promise on the invoice.",
+          do: [
+            "On the invoice, press + Log a reminder or promise to pay.",
+            "Under How, choose WhatsApp, SMS, Email, Phone call, Visit or Other.",
+            "Under What was said, write who you spoke to and what they said.",
+            "If they promised a date, enter it in Client promised to pay by. Leave it empty if there was no promise.",
+            "Press Save. The invoice shows Promised to pay by with the date.",
+          ],
+          where: ["Finance", "Invoices", "open an invoice"],
+          href: "/invoices",
+          who: "Finance or Sales",
+          example: {
+            kind: "Follow-up",
+            title: "INV-2026-0094",
+            lines: [
+              ["How", "Phone call"],
+              ["What was said", "Mr Mollel: cheque being signed this week"],
+              ["Client promised to pay by", "20 Oct 2026"],
+            ],
+            mark: 2,
+            stamp: "Promised to pay by",
+            tone: "ok",
+          },
+          scenarios: [
+            {
+              title: "The client misses the date they promised",
+              problem: "Arusha Medical Stores promised to pay TZS 1,180,000 by 20 October. It is now 23 October and nothing has come.",
+              fix: [
+                "After the promised date passes, reminders start again by themselves.",
+                "Look at the log on the invoice: you can quote the promise back to them, with the date and the name of the person.",
+                "Call, do not only message. Ask for a firm date and what is stopping the payment.",
+                "Log the new answer with + Log a reminder or promise to pay.",
+                "If a second promise is missed, management decides whether to hold new orders until it is paid.",
+              ],
+              tone: "bad",
+            },
+          ],
+          tip: "On the Enterprise level, the Cash-flow forecast counts each unpaid invoice on its promised date instead of its due date, so your forecast becomes more real with every promise you log.",
+          scales: "all",
+        },
+        {
+          id: "aging",
+          title: "Look at money owed by age every week",
+          body:
+            "Money owed to us shows every client and how late their money is: current, 1 to 30, 31 to 60, 61 to 90 and over 90 days. The older a debt, the harder it is to collect, so work from the right-hand columns first.",
+          do: [
+            "Open Money owed to us.",
+            "Read the total outstanding and the Overdue figure.",
+            "Start with clients in the Over 90 days and 61–90 days columns. Call them yourself.",
+            "Tap See overdue invoices → to open each late invoice and send a reminder.",
+            "Managers also see money owed by age in the Statistics row on Home.",
+          ],
+          where: ["Finance", "Money owed to us"],
+          href: "/receivables",
+          who: "Finance and Management",
+          example: {
+            kind: "Money owed to us",
+            title: "15 Oct 2026",
+            lines: [
+              ["Current", "TZS 18,400,000"],
+              ["1–30 days", "TZS 6,250,000"],
+              ["31–60 days", "TZS 2,100,000"],
+              ["61–90 days", "TZS 1,180,000"],
+              ["Over 90 days", "TZS 23,600,000"],
+            ],
+            mark: 4,
+            stamp: "Act now",
+            tone: "bad",
+          },
+          scenarios: [
+            {
+              title: "One client is most of what is owed",
+              problem: "Of TZS 51,530,000 owed to you, TZS 23,600,000 is one government hospital. If they are late, your whole month is late.",
+              fix: [
+                "Keep their invoices up to date: LPO number, signed delivery note, stamped copy.",
+                "Visit or call their accounts office every two weeks and log each contact.",
+                "Do not take another big order from them on credit until part of the old one is paid, unless management agrees.",
+                "Make sure smaller clients pay on time, because they carry your cash flow while you wait.",
+              ],
+              tone: "warn",
+            },
+          ],
+          tip: "Foreign-currency invoices are shown in shillings at their invoice rate, so the totals add up.",
+          scales: "all",
+        },
+        {
+          id: "statement",
+          title: "Send a statement of account",
+          body:
+            "A statement lists every invoice and payment for a period with the running balance, and what is still open by age. It settles most arguments about what is owed, and many clients ask for one at the end of the month or the year.",
+          do: [
+            "Open Statements, choose the client and press Open statement. Or press Statement of account → on the client's page.",
+            "Choose the From and To dates and the Currency, then press Show.",
+            "Check the Balance on the first day, what was Invoiced and Received, and the Owed to us on the last day.",
+            "Press PDF and send it to the client.",
+          ],
+          where: ["Finance", "Statements"],
+          href: "/statements",
+          who: "Finance or Management",
+          example: {
+            kind: "Statement of account",
+            title: "Kilimanjaro Hotels Ltd",
+            lines: [
+              ["Balance on 1 Sep 2026", "TZS 3,540,000"],
+              ["Invoiced", "TZS 7,080,000"],
+              ["Received", "TZS 5,900,000"],
+              ["Owed to us on 30 Sep 2026", "TZS 4,720,000"],
+            ],
+            mark: 3,
+            stamp: "PDF",
+            tone: "info",
+          },
+          scenarios: [
+            {
+              title: "The client wants a statement for their auditors",
+              problem: "Zanzibar Resorts' auditors ask for a statement of everything invoiced and paid from 1 January to 30 September 2026, and the balance on 30 September.",
+              fix: [
+                "Open Statements, choose Zanzibar Resorts and press Open statement.",
+                "Set From to 1 Jan 2026 and To to 30 Sep 2026 and press Show.",
+                "Check that every payment you know of is there. Voided payments and cancelled invoices are left out, which is what auditors expect.",
+                "Press PDF and send it to the client or the auditors, with their confirmation form if they sent one.",
+                "If they say a payment is missing, follow the steps in \"The client says they already paid\".",
+              ],
+              tone: "info",
+            },
+            {
+              title: "The client's figure is different from yours",
+              problem: "Kilimanjaro Hotels says they owe TZS 2,360,000; your statement says TZS 4,720,000.",
+              fix: [
+                "Send them your statement PDF and ask for theirs.",
+                "Compare line by line. The difference is usually one invoice they have not booked yet or one payment you have not recorded.",
+                "If an invoice is missing on their side, send its PDF again with the signed delivery note.",
+                "If a payment is missing on your side, find it on your bank statement and record it on the invoice.",
+              ],
+              tone: "warn",
+            },
+          ],
+          scales: "all",
+        },
+        {
+          id: "before-next-order",
+          title: "Check the client's account before the next order",
+          body:
+            "The best moment to collect old money is when the client wants something new. Before you accept a new order on credit, look at what they already owe and how late it is.",
+          do: [
+            "Open Clients and tap the client. The Account card shows Owed to us, Overdue and Credit available.",
+            "Press Statement of account → to see every open invoice with its age.",
+            "If nothing is overdue and the order fits under the credit limit, go ahead as usual.",
+            "If money is overdue, call the client before you confirm: ask for the overdue amount first, or for payment with the new order.",
+            "For a client who keeps paying late, change the Payment terms to 50% advance or 100% advance and press Save changes. New quotations then show those terms.",
+          ],
+          where: ["Clients"],
+          href: "/clients",
+          who: "Sales, Finance and Management",
+          example: {
+            kind: "Client account",
+            title: "Dodoma Builders",
+            lines: [
+              ["Owed to us", "TZS 7,800,000"],
+              ["Overdue", "TZS 5,900,000"],
+              ["Credit available", "TZS 200,000"],
+              ["New LPO", "TZS 3,540,000"],
+            ],
+            mark: 1,
+            stamp: "Collect first",
+            tone: "bad",
+          },
+          scenarios: [
+            {
+              title: "A late payer sends a big new order",
+              problem: "Dodoma Builders owes TZS 5,900,000 that is more than 60 days late and sends a new LPO for TZS 3,540,000.",
+              fix: [
+                "Thank them for the order, then say clearly: we can deliver as soon as the overdue TZS 5,900,000 is settled.",
+                "Offer a way forward: part of the old debt now and the rest on a promised date. Log the promise on the invoices with + Log a reminder or promise to pay.",
+                "Prepare the quotation and the goods, but dispatch only when the agreed payment is recorded.",
+                "If management decides to deliver anyway, the invoice above the credit limit needs a manager to issue it, so the decision is on record.",
+              ],
+              tone: "bad",
+            },
+          ],
+          tip: "Salespeople see the client's account too. Ask them to look at it before they promise a delivery date to a client who owes money.",
+          scales: "all",
+        },
+      ],
+    },
+    {
+      id: "record",
+      title: "Record every payment the right way",
+      intro:
+        "Each payment is recorded on the invoice it pays, with the method and the reference. The invoice then shows Part paid or Paid, and the client gets a receipt.",
+      steps: [
+        {
+          id: "record-payment",
+          title: "Record a payment received",
+          body:
+            "Record the money the day it reaches your account, not the day the client says they sent it. Only management and finance can record payments.",
+          do: [
+            "Open the invoice and press + Record a payment received.",
+            "Check the Amount: it starts at the balance due. Change it if the client paid less.",
+            "Enter the Date received.",
+            "Under How, choose Bank transfer, Cash, Mobile money, Cheque or Other.",
+            "In Reference, type the bank reference, cheque number or receipt number.",
+            "Press Record payment. The invoice shows Part paid or Paid.",
+            "Press Receipt to get a PDF receipt for the client.",
+          ],
+          where: ["Finance", "Invoices", "open an invoice"],
+          href: "/invoices",
+          who: "Finance or Management",
+          example: {
+            kind: "Payment",
+            title: "INV-2026-0118",
+            lines: [
+              ["Amount", "TZS 2,360,000"],
+              ["Date received", "12 Nov 2026"],
+              ["How", "Bank transfer"],
+              ["Reference", "FT26316KX9Q2"],
+            ],
+            stamp: "Paid",
+            tone: "ok",
+          },
+          scenarios: [
+            {
+              title: "One transfer pays two invoices",
+              problem:
+                "Kilimanjaro Hotels sends one bank transfer of TZS 5,900,000 for INV-2026-0101 (TZS 3,540,000) and INV-2026-0107 (TZS 2,360,000).",
+              fix: [
+                "Open INV-2026-0101, press + Record a payment received and enter TZS 3,540,000 with the bank reference.",
+                "Open INV-2026-0107 and record TZS 2,360,000 with the same bank reference and date.",
+                "Both invoices show Paid, and the two amounts add up to the transfer.",
+                "On Check payments, both lines show the badge same code twice. That is expected here: tick both.",
+              ],
+              tone: "info",
+            },
+            {
+              title: "The client pays more than the invoice",
+              problem: "Mwanza Stationers sends TZS 3,000,000 for an invoice of TZS 2,950,000.",
+              fix: [
+                "The app does not let you record more than is owed on an invoice. Record TZS 2,950,000 on it.",
+                "If they have another unpaid invoice, record the TZS 50,000 on that one, with the same reference.",
+                "If not, agree with the client: either you return the TZS 50,000, or you use it on their next invoice. Write the agreement in the log with + Log a reminder or promise to pay so it is not forgotten.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "The bank took charges from the payment",
+              problem: "Zanzibar Resorts paid an invoice of TZS 5,900,000 but only TZS 5,880,000 reached your account because of bank charges.",
+              fix: [
+                "Record the TZS 5,880,000 that arrived. The invoice shows Part paid with TZS 20,000 still owed.",
+                "Tell the client that charges are on their side under your terms, and ask them to add the TZS 20,000 to their next payment.",
+                "Record that amount on this invoice when it comes.",
+                "To avoid it next time, add \"Bank charges are paid by the sender\" to your Standard invoice terms.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "Never record a payment from a screenshot alone. Wait until you see the money in your bank or mobile-money account.",
+          scales: "all",
+        },
+        {
+          id: "mobile-money",
+          title: "Record mobile-money payments with the transaction code",
+          body:
+            "The transaction code is the proof of a mobile-money payment. With it, you can find the payment on the statement in seconds and nobody can record the same money twice without it showing.",
+          do: [
+            "Open the invoice and press + Record a payment received.",
+            "Under How, choose Mobile money.",
+            "Under Mobile-money service, choose M-Pesa, Mixx by Yas (Tigo Pesa), Airtel Money, HaloPesa, AzamPesa or Other mobile money.",
+            "In Transaction code, type the code from the confirmation message exactly, for example QK71ABC2D.",
+            "Enter the amount and the date, then press Record payment.",
+          ],
+          where: ["Finance", "Invoices", "open an invoice"],
+          href: "/invoices",
+          who: "Finance or Management",
+          example: {
+            kind: "Payment",
+            title: "INV-2026-0094",
+            lines: [
+              ["How", "Mobile money"],
+              ["Mobile-money service", "M-Pesa"],
+              ["Transaction code", "QK71ABC2D"],
+              ["Amount", "TZS 1,180,000"],
+            ],
+            mark: 2,
+            stamp: "Paid",
+            tone: "ok",
+          },
+          tip: "Ask clients to put the invoice number in the account or reference box when they pay by Lipa Namba, so you know which invoice the money is for.",
+          scales: "all",
+        },
+        {
+          id: "part-payment",
+          title: "Handle part payments",
+          body:
+            "Many clients pay in instalments. Record each one as it comes; the invoice shows Part paid and the balance, and the next reminder says how much was received and how much is left.",
+          do: [
+            "Record each instalment with + Record a payment received, with its own date and reference.",
+            "The invoice shows Paid and Balance due under Payment.",
+            "Agree the date of the next instalment and log it with + Log a reminder or promise to pay.",
+            "Each instalment gets its own Receipt.",
+          ],
+          where: ["Finance", "Invoices", "open an invoice"],
+          href: "/invoices",
+          who: "Finance or Management",
+          example: {
+            kind: "Invoice",
+            title: "INV-2026-0102",
+            lines: [
+              ["Invoice total", "TZS 11,800,000"],
+              ["Paid 1 Oct (cheque 004512)", "TZS 5,000,000"],
+              ["Paid 15 Oct (M-Pesa)", "TZS 3,000,000"],
+              ["Balance due", "TZS 3,800,000"],
+            ],
+            mark: 3,
+            stamp: "Part paid",
+            tone: "warn",
+          },
+          scales: "all",
+        },
+        {
+          id: "payments-list",
+          title: "See all money received",
+          body:
+            "Payments received lists every payment of the month with its method and reference. Use it to answer \"how much came in this month?\" and to find one payment fast.",
+          do: [
+            "Open Payments received. It shows this month; use ← Earlier and Later → to move between months.",
+            "The total at the top is what was collected in that month.",
+            "Tap a payment to open its invoice.",
+            "For any dates and filters, open Reports and choose Payments received, then press Show report. Print, PDF or Excel are at the bottom.",
+          ],
+          where: ["Finance", "Payments received"],
+          href: "/payments",
+          who: "Finance and Management",
+          example: {
+            kind: "Payments received",
+            title: "October 2026",
+            lines: [
+              ["Bank transfer", "TZS 14,600,000"],
+              ["Mobile money", "TZS 3,420,000"],
+              ["Cheque", "TZS 5,000,000"],
+              ["Collected in October 2026", "TZS 23,020,000"],
+            ],
+            mark: 3,
+            stamp: "Total",
+            tone: "ok",
+          },
+          scales: "all",
+        },
+        {
+          id: "foreign-money",
+          title: "Payments in another currency",
+          body:
+            "A payment is always recorded in the currency of its invoice. If you bill a client in USD, the invoice is in USD and so are its payments. If a client pays dollars for a shilling invoice, you record the shillings the bank credited.",
+          do: [
+            "For clients who pay in USD, set their Currency to USD on the client record, so their quotations and invoices are in USD. This needs Multiple currencies.",
+            "Keep the USD rate up to date on Exchange rates.",
+            "When you record a payment on a USD invoice, enter the amount in USD and the Exchange rate on the day.",
+          ],
+          where: ["Finance", "Exchange rates"],
+          href: "/rates",
+          who: "Finance or Management",
+          example: {
+            kind: "Payment",
+            title: "INV-2026-0121",
+            lines: [
+              ["Invoice", "USD 4,000.00"],
+              ["Amount (USD)", "USD 4,000.00"],
+              ["Exchange rate on the day", "2,600"],
+              ["≈ in TZS", "TZS 10,400,000"],
+            ],
+            mark: 2,
+            stamp: "Paid",
+            tone: "ok",
+          },
+          scenarios: [
+            {
+              title: "A client pays in USD for a TZS invoice",
+              problem:
+                "Zanzibar Resorts pays USD 2,000 for invoice INV-2026-0110 of TZS 5,200,000. The app cannot record a payment in a currency other than the invoice's.",
+              fix: [
+                "Look at what your bank actually did. If it converted the dollars into your TZS account, record the shillings it credited, for example TZS 5,120,000.",
+                "In Reference, write the bank reference and the original amount, for example \"FT26290 USD 2,000 at 2,560\".",
+                "If the shillings are less than the invoice, the invoice stays Part paid. Agree with the client who carries the difference before you ask for it.",
+                "If the dollars went into a USD account, record the shillings they were worth at the bank's buying rate that day, with the same kind of note.",
+                "If this client will keep paying in dollars, change their Currency to USD so the next invoices are in USD.",
+              ],
+              tone: "warn",
+            },
+          ],
+          tip: "The rate on a document can only differ from the rate on Exchange rates by up to 10%. Update the rates when the bank rate moves.",
+          scales: "medium+",
+        },
+      ],
+    },
+    {
+      id: "check",
+      title: "Check payments against the bank and M-Pesa",
+      intro:
+        "Recording a payment is half the job. Checking it against the real statement proves the money arrived, catches typing mistakes and stops anyone recording money that never came.",
+      steps: [
+        {
+          id: "reconcile",
+          title: "Tick payments against your statement",
+          body:
+            "Check payments shows what was recorded for one month and one method. You tick what you find on the statement, or paste the statement and the matching transaction codes are ticked for you.",
+          do: [
+            "Download your bank or M-Pesa statement for the month.",
+            "Open Check payments. Choose Money in (from clients), the Payment method, the service and the Month, then press Show.",
+            "Press Paste a statement. Select all in the statement, copy, paste it in the box (or load a CSV file) and press Find and tick.",
+            "Payments whose code appears in the statement are ticked and marked as checked. Only codes of 6 characters or more are matched, and nothing in the statement is stored.",
+            "Tick the rest by hand after finding them on the statement, then press Mark ticked as checked.",
+            "What is left under To check needs a question: was it recorded wrong, or did it never arrive?",
+          ],
+          where: ["Finance", "Check payments"],
+          href: "/reconcile",
+          who: "Finance or Management",
+          example: {
+            kind: "Check payments",
+            title: "M-Pesa · October 2026",
+            lines: [
+              ["Recorded", "42 payments"],
+              ["Found in the statement", "39"],
+              ["Ticked by hand", "2"],
+              ["To check", "1"],
+            ],
+            mark: 3,
+            stamp: "Checked",
+            tone: "ok",
+          },
+          scenarios: [
+            {
+              title: "The client says \"we already paid\"",
+              problem: "Arusha Medical Stores says they paid INV-2026-0094 last week, but the invoice still shows TZS 1,180,000 owed.",
+              fix: [
+                "Ask politely for the proof: the bank slip or the M-Pesa message with the transaction code, the date and the amount.",
+                "Search your bank or M-Pesa statement for that code and amount.",
+                "If you find it, the payment was simply not recorded. Open the invoice, press + Record a payment received and enter it with the code. Thank the client.",
+                "If it was recorded on another invoice by mistake, ask management to void it there and record it on the right invoice.",
+                "If it is not on your statement, send the client the proof you looked for and ask them to check with their bank. The money may have gone to another account or failed.",
+                "Log what was found with + Log a reminder or promise to pay.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "A code shows \"same code twice\"",
+              problem: "On Check payments, two payments have the same transaction code QK71ABC2D.",
+              fix: [
+                "Open both invoices.",
+                "If one client paid two invoices with one transfer, the two amounts add up to the statement line: that is fine, tick both.",
+                "If the same payment was recorded twice, the money is counted twice. Management voids the second one with the reason \"recorded twice\".",
+              ],
+              tone: "bad",
+            },
+            {
+              title: "Money on the statement that nobody recorded",
+              problem: "Your M-Pesa statement shows TZS 590,000 from a number you do not recognise, with no invoice number.",
+              fix: [
+                "Look at Money owed to us for an invoice of exactly TZS 590,000, or two that add up to it.",
+                "Call the number, or check the name on the statement against your clients' contacts.",
+                "When you know which invoice it pays, record it there with the transaction code.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "Checked payments can no longer be changed. If one was ticked by mistake, Untick it first.",
+          scales: "all",
+        },
+      ],
+    },
+    {
+      id: "problems",
+      title: "Mistakes, bounced cheques and disputes",
+      intro:
+        "Things go wrong in every business. The app keeps a clean record: wrong entries are voided with a reason rather than deleted, so the history always shows what happened and who did it.",
+      steps: [
+        {
+          id: "void-payment",
+          title: "Correct a wrong payment",
+          body:
+            "A payment cannot be edited. If it is wrong, management voids it with a reason, the amount is owed again, and the right payment is recorded. The voided line stays on the invoice, crossed out.",
+          do: [
+            "Open the invoice and find the payment.",
+            "Management opens Void this payment, types the reason and presses Void.",
+            "The amount is owed again and the invoice goes back to Unpaid or Part paid.",
+            "Record the right payment with + Record a payment received.",
+          ],
+          where: ["Finance", "Invoices", "open an invoice"],
+          href: "/invoices",
+          who: "Management",
+          example: {
+            kind: "Payment",
+            title: "INV-2026-0107",
+            lines: [
+              ["Recorded", "TZS 3,250,000"],
+              ["Should be", "TZS 2,360,000"],
+              ["Reason", "Wrong amount typed"],
+            ],
+            mark: 2,
+            stamp: "Voided",
+            tone: "bad",
+          },
+          scenarios: [
+            {
+              title: "A payment was recorded on the wrong invoice",
+              problem: "TZS 2,360,000 from Kilimanjaro Hotels was recorded on INV-2026-0101 instead of INV-2026-0107.",
+              fix: [
+                "Management opens INV-2026-0101 and voids the payment with the reason \"Belongs to INV-2026-0107\".",
+                "Open INV-2026-0107 and record the payment with the same date and reference.",
+                "If the payment had been ticked on Check payments, tick the new one too.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "A cheque bounces",
+              problem: "Dodoma Builders paid TZS 4,130,000 by cheque number 004512. You recorded it, and three days later the bank returns it unpaid.",
+              fix: [
+                "Management opens the invoice, opens Void this payment, types \"cheque 004512 bounced\" and presses Void.",
+                "The invoice shows the TZS 4,130,000 owed again.",
+                "Call the client the same day and ask for a bank transfer or mobile-money payment instead. Log the call with + Log a reminder or promise to pay.",
+                "If your terms allow you to charge the bank's fee, make a separate invoice for it with + Invoice.",
+                "For this client, set Payment terms to Cash on delivery or 100% advance until trust is back.",
+              ],
+              tone: "bad",
+            },
+          ],
+          tip: "Record a cheque on the day it is cleared by the bank, not the day you receive it. Then bounced cheques never show as money in.",
+          scales: "all",
+        },
+        {
+          id: "disputes",
+          title: "Handle a dispute about the invoice",
+          body:
+            "When a client refuses to pay because of the price, the quantity or the condition of the goods, deal with it quickly and in writing. A dispute left open is a payment that never comes.",
+          do: [
+            "Listen first, then find the papers: the accepted quotation, the client's PO, the delivery note and the proof of delivery.",
+            "Log what the client says with + Log a reminder or promise to pay, so everyone sees the dispute.",
+            "If the client is right and nothing has been paid, management cancels the invoice under Cancel this invoice with the reason, and you make a corrected one.",
+            "If the client is right and part is already paid, management voids the payments first, then cancels, then you make the corrected invoice and record the payments again on it.",
+            "If you are right, send the signed delivery note or the driver's proof of delivery with a short, polite explanation.",
+          ],
+          where: ["Finance", "Invoices", "open an invoice"],
+          href: "/invoices",
+          who: "Management and Finance",
+          example: {
+            kind: "Dispute",
+            title: "INV-2026-0099",
+            lines: [
+              ["Client", "Zanzibar Resorts"],
+              ["Invoiced", "60 cartons of gloves"],
+              ["Signed for", "50 cartons"],
+              ["Decision", "Cancel and make a new invoice for 50"],
+            ],
+            mark: 2,
+            stamp: "Resolved",
+            tone: "warn",
+          },
+          scenarios: [
+            {
+              title: "The client says some goods were damaged",
+              problem: "Zanzibar Resorts says 5 of 50 cartons of gloves arrived wet and refuses to pay for them, TZS 590,000 of a TZS 5,900,000 invoice.",
+              fix: [
+                "Ask for photos and check the delivery note and the proof of delivery: did the receiver note any damage when signing?",
+                "If they did, accept it. Agree whether you replace the 5 cartons or reduce the invoice.",
+                "To reduce it: if nothing has been paid, management cancels the invoice and you make a new one for 45 cartons. LeMoSp has no credit notes, so this is the clean way.",
+                "If you replace the goods, send 5 cartons on a new delivery note, and keep the invoice as it is.",
+                "Log the agreement on the invoice so finance knows why the amount changed.",
+              ],
+              tone: "warn",
+            },
+            {
+              title: "The client says the price is higher than agreed",
+              problem: "Mwanza Stationers says they agreed TZS 42,000 a box, but the invoice says TZS 45,000.",
+              fix: [
+                "Open the accepted quotation from the link at the top of the invoice and look at the price on it.",
+                "If the quotation says TZS 45,000, send them the quotation PDF they accepted.",
+                "If it says TZS 42,000, the invoice is wrong. Management cancels it and you make a corrected one.",
+                "If there is a contract with agreed prices, use Use contract prices on the next quotation so this does not happen again.",
+              ],
+              tone: "info",
+            },
+          ],
+          tip: "Ask drivers to record a photo and the receiver's signature at every delivery. Proof of delivery ends most quantity disputes in one message.",
+          scales: "all",
+        },
+        {
+          id: "routine",
+          title: "A simple routine that keeps money coming in",
+          body:
+            "Getting paid on time is a habit, not a single action. Twenty minutes a day and an hour a week is enough for most businesses.",
+          do: [
+            "Every day: record the payments that arrived, issue invoices for yesterday's deliveries and send the reminders the bell suggests.",
+            "Every week: open Money owed to us and call every client in the 31–60 days column and older.",
+            "Every month: tick the month's payments on Check payments, and send statements to clients who owe you.",
+            "Every quarter: review credit limits and payment terms. Reward good payers and tighten terms for slow ones.",
+          ],
+          where: ["Finance", "Money owed to us"],
+          href: "/receivables",
+          who: "Finance and Management",
+          example: {
+            kind: "Routine",
+            title: "Weekly",
+            lines: [
+              ["Monday", "Money owed to us: call 61–90 days and older"],
+              ["Daily", "Record payments, send reminders"],
+              ["Month end", "Check payments, statements"],
+            ],
+            stamp: "On time",
+            tone: "ok",
+          },
+          tip: "Where scheduled reports are switched on, open the Payments received report and use Email me this report to get it every Monday.",
+          scales: "all",
+        },
+      ],
+    },
+  ],
+};

@@ -9,6 +9,7 @@ import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { EVENT_LABELS, type SecurityEventRow } from "@/lib/securityLabels";
 import { resetMemberMfa, saveSecurity } from "./actions";
+import { Hint, SettingsHead } from "../SettingsHead";
 import type { Key } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
 
@@ -121,10 +122,18 @@ export default async function SecuritySettingsPage({ searchParams }: { searchPar
 
   return (
     <>
-      <p className="small">
-        <Link href="/settings">{tr("← Settings")}</Link>
-      </p>
-      <h1>{tr("Security")}</h1>
+      <SettingsHead
+        title={tr("Security")}
+        icon="lock"
+        lead={tr("Protect your company's data: two-step verification, automatic sign-out and a record of who signed in.")}
+        side={
+          company.require_mfa !== undefined ? (
+            <span className={`badge ${company.require_mfa ? "tone-ok" : "tone-warn"}`}>
+              {company.require_mfa ? tr("Two-step: on") : tr("Two-step: off")}
+            </span>
+          ) : undefined
+        }
+      />
       <Notice {...notice} />
 
       {health.length > 0 && (
@@ -155,14 +164,14 @@ export default async function SecuritySettingsPage({ searchParams }: { searchPar
         </section>
       )}
 
-      <StepUpForm action={saveSecurity}>
+      <StepUpForm action={saveSecurity} className="st-form">
         <section className="card" id="two-step">
           <h2>{tr("Two-step verification for everyone")}</h2>
           <p className="muted small">
             {tr("When this is on, everyone in")} {company.name}{" "}
             {tr("must enter a code from an authenticator app after their password. The database itself refuses access without it, so once someone has set up their app, a stolen password is not enough.")}
           </p>
-          <label className="check" style={{ fontWeight: 600 }}>
+          <label className="check" style={{ fontWeight: 600, minHeight: 44, display: "flex", alignItems: "center", gap: 8 }}>
             <input type="checkbox" name="require_mfa" defaultChecked={Boolean(company.require_mfa)} disabled={!meWithCode && !company.require_mfa} />{" "}
             {tr("Require two-step verification")}
           </label>
@@ -179,13 +188,14 @@ export default async function SecuritySettingsPage({ searchParams }: { searchPar
           <p className="muted small">{tr("Signs people out when the app is left open without use, e.g. on a shared office computer. A warning appears a minute before. The driver screen is not affected, so deliveries can be recorded offline.")}</p>
           <div className="field">
             <label htmlFor="idle_select">{tr("Sign out when idle")}</label>
-            <select id="idle_select" name="idle" defaultValue={String(company.idle_timeout_minutes ?? 0)}>
+            <select id="idle_select" name="idle" defaultValue={String(company.idle_timeout_minutes ?? 0)} aria-describedby="idle-hint">
               {IDLE.map((o) => (
                 <option key={o.v} value={o.v}>
                   {tr(o.label)}
                 </option>
               ))}
             </select>
+            <Hint id="idle-hint">{tr("30 minutes suits most offices. Choose Never only if every device is personal and locked.")}</Hint>
           </div>
         </section>
 
@@ -199,19 +209,22 @@ export default async function SecuritySettingsPage({ searchParams }: { searchPar
           </ul>
         </section>
 
-        <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Saving…")}>
-          {tr("Save security settings")}
-        </SubmitButton>
+        <div className="st-savebar">
+          <span className="st-savebar-note">{tr("You may be asked for your password before saving.")}</span>
+          <SubmitButton className="btn btn-primary" pendingText={tr("Saving…")}>
+            {tr("Save security settings")}
+          </SubmitButton>
+        </div>
       </StepUpForm>
 
       {team.length > 0 && (
-        <section className="card" id="who-two-step" style={{ marginTop: 16 }}>
+        <section className="card" id="who-two-step">
           <h2>{tr("Who has two-step on")}</h2>
           <p className="muted small">
             {withCode} / {team.length}{" "}
             {tr("people. Ask everyone to turn it on under Your account → Security before you require it: anyone without it will be asked to set it up at their next sign-in.")}
           </p>
-          <ul className="list">
+          <ul className="list st-rows">
             {team.map((m) => (
               <li key={m.membership_id} className="row">
                 <div style={{ flex: 1, minWidth: 0 }}>

@@ -7,6 +7,24 @@ export type Release = { version: string; date: string; en: string[]; sw: string[
 
 export const RELEASES: Release[] = [
   {
+    version: "1.20",
+    date: "2026-10-15",
+    en: [
+      "Faster: screens open sooner and moving between them feels instant, because the app now gets the next screen ready while your finger is still on the link.",
+      "Playbooks: long step-by-step guides with live examples and \"If this happens\" situations, for setting up, order to payment, getting paid, stock, numbers and decisions, daily routines, security, bigger businesses and connecting other systems. Each one is also a PDF to print or share.",
+      "Business assistant: ask \"who owes us money?\", \"what should we reorder?\" or \"draft a reminder to a client\" in English or Kiswahili and get the answer with the records behind it. Also from the box on the home screen.",
+      "Integrations & API: monthly files for your accountant (invoices, payments, supplier bills, expenses), and API keys so other systems can read your data safely.",
+      "Settings and Your account have a cleaner layout, with the status of each setting at a glance and the language choice on Your account.",
+    ],
+    sw: [
+      "Kasi zaidi: skrini zinafunguka mapema na kuhama kati yake ni papo hapo, kwa sababu programu sasa inaandaa skrini inayofuata kidole chako kikiwa bado kwenye kiungo.",
+      "Miongozo ya kazi: miongozo mirefu ya hatua kwa hatua yenye mifano hai na hali za \"Hili likitokea\", kwa kusanidi, oda hadi malipo, kulipwa, stoku, takwimu na maamuzi, ratiba za kila siku, usalama, biashara kubwa na kuunganisha mifumo mingine. Kila mmoja pia ni PDF ya kuchapisha au kushirikisha.",
+      "Msaidizi wa biashara: uliza \"nani anadaiwa na sisi?\", \"tuagize nini tena?\" au \"andaa ukumbusho kwa mteja\" kwa Kiingereza au Kiswahili na upate jibu pamoja na kumbukumbu husika. Pia kupitia kisanduku kwenye skrini ya mwanzo.",
+      "Miunganisho na API: faili za kila mwezi kwa mhasibu wako (ankara, malipo, bili za wasambazaji, matumizi), na funguo za API ili mifumo mingine isome data yako kwa usalama.",
+      "Mipangilio na Akaunti yako zina mpangilio safi zaidi, hali ya kila mpangilio ikionekana kwa haraka na chaguo la lugha kwenye Akaunti yako.",
+    ],
+  },
+  {
     version: "1.19",
     date: "2026-10-11",
     en: [

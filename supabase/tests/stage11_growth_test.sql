@@ -67,8 +67,9 @@ select tests.check((select string_agg(key, ',' order by key) from public.feature
 select tests.check((select bool_and(default_level = 'small') from public.features where core or key = 'goods_received'),
   'core features and goods received belong to the small level');
 select tests.check((select count(*) from public.features) = 54, 'catalogue has 54 features (Stage 13 added reminders)');
-select tests.check((select count(*) from public.features where status = 'live') = 52
-                   and (select count(*) from public.features where status = 'planned') = 2, '52 live and 2 planned features (Stage 15 made eight more live)');
+select tests.check((select count(*) from public.features where status = 'planned') = 0, 'all 54 features live (Stage 16 added the assistant and integrations)');
+-- Every feature is live since Stage 16; the rules for planned features are tested with the assistant marked planned again.
+reset role; update public.features set status = 'planned' where key = 'ai_assistant'; set role authenticated;
 select tests.check((select bool_and(jsonb_array_length(tutorial) between 2 and 4 and description is not null
                                     and audience is not null and benefits is not null) from public.features),
   'every feature has a description, audience, benefits and a 2-4 step tutorial');
@@ -107,7 +108,7 @@ select tests.blocked(format('select public.set_business_level(%L, null)', :'co')
 select tests.blocked(format('select public.set_business_level(%L, %L, %L)', :'co', 'small', '[1,2]'), 'the profile must be an object');
 
 select public.set_business_level(:'co', 'enterprise');
-select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 51,
+select tests.check((select count(*) from public.company_feature_map(:'co') where enabled) = 52,
   'enterprise: all live features except the one switched off');
 select tests.check((select bool_and(not enabled) from public.company_feature_map(:'co') where status = 'planned'),
   'enterprise planned features stay off');
@@ -636,3 +637,6 @@ reset role;
 select tests.login_guest(:'guest'); set role authenticated;
 select public.end_demo();
 reset role;
+
+-- Back to live (see the top of this file).
+update public.features set status = 'live' where key = 'ai_assistant';

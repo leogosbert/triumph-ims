@@ -3,6 +3,7 @@ import { primeLang } from "@/lib/tr";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/user";
 import type { Role } from "@/lib/roles";
 import { loadFeatures } from "@/lib/features";
 import type { Level } from "@/lib/levels";
@@ -79,21 +80,36 @@ export type Profile = {
 export const getAppContext = cache(async () => {
   await primeLang();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
   // Two-step verification is on for this person: they must enter their code first.
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") redirect("/two-step");
 
-  const { data, error } = await supabase
-    .from("memberships")
-    .select("id, role, company_id, company:companies(*)")
-    .eq("user_id", user.id)
-    .eq("active", true)
-    .order("created_at");
+  // The company chosen last time: its feature switches load alongside the memberships.
+  const chosen = (await cookies()).get(ACTIVE_COMPANY_COOKIE)?.value;
+  const early = chosen && /^[0-9a-f-]{36}$/i.test(chosen) ? loadFeatures(supabase, chosen) : null;
+
+  // Memberships, profile and "is this LeMo Tech staff" in one round trip.
+  const [{ data, error }, { data: profileRow }, isPlatformAdmin] = await Promise.all([
+    supabase
+      .from("memberships")
+      .select("id, role, company_id, company:companies(*)")
+      .eq("user_id", user.id)
+      .eq("active", true)
+      .order("created_at"),
+    supabase.from("profiles").select("id, full_name, email, phone").eq("id", user.id).maybeSingle(),
+    // LeMo Tech staff (Stage 11). False when the function is missing or refuses.
+    (async () => {
+      try {
+        const { data: admin, error: adminError } = await supabase.rpc("is_platform_admin");
+        return !adminError && admin === true;
+      } catch {
+        return false;
+      }
+    })(),
+  ]);
   if (error) {
     // The database tables don't exist yet: the setup SQL hasn't been run.
     if (error.code === "PGRST205" || error.code === "42P01" || /does not exist|schema cache/i.test(error.message)) {
@@ -113,7 +129,6 @@ export const getAppContext = cache(async () => {
     redirect("/welcome");
   }
 
-  const chosen = (await cookies()).get(ACTIVE_COMPANY_COOKIE)?.value;
   // Without a choice, start in a company that is not closing.
   const membership =
     memberships.find((m) => m.company_id === chosen) ??
@@ -125,20 +140,8 @@ export const getAppContext = cache(async () => {
   // Other companies hidden for the same reason are left out of lists and switchers.
   const visible = memberships.filter((m) => m.company);
 
-  const [{ data: profileRow }, features, isPlatformAdmin] = await Promise.all([
-    supabase.from("profiles").select("id, full_name, email, phone").eq("id", user.id).maybeSingle(),
-    // Feature switches (Stage 11). Before that SQL is run every screen stays visible.
-    loadFeatures(supabase, membership.company_id),
-    // LeMo Tech staff (Stage 11). False when the function is missing or refuses.
-    (async () => {
-      try {
-        const { data: admin, error: adminError } = await supabase.rpc("is_platform_admin");
-        return !adminError && admin === true;
-      } catch {
-        return false;
-      }
-    })(),
-  ]);
+  // Feature switches (Stage 11). Before that SQL is run every screen stays visible.
+  const features = early && membership.company_id === chosen ? await early : await loadFeatures(supabase, membership.company_id);
   const profile: Profile = (profileRow as Profile | null) ?? {
     id: user.id,
     full_name: null,

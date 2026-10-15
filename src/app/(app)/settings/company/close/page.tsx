@@ -6,6 +6,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { requestCompanyClosure } from "@/app/deletion-actions";
 import { requireManager } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
+import { Hint, SettingsHead } from "../../SettingsHead";
 
 export const metadata = { title: "Close company account" };
 
@@ -17,10 +18,11 @@ export default async function CloseCompanyPage({ searchParams }: { searchParams:
 
   return (
     <>
-      <p className="small">
-        <Link href="/settings/company">{tr("← Company details")}</Link>
-      </p>
-      <h1>{tr("Close company account")}</h1>
+      <SettingsHead
+        title={tr("Close company account")}
+        back={{ href: "/settings/company", label: tr("← Company details") }}
+        lead={tr("Stop using LeMoSp for this company and delete all its data after 30 days.")}
+      />
       <Notice {...notice} />
 
       {company.is_demo ? (
@@ -58,7 +60,8 @@ export default async function CloseCompanyPage({ searchParams }: { searchParams:
               <label htmlFor="company_name">
                 {tr("Type the company name to confirm:")} <strong>{company.name}</strong>
               </label>
-              <input id="company_name" name="company_name" type="text" autoComplete="off" spellCheck={false} required />
+              <input id="company_name" name="company_name" type="text" autoComplete="off" autoCapitalize="off" spellCheck={false} required aria-describedby="company_name-hint" />
+              <Hint id="company_name-hint">{tr("Type it exactly as shown, including capital letters.")}</Hint>
             </div>
             <SubmitButton className="btn btn-danger-solid btn-block" pendingText={tr("Please wait…")}>
               {tr("Close company account")}

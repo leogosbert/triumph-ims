@@ -1,0 +1,454 @@
+/* Settings and account screens. Every class starts with "st-" so nothing else in the app changes.
+   Colours come from the tokens in globals.css (they switch for dark mode by themselves). */
+
+/* ---------- Page header ---------- */
+.st-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+.st-head-ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--brand) 12%, var(--card));
+  color: var(--brand);
+}
+[data-theme="dark"] .st-head-ico {
+  color: color-mix(in srgb, var(--brand) 45%, #fff);
+}
+.st-head-text {
+  flex: 1;
+  min-width: 0;
+}
+.st-head h1 {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.st-lead {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.st-head-side {
+  flex: none;
+  align-self: center;
+}
+@media (max-width: 639px) {
+  .st-head {
+    flex-wrap: wrap;
+  }
+  .st-head-side {
+    order: 3;
+    flex-basis: 100%;
+    margin-left: 56px;
+  }
+}
+@media (min-width: 1024px) {
+  .st-head h1 {
+    font-size: 1.8rem;
+  }
+}
+
+/* ---------- Settings hub ---------- */
+.st-group {
+  margin: 0 0 22px;
+}
+.st-group-title {
+  margin: 0 0 8px 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.st-items {
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 720px) {
+  .st-items {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.st-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 14px 14px 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.st-item:hover {
+  border-color: var(--brand);
+  box-shadow: 0 4px 14px var(--shadow);
+}
+.st-item:active {
+  transform: scale(0.99);
+}
+.st-item:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.st-item-ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--brand) 10%, var(--card));
+  color: var(--brand);
+}
+[data-theme="dark"] .st-item-ico {
+  color: color-mix(in srgb, var(--brand) 45%, #fff);
+}
+.st-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.st-item-title {
+  font-weight: 600;
+  font-size: 0.97rem;
+}
+.st-item-sub {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+.st-item-body .badge {
+  align-self: flex-start;
+  margin-top: 4px;
+  white-space: normal;
+}
+.st-item-chev {
+  flex: none;
+  color: var(--chev);
+}
+.st-company-line {
+  margin: -8px 0 18px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+/* ---------- Cards and fields ---------- */
+.st-card-lead {
+  margin: -4px 0 14px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.st-hint {
+  display: block;
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+.st-hint::first-letter {
+  text-transform: uppercase;
+}
+.st-form select,
+.st-form input[type="text"],
+.st-form input[type="email"],
+.st-form input[type="tel"],
+.st-form textarea {
+  min-height: 46px;
+}
+.st-readonly {
+  display: block;
+  padding: 11px 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.st-plain {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+/* Jump links at the top of a long page. Wraps instead of scrolling sideways. */
+.st-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+.st-jump a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.st-jump a:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+/* Sticky save bar: stays above the floating bottom bar on phones. */
+.st-savebar {
+  position: sticky;
+  bottom: calc(var(--nav-h) + 18px + env(safe-area-inset-bottom));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 16px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px var(--shadow);
+}
+.st-savebar .btn {
+  flex: 1;
+}
+.st-savebar-note {
+  display: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+@media (min-width: 640px) {
+  .st-savebar .btn {
+    flex: 0 0 auto;
+    min-width: 220px;
+  }
+  .st-savebar-note {
+    display: block;
+    flex: 1;
+  }
+}
+@media (min-width: 1024px) {
+  .st-savebar {
+    bottom: 12px;
+  }
+}
+
+/* Long rows that must not push the page sideways. */
+.st-rows > li {
+  min-height: 56px;
+}
+.st-rows > li > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+pre.st-code {
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.st-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.st-card-head h2 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+.st-step {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand) 12%, var(--card));
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+[data-theme="dark"] .st-step {
+  color: color-mix(in srgb, var(--brand) 45%, #fff);
+}
+
+/* Progress bar (go-live, alerts). */
+.st-progress {
+  height: 8px;
+  margin: 8px 0 4px;
+  border-radius: 999px;
+  background: var(--soft);
+  overflow: hidden;
+}
+.st-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ok);
+}
+
+/* Go-live checklist lines. */
+.st-check > li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.st-check .mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--off-bg);
+  color: var(--muted);
+}
+.st-check .mark.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.st-check .mark.todo {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.st-check .what {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+
+/* Team members. */
+.st-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.st-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand) 14%, var(--card));
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+[data-theme="dark"] .st-avatar {
+  color: color-mix(in srgb, var(--brand) 45%, #fff);
+}
+.st-avatar.lg {
+  width: 56px;
+  height: 56px;
+  font-size: 1.15rem;
+}
+.st-person-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.st-member-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.st-member-form select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+}
+.st-member-form .btn {
+  grid-column: 1 / -1;
+}
+@media (min-width: 640px) {
+  .st-member-form {
+    grid-template-columns: 1fr 1fr auto;
+  }
+  .st-member-form .btn {
+    grid-column: auto;
+  }
+}
+
+/* Short help topics (backups). */
+.st-faq {
+  margin: 0;
+}
+.st-faq details {
+  border-top: 1px solid var(--line);
+}
+.st-faq details:first-of-type {
+  border-top: 0;
+}
+.st-faq summary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+.st-faq details p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* Account: profile summary and segmented choices. */
+.st-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.st-profile-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.st-profile-text strong {
+  display: block;
+  font-size: 1.05rem;
+}
+.st-seg-wrap .seg {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.st-seg-wrap .seg button {
+  min-height: 42px;
+}
+.st-sub-title {
+  margin: 16px 0 8px;
+  font-size: 0.9rem;
+}
+.st-bottom-actions {
+  display: grid;
+  gap: 10px;
+}

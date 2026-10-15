@@ -89,6 +89,8 @@ export const ROUTE_FEATURES: Record<string, string> = {
   "/head-office": "consolidated_reports",
   "/approvals": "advanced_approvals",
   "/scheduled-reports": "scheduled_reports",
+  "/assistant": "ai_assistant",
+  "/integrations": "integrations",
 };
 
 /** The feature a link belongs to: longest matching route prefix ("/rfqs/new" → client_rfqs). */

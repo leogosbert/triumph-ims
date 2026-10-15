@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { PrefetchKind } from "next/dist/client/components/router-reducer/router-reducer-types";
 import { Suspense, useEffect, useRef, useState } from "react";
 
 /** Marks the page as leaving (the current screen fades back) until the next one arrives. */
@@ -26,6 +27,46 @@ function Bar() {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => setState("idle"), 400);
   }, [pathname, search]);
+
+  // Get the next screen ready the moment a finger touches a link (or the mouse rests on it for a
+  // moment), so it is usually there by the time the tap completes.
+  const router = useRouter();
+  useEffect(() => {
+    const done = new Map<string, number>();
+    let hover: ReturnType<typeof setTimeout> | null = null;
+    function target(e: Event): string | null {
+      const a = (e.target as Element | null)?.closest?.("a");
+      if (!a || a.target === "_blank" || a.hasAttribute("download")) return null;
+      const href = a.getAttribute("href");
+      if (!href || !href.startsWith("/") || href.startsWith("//")) return null;
+      // Files and links answered by the server directly (PDFs, notifications, templates) are not screens.
+      if (/\/(pdf|api|templates)(\/|$|\?)|^\/(admin\/)?notifications\/[^/?]+/.test(href)) return null;
+      if (href.split("#")[0] === location.pathname + location.search) return null;
+      return href;
+    }
+    function warm(href: string) {
+      const now = Date.now();
+      if ((done.get(href) ?? 0) > now - 10_000) return;
+      done.set(href, now);
+      router.prefetch(href, { kind: "full" as PrefetchKind });
+    }
+    function onDown(e: PointerEvent) {
+      const href = target(e);
+      if (href) warm(href);
+    }
+    function onOver(e: MouseEvent) {
+      const href = target(e);
+      if (hover) clearTimeout(hover);
+      if (href) hover = setTimeout(() => warm(href), 120);
+    }
+    document.addEventListener("pointerdown", onDown, { capture: true, passive: true });
+    document.addEventListener("mouseover", onOver, { passive: true });
+    return () => {
+      document.removeEventListener("pointerdown", onDown, { capture: true });
+      document.removeEventListener("mouseover", onOver);
+      if (hover) clearTimeout(hover);
+    };
+  }, [router]);
 
   // Start on taps on links to another page of the app.
   useEffect(() => {

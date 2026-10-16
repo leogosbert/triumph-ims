@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESC}}" />
+  <meta name="theme-color" content="#050d22" />
+  <meta property="og:title" content="{{OGTITLE}}" />
+  <meta property="og:description" content="{{DESC}}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/assets/img/og.png" />
+  <link rel="icon" href="/assets/img/triumph-mark.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/img/triumph-mark.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://images.pexels.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    /* Before first paint: skip the intro loader after the first page, and cover the page if we arrived through the curtain. */
+    (function (d) {
+      // Links to sections of the old one-page site go to the page that now holds them.
+      var old = { about: "about", why: "about", industries: "industries", network: "industries", services: "services", process: "services", faq: "services", gallery: "gallery", quote: "contact", contact: "contact" };
+      var h = location.hash.slice(1);
+      if (/^\/(index\.html)?$/.test(location.pathname) && old[h]) return location.replace("/" + old[h] + ".html" + (h === "faq" ? "#faq" : ""));
+      try {
+        var s = sessionStorage;
+        if (s.getItem("t-seen")) d.classList.add("seen");
+        if (s.getItem("t-nav") && !("onpagereveal" in window)) d.classList.add("arrive");
+        s.removeItem("t-nav");
+      } catch (e) {}
+    })(document.documentElement);
+  </script>
+  <link rel="stylesheet" href="/assets/css/site.css" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "TRIUMPH General Suppliers Ltd",
+      "description": "Industrial and general supply company in Tanzania: chemicals, oils and lubricants, mechanical spares, PPE, electrical and general supplies.",
+      "areaServed": "Tanzania",
+      "logo": "/assets/img/triumph-logo.svg"
+    }
+  </script>
+</head>

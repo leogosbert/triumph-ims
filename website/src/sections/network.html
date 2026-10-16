@@ -1,0 +1,31 @@
+    <!-- SUPPLY NETWORK (3D simulation) -->
+    <section class="section dark" id="network" style="padding-top: 0">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="kicker reveal">Supply network</span>
+          <h2 class="reveal" style="--d: 1">From source to site, <span class="grad-text">in motion</span></h2>
+          <p class="reveal" style="--d: 2">A live 3D picture of how supply flows from the port, through our warehouse, to the plants we serve. Drag to turn it, and pick a route to follow.</p>
+        </div>
+        <div class="sim reveal" style="--d: 3">
+          <div class="sim-stage" data-sim-stage>
+            <canvas id="sim3d" aria-label="3D simulation of deliveries from the port and warehouse to industry sites"></canvas>
+            <div class="sim-labels" data-sim-labels></div>
+            <p class="sim-fallback">The 3D view needs a browser with WebGL. Our routes run from Dar es Salaam port through our warehouse to mines, sugar estates, cement plants and refineries.</p>
+            <span class="sim-hint">Drag to rotate · scroll the page as usual</span>
+          </div>
+          <div class="sim-panel">
+            <div class="glass-card">
+              <h3 style="font-size: 1.05rem; color: #fff">Follow a route</h3>
+              <div class="sim-routes" data-sim-routes></div>
+            </div>
+            <div class="glass-card">
+              <div class="sim-meter">
+                <div><b data-sim-moving>0</b><small>Deliveries moving</small></div>
+                <div><b data-sim-done>0</b><small>Arrived on site</small></div>
+              </div>
+            </div>
+            <p class="sim-note">An illustration of how our routes work, not live tracking.</p>
+          </div>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,54 @@
+    <!-- QUOTE + CONTACT -->
+    <section class="section dark" id="quote">
+      <div class="wrap quote">
+        <div class="quote-aside">
+          <span class="kicker reveal">Request a quote</span>
+          <h2 class="reveal" style="--d: 1">Tell us what you need. <span class="grad-text">We'll handle the rest.</span></h2>
+          <p class="reveal" style="--d: 2">Send your list or attach your purchase requisition. We reply with prices, lead times and delivery to your site.</p>
+          <ul class="contact-list">
+            <li class="reveal" data-contact="phone" hidden><span class="ico"><svg><use href="#i-phone" /></svg></span><div><small>Call us</small><a href="#"></a></div></li>
+            <li class="reveal" data-contact="email" hidden><span class="ico"><svg><use href="#i-mail" /></svg></span><div><small>Email</small><a href="#"></a></div></li>
+            <li class="reveal" data-contact="whatsapp" hidden><span class="ico"><svg><use href="#i-whatsapp" /></svg></span><div><small>WhatsApp</small><a href="#" target="_blank" rel="noopener">Chat with us</a></div></li>
+            <li class="reveal" data-contact="address" hidden><span class="ico"><svg><use href="#i-pin" /></svg></span><div><small>Office</small><span></span></div></li>
+            <li class="reveal" data-contact="hours" hidden><span class="ico"><svg><use href="#i-clock" /></svg></span><div><small>Hours</small><span></span></div></li>
+            <li class="reveal"><span class="ico"><svg><use href="#i-globe" /></svg></span><div><small>Serving</small><span>All of Tanzania</span></div></li>
+          </ul>
+          <div data-map style="margin-top: 22px"></div>
+        </div>
+
+        <form class="glass-card form reveal right" name="quote" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="company_website" enctype="multipart/form-data">
+          <input type="hidden" name="form-name" value="quote" />
+          <p class="hp"><label>Leave this empty <input name="company_website" /></label></p>
+          <div class="form-grid">
+            <div class="field"><label for="q-name">Your name</label><input id="q-name" name="name" required autocomplete="name" placeholder="Full name" /></div>
+            <div class="field"><label for="q-company">Company</label><input id="q-company" name="company" required autocomplete="organization" placeholder="Company name" /></div>
+            <div class="field"><label for="q-email">Email</label><input id="q-email" type="email" name="email" required autocomplete="email" placeholder="you@company.co.tz" /></div>
+            <div class="field"><label for="q-phone">Phone</label><input id="q-phone" type="tel" name="phone" autocomplete="tel" placeholder="+255 ..." /></div>
+            <div class="field"><label for="q-industry">Industry</label>
+              <select id="q-industry" name="industry">
+                <option>Mining</option><option>Sugar processing</option><option>Oil &amp; gas</option><option>Cement</option><option>Manufacturing</option><option>Construction</option><option>Energy &amp; utilities</option><option>Agriculture</option><option>Other</option>
+              </select>
+            </div>
+            <div class="field"><label for="q-currency">Quote currency</label>
+              <select id="q-currency" name="currency"><option>TZS</option><option>USD</option></select>
+            </div>
+            <fieldset class="field full">
+              <legend>What do you need?</legend>
+              <div class="checks" data-cat-checks><label><input type="checkbox" name="categories" value="Industrial chemicals" /><span>Industrial chemicals</span></label><label><input type="checkbox" name="categories" value="Oils &amp; lubricants" /><span>Oils &amp; lubricants</span></label><label><input type="checkbox" name="categories" value="Mechanical spares" /><span>Mechanical spares</span></label><label><input type="checkbox" name="categories" value="Safety &amp; PPE" /><span>Safety &amp; PPE</span></label><label><input type="checkbox" name="categories" value="Electrical" /><span>Electrical</span></label><label><input type="checkbox" name="categories" value="Tools &amp; consumables" /><span>Tools &amp; consumables</span></label><label><input type="checkbox" name="categories" value="General supplies" /><span>General supplies</span></label></div>
+            </fieldset>
+            <div class="field full">
+              <div class="basket-note" data-basket-note></div>
+              <input type="hidden" name="selected_products" data-basket-field />
+            </div>
+            <div class="field full"><label for="q-items">Items, quantities and specifications</label><textarea id="q-items" name="items" required placeholder="e.g. 20 × 208 L drums hydraulic oil ISO VG 46; 50 pairs safety boots size 42"></textarea></div>
+            <div class="field"><label for="q-site">Delivery site</label><input id="q-site" name="delivery_site" placeholder="Town or site name" /></div>
+            <div class="field"><label for="q-date">Needed by</label><input id="q-date" type="date" name="needed_by" /></div>
+            <div class="field full"><label for="q-file">Attach a list or requisition (optional)</label><input id="q-file" type="file" name="attachment" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png" /></div>
+          </div>
+          <div class="form-foot">
+            <small>We reply within one working day.</small>
+            <button class="btn btn-primary magnetic" type="submit">Send request <svg><use href="#i-arrow" /></svg></button>
+          </div>
+        </form>
+      </div>
+    </section>

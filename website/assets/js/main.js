@@ -234,9 +234,7 @@
 
   /* ---------- Quote form: categories + basket from the Products page ---------- */
   const checks = $("[data-cat-checks]");
-  if (checks) {
-    checks.innerHTML = CAT.categories.map((c) => `<label><input type="checkbox" name="categories" value="${esc(c.name)}"/><span>${esc(c.name)}</span></label>`).join("");
-  }
+  // The category boxes are written in the HTML (not here) so Netlify Forms sees the field and keeps it.
   let basket = [];
   try {
     basket = JSON.parse(localStorage.getItem("triumph-basket") || "[]");

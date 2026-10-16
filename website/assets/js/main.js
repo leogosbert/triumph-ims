@@ -21,7 +21,7 @@
   function wireImg(img) {
     if (img.dataset.wired) return;
     img.dataset.wired = "1";
-    const ph = img.closest(".ph");
+    const ph = img.closest(".ph, .page-hero-bg");
     img.addEventListener("error", () => ph && ph.classList.add("no-img"));
     if (img.dataset.img) {
       const w = Number(img.dataset.w || 900);
@@ -32,10 +32,16 @@
   }
 
   /* ---------- Loader ---------- */
+  // The intro plays once per visit; moving between pages skips it.
+  const root = document.documentElement;
   const loader = $(".loader");
   const hideLoader = () => loader && loader.classList.add("done");
+  if (root.classList.contains("seen")) hideLoader();
   window.addEventListener("load", () => setTimeout(hideLoader, 250));
   setTimeout(hideLoader, 2600);
+  try {
+    sessionStorage.setItem("t-seen", "1");
+  } catch (e) {}
 
   const yr = $("[data-year]");
   if (yr) yr.textContent = new Date().getFullYear();
@@ -108,7 +114,7 @@
         </a>`;
       })
       .join("") +
-      `<a class="supply supply-cta reveal" style="--d:1" href="#quote">
+      `<a class="supply supply-cta reveal" style="--d:1" href="/contact.html">
         <div class="supply-body">
           <span class="tag" style="position:static;margin-bottom:18px">${icon("search")}</span>
           <h3>Can't see what you need?</h3>
@@ -190,21 +196,50 @@
       b.addEventListener("mouseleave", () => v.pause());
     });
   }
+  /* ---------- Photo wall (Gallery page) ---------- */
+  const photos = $("[data-photos]");
+  if (photos) {
+    const PICS = [
+      ["mining", "Open-pit mining"], ["drums", "Lubricant drums ready for dispatch"], ["sugar", "Sugar cane harvest"],
+      ["engineer", "Engineer on site"], ["refinery", "Refinery at dusk"], ["bearings", "Bearings and mechanical spares"],
+      ["cement", "Cement plant"], ["helmet", "Safety first"], ["tanks", "Storage tanks"], ["warehouse", "Warehouse stock"],
+      ["mechanic", "Maintenance crew"], ["truck", "Delivery to site"],
+    ].filter(([k]) => C.img[k]);
+    photos.innerHTML = PICS.map(
+      ([k, cap], i) => `<button class="photo reveal" style="--d:${i % 4}" data-zoom="${k}" data-cap="${esc(cap)}" aria-label="View photo: ${esc(cap)}">
+        <span class="ph"><img data-img="${k}" data-w="700" data-sizes="(max-width: 640px) 50vw, 25vw" alt="${esc(cap)}" loading="lazy"/></span>
+        <span class="cap">${esc(cap)}</span>
+      </button>`,
+    ).join("");
+  }
+
   const lb = $("[data-lightbox]");
   if (lb) {
     const v = $("video", lb);
+    const fig = $("figure", lb);
     const close = () => {
       lb.classList.remove("open");
       v.pause();
       document.body.style.overflow = "";
     };
     document.addEventListener("click", (e) => {
-      const b = e.target.closest("[data-video]");
+      const b = e.target.closest("[data-video], [data-zoom]");
       if (!b) return;
-      v.src = b.dataset.video;
+      const isPhoto = !!b.dataset.zoom;
+      v.hidden = isPhoto;
+      if (fig) fig.hidden = !isPhoto;
+      lb.setAttribute("aria-label", isPhoto ? "Photo" : "Video");
+      if (isPhoto) {
+        v.pause();
+        $("img", fig).src = photo(b.dataset.zoom, 1800);
+        $("img", fig).alt = b.dataset.cap || "";
+        $("figcaption", fig).textContent = b.dataset.cap || "";
+      } else {
+        v.src = b.dataset.video;
+        v.play().catch(() => {});
+      }
       lb.classList.add("open");
       document.body.style.overflow = "hidden";
-      v.play().catch(() => {});
       $(".lightbox-close", lb).focus();
     });
     lb.addEventListener("click", (e) => (e.target === lb || e.target.closest(".lightbox-close")) && close());
@@ -234,9 +269,7 @@
 
   /* ---------- Quote form: categories + basket from the Products page ---------- */
   const checks = $("[data-cat-checks]");
-  if (checks) {
-    checks.innerHTML = CAT.categories.map((c) => `<label><input type="checkbox" name="categories" value="${esc(c.name)}"/><span>${esc(c.name)}</span></label>`).join("");
-  }
+  // The category boxes are written in the HTML (not here) so Netlify Forms sees the field and keeps it.
   let basket = [];
   try {
     basket = JSON.parse(localStorage.getItem("triumph-basket") || "[]");
@@ -360,41 +393,63 @@
   onScroll();
   top && top.addEventListener("click", () => scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }));
 
-  /* ---------- Nav: sliding pill on the section in view ---------- */
+  /* ---------- Nav: sliding pill on the current page ---------- */
   const nav = $(".nav");
   const pill = nav && $(".nav-pill", nav);
-  const placePill = (a) => {
+  const placePill = (a, instant) => {
     if (!pill) return;
-    if (!a) return pill.style.setProperty("--o", 0);
-    pill.style.setProperty("--x", `${a.offsetLeft}px`);
-    pill.style.setProperty("--w", `${a.offsetWidth}px`);
-    pill.style.setProperty("--o", 1);
+    if (instant) pill.style.transition = "none";
+    if (!a) pill.style.setProperty("--o", 0);
+    else {
+      pill.style.setProperty("--x", `${a.offsetLeft}px`);
+      pill.style.setProperty("--w", `${a.offsetWidth}px`);
+      pill.style.setProperty("--o", 1);
+    }
+    if (instant) {
+      void pill.offsetWidth;
+      pill.style.transition = "";
+    }
   };
   if (nav) {
-    const links = $$('a[href^="#"]', nav);
-    const secs = links.map((a) => document.getElementById(a.getAttribute("href").slice(1))).filter(Boolean);
-    let active = null;
-    const setActive = (id) => {
-      links.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === `#${id}`));
-      active = links.find((a) => a.getAttribute("href") === `#${id}`) || null;
-      placePill(active);
+    const links = $$("a", nav);
+    const active = $('a[aria-current="page"]', nav);
+    // The pill starts where it was on the last page and glides over to this one.
+    let from = null;
+    try {
+      from = links.find((a) => a.getAttribute("href") === sessionStorage.getItem("t-pill"));
+      sessionStorage.setItem("t-pill", active ? active.getAttribute("href") : "");
+    } catch (e) {}
+    const start = () => {
+      placePill(from || active, true);
+      requestAnimationFrame(() => requestAnimationFrame(() => placePill(active)));
     };
-    const secIO = new IntersectionObserver(
-      (en) => {
-        en.forEach((x) => {
-          if (x.isIntersecting) setActive(x.target.id === "quote" ? "contact" : x.target.id);
-        });
-      },
-      { rootMargin: "-45% 0px -50% 0px" },
-    );
-    secs.forEach((s) => secIO.observe(s));
-    const q = document.getElementById("quote");
-    q && secIO.observe(q);
-    const top0 = document.getElementById("top");
-    top0 && new IntersectionObserver((en) => en[0].isIntersecting && setActive(""), { rootMargin: "-45% 0px -50% 0px" }).observe(top0);
+    document.fonts && document.fonts.status !== "loaded" ? document.fonts.ready.then(start) : start();
     links.forEach((a) => a.addEventListener("mouseenter", () => placePill(a)));
     nav.addEventListener("mouseleave", () => placePill(active));
-    addEventListener("resize", () => placePill(active));
+    addEventListener("resize", () => placePill(active, true));
+  }
+
+  /* ---------- Page transitions ---------- */
+  // Browsers with cross-page view transitions animate in CSS (site.css). Others get a curtain that
+  // sweeps over the page on the way out and lifts off the next page on the way in.
+  if (!("onpagereveal" in window)) {
+    if (root.classList.contains("arrive")) setTimeout(() => root.classList.remove("arrive"), 1200);
+    const page = (p) => p.replace(/(index)?\.html$/, "").replace(/\/$/, "") || "/";
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest("a[href]");
+      if (!a || reduced || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target || a.hasAttribute("download")) return;
+      const u = new URL(a.href, location.href);
+      if (u.origin !== location.origin || page(u.pathname) === page(location.pathname)) return;
+      e.preventDefault();
+      try {
+        sessionStorage.setItem("t-nav", "1");
+      } catch (err) {}
+      root.classList.add("leaving");
+      setTimeout(() => location.assign(u.href), 430);
+    });
+    // Coming back with the browser's Back button can show the page as it was left, curtain and all.
+    addEventListener("pageshow", (e) => e.persisted && root.classList.remove("leaving", "arrive"));
   }
 
   /* ---------- Mobile menu ---------- */

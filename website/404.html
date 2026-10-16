@@ -6,8 +6,8 @@
   <title>Page not found | TRIUMPH General Suppliers Ltd</title>
   <meta name="description" content="This page could not be found." />
   <meta name="theme-color" content="#050d22" />
-  <meta property="og:title" content="TRIUMPH General Suppliers Ltd" />
-  <meta property="og:description" content="Reliable industrial supply for mining, sugar, oil & gas, cement and manufacturing in Tanzania." />
+  <meta property="og:title" content="Page not found" />
+  <meta property="og:description" content="This page could not be found." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="/assets/img/og.png" />
   <link rel="icon" href="/assets/img/triumph-mark.svg" type="image/svg+xml" />
@@ -17,7 +17,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://images.pexels.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/assets/css/site.css" />
+  <script>
+    /* Before first paint: skip the intro loader after the first page, and cover the page if we arrived through the curtain. */
+    (function (d) {
+      // Links to sections of the old one-page site go to the page that now holds them.
+      var old = { about: "about", why: "about", industries: "industries", network: "industries", services: "services", process: "services", faq: "services", gallery: "gallery", quote: "contact", contact: "contact" };
+      var h = location.hash.slice(1);
+      if (/^\/(index\.html)?$/.test(location.pathname) && old[h]) return location.replace("/" + old[h] + ".html" + (h === "faq" ? "#faq" : ""));
+      try {
+        var s = sessionStorage;
+        if (s.getItem("t-seen")) d.classList.add("seen");
+        if (s.getItem("t-nav") && !("onpagereveal" in window)) d.classList.add("arrive");
+        s.removeItem("t-nav");
+      } catch (e) {}
+    })(document.documentElement);
+  </script>
+  <link rel="stylesheet" href="/assets/css/site.css?v=88ceb7b1" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -30,6 +45,7 @@
   </script>
 </head>
 <body>
+<!-- Built by website/tools/build.py from website/src. Edit the source, then run the build. -->
   <a class="skip" href="#main">Skip to content</a>
 
   <div class="loader" aria-hidden="true">
@@ -46,6 +62,7 @@
 
   <div class="progress" aria-hidden="true"></div>
   <div class="cursor-glow" aria-hidden="true"></div>
+  <div class="curtain" aria-hidden="true"><svg viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#1C4C9B" /><path d="M20 6 34 19h-6.2L20 11.8 12.2 19H6z" fill="#fff" /><path d="M20 16.5 30 26h-5.6L20 21.9 15.6 26H10z" fill="#A9B4C2" /><rect x="17.6" y="22.6" width="4.8" height="11.4" rx="1" fill="#fff" /></svg></div>
 
   <header class="header">
     <div class="wrap">
@@ -60,30 +77,28 @@
       </a>
       <nav class="nav" aria-label="Main">
         <span class="nav-pill" aria-hidden="true"></span>
-        <a href="/#about">About</a>
-        <a href="/#supplies">Supplies</a>
-        <a href="/#industries">Industries</a>
-        <a href="/#network">Supply network</a>
-        <a href="/#services">Services</a>
-        <a href="/#gallery">Gallery</a>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
         <a href="/products.html">Products</a>
-        <a href="/#contact">Contact</a>
+        <a href="/industries.html">Industries</a>
+        <a href="/services.html">Services</a>
+        <a href="/gallery.html">Gallery</a>
+        <a href="/contact.html">Contact</a>
       </nav>
-      <a class="btn btn-primary btn-sm header-cta magnetic" href="/#quote">Request a quote <svg><use href="#i-arrow" /></svg></a>
+      <a class="btn btn-primary btn-sm header-cta magnetic" href="/contact.html">Request a quote <svg><use href="#i-arrow" /></svg></a>
       <button class="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
     </div>
   </header>
 
   <nav class="mobile-menu" id="mobile-menu" aria-label="Menu">
-    <a href="/#about">About</a>
-    <a href="/#supplies">Supplies</a>
-    <a href="/#industries">Industries</a>
-    <a href="/#network">Supply network</a>
-    <a href="/#services">Services</a>
-    <a href="/#gallery">Gallery</a>
+    <a href="/">Home</a>
+    <a href="/about.html">About</a>
     <a href="/products.html">Products</a>
-    <a href="/#contact">Contact</a>
-    <a class="btn btn-primary" href="/#quote">Request a quote</a>
+    <a href="/industries.html">Industries</a>
+    <a href="/services.html">Services</a>
+    <a href="/gallery.html">Gallery</a>
+    <a href="/contact.html">Contact</a>
+    <a class="btn btn-primary" href="/contact.html">Request a quote</a>
   </nav>
 
   <main id="main" class="simple">
@@ -91,9 +106,10 @@
       <p class="grad-text" style="font-family: var(--head); font-size: 5rem; font-weight: 800; line-height: 1; margin: 0">404</p>
       <h1>This page has moved on</h1>
       <p>The page you were looking for isn't here. Let's get you back on track.</p>
-      <p style="margin-top: 24px"><a class="btn btn-primary magnetic" href="/">Go to home <svg><use href="#i-arrow" /></svg></a> <a class="btn btn-glass magnetic" href="/#quote">Request a quote</a></p>
+      <p style="margin-top: 24px"><a class="btn btn-primary magnetic" href="/">Go to home <svg><use href="#i-arrow" /></svg></a> <a class="btn btn-glass magnetic" href="/contact.html">Request a quote</a></p>
     </div>
   </main>
+
   <footer class="footer">
     <div class="wrap">
       <div class="footer-grid">
@@ -123,17 +139,17 @@
         <div>
           <h4>Company</h4>
           <ul>
-            <li><a href="/#about">About us</a></li>
-            <li><a href="/#industries">Industries</a></li>
-            <li><a href="/#services">Services</a></li>
-            <li><a href="/#gallery">Gallery</a></li>
-            <li><a href="/#faq">FAQ</a></li>
+            <li><a href="/about.html">About us</a></li>
+            <li><a href="/industries.html">Industries</a></li>
+            <li><a href="/services.html">Services</a></li>
+            <li><a href="/gallery.html">Gallery</a></li>
+            <li><a href="/services.html#faq">FAQ</a></li>
           </ul>
         </div>
         <div>
           <h4>Get in touch</h4>
           <ul data-footer-contact>
-            <li><a href="/#quote">Request a quote</a></li>
+            <li><a href="/contact.html">Request a quote</a></li>
           </ul>
         </div>
       </div>
@@ -151,10 +167,15 @@
     <svg><use href="#i-up" /></svg>
   </button>
 
-  
-  <script src="/assets/js/icons.js"></script>
-  <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/catalogue.js"></script>
-  <script src="/assets/js/main.js"></script>
+  <div class="lightbox" role="dialog" aria-modal="true" aria-label="Video" data-lightbox>
+    <button class="lightbox-close" aria-label="Close">×</button>
+    <video controls playsinline></video>
+    <figure hidden><img alt="" /><figcaption></figcaption></figure>
+  </div>
+
+  <script src="/assets/js/icons.js?v=efcbccad"></script>
+  <script src="/assets/js/config.js?v=535e8577"></script>
+  <script src="/assets/js/catalogue.js?v=8146436a"></script>
+  <script src="/assets/js/main.js?v=16ee52b7"></script>
 </body>
 </html>

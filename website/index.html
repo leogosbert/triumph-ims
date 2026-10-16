@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>TRIUMPH General Suppliers Ltd | Industrial supply in Tanzania</title>
-  <meta name="description" content="TRIUMPH General Suppliers Ltd supplies industrial chemicals, oils and lubricants, mechanical spares, PPE and general supplies to mining, sugar, oil & gas, cement and manufacturing companies in Tanzania." />
+  <meta name="description" content="TRIUMPH General Suppliers Ltd supplies industrial chemicals, oils and lubricants, mechanical spares, PPE and general supplies to mining, sugar, oil &amp; gas, cement and manufacturing companies in Tanzania." />
   <meta name="theme-color" content="#050d22" />
   <meta property="og:title" content="TRIUMPH General Suppliers Ltd" />
-  <meta property="og:description" content="Reliable industrial supply for mining, sugar, oil & gas, cement and manufacturing in Tanzania." />
+  <meta property="og:description" content="TRIUMPH General Suppliers Ltd supplies industrial chemicals, oils and lubricants, mechanical spares, PPE and general supplies to mining, sugar, oil &amp; gas, cement and manufacturing companies in Tanzania." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="/assets/img/og.png" />
   <link rel="icon" href="/assets/img/triumph-mark.svg" type="image/svg+xml" />
@@ -17,7 +17,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://images.pexels.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/assets/css/site.css" />
+  <script>
+    /* Before first paint: skip the intro loader after the first page, and cover the page if we arrived through the curtain. */
+    (function (d) {
+      // Links to sections of the old one-page site go to the page that now holds them.
+      var old = { about: "about", why: "about", industries: "industries", network: "industries", services: "services", process: "services", faq: "services", gallery: "gallery", quote: "contact", contact: "contact" };
+      var h = location.hash.slice(1);
+      if (/^\/(index\.html)?$/.test(location.pathname) && old[h]) return location.replace("/" + old[h] + ".html" + (h === "faq" ? "#faq" : ""));
+      try {
+        var s = sessionStorage;
+        if (s.getItem("t-seen")) d.classList.add("seen");
+        if (s.getItem("t-nav") && !("onpagereveal" in window)) d.classList.add("arrive");
+        s.removeItem("t-nav");
+      } catch (e) {}
+    })(document.documentElement);
+  </script>
+  <link rel="stylesheet" href="/assets/css/site.css?v=88ceb7b1" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -30,6 +45,7 @@
   </script>
 </head>
 <body>
+<!-- Built by website/tools/build.py from website/src. Edit the source, then run the build. -->
   <a class="skip" href="#main">Skip to content</a>
 
   <div class="loader" aria-hidden="true">
@@ -46,6 +62,7 @@
 
   <div class="progress" aria-hidden="true"></div>
   <div class="cursor-glow" aria-hidden="true"></div>
+  <div class="curtain" aria-hidden="true"><svg viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#1C4C9B" /><path d="M20 6 34 19h-6.2L20 11.8 12.2 19H6z" fill="#fff" /><path d="M20 16.5 30 26h-5.6L20 21.9 15.6 26H10z" fill="#A9B4C2" /><rect x="17.6" y="22.6" width="4.8" height="11.4" rx="1" fill="#fff" /></svg></div>
 
   <header class="header">
     <div class="wrap">
@@ -60,30 +77,28 @@
       </a>
       <nav class="nav" aria-label="Main">
         <span class="nav-pill" aria-hidden="true"></span>
-        <a href="#about">About</a>
-        <a href="#supplies">Supplies</a>
-        <a href="#industries">Industries</a>
-        <a href="#network">Supply network</a>
-        <a href="#services">Services</a>
-        <a href="#gallery">Gallery</a>
+        <a href="/" aria-current="page">Home</a>
+        <a href="/about.html">About</a>
         <a href="/products.html">Products</a>
-        <a href="#contact">Contact</a>
+        <a href="/industries.html">Industries</a>
+        <a href="/services.html">Services</a>
+        <a href="/gallery.html">Gallery</a>
+        <a href="/contact.html">Contact</a>
       </nav>
-      <a class="btn btn-primary btn-sm header-cta magnetic" href="#quote">Request a quote <svg><use href="#i-arrow" /></svg></a>
+      <a class="btn btn-primary btn-sm header-cta magnetic" href="/contact.html">Request a quote <svg><use href="#i-arrow" /></svg></a>
       <button class="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
     </div>
   </header>
 
   <nav class="mobile-menu" id="mobile-menu" aria-label="Menu">
-    <a href="#about">About</a>
-    <a href="#supplies">Supplies</a>
-    <a href="#industries">Industries</a>
-    <a href="#network">Supply network</a>
-    <a href="#services">Services</a>
-    <a href="#gallery">Gallery</a>
+    <a href="/" aria-current="page">Home</a>
+    <a href="/about.html">About</a>
     <a href="/products.html">Products</a>
-    <a href="#contact">Contact</a>
-    <a class="btn btn-primary" href="#quote">Request a quote</a>
+    <a href="/industries.html">Industries</a>
+    <a href="/services.html">Services</a>
+    <a href="/gallery.html">Gallery</a>
+    <a href="/contact.html">Contact</a>
+    <a class="btn btn-primary" href="/contact.html">Request a quote</a>
   </nav>
 
   <main id="main">
@@ -109,7 +124,7 @@
             cement and manufacturing. Sourced right, checked, and delivered on time to your site.
           </p>
           <div class="hero-ctas reveal" style="--d: 8">
-            <a class="btn btn-primary magnetic" href="#quote">Request a quote <svg><use href="#i-arrow" /></svg></a>
+            <a class="btn btn-primary magnetic" href="/contact.html">Request a quote <svg><use href="#i-arrow" /></svg></a>
             <a class="btn btn-glass magnetic" href="/products.html">Browse products</a>
           </div>
         </div>
@@ -128,7 +143,7 @@
           </div>
         </div>
       </div>
-      <a class="scroll-cue" href="#about" aria-label="Scroll down"></a>
+      <a class="scroll-cue" href="#supplies" aria-label="Scroll down"></a>
     </section>
 
     <div class="marquee" aria-hidden="true">
@@ -137,37 +152,6 @@
         <span>Mining</span><span>Sugar processing</span><span>Oil &amp; gas</span><span>Cement</span><span>Manufacturing</span><span>Construction</span><span>Energy &amp; utilities</span><span>Agriculture</span>
       </div>
     </div>
-
-    <!-- ABOUT -->
-    <section class="section" id="about">
-      <div class="wrap about">
-        <div class="collage reveal left">
-          <div class="ph"><img data-img="warehouse" data-w="900" alt="Warehouse aisle with stocked shelves" loading="lazy" /></div>
-          <div class="ph"><img data-img="worker" data-w="700" alt="Worker in a safety helmet and reflective vest" loading="lazy" /></div>
-          <div class="glass-card badge-card"><b>Registered in Tanzania</b><small>A fully registered limited company serving industry nationwide.</small></div>
-        </div>
-        <div>
-          <span class="kicker reveal">Who we are</span>
-          <h2 class="reveal" style="--d: 1">One dependable source for <span class="grad-text">everything your plant needs</span></h2>
-          <p class="reveal" style="--d: 2">
-            TRIUMPH General Suppliers Ltd is a Tanzanian general supply company. We source and deliver the chemicals,
-            lubricants, spare parts, safety gear and everyday supplies that keep mines, factories and processing plants
-            running, so your team can focus on production instead of chasing suppliers.
-          </p>
-          <div class="mv reveal" style="--d: 3">
-            <div><b>Mission</b><p>To supply quality industrial products on time, at fair prices, with honest service.</p></div>
-            <div><b>Vision</b><p>To be the most trusted supply partner for industry in East Africa.</p></div>
-          </div>
-          <div class="values">
-            <div class="value reveal" style="--d: 4"><h3><svg><use href="#i-shield" /></svg>Quality first</h3><p>Genuine products from known makers, checked before dispatch.</p></div>
-            <div class="value reveal" style="--d: 5"><h3><svg><use href="#i-clock" /></svg>On time</h3><p>Clear lead times and delivery to site, with updates on the way.</p></div>
-            <div class="value reveal" style="--d: 6"><h3><svg><use href="#i-handshake" /></svg>Integrity</h3><p>Transparent quotes, proper invoices and documentation.</p></div>
-            <div class="value reveal" style="--d: 7"><h3><svg><use href="#i-users" /></svg>Partnership</h3><p>We learn your plant and plan supply with you, not just for you.</p></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- SUPPLIES -->
     <section class="section tint" id="supplies">
       <div class="wrap">
@@ -182,199 +166,48 @@
         </p>
       </div>
     </section>
-
-    <!-- INDUSTRIES -->
-    <section class="section dark" id="industries">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="kicker reveal">Industries we serve</span>
-          <h2 class="reveal" style="--d: 1">Built around the way <span class="grad-text">heavy industry works</span></h2>
-          <p class="reveal" style="--d: 2">Each industry has its own rhythm, risks and specifications. We know what yours needs.</p>
-        </div>
-        <div class="industries reveal" style="--d: 3">
-          <div class="ind-tabs" role="tablist" aria-label="Industries" data-ind-tabs></div>
-          <div class="ind-stage" data-ind-stage></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SUPPLY NETWORK (3D simulation) -->
-    <section class="section dark" id="network" style="padding-top: 0">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="kicker reveal">Supply network</span>
-          <h2 class="reveal" style="--d: 1">From source to site, <span class="grad-text">in motion</span></h2>
-          <p class="reveal" style="--d: 2">A live 3D picture of how supply flows from the port, through our warehouse, to the plants we serve. Drag to turn it, and pick a route to follow.</p>
-        </div>
-        <div class="sim reveal" style="--d: 3">
-          <div class="sim-stage" data-sim-stage>
-            <canvas id="sim3d" aria-label="3D simulation of deliveries from the port and warehouse to industry sites"></canvas>
-            <div class="sim-labels" data-sim-labels></div>
-            <p class="sim-fallback">The 3D view needs a browser with WebGL. Our routes run from Dar es Salaam port through our warehouse to mines, sugar estates, cement plants and refineries.</p>
-            <span class="sim-hint">Drag to rotate · scroll the page as usual</span>
-          </div>
-          <div class="sim-panel">
-            <div class="glass-card">
-              <h3 style="font-size: 1.05rem; color: #fff">Follow a route</h3>
-              <div class="sim-routes" data-sim-routes></div>
-            </div>
-            <div class="glass-card">
-              <div class="sim-meter">
-                <div><b data-sim-moving>0</b><small>Deliveries moving</small></div>
-                <div><b data-sim-done>0</b><small>Arrived on site</small></div>
-              </div>
-            </div>
-            <p class="sim-note">An illustration of how our routes work, not live tracking.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SERVICES -->
-    <section class="section" id="services">
+    <!-- EXPLORE: a door to each page -->
+    <section class="section" id="explore">
       <div class="wrap">
         <div class="section-head center">
-          <span class="kicker reveal">Services</span>
-          <h2 class="reveal" style="--d: 1">More than a supplier: <span class="grad-text">a supply team</span></h2>
-          <p class="reveal" style="--d: 2">We take the work of finding, buying, checking and moving goods off your hands.</p>
+          <span class="kicker reveal">Explore TRIUMPH</span>
+          <h2 class="reveal" style="--d: 1">Get to know <span class="grad-text">how we work</span></h2>
+          <p class="reveal" style="--d: 2">Who we are, the industries we serve, what we do for you and the work itself.</p>
         </div>
-        <div class="services">
-          <div class="service reveal" style="--d: 0"><span class="num">01</span><span class="ico"><svg><use href="#i-search" /></svg></span><h3>Sourcing &amp; procurement</h3><p>We find the right product from trusted manufacturers and distributors, compare offers and buy at the best value.</p></div>
-          <div class="service reveal" style="--d: 1"><span class="num">02</span><span class="ico"><svg><use href="#i-truck" /></svg></span><h3>Logistics &amp; delivery</h3><p>Clearing, transport and delivery to your site anywhere in Tanzania, with updates along the way.</p></div>
-          <div class="service reveal" style="--d: 2"><span class="num">03</span><span class="ico"><svg><use href="#i-warehouse" /></svg></span><h3>Stocking &amp; warehousing</h3><p>We hold fast-moving items for you and call them off as you need them, cutting your downtime.</p></div>
-          <div class="service reveal" style="--d: 3"><span class="num">04</span><span class="ico"><svg><use href="#i-clipboard" /></svg></span><h3>Framework &amp; contract supply</h3><p>Fixed-price agreements and scheduled deliveries for your regular consumables.</p></div>
-          <div class="service reveal" style="--d: 4"><span class="num">05</span><span class="ico"><svg><use href="#i-wrench" /></svg></span><h3>Technical advice</h3><p>Help choosing the right grade, specification or equivalent part, with data sheets and safety sheets.</p></div>
-          <div class="service reveal" style="--d: 5"><span class="num">06</span><span class="ico"><svg><use href="#i-bolt" /></svg></span><h3>Urgent supply</h3><p>When a breakdown stops production, we move fast to get the part or product to you.</p></div>
+        <div class="explore">
+          <a class="go tilt reveal" style="--d: 0" href="/about.html">
+            <div class="ph"><img data-img="handshake" data-w="800" data-sizes="(max-width: 640px) 100vw, 50vw" alt="" loading="lazy" /></div>
+            <span class="go-body"><small>About us</small><b>A Tanzanian supply partner you can rely on</b><span class="more">Our story and values <svg><use href="#i-arrow" /></svg></span></span>
+          </a>
+          <a class="go tilt reveal" style="--d: 1" href="/industries.html">
+            <div class="ph"><img data-img="mine2" data-w="800" data-sizes="(max-width: 640px) 100vw, 50vw" alt="" loading="lazy" /></div>
+            <span class="go-body"><small>Industries &amp; network</small><b>Mining, sugar, oil &amp; gas, cement and more</b><span class="more">See the 3D supply network <svg><use href="#i-arrow" /></svg></span></span>
+          </a>
+          <a class="go tilt reveal" style="--d: 2" href="/services.html">
+            <div class="ph"><img data-img="truck" data-w="800" data-sizes="(max-width: 640px) 100vw, 50vw" alt="" loading="lazy" /></div>
+            <span class="go-body"><small>Services</small><b>Sourcing, delivery, stocking and urgent supply</b><span class="more">What we do for you <svg><use href="#i-arrow" /></svg></span></span>
+          </a>
+          <a class="go tilt reveal" style="--d: 3" href="/gallery.html">
+            <div class="ph"><img data-img="refinery" data-w="800" data-sizes="(max-width: 640px) 100vw, 50vw" alt="" loading="lazy" /></div>
+            <span class="go-body"><small>Gallery</small><b>Videos and photos of supply at work</b><span class="more">Watch the reel <svg><use href="#i-arrow" /></svg></span></span>
+          </a>
         </div>
       </div>
     </section>
-
-    <!-- PROCESS -->
-    <section class="section tint" id="process">
+    <!-- CALL TO ACTION -->
+    <section class="cta-band">
       <div class="wrap">
-        <div class="section-head center">
-          <span class="kicker reveal">How we work</span>
-          <h2 class="reveal" style="--d: 1">Five clear steps from <span class="grad-text">request to delivery</span></h2>
-        </div>
-        <div class="steps" data-steps>
-          <div class="step"><span class="dot"><svg><use href="#i-clipboard" /></svg></span><h3>Request</h3><p>Send your list, specification or drawing.</p></div>
-          <div class="step"><span class="dot"><svg><use href="#i-coins" /></svg></span><h3>Quote</h3><p>A clear quote in TZS or USD with lead times.</p></div>
-          <div class="step"><span class="dot"><svg><use href="#i-search" /></svg></span><h3>Source</h3><p>We buy from trusted makers and distributors.</p></div>
-          <div class="step"><span class="dot"><svg><use href="#i-shield" /></svg></span><h3>Check</h3><p>Every item is checked against your order.</p></div>
-          <div class="step"><span class="dot"><svg><use href="#i-truck" /></svg></span><h3>Deliver</h3><p>Delivered to site with delivery note and invoice.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- GALLERY / VIDEOS -->
-    <section class="section dark" id="gallery">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="kicker reveal">See us at work</span>
-          <h2 class="reveal" style="--d: 1">Where our supplies <span class="grad-text">go to work</span></h2>
-          <p class="reveal" style="--d: 2">Tap a video to watch it full screen.</p>
-        </div>
-        <div class="reel" data-reel></div>
-      </div>
-    </section>
-
-    <!-- WHY -->
-    <section class="section dark" id="why" style="padding-top: 0">
-      <div class="wrap why">
-        <div class="orb-wrap reveal zoom" aria-hidden="true">
-          <div class="ring"><i></i></div>
-          <div class="ring r2"><i></i></div>
-          <div class="orb"></div>
-          <div class="glass-card orb-label a"><b>Quality</b>checked</div>
-          <div class="glass-card orb-label b"><b>On time</b>to site</div>
-          <div class="glass-card orb-label c"><b>Fair</b>pricing</div>
-        </div>
-        <div>
-          <span class="kicker reveal">Why TRIUMPH</span>
-          <h2 class="reveal" style="--d: 1; color: #fff; font-size: clamp(1.9rem, 4vw, 2.8rem)">Reasons our clients <span class="grad-text">stay with us</span></h2>
-          <div class="why-list">
-            <div class="why-item reveal" style="--d: 2"><svg><use href="#i-shield" /></svg><h3>Genuine products</h3><p>Original brands and certified equivalents, with documents to prove it.</p></div>
-            <div class="why-item reveal" style="--d: 3"><svg><use href="#i-clock" /></svg><h3>Fast response</h3><p>Quick quotes and honest lead times you can plan with.</p></div>
-            <div class="why-item reveal" style="--d: 4"><svg><use href="#i-layers" /></svg><h3>One order, many lines</h3><p>Chemicals, spares and PPE on one purchase order and one invoice.</p></div>
-            <div class="why-item reveal" style="--d: 5"><svg><use href="#i-globe" /></svg><h3>Local and global</h3><p>Local stock where it exists, imports where it does not.</p></div>
-            <div class="why-item reveal" style="--d: 6"><svg><use href="#i-clipboard" /></svg><h3>Proper paperwork</h3><p>Tax invoices, delivery notes, safety data sheets and certificates.</p></div>
-            <div class="why-item reveal" style="--d: 7"><svg><use href="#i-sparkle" /></svg><h3>Clear records</h3><p>Every order, delivery and invoice on record and easy to trace.</p></div>
+        <div class="cta-card reveal zoom">
+          <span class="cta-glow" aria-hidden="true"></span>
+          <div>
+            <h2>Have a list ready? <span class="grad-text">Send it to us.</span></h2>
+            <p>Tell us what you need and where it goes. We reply with prices, lead times and delivery to your site.</p>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary magnetic" href="/contact.html">Request a quote <svg><use href="#i-arrow" /></svg></a>
+            <a class="btn btn-glass magnetic" href="/products.html">Browse products</a>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="section" id="faq">
-      <div class="wrap">
-        <div class="section-head center">
-          <span class="kicker reveal">Questions</span>
-          <h2 class="reveal" style="--d: 1">Good to know</h2>
-        </div>
-        <div class="faq">
-          <details class="reveal"><summary>Which areas do you deliver to?<i></i></summary><div class="ans"><div><p>We deliver across Tanzania, including mine sites and remote plants. Tell us your site and we will confirm transport and lead time in the quote.</p></div></div></details>
-          <details class="reveal" style="--d: 1"><summary>Can you quote in US dollars?<i></i></summary><div class="ans"><div><p>Yes. We quote and invoice in Tanzanian shillings or US dollars, whichever suits your purchasing.</p></div></div></details>
-          <details class="reveal" style="--d: 2"><summary>Do you supply items that are not on your product list?<i></i></summary><div class="ans"><div><p>Very likely. Our list shows our main ranges, but sourcing is our job. Send us the part number, brand or specification and we will find it.</p></div></div></details>
-          <details class="reveal" style="--d: 3"><summary>Do you provide safety data sheets and certificates?<i></i></summary><div class="ans"><div><p>Yes. Chemicals and lubricants come with safety data sheets, and we provide certificates of conformity or origin where the manufacturer issues them.</p></div></div></details>
-          <details class="reveal" style="--d: 4"><summary>Can we set up a regular supply contract?<i></i></summary><div class="ans"><div><p>Yes. We offer framework agreements with agreed prices and scheduled deliveries for consumables you use every month.</p></div></div></details>
-          <details class="reveal" style="--d: 5"><summary>How quickly will I get a quote?<i></i></summary><div class="ans"><div><p>Most requests get a reply within one working day. Complex or imported items may take a little longer, and we will tell you when to expect it.</p></div></div></details>
-        </div>
-      </div>
-    </section>
-
-    <!-- QUOTE + CONTACT -->
-    <section class="section dark" id="quote">
-      <span id="contact" style="position: absolute; top: 0"></span>
-      <div class="wrap quote">
-        <div class="quote-aside">
-          <span class="kicker reveal">Request a quote</span>
-          <h2 class="reveal" style="--d: 1">Tell us what you need. <span class="grad-text">We'll handle the rest.</span></h2>
-          <p class="reveal" style="--d: 2">Send your list or attach your purchase requisition. We reply with prices, lead times and delivery to your site.</p>
-          <ul class="contact-list">
-            <li class="reveal" data-contact="phone" hidden><span class="ico"><svg><use href="#i-phone" /></svg></span><div><small>Call us</small><a href="#"></a></div></li>
-            <li class="reveal" data-contact="email" hidden><span class="ico"><svg><use href="#i-mail" /></svg></span><div><small>Email</small><a href="#"></a></div></li>
-            <li class="reveal" data-contact="whatsapp" hidden><span class="ico"><svg><use href="#i-whatsapp" /></svg></span><div><small>WhatsApp</small><a href="#" target="_blank" rel="noopener">Chat with us</a></div></li>
-            <li class="reveal" data-contact="address" hidden><span class="ico"><svg><use href="#i-pin" /></svg></span><div><small>Office</small><span></span></div></li>
-            <li class="reveal" data-contact="hours" hidden><span class="ico"><svg><use href="#i-clock" /></svg></span><div><small>Hours</small><span></span></div></li>
-            <li class="reveal"><span class="ico"><svg><use href="#i-globe" /></svg></span><div><small>Serving</small><span>All of Tanzania</span></div></li>
-          </ul>
-          <div data-map style="margin-top: 22px"></div>
-        </div>
-
-        <form class="glass-card form reveal right" name="quote" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="company_website" enctype="multipart/form-data">
-          <input type="hidden" name="form-name" value="quote" />
-          <p class="hp"><label>Leave this empty <input name="company_website" /></label></p>
-          <div class="form-grid">
-            <div class="field"><label for="q-name">Your name</label><input id="q-name" name="name" required autocomplete="name" placeholder="Full name" /></div>
-            <div class="field"><label for="q-company">Company</label><input id="q-company" name="company" required autocomplete="organization" placeholder="Company name" /></div>
-            <div class="field"><label for="q-email">Email</label><input id="q-email" type="email" name="email" required autocomplete="email" placeholder="you@company.co.tz" /></div>
-            <div class="field"><label for="q-phone">Phone</label><input id="q-phone" type="tel" name="phone" autocomplete="tel" placeholder="+255 ..." /></div>
-            <div class="field"><label for="q-industry">Industry</label>
-              <select id="q-industry" name="industry">
-                <option>Mining</option><option>Sugar processing</option><option>Oil &amp; gas</option><option>Cement</option><option>Manufacturing</option><option>Construction</option><option>Energy &amp; utilities</option><option>Agriculture</option><option>Other</option>
-              </select>
-            </div>
-            <div class="field"><label for="q-currency">Quote currency</label>
-              <select id="q-currency" name="currency"><option>TZS</option><option>USD</option></select>
-            </div>
-            <fieldset class="field full">
-              <legend>What do you need?</legend>
-              <div class="checks" data-cat-checks></div>
-            </fieldset>
-            <div class="field full">
-              <div class="basket-note" data-basket-note></div>
-              <input type="hidden" name="selected_products" data-basket-field />
-            </div>
-            <div class="field full"><label for="q-items">Items, quantities and specifications</label><textarea id="q-items" name="items" required placeholder="e.g. 20 × 208 L drums hydraulic oil ISO VG 46; 50 pairs safety boots size 42"></textarea></div>
-            <div class="field"><label for="q-site">Delivery site</label><input id="q-site" name="delivery_site" placeholder="Town or site name" /></div>
-            <div class="field"><label for="q-date">Needed by</label><input id="q-date" type="date" name="needed_by" /></div>
-            <div class="field full"><label for="q-file">Attach a list or requisition (optional)</label><input id="q-file" type="file" name="attachment" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png" /></div>
-          </div>
-          <div class="form-foot">
-            <small>We reply within one working day.</small>
-            <button class="btn btn-primary magnetic" type="submit">Send request <svg><use href="#i-arrow" /></svg></button>
-          </div>
-        </form>
       </div>
     </section>
   </main>
@@ -408,17 +241,17 @@
         <div>
           <h4>Company</h4>
           <ul>
-            <li><a href="#about">About us</a></li>
-            <li><a href="#industries">Industries</a></li>
-            <li><a href="#services">Services</a></li>
-            <li><a href="#gallery">Gallery</a></li>
-            <li><a href="#faq">FAQ</a></li>
+            <li><a href="/about.html">About us</a></li>
+            <li><a href="/industries.html">Industries</a></li>
+            <li><a href="/services.html">Services</a></li>
+            <li><a href="/gallery.html">Gallery</a></li>
+            <li><a href="/services.html#faq">FAQ</a></li>
           </ul>
         </div>
         <div>
           <h4>Get in touch</h4>
           <ul data-footer-contact>
-            <li><a href="#quote">Request a quote</a></li>
+            <li><a href="/contact.html">Request a quote</a></li>
           </ul>
         </div>
       </div>
@@ -437,14 +270,15 @@
   </button>
 
   <div class="lightbox" role="dialog" aria-modal="true" aria-label="Video" data-lightbox>
-    <button class="lightbox-close" aria-label="Close video">×</button>
+    <button class="lightbox-close" aria-label="Close">×</button>
     <video controls playsinline></video>
+    <figure hidden><img alt="" /><figcaption></figcaption></figure>
   </div>
 
-  <script src="/assets/js/icons.js"></script>
-  <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/catalogue.js"></script>
-  <script src="/assets/js/main.js"></script>
-  <script type="module" src="/assets/js/scenes.js"></script>
+  <script src="/assets/js/icons.js?v=efcbccad"></script>
+  <script src="/assets/js/config.js?v=535e8577"></script>
+  <script src="/assets/js/catalogue.js?v=8146436a"></script>
+  <script src="/assets/js/main.js?v=16ee52b7"></script>
+  <script type="module" src="/assets/js/scenes.js?v=778888c3"></script>
 </body>
 </html>

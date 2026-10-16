@@ -62,7 +62,7 @@
           </article>`;
           })
           .join("")
-      : `<p class="empty">Nothing matches “${esc(search.value)}”. We source on request, so <a class="grad-text" href="/#quote"><b>ask us for it</b></a>.</p>`;
+      : `<p class="empty">Nothing matches “${esc(search.value)}”. We source on request, so <a class="grad-text" href="/contact.html"><b>ask us for it</b></a>.</p>`;
     window.TRIUMPH_REVEAL && window.TRIUMPH_REVEAL(grid);
   }
 

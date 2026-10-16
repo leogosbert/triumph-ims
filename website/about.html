@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>About us | TRIUMPH General Suppliers Ltd</title>
+  <meta name="description" content="Who TRIUMPH General Suppliers Ltd is: a Tanzanian general supply company with a mission to supply quality industrial products on time, at fair prices, with honest service." />
+  <meta name="theme-color" content="#050d22" />
+  <meta property="og:title" content="About us" />
+  <meta property="og:description" content="Who TRIUMPH General Suppliers Ltd is: a Tanzanian general supply company with a mission to supply quality industrial products on time, at fair prices, with honest service." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/assets/img/og.png" />
+  <link rel="icon" href="/assets/img/triumph-mark.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/img/triumph-mark.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://images.pexels.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    /* Before first paint: skip the intro loader after the first page, and cover the page if we arrived through the curtain. */
+    (function (d) {
+      // Links to sections of the old one-page site go to the page that now holds them.
+      var old = { about: "about", why: "about", industries: "industries", network: "industries", services: "services", process: "services", faq: "services", gallery: "gallery", quote: "contact", contact: "contact" };
+      var h = location.hash.slice(1);
+      if (/^\/(index\.html)?$/.test(location.pathname) && old[h]) return location.replace("/" + old[h] + ".html" + (h === "faq" ? "#faq" : ""));
+      try {
+        var s = sessionStorage;
+        if (s.getItem("t-seen")) d.classList.add("seen");
+        if (s.getItem("t-nav") && !("onpagereveal" in window)) d.classList.add("arrive");
+        s.removeItem("t-nav");
+      } catch (e) {}
+    })(document.documentElement);
+  </script>
+  <link rel="stylesheet" href="/assets/css/site.css?v=88ceb7b1" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "TRIUMPH General Suppliers Ltd",
+      "description": "Industrial and general supply company in Tanzania: chemicals, oils and lubricants, mechanical spares, PPE, electrical and general supplies.",
+      "areaServed": "Tanzania",
+      "logo": "/assets/img/triumph-logo.svg"
+    }
+  </script>
+</head>
+<body>
+<!-- Built by website/tools/build.py from website/src. Edit the source, then run the build. -->
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="loader" aria-hidden="true">
+    <div>
+      <svg class="loader-mark" viewBox="0 0 40 40">
+        <rect width="40" height="40" rx="9" fill="#1C4C9B" />
+        <path d="M20 6 34 19h-6.2L20 11.8 12.2 19H6z" fill="#fff" />
+        <path d="M20 16.5 30 26h-5.6L20 21.9 15.6 26H10z" fill="#A9B4C2" />
+        <rect class="bar" x="17.6" y="22.6" width="4.8" height="11.4" rx="1" fill="#fff" />
+      </svg>
+      <div class="loader-bar"></div>
+    </div>
+  </div>
+
+  <div class="progress" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+  <div class="curtain" aria-hidden="true"><svg viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#1C4C9B" /><path d="M20 6 34 19h-6.2L20 11.8 12.2 19H6z" fill="#fff" /><path d="M20 16.5 30 26h-5.6L20 21.9 15.6 26H10z" fill="#A9B4C2" /><rect x="17.6" y="22.6" width="4.8" height="11.4" rx="1" fill="#fff" /></svg></div>
+
+  <header class="header">
+    <div class="wrap">
+      <a class="brand" href="/" aria-label="TRIUMPH General Suppliers Ltd, home">
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <rect width="40" height="40" rx="9" fill="#1C4C9B" />
+          <path d="M20 6 34 19h-6.2L20 11.8 12.2 19H6z" fill="#fff" />
+          <path d="M20 16.5 30 26h-5.6L20 21.9 15.6 26H10z" fill="#A9B4C2" />
+          <rect x="17.6" y="22.6" width="4.8" height="11.4" rx="1" fill="#fff" />
+        </svg>
+        <span class="brand-name"><b>TRIUMPH</b><small>General Suppliers Ltd</small></span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <span class="nav-pill" aria-hidden="true"></span>
+        <a href="/">Home</a>
+        <a href="/about.html" aria-current="page">About</a>
+        <a href="/products.html">Products</a>
+        <a href="/industries.html">Industries</a>
+        <a href="/services.html">Services</a>
+        <a href="/gallery.html">Gallery</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+      <a class="btn btn-primary btn-sm header-cta magnetic" href="/contact.html">Request a quote <svg><use href="#i-arrow" /></svg></a>
+      <button class="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <nav class="mobile-menu" id="mobile-menu" aria-label="Menu">
+    <a href="/">Home</a>
+    <a href="/about.html" aria-current="page">About</a>
+    <a href="/products.html">Products</a>
+    <a href="/industries.html">Industries</a>
+    <a href="/services.html">Services</a>
+    <a href="/gallery.html">Gallery</a>
+    <a href="/contact.html">Contact</a>
+    <a class="btn btn-primary" href="/contact.html">Request a quote</a>
+  </nav>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="page-hero-bg" aria-hidden="true"><img data-img="warehouse" data-w="1600" data-sizes="100vw" alt="" /></div>
+      <div class="wrap">
+        <nav class="crumbs reveal" aria-label="Breadcrumb"><a href="/">Home</a><span aria-current="page">About</span></nav>
+        <span class="kicker reveal" style="--d: 1">About us</span>
+        <h1 class="reveal" style="--d: 2">A supply partner built on <span class="grad-text">trust and timing</span></h1>
+        <p class="reveal" style="--d: 3">We are a Tanzanian general supply company. Our job is simple: get the right product to your site, on time, with the right paperwork.</p>
+      </div>
+    </section>
+    <!-- ABOUT -->
+    <section class="section" id="about">
+      <div class="wrap about">
+        <div class="collage reveal left">
+          <div class="ph"><img data-img="warehouse" data-w="900" alt="Warehouse aisle with stocked shelves" loading="lazy" /></div>
+          <div class="ph"><img data-img="worker" data-w="700" alt="Worker in a safety helmet and reflective vest" loading="lazy" /></div>
+          <div class="glass-card badge-card"><b>Registered in Tanzania</b><small>A fully registered limited company serving industry nationwide.</small></div>
+        </div>
+        <div>
+          <span class="kicker reveal">Who we are</span>
+          <h2 class="reveal" style="--d: 1">One dependable source for <span class="grad-text">everything your plant needs</span></h2>
+          <p class="reveal" style="--d: 2">
+            TRIUMPH General Suppliers Ltd is a Tanzanian general supply company. We source and deliver the chemicals,
+            lubricants, spare parts, safety gear and everyday supplies that keep mines, factories and processing plants
+            running, so your team can focus on production instead of chasing suppliers.
+          </p>
+          <div class="mv reveal" style="--d: 3">
+            <div><b>Mission</b><p>To supply quality industrial products on time, at fair prices, with honest service.</p></div>
+            <div><b>Vision</b><p>To be the most trusted supply partner for industry in East Africa.</p></div>
+          </div>
+          <div class="values">
+            <div class="value reveal" style="--d: 4"><h3><svg><use href="#i-shield" /></svg>Quality first</h3><p>Genuine products from known makers, checked before dispatch.</p></div>
+            <div class="value reveal" style="--d: 5"><h3><svg><use href="#i-clock" /></svg>On time</h3><p>Clear lead times and delivery to site, with updates on the way.</p></div>
+            <div class="value reveal" style="--d: 6"><h3><svg><use href="#i-handshake" /></svg>Integrity</h3><p>Transparent quotes, proper invoices and documentation.</p></div>
+            <div class="value reveal" style="--d: 7"><h3><svg><use href="#i-users" /></svg>Partnership</h3><p>We learn your plant and plan supply with you, not just for you.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- WHY -->
+    <section class="section dark" id="why">
+      <div class="wrap why">
+        <div class="orb-wrap reveal zoom" aria-hidden="true">
+          <div class="ring"><i></i></div>
+          <div class="ring r2"><i></i></div>
+          <div class="orb"></div>
+          <div class="glass-card orb-label a"><b>Quality</b>checked</div>
+          <div class="glass-card orb-label b"><b>On time</b>to site</div>
+          <div class="glass-card orb-label c"><b>Fair</b>pricing</div>
+        </div>
+        <div>
+          <span class="kicker reveal">Why TRIUMPH</span>
+          <h2 class="reveal" style="--d: 1; color: #fff; font-size: clamp(1.9rem, 4vw, 2.8rem)">Reasons our clients <span class="grad-text">stay with us</span></h2>
+          <div class="why-list">
+            <div class="why-item reveal" style="--d: 2"><svg><use href="#i-shield" /></svg><h3>Genuine products</h3><p>Original brands and certified equivalents, with documents to prove it.</p></div>
+            <div class="why-item reveal" style="--d: 3"><svg><use href="#i-clock" /></svg><h3>Fast response</h3><p>Quick quotes and honest lead times you can plan with.</p></div>
+            <div class="why-item reveal" style="--d: 4"><svg><use href="#i-layers" /></svg><h3>One order, many lines</h3><p>Chemicals, spares and PPE on one purchase order and one invoice.</p></div>
+            <div class="why-item reveal" style="--d: 5"><svg><use href="#i-globe" /></svg><h3>Local and global</h3><p>Local stock where it exists, imports where it does not.</p></div>
+            <div class="why-item reveal" style="--d: 6"><svg><use href="#i-clipboard" /></svg><h3>Proper paperwork</h3><p>Tax invoices, delivery notes, safety data sheets and certificates.</p></div>
+            <div class="why-item reveal" style="--d: 7"><svg><use href="#i-sparkle" /></svg><h3>Clear records</h3><p>Every order, delivery and invoice on record and easy to trace.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- CALL TO ACTION -->
+    <section class="cta-band">
+      <div class="wrap">
+        <div class="cta-card reveal zoom">
+          <span class="cta-glow" aria-hidden="true"></span>
+          <div>
+            <h2>Have a list ready? <span class="grad-text">Send it to us.</span></h2>
+            <p>Tell us what you need and where it goes. We reply with prices, lead times and delivery to your site.</p>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary magnetic" href="/contact.html">Request a quote <svg><use href="#i-arrow" /></svg></a>
+            <a class="btn btn-glass magnetic" href="/products.html">Browse products</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="/">
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              <rect width="40" height="40" rx="9" fill="#1C4C9B" />
+              <path d="M20 6 34 19h-6.2L20 11.8 12.2 19H6z" fill="#fff" />
+              <path d="M20 16.5 30 26h-5.6L20 21.9 15.6 26H10z" fill="#A9B4C2" />
+              <rect x="17.6" y="22.6" width="4.8" height="11.4" rx="1" fill="#fff" />
+            </svg>
+            <span class="brand-name"><b>TRIUMPH</b><small>General Suppliers Ltd</small></span>
+          </a>
+          <p>Industrial and general supply for the companies that build and power Tanzania.</p>
+          <div style="display: flex; gap: 10px" data-socials></div>
+        </div>
+        <div>
+          <h4>Supplies</h4>
+          <ul>
+            <li><a href="/products.html#chemicals">Industrial chemicals</a></li>
+            <li><a href="/products.html#lubricants">Oils &amp; lubricants</a></li>
+            <li><a href="/products.html#spares">Mechanical spares</a></li>
+            <li><a href="/products.html#ppe">Safety &amp; PPE</a></li>
+            <li><a href="/products.html#electrical">Electrical</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/about.html">About us</a></li>
+            <li><a href="/industries.html">Industries</a></li>
+            <li><a href="/services.html">Services</a></li>
+            <li><a href="/gallery.html">Gallery</a></li>
+            <li><a href="/services.html#faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Get in touch</h4>
+          <ul data-footer-contact>
+            <li><a href="/contact.html">Request a quote</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-big" aria-hidden="true">TRIUMPH</div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> TRIUMPH General Suppliers Ltd. All rights reserved.</span>
+        <span>Photos and videos: Pexels (stand-in footage)</span>
+      </div>
+    </div>
+  </footer>
+
+  <a class="fab fab-wa" data-wa href="#" target="_blank" rel="noopener" aria-label="Chat on WhatsApp" hidden><svg><use href="#i-whatsapp" /></svg></a>
+  <button class="fab fab-top" aria-label="Back to top">
+    <svg class="ring-svg" viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="24" /></svg>
+    <svg><use href="#i-up" /></svg>
+  </button>
+
+  <div class="lightbox" role="dialog" aria-modal="true" aria-label="Video" data-lightbox>
+    <button class="lightbox-close" aria-label="Close">×</button>
+    <video controls playsinline></video>
+    <figure hidden><img alt="" /><figcaption></figcaption></figure>
+  </div>
+
+  <script src="/assets/js/icons.js?v=efcbccad"></script>
+  <script src="/assets/js/config.js?v=535e8577"></script>
+  <script src="/assets/js/catalogue.js?v=8146436a"></script>
+  <script src="/assets/js/main.js?v=16ee52b7"></script>
+</body>
+</html>

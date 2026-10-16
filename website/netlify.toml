@@ -22,3 +22,16 @@
   from = "/products"
   to = "/products.html"
   status = 301
+
+# The page sources and the build script are not part of the site.
+[[redirects]]
+  from = "/src/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/tools/*"
+  to = "/404.html"
+  status = 404
+  force = true

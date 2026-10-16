@@ -1,0 +1,18 @@
+  <main id="main">
+{{hero}}
+    <div class="cat-tools">
+      <div class="wrap">
+        <label class="search"><span class="sr-only">Search products</span><svg><use href="#i-search" /></svg><input type="search" placeholder="Search, e.g. bearings, hydraulic oil, gloves" data-search /></label>
+        <div class="filters" role="group" aria-label="Filter by category" data-filters><span class="nav-pill" aria-hidden="true"></span></div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="cat-grid" data-grid aria-live="polite"></div>
+    </div>
+  </main>
+
+  <div class="basket" data-basket role="region" aria-label="Quote list">
+    <span><span class="count" data-basket-count>0</span><b>in your quote list</b></span>
+    <button class="clear" data-basket-clear>Clear</button>
+    <a class="btn btn-primary btn-sm" href="/contact.html">Request quote <svg><use href="#i-arrow" /></svg></a>
+  </div>

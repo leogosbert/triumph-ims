@@ -61,7 +61,7 @@ export function bottomNav(role: Role, t: Dict, on: FeatureCheck = allOn): NavIte
 }
 
 /** Laptop sidebar: every section the role can open (and the company has switched on). */
-export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services = false, admin = false): NavItem[] {
+export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services = false, admin = false, settings = false): NavItem[] {
   if (role === "driver") {
     return [
       { href: "/driver", label: t["nav.myDeliveries"], icon: "deliveries", match: ["/driver"], plain: true },
@@ -84,8 +84,15 @@ export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services 
   if (can(role, "seeFinance")) out.push({ href: "/finance", label: t["nav.finance"], icon: "finance", match: M.finance });
   else if (can(role, "seeInvoices")) out.push({ href: "/invoices", label: t["nav.finance"], icon: "finance", match: M.finance, feature: "invoices" });
   out.push({ href: "/reports", label: t["nav.reports"], icon: "report", match: M.reports });
+  // Settings for management (company details, team, security, features, backups...).
+  if (settings) out.push({ href: "/settings", label: t["nav.settings"], icon: "settings", match: ["/settings"] });
   out.push({ href: "/help", label: t["nav.help"], icon: "help", match: ["/help", "/guide"] });
-  out.push({ href: "/more", label: t["nav.more"], icon: "more", match: M.more.filter((p) => p !== "/help" && p !== "/guide" && p !== "/reports" && !(admin && M.admin.includes(p))) });
+  out.push({
+    href: "/more",
+    label: t["nav.more"],
+    icon: "more",
+    match: M.more.filter((p) => p !== "/help" && p !== "/guide" && p !== "/reports" && !(settings && p === "/settings") && !(admin && M.admin.includes(p))),
+  });
   return out.filter((i) => on(i.feature));
 }
 

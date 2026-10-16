@@ -113,7 +113,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="shell" style={brandStyle}>
       <AppBackground kind={background} />
-      <SideNav items={sideNav(role, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled))} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
+      <SideNav items={sideNav(role, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled), isManager)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">
           <CompanyButton className="topbar-brand" title={company.name}>
@@ -137,6 +137,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <span aria-current={lang === "en" ? "true" : undefined}>{tr("EN")}</span>·<span aria-current={lang === "sw" ? "true" : undefined}>{tr("SW")}</span>
               </button>
             </form>
+            {isManager && (
+              <Link href="/settings" className="icon-btn only-phone" aria-label={t["nav.settings"]}>
+                <Icon name="settings" />
+              </Link>
+            )}
             <Link href="/notifications" className="icon-btn bell" aria-label={`${t["shell.notifications"]}${unread ? `, ${unread} ${t["shell.unread"]}` : ""}`}>
               <Icon name="bell" size={23} />
               {(unread ?? 0) > 0 && <span className="count">{(unread ?? 0) > 99 ? "99+" : unread}</span>}

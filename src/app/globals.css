@@ -5743,3 +5743,91 @@ table.compare.rep-table tfoot td { font-weight: 700; border-top: 2px solid var(-
   .guide-topic-head { padding: 6px 8px; }
   .guide-body { padding: 0 8px 8px; }
 }
+
+/* ---------- Order progress: steps, status and who is responsible ---------- */
+.progress-status {
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: 6px;
+  vertical-align: 1px;
+}
+.progress-steps {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  font-size: 0.66rem;
+  line-height: 1.2;
+  color: var(--muted);
+  text-align: center;
+}
+.progress-steps li.done {
+  color: var(--brand-dark);
+}
+.progress-steps li.now {
+  color: var(--warn);
+  font-weight: 600;
+}
+@media (max-width: 520px) {
+  .progress-steps li:not(.now) {
+    visibility: hidden;
+  }
+}
+.progress-owner {
+  font-weight: 500;
+}
+.progress-people {
+  margin-top: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+.progress-people summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.progress-person {
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line);
+  flex: none;
+}
+.progress-dot.done {
+  background: var(--brand);
+}
+.progress-dot.now {
+  background: #d97706;
+}
+.progress-assign {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.progress-assign select {
+  max-width: 180px;
+}
+.progress-mini {
+  margin-top: 6px;
+}
+.progress-mini-track {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+  max-width: 240px;
+}
+.progress-mini-track span {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+  border-radius: 3px;
+}

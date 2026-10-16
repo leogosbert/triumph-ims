@@ -9,6 +9,8 @@ import { formatMoney } from "@/lib/money";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { QUOTE_STATUS, quoteNo, StatusBadge, todayTz } from "@/lib/sales";
+import { OrderProgressMini } from "@/components/OrderProgress";
+import { loadOrderJourneys } from "@/lib/orders";
 
 export const metadata = { title: "Quotations" };
 
@@ -57,6 +59,11 @@ export default async function QuotationsPage({ searchParams }: { searchParams: S
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as unknown as Row[];
   const today = todayTz();
+  // Progress bar and next stage for every open or won order (one database call for the whole list).
+  const journeys = await loadOrderJourneys(
+    supabase,
+    rows.filter((r) => !["rejected", "cancelled"].includes(r.status)).map((r) => r.id),
+  );
 
   return (
     <>
@@ -97,6 +104,7 @@ export default async function QuotationsPage({ searchParams }: { searchParams: S
                       {quoteNo(r)} · {formatDate(r.issue_date)}
                       {expired && <span className="text-warn">{" "}{tr("· validity expired")}</span>}
                     </div>
+                    {journeys[r.id] && <OrderProgressMini journey={journeys[r.id]} />}
                   </div>
                   <div className="side">
                     {formatMoney(r.total, r.currency)}

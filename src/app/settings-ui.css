@@ -452,3 +452,29 @@ pre.st-code {
   display: grid;
   gap: 10px;
 }
+
+/* Backups: an open restore request, and the restore preview. */
+.notice-warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.bk-preview td.num,
+.bk-preview th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.bk-preview tr.kept td {
+  color: var(--muted);
+}
+.bk-preview .more {
+  color: var(--err);
+}
+.bk-checksum {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  word-break: break-all;
+}

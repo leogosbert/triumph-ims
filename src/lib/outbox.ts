@@ -140,7 +140,7 @@ async function sendEmail(
  * Automatic backups: a few companies per scheduled run, after the alerts.
  * Each step is its own short database call (saved on its own), because Supabase stops a
  * server call after a few seconds and a stopped call undoes everything it did:
- * claim the next company → take its backup → … then the once-a-day "backup overdue" check.
+ * claim the next company → take its backup → … → check a copy or two → the once-a-day "backup overdue" check.
  * Errors never stop the alerts; quiet until the backups SQL has been run.
  */
 async function runBackups(
@@ -164,6 +164,20 @@ async function runBackups(
       else if (take.data) result.backups++;
     } catch (e) {
       result.backupError = (e as Error).message;
+    }
+  }
+  // Check copies: new ones first, then each copy again every week. One copy per call.
+  for (let i = 0; i < 2 && Date.now() - started < 7000; i++) {
+    try {
+      const check = await supabase.rpc("verify_next_backup", { p_secret: secret });
+      if (check.error) {
+        if (!missing(check.error)) result.backupError = `check: ${check.error.message}`;
+        break;
+      }
+      if (!check.data) break;
+    } catch (e) {
+      result.backupError = (e as Error).message;
+      break;
     }
   }
   try {

@@ -98,12 +98,23 @@ Two layers:
      - `SUPABASE_DB_URL` = that connection string
      - `BACKUP_PASSPHRASE` = a long passphrase (write it down and keep it somewhere safe offline — without it the
        backups cannot be opened)
-  3. **Actions → Nightly database backup → Run workflow** once, and check it finishes green.
-  4. Test that you can open it: download the file from the run, then on a laptop
+  3. *Optional but recommended* — also copy the **files** (logos, signatures, delivery photos):
+     - `SUPABASE_URL` = `https://<project-ref>.supabase.co`
+     - `SUPABASE_SERVICE_ROLE_KEY` = Supabase → **Project Settings → API keys** → the `service_role` secret key
+  4. **Actions → Nightly database backup → Run workflow** once, and check it finishes green. The run's **Summary**
+     shows "all rows came back: yes" and how many files were copied.
+  5. Test that you can open it: download the file from the run, then on a laptop
      `gpg -d triumph-ims-YYYYMMDD.tar.gz.gpg > backup.tar.gz && tar -xzf backup.tar.gz`.
 
+**Every night it proves the copy can be put back:** the copy is loaded into an empty database and every table must
+come back with all its rows. If not, the run fails and GitHub emails you; the copy is still kept. Kept: every night
+for **30 days**, and the copy of the **1st of each month for 90 days**. Inside the file: `public.sql` (business data
+and rules), `auth-storage.sql` (sign-in accounts and file records), `files/` (the files themselves, when the two
+optional secrets are set), `restore-report.txt` and `SHA256SUMS` (to check nothing changed:
+`sha256sum -c SHA256SUMS`).
+
 **To restore** into a new Supabase project: run `public.sql` in the SQL editor (or with `psql`), then
-`auth-storage.sql`; files (logos, signatures, photos) need copying separately from Supabase Storage.
+`auth-storage.sql`; then upload the `files/<bucket>/…` folders to the buckets of the same names in Supabase Storage.
 
 ### Automatic backups in the app
 
@@ -121,10 +132,26 @@ A third layer that every company's managers can see: **Settings → Backups** (a
   can only be read through a database function that checks the manager and writes every download to the Activity log.
 - **Warnings.** If the last automatic copy is more than 2 days old, managers get a notification once a day and an
   orange line on the home dashboard ("automatic backup overdue").
-- **Restore** is not automatic (too risky): the company contacts LeMo Tech support with the backup date, and we put
-  the records back with them.
+- **Checked.** The scheduled job opens every copy again and checks it: the fingerprint (SHA-256) still matches, it
+  belongs to the right company, the record counts match and every record still fits the tables as they are today
+  (the real test that it can be put back). New copies are checked first; every copy is checked again each week.
+  Managers see *✓ Checked* next to each copy. A failed check tells the company's managers and you (admin
+  notifications, urgent).
+- **Restore, step 1 (manager).** Settings → Backups → tap a copy: it shows, per area (clients, invoices, stock…),
+  how many records the copy has and how many there are now. **Ask LeMo Tech to restore this backup** (password
+  first) sends you an urgent admin notification. One request at a time; the copy is not cleaned up while it waits.
+- **Restore, step 2 (you).** Admin site → **Backups**: call the company to confirm, type the company name, **Restore
+  now**. In one go: the copy is checked again; a *safety copy* of today's data is taken (so the restore itself can be
+  undone by restoring that safety copy); the company's records are replaced by the copy's; links to people who left
+  or items deleted since are cleared; then every link is checked again, and if anything is still wrong **nothing at
+  all is changed** and the request shows *Not done* with the reason. Managers are told when it is done.
+  **Not put back** (stay as they are now): the team and invitations, company settings and features, LeMoSp billing
+  and paid services, and document number counters (numbers never go backwards, so no invoice number is used twice).
+- **Very large company** (the button reports a time-out): run the line shown on that request in the SQL editor,
+  `select public.restore_company_backup_sql('<request id>');` (no time limit there).
+- Every database test run backs up and restores all the test companies and checks the records come back identical.
 
-**Set-up:** nothing beyond running `20261014000200_auto_backups.sql` in the SQL editor. It uses the same scheduled job
+**Set-up:** run `20261014000200_auto_backups.sql`, then `20261023000100_backup_restore.sql` (checks and restore) in the SQL editor. It uses the same scheduled job
 and `OUTBOX_SECRET` as alerts (section 3), so alerts must be set up first. Still keep the Supabase Pro plan and the
 encrypted GitHub copy above: copies inside the database do not help if the whole database is lost.
 The web server's scheduled job backs up a few companies per run, each in its own short step, so one very large

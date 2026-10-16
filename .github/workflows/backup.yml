@@ -6,7 +6,13 @@ name: Nightly database backup
 #   SUPABASE_DB_URL    Supabase → Connect → "Session pooler" connection string
 #                      (postgresql://postgres.<ref>:<password>@aws-…pooler.supabase.com:5432/postgres)
 #   BACKUP_PASSPHRASE  a long passphrase; keep a copy somewhere safe offline
+# Optional, to also copy the files (logos, signatures, delivery photos):
+#   SUPABASE_URL               https://<ref>.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY  Supabase → Project Settings → API keys → service_role (secret)
 # The backup is encrypted before upload, so it is safe even in a public repository.
+# Every run also proves the copy can be put back: it is loaded into an empty database and
+# every table must come back with all its rows. If not, the run fails (GitHub emails you).
+# Kept: every night's copy for 30 days, and the copy of the 1st of each month for 90 days.
 on:
   schedule:
     - cron: "30 0 * * *"
@@ -16,10 +22,22 @@ jobs:
   backup:
     name: Encrypted backup
     runs-on: ubuntu-latest
+    services:
+      # Empty database for the restore test (never the live one).
+      scratch:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
+      - uses: actions/checkout@v5
       - name: Check settings
         id: cfg
         run: |
@@ -34,22 +52,77 @@ jobs:
           sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
           sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17 >/dev/null
-      - name: Dump and encrypt
+      - name: Dump
         if: steps.cfg.outputs.skip != '1'
         run: |
           set -euo pipefail
-          day=$(date -u +%Y%m%d)
-          mkdir out
+          mkdir -p out
           # 1. All business data and rules (tables, functions, policies).
           /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" --schema=public --no-owner --no-privileges -f out/public.sql
           # 2. Sign-in accounts and file records, so people and files can be restored too.
           /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" --data-only --no-owner --no-privileges \
             -t auth.users -t auth.identities -t storage.buckets -t storage.objects -f out/auth-storage.sql \
             || echo "::warning::Could not dump sign-in accounts; business data was still backed up."
+      - name: Copy files (logos, signatures, photos)
+        if: steps.cfg.outputs.skip != '1'
+        run: |
+          set -uo pipefail
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SERVICE_KEY" ]; then
+            echo "::notice title=Files not copied::Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to also back up logos, signatures and photos."
+            exit 0
+          fi
+          /usr/lib/postgresql/17/bin/psql "$DB_URL" -At -F $'\t' \
+            -c "select bucket_id, name from storage.objects where name not like '%/.emptyFolderPlaceholder' order by 1, 2" > objects.tsv
+          ok=0; bad=0
+          while IFS=$'\t' read -r bucket name; do
+            [ -z "$name" ] && continue
+            enc=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))' "$name")
+            mkdir -p "out/files/$bucket/$(dirname "$name")"
+            if curl -fsS --retry 2 -H "Authorization: Bearer $SERVICE_KEY" -H "apikey: $SERVICE_KEY" \
+                 -o "out/files/$bucket/$name" "$SUPABASE_URL/storage/v1/object/authenticated/$bucket/$enc"; then
+              ok=$((ok + 1))
+            else
+              bad=$((bad + 1))
+            fi
+          done < objects.tsv
+          echo "Files copied: $ok, failed: $bad"
+          echo "FILES_LINE=Files copied: $ok, failed: $bad" >> "$GITHUB_ENV"
+          if [ "$bad" -gt 0 ]; then echo "::warning title=Some files not copied::$bad file(s) could not be downloaded."; fi
+      - name: Prove the copy can be restored
+        if: steps.cfg.outputs.skip != '1'
+        env:
+          PGHOST: localhost
+          PGPORT: "5432"
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: |
+          set -uo pipefail
+          export PATH=/usr/lib/postgresql/17/bin:$PATH
+          bash scripts/backup-restore-test.sh out/public.sql
+          status=$?
+          cp restore-report.txt out/restore-report.txt
+          {
+            echo "### Nightly backup"
+            echo '```'
+            cat restore-report.txt
+            echo "${FILES_LINE:-Files: not copied (secrets not set)}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ $status -ne 0 ]; then
+            echo "::error title=Backup could not be fully restored::$(head -n 3 restore-report.txt | tr '\n' ' ')"
+          fi
+          echo "RESTORE_STATUS=$status" >> "$GITHUB_ENV"
+      - name: Encrypt
+        if: steps.cfg.outputs.skip != '1'
+        run: |
+          set -euo pipefail
+          day=$(date -u +%Y%m%d)
+          (cd out && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
           tar -czf - -C out . | gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PASSPHRASE" \
             -o "triumph-ims-$day.tar.gz.gpg"
           ls -la "triumph-ims-$day.tar.gz.gpg"
           echo "FILE=triumph-ims-$day.tar.gz.gpg" >> "$GITHUB_ENV"
+          echo "DAY_OF_MONTH=$(date -u +%d)" >> "$GITHUB_ENV"
       - name: Keep for 30 days
         if: steps.cfg.outputs.skip != '1'
         uses: actions/upload-artifact@v4
@@ -57,3 +130,15 @@ jobs:
           name: ${{ env.FILE }}
           path: ${{ env.FILE }}
           retention-days: 30
+      - name: Keep the 1st of the month for 90 days
+        if: steps.cfg.outputs.skip != '1' && env.DAY_OF_MONTH == '01'
+        uses: actions/upload-artifact@v4
+        with:
+          name: monthly-${{ env.FILE }}
+          path: ${{ env.FILE }}
+          retention-days: 90
+      - name: Fail if the copy could not be restored
+        if: steps.cfg.outputs.skip != '1' && env.RESTORE_STATUS != '0'
+        run: |
+          echo "::error::The backup was saved, but loading it into an empty database lost rows. See the run summary."
+          exit 1

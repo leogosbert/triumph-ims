@@ -13,6 +13,7 @@ const TABS: { href: string; label: string; short: string; icon: IconName }[] = [
   { href: "/admin/billing", label: "Billing & services", short: "Billing", icon: "cash" },
   { href: "/admin/rules", label: "Growth rules", short: "Rules", icon: "activity" },
   { href: "/admin/feedback", label: "Feedback", short: "Feedback", icon: "inbox" },
+  { href: "/admin/backups", label: "Backups", short: "Backups", icon: "inbox" },
   { href: "/admin/deletions", label: "Deletions", short: "Deletions", icon: "close" },
 ];
 

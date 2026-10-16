@@ -3,6 +3,8 @@
 [build]
   command = "npm run build"
   publish = ".next"
+  # The company website in website/ is a separate Netlify project: a change only there does not rebuild the app.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)website'"
 
 [build.environment]
   NODE_VERSION = "22"

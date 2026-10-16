@@ -1,0 +1,24 @@
+# TRIUMPH company website (static, no build step).
+# Netlify project "triumph-suppliers": base directory = website, publish directory = website.
+[build]
+  publish = "."
+  command = ""
+  # Only rebuild this site when something in website/ changed.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+
+[[redirects]]
+  from = "/products"
+  to = "/products.html"
+  status = 301

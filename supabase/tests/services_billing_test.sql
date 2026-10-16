@@ -54,7 +54,7 @@ reset role;
 
 -- ---- 1. Price book -----------------------------------------------------------------------------
 select tests.check((select count(*) from public.price_items where category = 'plan') = 3, 'three plans in the price book');
-select tests.check((select count(*) from public.price_items where playbook_id is not null) = 12, 'twelve playbooks in the price book');
+select tests.check((select count(*) from public.price_items where playbook_id is not null) = 13, 'thirteen playbooks in the price book');
 select tests.check(not exists (select 1 from public.price_items i, unnest(i.feature_keys) k
                                 where not exists (select 1 from public.features f where f.key = k)),
                    'every add-on names real features');

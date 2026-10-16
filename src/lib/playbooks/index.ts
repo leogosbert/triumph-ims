@@ -11,6 +11,7 @@ import { ROUTINES } from "./routines";
 import { SECURITY } from "./security";
 import { CONNECT } from "./connect";
 import { ENTERPRISE } from "./enterprise";
+import { MINING_SERVICES } from "./mining-services";
 import { SW_SETUP } from "./sw/setup";
 import { SW_GOODS_BUSINESS } from "./sw/goods-business";
 import { SW_SERVICES_BUSINESS } from "./sw/services-business";
@@ -23,11 +24,12 @@ import { SW_ROUTINES } from "./sw/routines";
 import { SW_SECURITY } from "./sw/security";
 import { SW_CONNECT } from "./sw/connect";
 import { SW_ENTERPRISE } from "./sw/enterprise";
+import { SW_MINING_SERVICES } from "./sw/mining-services";
 
 export type { Playbook, PlaybookChapter, PlaybookExample, PlaybookScenario, PlaybookStep, Tone } from "./types";
 
 /** In the order they are shown on /playbooks. */
-export const PLAYBOOKS: Playbook[] = [SETUP, GOODS_BUSINESS, SERVICES_BUSINESS, GOODS_AND_SERVICES, ORDER_TO_CASH, ANALYTICS, GETTING_PAID, STOCK, ROUTINES, SECURITY, ENTERPRISE, CONNECT];
+export const PLAYBOOKS: Playbook[] = [SETUP, GOODS_BUSINESS, SERVICES_BUSINESS, GOODS_AND_SERVICES, MINING_SERVICES, ORDER_TO_CASH, ANALYTICS, GETTING_PAID, STOCK, ROUTINES, SECURITY, ENTERPRISE, CONNECT];
 
 export function findPlaybook(id: string): Playbook | null {
   return PLAYBOOKS.find((p) => p.id === id) ?? null;
@@ -50,6 +52,7 @@ const SW_PB: Record<string, string> = {
   ...SW_SECURITY,
   ...SW_CONNECT,
   ...SW_ENTERPRISE,
+  ...SW_MINING_SERVICES,
 };
 
 /** The playbook in the chosen language (text without a translation stays in English). */

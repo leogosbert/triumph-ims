@@ -1,0 +1,9 @@
+{
+  "name": "TRIUMPH General Suppliers Ltd",
+  "short_name": "TRIUMPH",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050d22",
+  "theme_color": "#050d22",
+  "icons": [{ "src": "/assets/img/triumph-mark.png", "sizes": "512x512", "type": "image/png" }]
+}

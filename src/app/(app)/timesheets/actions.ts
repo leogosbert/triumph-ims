@@ -88,3 +88,14 @@ export async function saveTeamRate(form: FormData) {
   revalidatePath(path);
   redirect(withNotice(path, { msg: "Rates saved. New hours use them; hours already recorded keep their rate." }));
 }
+
+export async function submitWeek(form: FormData) {
+  const week = mondayOf(str(form, "week"));
+  const path = `/timesheets?week=${week}`;
+  const { supabase, company } = await getAppContext();
+  const { error } = await supabase.rpc("submit_timesheet_week", { p_company: company.id, p_week: week });
+  if (error) fail(path, error.message);
+  revalidatePath("/timesheets");
+  revalidatePath("/timesheets/approve");
+  redirect(withNotice(path, { msg: "Week submitted for approval." }));
+}

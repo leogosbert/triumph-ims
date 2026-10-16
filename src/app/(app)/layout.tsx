@@ -113,7 +113,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="shell" style={brandStyle}>
       <AppBackground kind={background} />
-      <SideNav items={sideNav(role, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled))} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
+      <SideNav items={sideNav(role, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled))} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">
           <CompanyButton className="topbar-brand" title={company.name}>

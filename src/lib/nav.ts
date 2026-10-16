@@ -17,10 +17,11 @@ const M = {
   purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers", "/requisitions", "/approvals"],
   stock: ["/stock", "/warehouses", "/receiving", "/grns", "/transfers", "/planning"],
   deliveries: ["/deliveries", "/backorders", "/fleet"],
-  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow"],
+  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow", "/accounts", "/payroll"],
   services: ["/jobs", "/maintenance", "/equipment", "/projects", "/timesheets", "/hire", "/service-reports"],
   reports: ["/reports", "/head-office", "/scheduled-reports"],
-  more: ["/more", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
+  admin: ["/hr", "/hse", "/quality"],
+  more: ["/more", "/hr", "/hse", "/quality", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
 };
 
 /** Phone bottom bar: at most five items, most-used first for each role. */
@@ -60,7 +61,7 @@ export function bottomNav(role: Role, t: Dict, on: FeatureCheck = allOn): NavIte
 }
 
 /** Laptop sidebar: every section the role can open (and the company has switched on). */
-export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services = false): NavItem[] {
+export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services = false, admin = false): NavItem[] {
   if (role === "driver") {
     return [
       { href: "/driver", label: t["nav.myDeliveries"], icon: "deliveries", match: ["/driver"], plain: true },
@@ -78,11 +79,13 @@ export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services 
   if (can(role, "seeDeliveries")) out.push({ href: "/deliveries", label: t["nav.deliveries"], icon: "deliveries", match: M.deliveries, feature: "deliveries" });
   // Service jobs and the other service screens (only once the goods-and-services update is in and switched on).
   if (services && role !== "procurement") out.push({ href: "/jobs", label: t["nav.services"], icon: "tools", match: M.services });
+  // Administration: employees, leave, health & safety and quality (once that update is in and switched on).
+  if (admin) out.push({ href: "/hr", label: t["nav.admin"], icon: "team", match: M.admin });
   if (can(role, "seeFinance")) out.push({ href: "/finance", label: t["nav.finance"], icon: "finance", match: M.finance });
   else if (can(role, "seeInvoices")) out.push({ href: "/invoices", label: t["nav.finance"], icon: "finance", match: M.finance, feature: "invoices" });
   out.push({ href: "/reports", label: t["nav.reports"], icon: "report", match: M.reports });
   out.push({ href: "/help", label: t["nav.help"], icon: "help", match: ["/help", "/guide"] });
-  out.push({ href: "/more", label: t["nav.more"], icon: "more", match: M.more.filter((p) => p !== "/help" && p !== "/guide" && p !== "/reports") });
+  out.push({ href: "/more", label: t["nav.more"], icon: "more", match: M.more.filter((p) => p !== "/help" && p !== "/guide" && p !== "/reports" && !(admin && M.admin.includes(p))) });
   return out.filter((i) => on(i.feature));
 }
 

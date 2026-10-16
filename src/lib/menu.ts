@@ -25,6 +25,8 @@ export type MenuOptions = {
 };
 
 const SERVICE_FEATURES = new Set(["service_jobs", "maintenance_contracts", "equipment_register", "projects", "timesheets", "hire_rentals", "service_reports"]);
+/** Administration, payroll and accounts screens: shown once their database update has been run. */
+const ERP_FEATURES = new Set(["hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets"]);
 
 export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {}): MenuCategory[] {
   const on = opts.on ?? (() => true);
@@ -109,6 +111,8 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         c("planFinance") && { href: "/budgets", title: "Budgets vs actual", sub: "Monthly budgets for sales, profit and expenses against the real figures", icon: "report" },
         c("planFinance") && { href: "/cashflow", title: "Cash-flow forecast", sub: "Money expected in and out, week by week", icon: "cash" },
         c("seeFinance") && { href: "/rates", title: "Exchange rates", sub: "Rates used for foreign-currency documents", icon: "cash" },
+        c("seeLedger") && { href: "/accounts", title: "Accounts", sub: "Trial balance, profit & loss, balance sheet, VAT, journals and closing", icon: "report" },
+        c("seeLedger") && { href: "/accounts/assets", title: "Fixed assets", sub: "Vehicles, machines and equipment with monthly depreciation", icon: "building" },
       ],
     },
     {
@@ -121,6 +125,20 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         role !== "driver" && { href: "/reports", title: "Reports", sub: "Choose a report and dates, then print or download PDF or Excel", icon: "report" },
         c("planFinance") && { href: "/head-office", title: "Head-office figures", sub: "Sales, profit, expenses, money owed and stock of every branch side by side", icon: "building" },
         role !== "driver" && { href: "/scheduled-reports", title: "Scheduled reports", sub: "Reports emailed to you every day, week or month", icon: "report" },
+      ],
+    },
+    {
+      key: "administration",
+      label: "Administration",
+      icon: "team",
+      items: [
+        { href: "/hr", title: c("seeEmployees") ? "Employees" : "My employee file", sub: c("seeEmployees") ? "Employee files, contracts, certificates and licences with expiry" : "Your details, certificates and leave balance", icon: "team" },
+        { href: "/hr/leave", title: "Leave", sub: c("manageHr") ? "Leave requests to approve, who is away and balances" : "Ask for leave and see your balance", icon: "clock" },
+        c("manageHr") && { href: "/timesheets/approve", title: "Approve timesheets", sub: "Weeks of hours submitted by the team", icon: "check" },
+        { href: "/hse", title: "Health & safety", sub: c("manageHr") ? "Incidents, inspections, toolbox talks and actions" : "Report an incident or near miss, record an inspection", icon: "shield" },
+        c("seeQuality") && { href: "/quality", title: "Quality", sub: "Non-conformance reports: supplier problems, complaints, root cause and actions", icon: "check" },
+        c("runPayroll") && { href: "/payroll", title: "Payroll", sub: "Monthly pay with PAYE, NSSF, SDL and WCF, payslips", icon: "cash" },
+        { href: "/payroll/my", title: "My payslips", sub: "Your monthly payslips", icon: "receipt", feature: "payroll" },
       ],
     },
     {
@@ -186,7 +204,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
   const visible = (i: MenuItem) => {
     if (role === "driver" && i.href === "/driver") return true;
     const key = i.feature ?? featureForRoute(i.href);
-    if (key && SERVICE_FEATURES.has(key) && !known.has(key)) return false;
+    if (key && (SERVICE_FEATURES.has(key) || ERP_FEATURES.has(key)) && !known.has(key)) return false;
     return on(key);
   };
   const cats: MenuCategory[] = drafts.map((cat) => ({

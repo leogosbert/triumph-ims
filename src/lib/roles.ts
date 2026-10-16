@@ -87,6 +87,16 @@ const PERMISSIONS = {
   manageBranches: ["management"],
   /** Approval steps for purchase orders. */
   setApprovals: ["management"],
+  /** Administration package: employee files, leave decisions, timesheet approval, HSE investigation. */
+  manageHr: ["management"],
+  /** Employee files can be read by finance too (payroll). */
+  seeEmployees: ["management", "finance"],
+  /** Quality (NCRs): everyone except drivers. */
+  seeQuality: ["management", "sales", "procurement", "warehouse", "finance"],
+  /** Payroll runs, pay details and statutory payments. */
+  runPayroll: ["management", "finance"],
+  /** The general ledger, journals, fixed assets and financial statements. */
+  seeLedger: ["management", "finance"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

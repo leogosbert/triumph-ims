@@ -24,5 +24,6 @@ export async function playbookProfile(companyId: string | null): Promise<Playboo
     tin: s("tin"),
     vrn: s("vrn"),
     registrationNo: s("registration_no"),
+    mining: /\b(mining|mines?|madini|drilling)\b/i.test(`${s("name") ?? ""} ${s("legal_name") ?? ""}`),
   };
 }

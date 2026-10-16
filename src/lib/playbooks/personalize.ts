@@ -18,6 +18,8 @@ export type PlaybookProfile = {
   tin?: string | null;
   vrn?: string | null;
   registrationNo?: string | null;
+  /** The company works for mines (its name says so), so the mining services playbook is recommended. */
+  mining?: boolean;
 };
 
 export type TailorResult = {
@@ -41,6 +43,7 @@ const SAMPLE_SELLERS = [
   "Kilimo Supplies Ltd",
   "Kilimo Supplies",
   "Maji Bora Ltd",
+  "Madini Mining Services Ltd",
 ];
 
 const LEVEL_NAMES: Record<Level, string> = { small: "Small", medium: "Medium", enterprise: "Enterprise" };
@@ -136,10 +139,11 @@ export function nameTheCompany(pb: Playbook, companyName: string): Playbook {
 }
 
 /** Which playbooks suit the company best, for the list. */
-export function recommendedFor(p: Pick<PlaybookProfile, "businessType" | "level">): Set<string> {
+export function recommendedFor(p: Pick<PlaybookProfile, "businessType" | "level" | "mining">): Set<string> {
   const ids = new Set(["setup"]);
   ids.add(p.businessType === "services" ? "services-business" : p.businessType === "both" ? "goods-and-services" : "goods-business");
   if (p.businessType !== "services") ids.add("order-to-cash");
+  if (p.mining) ids.add("mining-services");
   ids.add("getting-paid");
   if (p.level === "enterprise") ids.add("enterprise");
   return ids;

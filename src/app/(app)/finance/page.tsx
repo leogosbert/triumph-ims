@@ -85,6 +85,8 @@ export default async function FinancePage() {
   const done = new Set(((invoicedDn ?? []) as { delivery_id: string }[]).map((r) => r.delivery_id));
   const toInvoice = ((delivered ?? []) as { id: string }[]).filter((d) => !done.has(d.id)).length;
 
+  // Accounts and payroll: only once their database update has been run and the feature is on.
+  const erpOn = (key: string) => features.list.some((f) => f.key === key && f.enabled);
   const Tile = ({ href, title, sub }: { href: string; title: string; sub: string }) => (
     <Link href={href} className="tile">
       <div className="tile-title">{title}</div>
@@ -191,6 +193,9 @@ export default async function FinancePage() {
         {features.on("statements") && <Tile href="/statements" title={tr("Statements")} sub={tr("Client and supplier statements of account")} />}
         {features.on("mobile_money") && <Tile href="/reconcile" title={tr("Check payments")} sub={tr("Tick payments against the M-Pesa or bank statement")} />}
         <Tile href="/rates" title={tr("Exchange rates")} sub={tr("Company rates for USD, EUR and other currencies")} />
+        {erpOn("ledger") && <Tile href="/accounts" title={tr("Accounts")} sub={tr("Trial balance, profit & loss, balance sheet, VAT, journals and closing")} />}
+        {erpOn("fixed_assets") && <Tile href="/accounts/assets" title={tr("Fixed assets")} sub={tr("Vehicles, machines and equipment with monthly depreciation")} />}
+        {erpOn("payroll") && <Tile href="/payroll" title={tr("Payroll")} sub={tr("Monthly pay with PAYE, NSSF, SDL and WCF, payslips")} />}
       </div>
     </>
   );

@@ -11,7 +11,8 @@ import { formatMoney } from "@/lib/money";
 import { clientOptions } from "@/lib/options";
 import { namesFor } from "@/lib/people";
 import { canInvoiceService, OPEN_JOB, todayTz } from "@/lib/services";
-import { addHours, removeHours } from "./actions";
+import { can } from "@/lib/roles";
+import { addHours, removeHours, submitWeek } from "./actions";
 import { addDays, hoursText, mondayOf } from "./week";
 
 export const metadata = { title: "Timesheets" };
@@ -44,7 +45,7 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: S
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, role, user, features } = await getAppContext();
   const manager = canInvoiceService(role);
   const team = manager && pick(sp.view) === "team";
   const week = mondayOf(pick(sp.week));
@@ -71,6 +72,21 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: S
   const billable = lines.filter((l) => l.billable).reduce((s, l) => s + Number(l.hours), 0);
   const value = lines.filter((l) => l.billable).reduce((s, l) => s + Number(l.hours) * Number(l.rate ?? 0), 0);
 
+  // Timesheet approval: the status of this week for the signed-in person (quiet before that SQL is run).
+  type WeekRow = { status: "submitted" | "approved" | "returned"; note: string | null; hours: number };
+  const weekRes = features.on("timesheet_approval")
+    ? await supabase
+        .from("timesheet_weeks")
+        .select("status, note, hours")
+        .eq("company_id", company.id)
+        .eq("user_id", user.id)
+        .eq("week_start", week)
+        .maybeSingle()
+    : null;
+  const approval = Boolean(weekRes && !weekRes.error);
+  const weekRow = approval ? ((weekRes?.data ?? null) as WeekRow | null) : null;
+  const locked = weekRow?.status === "submitted" || weekRow?.status === "approved";
+
   const viewQ = team ? "&view=team" : "";
   const weekLink = (w: string) => `/timesheets?week=${w}${viewQ}`;
 
@@ -79,9 +95,16 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: S
       <div className="page-head">
         <h1>{tr("Timesheets")}</h1>
         {manager && (
-          <Link href="/timesheets/rates" className="btn btn-small">
-            {tr("Rates")}
-          </Link>
+          <span style={{ display: "flex", gap: 6 }}>
+            {approval && can(role, "manageHr") && (
+              <Link href="/timesheets/approve" className="btn btn-small">
+                {tr("Approve weeks")}
+              </Link>
+            )}
+            <Link href="/timesheets/rates" className="btn btn-small">
+              {tr("Rates")}
+            </Link>
+          </span>
         )}
       </div>
       <Notice {...notice} />
@@ -209,9 +232,41 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: S
     .map((d) => ({ d, list: lines.filter((l) => l.work_date === d) }))
     .filter((x) => x.list.length > 0);
 
+  const weekPart = approval ? (
+    weekRow?.status === "submitted" ? (
+      <p className="small">
+        <span className="badge tone-warn">{tr("Waiting for approval")}</span> {tr("This week has been submitted. Ask management to send it back before changing it.")}
+      </p>
+    ) : weekRow?.status === "approved" ? (
+      <p className="small">
+        <span className="badge tone-ok">{tr("Approved")}</span> {tr("This week is approved and locked.")}
+      </p>
+    ) : (
+      <form action={submitWeek} className={weekRow?.status === "returned" ? "banner warn" : "card"}>
+        <input type="hidden" name="week" value={week} />
+        {weekRow?.status === "returned" ? (
+          <p className="small" style={{ marginTop: 0 }}>
+            <strong>{tr("Sent back by management")}</strong>
+            {weekRow.note && `: ${weekRow.note}`}
+            <br />
+            {tr("Change the hours, then submit the week again.")}
+          </p>
+        ) : (
+          <p className="muted small" style={{ marginTop: 0 }}>
+            {tr("When the week is complete, submit it to management for approval.")}
+          </p>
+        )}
+        <SubmitButton className="btn btn-small btn-primary" pendingText={tr("Sending…")} disabled={total <= 0}>
+          {tr("Submit week")}
+        </SubmitButton>
+      </form>
+    )
+  ) : null;
+
   return (
     <>
       {head}
+      {weekPart}
       <form action={addHours} className="card" id="add">
         <h2>{tr("Record hours")}</h2>
         <div className="grid grid-2">
@@ -294,7 +349,7 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: S
                       </div>
                       <strong style={{ whiteSpace: "nowrap" }}>{hoursText(Number(l.hours))} h</strong>
                     </div>
-                    {!l.invoice_id && (
+                    {!l.invoice_id && !(locked && !manager) && (
                       <form action={removeHours}>
                         <input type="hidden" name="id" value={l.id} />
                         <input type="hidden" name="week" value={week} />

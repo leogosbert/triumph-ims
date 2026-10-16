@@ -149,6 +149,9 @@ begin
   if tg_op = 'INSERT' and coalesce(btrim(new.employee_no), '') = '' then
     new.employee_no := public.next_code(new.company_id, 'employees', 'EMP-', 3);
   end if;
+  if tg_op = 'UPDATE' and coalesce(btrim(new.employee_no), '') = '' then
+    new.employee_no := old.employee_no;  -- left empty on the form: keep the number
+  end if;
   new.employee_no := btrim(new.employee_no);
   new.full_name := btrim(new.full_name);
   if new.user_id is not null and (tg_op = 'INSERT' or new.user_id is distinct from old.user_id)
@@ -463,6 +466,11 @@ as $$
 declare
   r record;
 begin
+  if tg_op = 'DELETE' and (coalesce(current_setting('ims.status_change', true), '') = 'on'
+                           or not exists (select 1 from public.companies c where c.id = old.company_id)
+                           or not exists (select 1 from auth.users u where u.id = old.user_id)) then
+    return old;  -- clearing test data, or the company or person is being removed
+  end if;
   if tg_op = 'UPDATE' and new.work_date = old.work_date and new.hours = old.hours and new.user_id = old.user_id
      and new.project_id is not distinct from old.project_id and new.job_id is not distinct from old.job_id
      and new.client_id is not distinct from old.client_id and new.description is not distinct from old.description

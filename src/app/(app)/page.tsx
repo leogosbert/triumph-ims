@@ -18,6 +18,7 @@ import { FirstStepsCard, GrowthCard, OnboardingCard } from "@/components/GrowthC
 import { loadRecommendations } from "@/lib/features";
 import { TourInvite } from "@/components/tour/TourButton";
 import { isLevel, levelRank, type Level } from "@/lib/levels";
+import { AdminSummary } from "@/components/AdminSummary";
 
 export const metadata = { title: "Home" };
 
@@ -200,6 +201,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       {isManager && welcomeLevel && <FirstStepsCard level={welcomeLevel} />}
       {invitedToTour && <TourInvite tour={level} company={company.id} />}
       {growth && <GrowthCard level={level} featureRecs={growth.featureRecs} featureLevel={growth.featureLevel} levelRec={growth.levelRec} />}
+      <AdminSummary />
 
       {(approvals.length > 0 || poApprovals.length > 0) && (
         <section className="card">

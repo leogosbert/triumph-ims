@@ -152,5 +152,20 @@ under Features).
 - Admin feature switches: sliding On / Off / Default selector with one Save.
 - Later: manufacturing / fabrication (bills of materials) and route sales for distributors.
 
+## v1.22 — ERP: administration package, payroll and accounts (built — SQL: `20261025000100_administration.sql`, `20261025000200_ledger.sql`, `20261025000300_payroll.sql`)
+- Administration (`/hr`, `/hr/leave`, `/timesheets/approve`, `/hse`, `/quality`): employee files linked to logins,
+  certificates and licences with expiry, contract and probation dates, leave requests with balances (working days),
+  timesheet weeks submitted and approved (approved weeks are locked), incidents and near misses, inspections and
+  toolbox talks, non-conformance reports, corrective actions with owners and due dates; dashboard card.
+- Accounts (`/accounts`): chart of accounts, double-entry journals posted automatically from invoices (sales goods /
+  services, VAT, cost of goods), payments (incl. withholding tax), supplier bills and payments (exchange
+  differences), expenses (one account per category) and payroll; corrections by reversal; manual and opening
+  journals; closing the books; trial balance, profit & loss, balance sheet, VAT; health check against the documents.
+- Fixed assets (`/accounts/assets`): register, straight-line monthly depreciation, sale or scrap with gain or loss.
+- Payroll (`/payroll`): Tanzania mainland PAYE bands, NSSF 10% + 10%, SDL 3.5% (10+ employees), WCF 0.5%, overtime
+  from approved timesheets, unpaid leave from HR, approval posts to the accounts, payslips for each person,
+  statutory payments and lists for TRA / NSSF and the bank. Rates are settings.
+- Later: manufacturing (bills of materials), budgets by account, bank feeds.
+
 ## Stage 17 — More intelligence & integrations
 - Configurable Tanzania tax (TRA EFD/VFD); WhatsApp/SMS notifications; East Africa localisation.

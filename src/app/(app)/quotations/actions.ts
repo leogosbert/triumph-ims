@@ -195,3 +195,18 @@ export async function cancelQuote(form: FormData) {
   if (error) fail(id, error.message);
   done(id, "Quotation cancelled.");
 }
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const STAGES = ["quoted", "approved", "sent", "won", "bought", "delivered", "invoiced", "paid"];
+
+/** Management: choose who is responsible for one stage of an order (empty = back to the default). */
+export async function setStageOwner(form: FormData) {
+  const { supabase } = await getAppContext();
+  const id = str(form, "quotation_id");
+  const stage = str(form, "stage");
+  const user = str(form, "user_id");
+  if (!UUID.test(id) || !STAGES.includes(stage) || (user && !UUID.test(user))) redirect("/quotations");
+  const { error } = await supabase.rpc("set_order_stage_owner", { p_quotation: id, p_stage: stage, p_user: user || null });
+  if (error) fail(id, error.message);
+  done(id, user ? "Saved: responsible person chosen." : "Saved: back to the default person.");
+}

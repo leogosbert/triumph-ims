@@ -39,6 +39,8 @@ import { INVOICE_STATUS, shownStatus } from "@/lib/finance";
 import { newInvoice } from "../../invoices/actions";
 import { applyContractPrices } from "../../contracts/actions";
 import { OrderProgress } from "@/components/OrderProgress";
+import { loadOrderJourney } from "@/lib/orders";
+import { setStageOwner } from "../actions";
 
 export const metadata = { title: "Quotation" };
 
@@ -181,6 +183,15 @@ export default async function QuotationPage({
   const orderCosts = (ocData ?? []) as OrderCost[];
   const orderExtras = orderCosts.reduce((a, c) => a + n(c.amount) * n(c.exchange_rate), 0);
   const names = await namesFor(supabase, [q.created_by, q.submitted_by, q.approved_by]);
+  // Status, progress bar and next stage; managers also get who is responsible (and the team to choose from).
+  const journey = await loadOrderJourney(supabase, q.id);
+  let team: { id: string; name: string }[] = [];
+  if (journey?.can_assign) {
+    const { data: members } = await supabase.from("memberships").select("user_id").eq("company_id", company.id).eq("active", true);
+    const ids = ((members ?? []) as { user_id: string }[]).map((m) => m.user_id);
+    const who = await namesFor(supabase, ids);
+    team = ids.map((id) => ({ id, name: who.get(id) ?? tr("Team member") })).sort((a, b) => a.name.localeCompare(b.name));
+  }
   const ccy = q.currency as string;
   const today = todayTz();
   const expired = q.valid_until && q.valid_until < today && ["approved", "sent"].includes(q.status);
@@ -212,7 +223,7 @@ export default async function QuotationPage({
       </p>
       <Notice {...notice} />
       <BranchField kind="quotation" id={q.id} branchId={q.branch_id ?? null} branches={branches} canMove={can(role, "manageBranches")} />
-      {!["rejected", "cancelled", "superseded"].includes(q.status) && <OrderProgress steps={progress} />}
+      {!["rejected", "cancelled", "superseded"].includes(q.status) && <OrderProgress steps={progress} journey={journey} team={team} assign={setStageOwner} />}
 
       {isDraft && q.review_note && (
         <div className="banner bad">

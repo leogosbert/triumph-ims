@@ -40,6 +40,7 @@ See [PRODUCT-VISION.md](PRODUCT-VISION.md) for the philosophy. This file tracks 
 - Demo guides per scale with "see the guide for another scale?"; more reliable update notice.
 - Automatic in-app backups per company (nightly, kept 7 daily / 5 weekly / 12 monthly), download, overdue alerts.
 - Backups checked weekly (fingerprint + every record still fits), restore preview and request by managers, restore with a safety copy by LeMo Tech (admin → Backups), backup health of every company; nightly GitHub copy includes files and is test-restored every night.
+- Order progress on every quotation/order: status, progress bar (Quoted → Approved → Sent → Won → Goods bought → Delivered → Invoiced → Paid), next stage; managers only see and choose who is responsible per stage.
 - Security plus: strict browser security headers, sign-in history and new-device alerts, sign out everywhere,
   password re-check before sensitive changes (enforced in the database), privacy blur, security health check.
 

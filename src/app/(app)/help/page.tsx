@@ -5,6 +5,8 @@ import { getAppContext } from "@/lib/context";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
 import { TourButton } from "@/components/tour/TourButton";
 import { LEVELS, type Level } from "@/lib/levels";
+import { startDemo } from "@/app/demo-actions";
+import { DemoScalePicker } from "@/components/DemoScalePicker";
 
 export const metadata = { title: "Help" };
 
@@ -105,6 +107,29 @@ export default async function HelpPage() {
         <h2>{tr("App guide")}</h2>
         <p className="small muted">{tr("Every function of LeMoSp: what it does, where to find it on a phone and on a laptop, and how to use it step by step.")}</p>
         <Link href="/guide" className="btn btn-primary btn-small">{tr("Open the App guide")} →</Link>
+      </section>
+      {role !== "driver" && (
+        <section className="card" id="demos">
+          <h2>{tr("Demos")}</h2>
+          {company.is_demo ? (
+            <p className="small muted">{tr("You are in a demo now. Use the bar at the top to change the role or the business scale, start again with fresh data, or leave the demo.")}</p>
+          ) : (
+            <>
+              <p className="small muted">
+                {tr("Open a sample company full of made-up data, next to your own, to try things safely. Pick the scale closest to your business. Your real data is not touched, and the demo deletes itself after 48 hours. Leave the demo to come back here.")}
+              </p>
+              <DemoScalePicker action={startDemo} tone="light" />
+            </>
+          )}
+        </section>
+      )}
+      <section className="card" id="learn">
+        <h2>{tr("Playbooks and walkthroughs")}</h2>
+        <ul className="small">
+          <li><Link href="/playbooks">{tr("Playbooks: step-by-step guides and PDFs")}</Link></li>
+          <li><Link href="/how-it-works">{tr("How it works: one order, from the first call to the profit, step by step")}</Link></li>
+          <li><Link href="/pricing">{tr("Prices")}</Link></li>
+        </ul>
       </section>
       {role !== "driver" && (
         <section className="card help-tour" data-tour="help-tour">

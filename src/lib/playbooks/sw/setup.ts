@@ -98,7 +98,7 @@ export const SW_SETUP: Record<string, string> = {
   "If it is on, check Grace's role in Team & roles: each role only sees its own screens.": "Kama kimewashwa, angalia jukumu la Grace kwenye Timu na majukumu: kila jukumu linaona skrini zake tu.",
   "Practise in a demo company first (optional)": "Jizoeze kwenye kampuni ya majaribio kwanza (si lazima)",
   "A demo is a made-up company full of sample data for a Small, Medium or Large business. Nothing you do there touches your real company.": "Demo ni kampuni ya kubuni iliyojaa data ya mfano kwa biashara Ndogo, ya Kati au Kubwa. Chochote unachofanya huko hakigusi kampuni yako halisi.",
-  "On the sign-in page, under Just looking?, pick the scale closest to your business. On the first onboarding screen the same choice is under Want to look around first?": "Kwenye ukurasa wa kuingia, chini ya Unaangalia tu?, chagua ukubwa unaokaribiana na biashara yako. Kwenye skrini ya kwanza ya kuanza, chaguo hilo hilo liko chini ya Unataka kuangalia kwanza?",
+  "Sign in, open Help, then Demos, and pick the scale closest to your business.": "Ingia, fungua Msaada, kisha Majaribio (demo), na uchague ukubwa unaokaribiana na biashara yako.",
   "Follow the short guided tour and try things freely.": "Fuata ziara fupi ya maelekezo na ujaribu mambo kwa uhuru.",
   "Press Exit demo in the demo bar to come back. The demo deletes itself after 48 hours.": "Bonyeza Toka kwenye demo kwenye upau wa demo ili kurudi. Demo inajifuta yenyewe baada ya saa 48.",
   "Anyone": "Mtu yeyote",

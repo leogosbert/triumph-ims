@@ -2,7 +2,6 @@ import type { BusinessProfile } from "@/lib/levels";
 import { primeLang, tr } from "@/lib/tr";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { startDemo } from "@/app/demo-actions";
 import { getAppContext } from "@/lib/context";
 import { readNotice, withNotice, type SearchParams } from "@/lib/messages";
 import { finishOnboarding } from "./actions";
@@ -43,7 +42,6 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
         currentLevel={company.business_level ?? "medium"}
         ready={ready}
         finishAction={finishOnboarding}
-        demoAction={startDemo}
         initialSell={company.business_type ?? "goods"}
       />
       <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>

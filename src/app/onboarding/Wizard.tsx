@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { DemoScalePicker } from "@/components/DemoScalePicker";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ACTIVITIES, LEVELS, LEVEL_ORDER, recommendLevel, type BusinessProfile, type Level } from "@/lib/levels";
 import { BUSINESS_TYPES } from "@/lib/services";
@@ -41,7 +40,6 @@ export function OnboardingWizard({
   currentLevel,
   ready,
   finishAction,
-  demoAction,
   initialSell = "goods",
 }: {
   /** What the company sells (goods, services or both); saved with the level. */
@@ -52,7 +50,6 @@ export function OnboardingWizard({
   /** False before the Stage 11 database update: the last step cannot be saved yet. */
   ready: boolean;
   finishAction: Action;
-  demoAction: Action;
 }) {
   const tr = useTr();
   const [step, setStep] = useState(0);
@@ -150,13 +147,6 @@ export function OnboardingWizard({
               <strong>{tr("This is not a judgement of your company.")}</strong>{" "}
               {tr("The level only decides which tools you see first. You can change it at any time, and you never lose any data.")}
             </p>
-            <div className="onb-demo">
-              <strong>{tr("Want to look around first?")}</strong>
-              <p className="small muted">
-                {tr("Each demo opens a sample company next to yours, full of made-up data for that size of business, with a short guided tour. Leave the demo to come back here.")}
-              </p>
-              <DemoScalePicker action={demoAction} tone="light" />
-            </div>
           </>
         )}
 

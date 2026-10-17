@@ -205,4 +205,13 @@ export const SW_ERP: Record<string, string> = {
     "Rekodi chanzo, kilichofanyika na bidhaa na gharama, na uongeze hatua za marekebisho.",
   "Management closes the NCR when the actions are done. The list shows which suppliers cause the most problems.":
     "Uongozi unafunga NCR hatua zikikamilika. Orodha inaonyesha wasambazaji wanaoleta matatizo zaidi.",
+  // Help: demos and playbooks (moved off the sign-in page)
+  "Demos": "Majaribio (demo)",
+  "You are in a demo now. Use the bar at the top to change the role or the business scale, start again with fresh data, or leave the demo.":
+    "Uko kwenye demo sasa. Tumia upau wa juu kubadilisha nafasi au ukubwa wa biashara, kuanza upya na data mpya, au kutoka kwenye demo.",
+  "Open a sample company full of made-up data, next to your own, to try things safely. Pick the scale closest to your business. Your real data is not touched, and the demo deletes itself after 48 hours. Leave the demo to come back here.":
+    "Fungua kampuni ya mfano yenye data ya kubuni, pembeni ya yako, ujaribu bila hofu. Chagua ukubwa unaokaribia biashara yako. Data yako halisi haiguswi, na demo inajifuta baada ya saa 48. Toka kwenye demo kurudi hapa.",
+  "Playbooks and walkthroughs": "Miongozo na maelezo ya hatua",
+  "How it works: one order, from the first call to the profit, step by step":
+    "Jinsi inavyofanya kazi: oda moja, kuanzia simu ya kwanza hadi faida, hatua kwa hatua",
 };

@@ -9,9 +9,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { checkPassword } from "@/lib/password";
 import { clearAway } from "@/lib/applock";
 import { createClient } from "@/lib/supabase/client";
-import { startDemo } from "@/app/demo-actions";
 import { useAdminHost } from "@/lib/host-client";
-import { DemoScalePicker } from "@/components/DemoScalePicker";
 import { AppBackground } from "@/components/AppBackground";
 import { LangSwitch } from "@/components/LangSwitch";
 import { recordSignIn } from "@/app/security-actions";
@@ -239,27 +237,8 @@ export default function LoginPage() {
           <p className="small muted" style={{ marginTop: 16 }}>{tr("Joining a company? Create your account with the same email address your manager invited.")}</p>
         )}
       </div>
-      {!adminApp && (
-      <section className="demo-card" aria-labelledby="demo-card-title">
-        <div>
-          <strong id="demo-card-title">{tr("Just looking?")}</strong>
-          <span>{tr("Try a demo company full of sample data. Pick the scale closest to your business. No sign-up needed; it deletes itself after 48 hours.")}</span>
-        </div>
-        <DemoScalePicker action={startDemo} tone="dark" />
-      </section>
-      )}
-      {!adminApp && (
-        <Link href="/how-it-works" className="how-link">
-          {tr("New here? See how LeMoSp works, step by step")} ›
-        </Link>
-      )}
-      {!adminApp && (
-        <p className="auth-links">
-          <Link href="/pricing">{tr("Prices")}</Link> · <Link href="/playbooks">{tr("Playbooks: step-by-step guides and PDFs")}</Link>
-        </p>
-      )}
       <p className="auth-foot">
-        {tr("LeMoSp · a LeMo Tech Solutions product")} · <Link href="/delete-account">{tr("Delete your account")}</Link>
+        {tr("LeMoSp · a LeMo Tech Solutions product")}
       </p>
     </div>
   );

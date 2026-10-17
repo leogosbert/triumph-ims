@@ -198,7 +198,7 @@ export const SETUP: Playbook = {
           title: "Practise in a demo company first (optional)",
           body: "A demo is a made-up company full of sample data for a Small, Medium or Large business. Nothing you do there touches your real company.",
           do: [
-            "On the sign-in page, under Just looking?, pick the scale closest to your business. On the first onboarding screen the same choice is under Want to look around first?",
+            "Sign in, open Help, then Demos, and pick the scale closest to your business.",
             "Follow the short guided tour and try things freely.",
             "Press Exit demo in the demo bar to come back. The demo deletes itself after 48 hours.",
           ],

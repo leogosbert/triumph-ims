@@ -4,7 +4,6 @@ import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { AppBackground } from "@/components/AppBackground";
 import { LangSwitch } from "@/components/LangSwitch";
-import Link from "next/link";
 import { acceptInvitation, createCompany, signOut } from "@/app/actions";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
@@ -91,9 +90,6 @@ export default async function WelcomePage({ searchParams }: { searchParams: Sear
           </p>
         )}
       </div>
-      <Link href="/how-it-works" className="how-link">
-        {tr("See how LeMoSp works, step by step")} ›
-      </Link>
       <p className="auth-foot">{tr("LeMoSp · a LeMo Tech Solutions product")}</p>
     </div>
   );

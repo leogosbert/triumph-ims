@@ -3392,7 +3392,7 @@ export const SW: Record<string, string> = {
   "A short guide for your role, tours of the real screens, and a demo company to practise in.": "Mwongozo mfupi kwa jukumu lako, ziara za skrini halisi, na kampuni ya demo ya kujifunzia.",
   "Help has a step-by-step guide for each role and a button to start the guided tour.": "Msaada una mwongozo wa hatua kwa hatua kwa kila jukumu na kitufe cha kuanza ziara ya maelekezo.",
   "The tour highlights each screen and explains what it does.": "Ziara inaangazia kila skrini na kueleza kazi yake.",
-  "To practise without touching real data, sign out and choose a Small, Medium or Large demo on the sign-in page.": "Kujifunza bila kugusa data halisi, toka na uchague demo ya Ndogo, Kati au Kubwa kwenye ukurasa wa kuingia.",
+  "To practise without touching real data, open Help, then Demos, and choose a Small, Medium or Large demo.": "Kujifunza bila kugusa data halisi, fungua Msaada, kisha Majaribio (demo), na uchague demo ya Ndogo, Kati au Kubwa.",
   "App guide": "Mwongozo wa programu",
   // v1.16.2: laptop sidebar headings, backgrounds, new password
   "Operations": "Shughuli",
@@ -4362,7 +4362,7 @@ export const SW: Record<string, string> = {
   "People with no branch work for the whole company (head office).": "Watu wasio na tawi wanafanya kazi kwa kampuni nzima (makao makuu).",
   // v1.19: How it works, sign-in
   "An animated walk through a whole order: customer, request, quotation, terms, purchase, delivery, invoice, payment and profit.": "Matembezi ya oda nzima kwa michoro inayosonga: mteja, ombi, nukuu ya bei, masharti, ununuzi, ufikishaji, ankara, malipo na faida.",
-  "Open How it works at the top of the App guide, from the demo bar, or from the sign-in page before you have an account.": "Fungua Jinsi inavyofanya kazi juu ya Mwongozo wa programu, kutoka upau wa majaribio, au kutoka ukurasa wa kuingia kabla hujawa na akaunti.",
+  "Open How it works at the top of the App guide, from Help, or from the demo bar.": "Fungua Jinsi inavyofanya kazi juu ya Mwongozo wa programu, kutoka Msaada, au kutoka upau wa majaribio.",
   "Each step shows what happens in the business, what you do in LeMoSp and where to find it, with a sample document that fills itself in.": "Kila hatua inaonyesha kinachotokea kwenye biashara, unachofanya kwenye LeMoSp na mahali pa kukipata, pamoja na hati ya mfano inayojijaza yenyewe.",
   "Press Next and Back, use the arrow keys, or swipe on a phone. The dots at the top jump to any step.": "Bonyeza Ifuatayo na Rudi, tumia vitufe vya mishale, au telezesha kidole kwenye simu. Vitone vya juu vinakupeleka hatua yoyote.",
   "When you are signed in, Open this screen takes you to the real screen for that step.": "Ukiwa umeingia, Fungua skrini hii inakupeleka kwenye skrini halisi ya hatua hiyo.",

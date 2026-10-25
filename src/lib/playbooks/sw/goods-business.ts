@@ -79,8 +79,6 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
     "Kwa kemikali, jisajili na Mamlaka ya Maabara ya Mkemia Mkuu wa Serikali (GCLA) kabla ya kuziagiza au kuziuza.",
   "For imports, choose a licensed clearing agent and keep each import's customs papers with the purchase order.":
     "Kwa uagizaji, chagua wakala wa forodha mwenye leseni na utunze nyaraka za forodha za kila mzigo pamoja na oda ya ununuzi.",
-  "Scan each licence and permit into Documents with its expiry date, so the app reminds you before it ends.":
-    "Skani kila leseni na kibali kwenye Nyaraka pamoja na tarehe ya kwisha, ili programu ikukumbushe kabla haijaisha.",
   "Company & account": "Kampuni na akaunti",
   "Documents": "Nyaraka",
   "Owner or Management": "Mmiliki au Uongozi",
@@ -586,7 +584,6 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
     "Angalia Stoku inayotoka polepole kwenye Maarifa ya biashara na upange kuiondoa.",
   "Give your accountant the sales and purchases for the VAT return, due by the 20th of the next month.":
     "Mpe mhasibu wako mauzo na manunuzi kwa ajili ya ritani ya VAT, inayotakiwa kabla ya tarehe 20 ya mwezi unaofuata.",
-  "Pay PAYE, NSSF and WCF on time.": "Lipa PAYE, NSSF na WCF kwa wakati.",
   "Profit & loss": "Faida na hasara",
   "Management and Finance": "Uongozi na Fedha",
   "Due dates in this list are general guidance. Confirm the current dates for VAT, PAYE, NSSF and WCF with TRA or your accountant.":
@@ -609,4 +606,8 @@ export const SW_GOODS_BUSINESS: Record<string, string> = {
     "Pitia kiwango cha biashara yako kwenye Vipengele na kiwango cha biashara: panda unapoongeza maghala, matawi au wafanyakazi.",
   "Owner and Management": "Mmiliki na Uongozi",
   "Services": "Huduma",
+  "Scan each licence and permit into Documents with its expiry date, so the app reminds you before it ends. In Legal & compliance, press Set up my checklist and record each licence under Licences; Read with AI fills in the details from a photo.": "Skani kila leseni na kibali kwenye Nyaraka pamoja na tarehe ya kwisha, ili programu ikukumbushe kabla haijaisha. Kwenye Sheria na utiifu, bonyeza Andaa orodha yangu na urekodi kila leseni chini ya Leseni; Soma kwa AI inajaza maelezo kutoka picha.",
+  "Pay PAYE, NSSF and WCF on time. Mark each one done in Legal & compliance → Tax & filing calendar.": "Lipa PAYE, NSSF na WCF kwa wakati. Weka kila moja imekamilika kwenye Sheria na utiifu → Kalenda ya kodi na uwasilishaji.",
+  "File the BRELA annual return (companies). The Tax & filing calendar in Legal & compliance reminds you before it is due.": "Wasilisha ritani ya mwaka ya BRELA (kwa makampuni). Kalenda ya kodi na uwasilishaji kwenye Sheria na utiifu inakukumbusha kabla ya tarehe yake.",
+  "With staff on salary, add them in Administration → Employees and run Finance → Payroll in LeMoSp: PAYE, NSSF, SDL and WCF are worked out for you.": "Ukiwa na wafanyakazi wa mshahara, waongeze kwenye Usimamizi → Wafanyakazi na uendeshe Fedha → Mishahara kwenye LeMoSp: PAYE, NSSF, SDL na WCF vinakokotolewa kwa ajili yako.",
 };

@@ -655,7 +655,7 @@ begin
 end;
 $$;
 
--- Edit while planned. Keys as meeting_insert (attendees: replaces the staff list; guests stay).
+-- Edit while planned. Keys as meeting_insert (attendees: replaces the staff list; the organiser and guests stay).
 create or replace function public.meeting_update(p_meeting uuid, p jsonb)
 returns void language plpgsql security definer set search_path = ''
 as $$
@@ -695,7 +695,8 @@ begin
   if jsonb_typeof(p -> 'attendees') = 'array' then
     select coalesce(array_agg(distinct x::uuid), '{}') into v_people
       from jsonb_array_elements_text(p -> 'attendees') x where x ~ '^[0-9a-f-]{36}$';
-    v_people := v_people || array_remove(array[v_new.chair_id, v_new.presenter_id], null);
+    -- The organiser, the chair and the presenter always stay on the list.
+    v_people := v_people || array_remove(array[v_new.chair_id, v_new.presenter_id, m.created_by], null);
     delete from public.meeting_attendees
      where meeting_id = p_meeting and user_id is not null and not (user_id = any (v_people)) and joined_at is null;
     foreach u in array v_people loop
@@ -2035,7 +2036,7 @@ begin
     v_who := (p ->> 'owner_id')::uuid;
     if v_who is not null and v_who <> auth.uid() then
       perform public.notify(x.company_id, v_who, 'corrective_action', 'attention', 'Corrective action for you', left(p ->> 'action', 300),
-        case when p ->> 'source_kind' = 'ncr' then '/quality/' else '/hse/incidents/' end || (p ->> 'source_id'), 'ca-meeting:' || v_id);
+        case when p ->> 'source_kind' = 'ncr' then '/quality/' else '/hse/' end || (p ->> 'source_id'), 'ca-meeting:' || v_id);
     end if;
     return 'corrective_actions:' || v_id;
   when 'calendar_entry' then

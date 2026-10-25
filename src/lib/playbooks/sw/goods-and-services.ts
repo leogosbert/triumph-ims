@@ -62,7 +62,6 @@ export const SW_GOODS_AND_SERVICES: Record<string, string> = {
     "Sajili sehemu yako ya kazi OSHA, na ukate bima ya dhima kwa umma kwa kazi kwenye maeneo ya wateja.",
   "Check product rules for what you sell, for example TBS standards for pipes and fittings.":
     "Angalia kanuni za bidhaa unazouza, kwa mfano viwango vya TBS kwa mabomba na viungio.",
-  "Scan each certificate into Documents with its expiry date.": "Skani kila cheti kwenye Nyaraka pamoja na tarehe ya kwisha.",
   "Company & account": "Kampuni na akaunti",
   "Documents": "Nyaraka",
   "Owner or Management": "Mmiliki au Uongozi",
@@ -431,10 +430,12 @@ export const SW_GOODS_AND_SERVICES: Record<string, string> = {
   "The yearly dates for a company that trades and works on site.": "Tarehe za kila mwaka kwa kampuni inayofanya biashara na kufanya kazi kwenye maeneo ya wateja.",
   "Renew the business licence, CRB, ERB and OSHA registrations and your insurance.":
     "Huisha leseni ya biashara, usajili wa CRB, ERB na OSHA na bima yako.",
-  "File the BRELA annual return (companies).": "Wasilisha ritani ya mwaka ya BRELA (kwa makampuni).",
   "Full stock count of every store at the year end; give the accountant all withholding certificates.":
     "Hesabu kamili ya stoku ya kila ghala mwishoni mwa mwaka; mpe mhasibu vyeti vyote vya kodi ya zuio.",
   "Review your business level in Features & business level as the company grows.":
     "Pitia kiwango cha biashara yako kwenye Vipengele na kiwango cha biashara kadri kampuni inavyokua.",
   "Owner and Management": "Mmiliki na Uongozi",
+  "Scan each certificate into Documents with its expiry date. In Legal & compliance, press Set up my checklist and record each licence under Licences; Read with AI fills in the details from a photo.": "Skani kila cheti kwenye Nyaraka pamoja na tarehe ya kwisha. Kwenye Sheria na utiifu, bonyeza Andaa orodha yangu na urekodi kila leseni chini ya Leseni; Soma kwa AI inajaza maelezo kutoka picha.",
+  "File the BRELA annual return (companies). The Tax & filing calendar in Legal & compliance reminds you before it is due.": "Wasilisha ritani ya mwaka ya BRELA (kwa makampuni). Kalenda ya kodi na uwasilishaji kwenye Sheria na utiifu inakukumbusha kabla ya tarehe yake.",
+  "With staff on salary, add them in Administration → Employees and run Finance → Payroll in LeMoSp: PAYE, NSSF, SDL and WCF are worked out for you.": "Ukiwa na wafanyakazi wa mshahara, waongeze kwenye Usimamizi → Wafanyakazi na uendeshe Fedha → Mishahara kwenye LeMoSp: PAYE, NSSF, SDL na WCF vinakokotolewa kwa ajili yako.",
 };

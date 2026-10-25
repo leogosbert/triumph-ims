@@ -340,8 +340,6 @@ export const SW_STOCK: Record<string, string> = {
     "Ankara ya msambazaji ndiyo unachodaiwa. Kuirekodi kunaonyesha unachodaiwa na kila msambazaji na lini, na unaarifiwa kabla ya kila malipo kufika tarehe yake.",
   "Open the purchase order and press Record supplier's invoice. The amounts are filled in from the purchase order: change them to match the invoice.":
     "Fungua oda ya ununuzi na ubonyeze Rekodi ankara ya msambazaji. Viasi vinajazwa kutoka kwenye oda ya ununuzi: vibadilishe vilingane na ankara.",
-  "Enter the Supplier's invoice no., Invoice date and Due date, then press Save bill.":
-    "Weka Namba ya ankara ya msambazaji, Tarehe ya ankara na Tarehe ya mwisho, kisha bonyeza Hifadhi bili.",
   "When you pay, open the bill, press + Record a payment to the supplier, enter the amount, the Date paid and how, and press Record payment.":
     "Unapolipa, fungua bili, bonyeza + Rekodi malipo kwa msambazaji, weka kiasi, Tarehe ya kulipa na jinsi ulivyolipa, na ubonyeze Rekodi malipo.",
   "Money we owe shows what is due to each supplier, and when.": "Madeni ya wasambazaji inaonyesha unachodaiwa na kila msambazaji, na lini.",
@@ -661,4 +659,12 @@ export const SW_STOCK: Record<string, string> = {
   "Both quotations show the gloves in stock, but you cannot send both in full.": "Nukuu zote mbili zinaonyesha glavu zipo stoo, lakini huwezi kutuma zote kikamilifu.",
   "Agree with management who gets what, usually by the oldest accepted date or the more important client.": "Kubaliana na uongozi nani apate nini, kwa kawaida kwa tarehe ya kukubaliwa iliyo ya zamani zaidi au mteja muhimu zaidi.",
   "Make a delivery note for the first client and change the quantity to what you agreed, then dispatch. The rest stays on Still to deliver.": "Andaa hati ya uwasilishaji kwa mteja wa kwanza na badilisha idadi kuwa mliyokubaliana, kisha tuma. Iliyobaki inabaki kwenye Bado kupeleka.",
+  "Enter the Supplier's invoice no., Invoice date and Due date, then press Save bill. With the AI service on, Scan receipt reads them from a photo of the invoice for you to check.": "Weka Namba ya ankara ya msambazaji, Tarehe ya ankara na Tarehe ya mwisho, kisha ubonyeze Hifadhi bili. Huduma ya AI ikiwa imewashwa, Soma risiti inazisoma kutoka picha ya ankara ili uzikague.",
+  "Wrong or damaged goods: raise an NCR": "Bidhaa zisizo sahihi au zilizoharibika: fungua NCR",
+  "When goods arrive wrong, short or damaged, a non-conformance report (NCR) records the problem, what was done with the goods, the cost and the supplier. Over time it shows which suppliers cause the most trouble.": "Bidhaa zikifika zisizo sahihi, pungufu au zimeharibika, ripoti ya kutokidhi viwango (NCR) inarekodi tatizo, kilichofanyika kwa bidhaa, gharama na msambazaji. Kadri muda unavyokwenda inaonyesha wasambazaji wanaoleta shida zaidi.",
+  "Open Administration → Quality and press + NCR. Choose the supplier, the product and the purchase order, and say what is wrong.": "Fungua Usimamizi → Ubora na ubonyeze + NCR. Chagua msambazaji, bidhaa na oda ya ununuzi, na useme kasoro ni nini.",
+  "Record what was done with the goods (returned, replaced, scrapped) and the cost, then add the corrective action agreed with the supplier.": "Rekodi kilichofanyika kwa bidhaa (zimerudishwa, zimebadilishwa, zimetupwa) na gharama, kisha uongeze hatua ya kurekebisha mliyokubaliana na msambazaji.",
+  "Warehouse and procurement": "Ghala na ununuzi",
+  "Check the supplier's bill against the GRN before paying, so you do not pay for goods you sent back.": "Linganisha bili ya msambazaji na GRN kabla ya kulipa, ili usilipie bidhaa ulizorudisha.",
+  "Receive only the quantity that is good; the rest stays open on the purchase order.": "Pokea kiasi kilicho kizuri tu; kilichobaki kinabaki wazi kwenye oda ya ununuzi.",
 };

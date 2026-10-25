@@ -56,6 +56,8 @@ export const ROUTE_FEATURES: Record<string, string> = {
   "/bills": "supplier_bills",
   "/inbox": "inbox",
   "/compliance": "compliance",
+  "/meetings": "meetings",
+  "/calendar": "calendar",
   "/payables": "payables",
   "/warehouses": "multi_warehouse",
   "/rates": "multi_currency",

@@ -121,14 +121,14 @@ select public.meeting_update(:'m_sales', jsonb_build_object('title', 'Geita orde
 select tests.check((select title from public.meetings where id = :'m_sales') = 'Geita order review (moved)'
                    and (select count(*) from public.meetings where company_id = :'co') = 1
                    and (select count(*) from public.meeting_attendees where meeting_id = :'m_sales' and user_id = :'fin') = 1
-                   and not exists (select 1 from public.meeting_attendees where meeting_id = :'m_sales' and user_id = :'sales'),
-  'changing a meeting: no extra meeting left behind; the staff list is replaced');
+                   and exists (select 1 from public.meeting_attendees where meeting_id = :'m_sales' and user_id = :'sales'),
+  'changing a meeting: no extra meeting left behind; the staff list is replaced (the organiser stays)');
 select tests.blocked(format('select public.meeting_update(%L, %L)', :'m_sales', '{"minutes": 2}'), 'edits are checked like a new meeting');
 reset role;
 select tests.check(not exists (select 1 from public.audit_log where entity = 'meetings' and action = 'delete' and company_id = :'co'),
   'the check row of an edit is not in the activity log');
 select tests.login('sales.mt@m.test'); set role authenticated;
-select tests.check(exists (select 1 from public.meetings where id = :'m_sales'), 'the organiser still sees it after leaving the staff list');
+select tests.check(exists (select 1 from public.meetings where id = :'m_sales'), 'the organiser still sees it');
 reset role;
 
 -- ---- 2. Regular meetings -----------------------------------------------------------------------------

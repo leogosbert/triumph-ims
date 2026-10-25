@@ -89,9 +89,9 @@ export const SERVICES_BUSINESS: Playbook = {
             "Builders and installation contractors: register with CRB (Contractors Registration Board) in the right class.",
             "Electrical installation work needs a licence from EWURA; workplaces register with OSHA for health and safety.",
             "Take insurance: professional indemnity for consultants, public liability for work at client sites.",
-            "Scan each certificate into Documents with its expiry date, so the app reminds you before it ends.",
+            "Scan each certificate into Documents with its expiry date, so the app reminds you before it ends. In Legal & compliance, press Set up my checklist and record each licence under Licences; Read with AI fills in the details from a photo.",
           ],
-          where: ["Company & account", "Documents"],
+          where: ["More", "Documents"],
           href: "/documents",
           who: "Owner or Management",
           example: {
@@ -119,6 +119,7 @@ export const SERVICES_BUSINESS: Playbook = {
             "Deduct PAYE from salaries and pay it to TRA every month. With ten or more employees, SDL is also due.",
             "Open a bank account in the business name and a mobile money lipa number.",
             "Put the bank details and pay numbers in Company details & branding: they are printed on every invoice.",
+            "With staff on salary, add them in Administration \u2192 Employees and run Finance \u2192 Payroll in LeMoSp: PAYE, NSSF, SDL and WCF are worked out for you.",
           ],
           where: ["Settings", "Company details & branding"],
           href: "/settings/company",
@@ -206,7 +207,7 @@ export const SERVICES_BUSINESS: Playbook = {
             "Enter the price and press Add product.",
             "Spare parts and gas you use on jobs are Type Goods, so they are counted in stock.",
           ],
-          where: ["Stock & delivery", "Products"],
+          where: ["Products"],
           href: "/products",
           who: "Management",
           example: {
@@ -518,9 +519,10 @@ export const SERVICES_BUSINESS: Playbook = {
           body:
             "Every hour on a job or project is recorded, billable or not. Management sets each person's hourly rate and cost once, so invoices and profit use the right figures.",
           do: [
-            "Management opens Timesheets, then Team rates, and sets each person's Hourly rate charged and Cost per hour.",
+            "Management opens Timesheets, presses Rates and sets each person's Charged per hour and Cost per hour.",
             "Each person opens Timesheets daily and presses Record hours: the day, the job or project, the hours and what they did.",
             "Untick Billable to the client for time the client should not pay for, such as travel included in the price.",
+            "At the end of the week, each person presses Submit week. Where timesheet approval is on, management approves it with Approve weeks; approved weeks are locked.",
           ],
           where: ["Services", "Timesheets"],
           href: "/timesheets",
@@ -532,7 +534,7 @@ export const SERVICES_BUSINESS: Playbook = {
               ["Project", "PRJ-012"],
               ["Hours", "7.5"],
               ["What was done", "Pipe network calculations"],
-              ["Hourly rate charged", "TZS 85,000"],
+              ["Charged per hour", "TZS 85,000"],
               ["Cost per hour", "TZS 40,000"],
             ],
             mark: 3,
@@ -585,7 +587,7 @@ export const SERVICES_BUSINESS: Playbook = {
             "Add up the person's monthly cost: salary, NSSF, WCF and allowances. Divide by the billable hours in a month, often 120 to 140.",
             "Add overhead per hour: vehicle, fuel, tools, phone, office rent and admin staff, divided by all billable hours.",
             "Add your margin, then round.",
-            "Enter the result as the price of the Labour item and as the person's Hourly rate charged in Team rates.",
+            "Enter the result as the price of the Labour item and as the person's Charged per hour in Timesheets → Rates.",
           ],
           who: "Management",
           example: {
@@ -595,7 +597,7 @@ export const SERVICES_BUSINESS: Playbook = {
               ["Cost per hour (salary, NSSF)", "TZS 9,000"],
               ["Overhead per hour (van, tools, office)", "TZS 8,000"],
               ["Margin 30%", "TZS 5,100"],
-              ["Hourly rate charged (rounded)", "TZS 22,000"],
+              ["Charged per hour (rounded)", "TZS 22,000"],
             ],
             mark: 3,
             stamp: "Priced",
@@ -678,7 +680,7 @@ export const SERVICES_BUSINESS: Playbook = {
         "Many services companies also supply in other ways. Here is how LeMoSp handles each one, and what is still to come.",
       steps: [
         {
-          id: "hire",
+          id: "hire-rental",
           title: "Hire or rental",
           body:
             "Equipment you own and rent out goes on the Equipment hire screen, charged per day, week or month, with returns and late items tracked.",
@@ -797,7 +799,7 @@ export const SERVICES_BUSINESS: Playbook = {
             "Record every withholding tax certificate received.",
             "Open Profit & loss: income, costs and profit for the month.",
             "Give your accountant the sales and purchases for the VAT return, due by the 20th of the next month.",
-            "Pay PAYE, NSSF and WCF on time, and check certificates and insurance expiring in Documents.",
+            "Pay PAYE, NSSF and WCF on time, and check certificates and insurance expiring in Documents. Mark each one done in Legal & compliance → Tax & filing calendar.",
           ],
           where: ["Finance", "Profit & loss"],
           href: "/profit-loss",
@@ -811,7 +813,7 @@ export const SERVICES_BUSINESS: Playbook = {
           body: "The yearly dates that keep you allowed to work.",
           do: [
             "Renew the business licence, ERB, CRB, EWURA and OSHA registrations as they fall due.",
-            "Renew insurance and file the BRELA annual return (companies).",
+            "Renew insurance and file the BRELA annual return (companies). The Tax & filing calendar in Legal & compliance reminds you before it is due.",
             "Give your accountant all withholding tax certificates for the year.",
             "Review prices and hourly rates against last year's costs.",
           ],

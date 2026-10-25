@@ -27,7 +27,7 @@ export type MenuOptions = {
 
 const SERVICE_FEATURES = new Set(["service_jobs", "maintenance_contracts", "equipment_register", "projects", "timesheets", "hire_rentals", "service_reports"]);
 /** Administration, payroll and accounts screens: shown once their database update has been run. */
-const ERP_FEATURES = new Set(["hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets", "inbox", "compliance"]);
+const ERP_FEATURES = new Set(["hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets", "inbox", "compliance", "meetings", "calendar"]);
 
 export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {}): MenuCategory[] {
   const on = opts.on ?? (() => true);
@@ -134,6 +134,8 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       label: "Administration",
       icon: "team",
       items: [
+        { href: "/meetings", title: "Meetings", sub: "Team, client and supplier meetings: agenda, video, minutes and actions", icon: "team" },
+        { href: "/calendar", title: "Calendar", sub: "Meetings, actions, deliveries, due dates and leave in one place, also on your phone", icon: "clock" },
         { href: "/hr", title: c("seeEmployees") ? "Employees" : "My employee file", sub: c("seeEmployees") ? "Employee files, contracts, certificates and licences with expiry" : "Your details, certificates and leave balance", icon: "team" },
         { href: "/hr/leave", title: "Leave", sub: c("manageHr") ? "Leave requests to approve, who is away and balances" : "Ask for leave and see your balance", icon: "clock" },
         c("manageHr") && { href: "/timesheets/approve", title: "Approve timesheets", sub: "Weeks of hours submitted by the team", icon: "check" },

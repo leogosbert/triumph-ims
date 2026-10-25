@@ -20,8 +20,8 @@ const M = {
   finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow", "/accounts", "/payroll"],
   services: ["/jobs", "/maintenance", "/equipment", "/projects", "/timesheets", "/hire", "/service-reports"],
   reports: ["/reports", "/head-office", "/scheduled-reports"],
-  admin: ["/hr", "/hse", "/quality"],
-  more: ["/more", "/hr", "/hse", "/quality", "/guide", "/documents", "/compliance", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
+  admin: ["/hr", "/hse", "/quality", "/meetings", "/calendar"],
+  more: ["/more", "/hr", "/hse", "/quality", "/guide", "/documents", "/compliance", "/meetings", "/calendar", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
 };
 
 /** The screens behind each menu section (read by src/lib/scenes.ts to colour and picture each section). */

@@ -13,7 +13,7 @@ export const SW_CONNECT: Record<string, string> = {
   "Switch on the assistant": "Washa msaidizi",
   "The assistant is part of the Enterprise level, but any company can switch it on by itself. It reads nothing new: it only looks at the records you already keep in the app.":
     "Msaidizi ni sehemu ya kiwango cha Enterprise, lakini kampuni yoyote inaweza kuuwasha peke yake. Hausomi kitu kipya: unaangalia tu kumbukumbu ambazo tayari unaziweka kwenye programu.",
-  "Open More → Features & business level.": "Fungua Zaidi → Vipengele na kiwango cha biashara.",
+  "Open Settings → Features & business level.": "Fungua Mipangilio → Vipengele na kiwango cha biashara.",
   "Find AI business assistant and press switch on.": "Tafuta Msaidizi wa biashara wa AI na ubonyeze washa.",
   "Open Reports → Business assistant. On a phone it is under More → Reports → Business assistant.":
     "Fungua Ripoti → Msaidizi wa biashara. Kwenye simu uko chini ya Zaidi → Ripoti → Msaidizi wa biashara.",
@@ -30,8 +30,7 @@ export const SW_CONNECT: Record<string, string> = {
   "The page says the assistant is switched off": "Ukurasa unasema msaidizi umezimwa",
   "Rehema opens Business assistant and reads that the assistant is switched off for this company.":
     "Rehema anafungua Msaidizi wa biashara na kusoma kwamba msaidizi umezimwa kwa kampuni hii.",
-  "Only management can switch it on. Ask Neema to open More → Features & business level and press switch on next to AI business assistant.":
-    "Uongozi pekee unaweza kuuwasha. Mwombe Neema afungue Zaidi → Vipengele na kiwango cha biashara na abonyeze washa karibu na Msaidizi wa biashara wa AI.",
+  "Only management can switch it on. Ask Neema to open Settings → Features & business level and press switch on next to AI business assistant.": "Uongozi pekee unaweza kuuwasha. Mwombe Neema afungue Mipangilio → Vipengele na kiwango cha biashara na abonyeze washa karibu na Msaidizi wa biashara wa AI.",
   "Changing features never deletes data. Switching it off again only hides the screen.":
     "Kubadilisha vipengele hakufuti data kamwe. Kuuzima tena kunaficha skrini tu.",
   "A driver cannot find the assistant": "Dereva hawezi kumpata msaidizi",
@@ -346,8 +345,7 @@ export const SW_CONNECT: Record<string, string> = {
   "Payments received": "Malipo yaliyopokelewa",
   "Supplier bills (purchases and input VAT)": "Bili za wasambazaji (manunuzi na VAT ya manunuzi)",
   "4 files": "Mafaili 4",
-  "Integrations & API is part of the Enterprise level. Management can switch it on alone in More → Features & business level.":
-    "Miunganisho na API ni sehemu ya kiwango cha Enterprise. Uongozi unaweza kuiwasha peke yake kwenye Zaidi → Vipengele na kiwango cha biashara.",
+  "Integrations & API is part of the Enterprise level. Management can switch it on alone in Settings → Features & business level.": "Miunganisho na API ni sehemu ya kiwango cha Enterprise. Uongozi unaweza kuiwasha peke yake kwenye Mipangilio → Vipengele na kiwango cha biashara.",
 
   "Month-end handover, step by step": "Makabidhiano ya mwisho wa mwezi, hatua kwa hatua",
   "Do this in the first days of each month for the month just ended. Checking payments first means the files your accountant gets match the bank.":
@@ -356,8 +354,7 @@ export const SW_CONNECT: Record<string, string> = {
     "Hakikisha kila ankara, malipo, bili ya msambazaji na tumizi la mwezi limeingizwa. Uliza timu siku ya mwisho ya kazi.",
   "Open Finance → Check payments. For each method and service, tick the payments you find on the statement, or press Paste a statement. Do the same for Money out.":
     "Fungua Fedha → Hakiki malipo. Kwa kila njia na huduma, weka alama kwenye malipo unayoyaona kwenye taarifa, au bonyeza Bandika taarifa. Fanya hivyo hivyo kwa Pesa zilizotoka.",
-  "Open More → Integrations & API. Under Accounting export choose the Month and press Show.":
-    "Fungua Zaidi → Miunganisho na API. Chini ya Faili za uhasibu chagua Mwezi na ubonyeze Onyesha.",
+  "Open Settings → Integrations & API. Under Accounting export choose the Month and press Show.": "Fungua Mipangilio → Miunganisho na API. Chini ya Faili za uhasibu chagua Mwezi na ubonyeze Onyesha.",
   "Press Download CSV on each of the four files.": "Bonyeza Pakua CSV kwenye kila moja ya mafaili manne.",
   "Send the four files to your accountant with the bank and mobile-money statements of the same month.":
     "Tuma mafaili manne kwa mhasibu wako pamoja na taarifa za benki na pesa za simu za mwezi huo huo.",
@@ -375,8 +372,7 @@ export const SW_CONNECT: Record<string, string> = {
   "The accountant needs last month's VAT figures today": "Mhasibu anahitaji takwimu za VAT za mwezi uliopita leo",
   "On 15 October the accountant calls: she needs September's output and input VAT this afternoon for the VAT return.":
     "Tarehe 15 Oktoba mhasibu anapiga simu: anahitaji VAT ya mauzo na ya manunuzi ya Septemba mchana huu kwa ritani ya VAT.",
-  "Open More → Integrations & API. Under Accounting export choose September 2026 and press Show.":
-    "Fungua Zaidi → Miunganisho na API. Chini ya Faili za uhasibu chagua Septemba 2026 na ubonyeze Onyesha.",
+  "Open Settings → Integrations & API. Under Accounting export choose September 2026 and press Show.": "Fungua Mipangilio → Miunganisho na API. Chini ya Faili za uhasibu chagua Septemba 2026 na ubonyeze Onyesha.",
   "Press Download CSV on Invoices (sales and output VAT) and on Supplier bills (purchases and input VAT). Add Expenses if you record VAT on expenses.":
     "Bonyeza Pakua CSV kwenye Ankara (mauzo na VAT ya mauzo) na kwenye Bili za wasambazaji (manunuzi na VAT ya manunuzi). Ongeza Matumizi kama unaandika VAT kwenye matumizi.",
   "In Excel, first filter out invoices with the status cancelled. Then add up the vat column of each file.":
@@ -504,9 +500,8 @@ export const SW_CONNECT: Record<string, string> = {
   "Create one key per system": "Tengeneza ufunguo mmoja kwa kila mfumo",
   "A key is like a password for one system. Make a separate key for each system, so you can switch one off without stopping the others. The key is shown only once: only a scrambled copy is kept.":
     "Ufunguo ni kama nenosiri la mfumo mmoja. Tengeneza ufunguo tofauti kwa kila mfumo, ili uweze kuzima mmoja bila kusimamisha mingine. Ufunguo unaonyeshwa mara moja tu: nakala iliyochanganywa tu ndiyo inahifadhiwa.",
-  "Switch on Integrations & API in More → Features & business level if it is off.":
-    "Washa Miunganisho na API kwenye Zaidi → Vipengele na kiwango cha biashara kama imezimwa.",
-  "Open More → Integrations & API and go to API keys.": "Fungua Zaidi → Miunganisho na API na uende kwenye Funguo za API.",
+  "Switch on Integrations & API in Settings → Features & business level if it is off.": "Washa Miunganisho na API kwenye Mipangilio → Vipengele na kiwango cha biashara kama imezimwa.",
+  "Open Settings → Integrations & API and go to API keys.": "Fungua Mipangilio → Miunganisho na API na uende kwenye Funguo za API.",
   "Under Name of the system that will use it, type a clear name, for example Website or Accounting software.":
     "Chini ya Jina la mfumo utakaoutumia, andika jina wazi, kwa mfano Tovuti au Programu ya uhasibu.",
   "Press Create key. In the Confirm it's you box, enter your password (and the 6-digit code if you use two-step verification) and press Confirm.":
@@ -582,15 +577,13 @@ export const SW_CONNECT: Record<string, string> = {
   "Every call answers 401 with Invalid API key or Missing API key.": "Kila mwito unajibu 401 pamoja na Invalid API key au Missing API key.",
   "Check the header is exactly Authorization: Bearer, a space, then the whole key starting with lmsp_.":
     "Hakikisha kichwa ni Authorization: Bearer kamili, nafasi moja, kisha ufunguo mzima unaoanza na lmsp_.",
-  "Open More → Integrations & API and look at the key: if it shows Switched off, it will never work again. Create a new one.":
-    "Fungua Zaidi → Miunganisho na API na uangalie ufunguo: ukionyesha Imezimwa, hautafanya kazi tena kamwe. Tengeneza mpya.",
+  "Open Settings → Integrations & API and look at the key: if it shows Switched off, it will never work again. Create a new one.": "Fungua Mipangilio → Miunganisho na API na uangalie ufunguo: ukionyesha Imezimwa, hautafanya kazi tena kamwe. Tengeneza mpya.",
   "If the key was lost or mistyped, switch it off and create a new key. Keys cannot be shown twice.":
     "Kama ufunguo ulipotea au uliandikwa vibaya, uzime na utengeneze ufunguo mpya. Funguo haziwezi kuonyeshwa mara mbili.",
   "The developer gets 403": "Msanidi programu anapata 403",
   "Calls that worked yesterday now answer 403: Integrations & API is switched off for this company.":
     "Miito iliyofanya kazi jana sasa inajibu 403: Miunganisho na API imezimwa kwa kampuni hii.",
-  "Someone switched off Integrations & API in More → Features & business level.":
-    "Mtu alizima Miunganisho na API kwenye Zaidi → Vipengele na kiwango cha biashara.",
+  "Someone switched off Integrations & API in Settings → Features & business level.": "Mtu alizima Miunganisho na API kwenye Mipangilio → Vipengele na kiwango cha biashara.",
   "If that was on purpose, nothing else is needed: all keys stop until it is switched on again.":
     "Kama ilikuwa makusudi, hakuna kingine kinachohitajika: funguo zote zinasimama hadi iwashwe tena.",
   "If not, press switch on next to Integrations & API. The keys work again at once.":
@@ -611,7 +604,7 @@ export const SW_CONNECT: Record<string, string> = {
   "Watch the keys every month": "Angalia funguo kila mwezi",
   "The key list shows each key's name, whether it is In use or Switched off, the first letters of the key, when it was made, when it was last used and how many calls it made. Creating and switching off keys is written to the Activity log.":
     "Orodha ya funguo inaonyesha jina la kila ufunguo, kama Inatumika au Imezimwa, herufi za kwanza za ufunguo, ulipotengenezwa, ulipotumika mwisho na idadi ya miito. Kutengeneza na kuzima funguo kunaandikwa kwenye Kumbukumbu ya shughuli.",
-  "Once a month, open More → Integrations & API and read the API keys list.": "Mara moja kwa mwezi, fungua Zaidi → Miunganisho na API na usome orodha ya Funguo za API.",
+  "Once a month, open Settings → Integrations & API and read the API keys list.": "Mara moja kwa mwezi, fungua Mipangilio → Miunganisho na API na usome orodha ya Funguo za API.",
   "A key that shows never used after a week: ask the developer whether the system was ever finished.":
     "Ufunguo unaoonyesha haijawahi kutumika baada ya wiki moja: muulize msanidi programu kama mfumo ulikamilika.",
   "A key whose calls jump suddenly: ask the developer why. A system reading too often, or a stranger, can both cause it.":
@@ -627,10 +620,8 @@ export const SW_CONNECT: Record<string, string> = {
   "Switch a key off, or stop everything at once": "Zima ufunguo, au simamisha kila kitu kwa mara moja",
   "Switching a key off works at once and cannot be undone: the system using it can no longer read your data. Switching off Integrations & API stops every key together, and switching it on again restarts them.":
     "Kuzima ufunguo kunafanya kazi mara moja na hakuwezi kurudishwa: mfumo unaoutumia hauwezi tena kusoma data zako. Kuzima Miunganisho na API kunasimamisha funguo zote pamoja, na kuiwasha tena kunazianzisha upya.",
-  "To stop one system: in More → Integrations & API, press Switch off next to its key. The page says the key is switched off and systems using it can no longer read your data.":
-    "Kusimamisha mfumo mmoja: kwenye Zaidi → Miunganisho na API, bonyeza Zima karibu na ufunguo wake. Ukurasa unasema ufunguo umezimwa na mifumo inayoutumia haiwezi tena kusoma data zako.",
-  "To stop all systems for a while: in More → Features & business level, press switch off next to Integrations & API. Every call then gets 403. This also hides the Accounting export.":
-    "Kusimamisha mifumo yote kwa muda: kwenye Zaidi → Vipengele na kiwango cha biashara, bonyeza zima karibu na Miunganisho na API. Kila mwito basi unapata 403. Hii pia inaficha Faili za uhasibu.",
+  "To stop one system: in Settings → Integrations & API, press Switch off next to its key. The page says the key is switched off and systems using it can no longer read your data.": "Kusimamisha mfumo mmoja: kwenye Mipangilio → Miunganisho na API, bonyeza Zima karibu na ufunguo wake. Ukurasa unasema ufunguo umezimwa na mifumo inayoutumia haiwezi tena kusoma data zako.",
+  "To stop all systems for a while: in Settings → Features & business level, press switch off next to Integrations & API. Every call then gets 403. This also hides the Accounting export.": "Kusimamisha mifumo yote kwa muda: kwenye Mipangilio → Vipengele na kiwango cha biashara, bonyeza zima karibu na Miunganisho na API. Kila mwito basi unapata 403. Hii pia inaficha Faili za uhasibu.",
   "To start them again: press switch on. Keys that were not switched off one by one work again.":
     "Kuzianzisha tena: bonyeza washa. Funguo ambazo hazikuzimwa moja moja zinafanya kazi tena.",
   "Before": "Kabla",
@@ -641,10 +632,9 @@ export const SW_CONNECT: Record<string, string> = {
   "A key may have leaked": "Huenda ufunguo umevuja",
   "Your web developer sent the key in a WhatsApp group by mistake. Several people outside the company saw it.":
     "Msanidi wa tovuti yako alituma ufunguo kwenye kikundi cha WhatsApp kwa makosa. Watu kadhaa nje ya kampuni waliuona.",
-  "Open More → Integrations & API now and press Switch off next to the Website key. It stops working at once.":
-    "Fungua Zaidi → Miunganisho na API sasa na ubonyeze Zima karibu na ufunguo wa Tovuti. Unaacha kufanya kazi mara moja.",
+  "Open Settings → Integrations & API now and press Switch off next to the Website key. It stops working at once.": "Fungua Mipangilio → Miunganisho na API sasa na ubonyeze Zima karibu na ufunguo wa Tovuti. Unaacha kufanya kazi mara moja.",
   "Create a new key named Website and send it privately to the developer only.": "Tengeneza ufunguo mpya unaoitwa Tovuti na umtumie msanidi programu peke yake kwa faragha.",
-  "Open More → Activity log to see when keys were created and switched off.": "Fungua Zaidi → Kumbukumbu ya shughuli kuona funguo zilipotengenezwa na kuzimwa.",
+  "Open Settings → Activity log to see when keys were created and switched off.": "Fungua Mipangilio → Kumbukumbu ya shughuli kuona funguo zilipotengenezwa na kuzimwa.",
   "If you are not sure which key leaked, switch off Integrations & API in Features & business level until you have replaced each key.":
     "Kama huna uhakika ni ufunguo upi umevuja, zima Miunganisho na API kwenye Vipengele na kiwango cha biashara hadi umebadilisha kila ufunguo.",
   "The developer leaves": "Msanidi programu anaondoka",
@@ -676,8 +666,7 @@ export const SW_CONNECT: Record<string, string> = {
     "Zanzibar Resorts waliagiza boksi 50 za karatasi A4 kwenye tovuti yako kwa sababu ilionyesha 65, lakini ghala lina 12 tu.",
   "Open Stock in LeMoSp and look at the product. If the app also says 65, the records are wrong: count the shelf and correct it with Adjust stock and a clear reason.":
     "Fungua Stoku kwenye LeMoSp na uangalie bidhaa. Kama programu pia inasema 65, kumbukumbu si sahihi: hesabu rafu na usahihishe kwa Rekebisha stoku na sababu iliyo wazi.",
-  "If the app says 12, the website is out of date. Open More → Integrations & API and check when the Website key was last used.":
-    "Kama programu inasema 12, tovuti imepitwa na wakati. Fungua Zaidi → Miunganisho na API na uangalie ufunguo wa Tovuti ulipotumika mwisho.",
+  "If the app says 12, the website is out of date. Open Settings → Integrations & API and check when the Website key was last used.": "Kama programu inasema 12, tovuti imepitwa na wakati. Fungua Mipangilio → Miunganisho na API na uangalie ufunguo wa Tovuti ulipotumika mwisho.",
   "If it was not used for hours, the website stopped reading: call the developer. If the key shows Switched off, give them a new key.":
     "Kama haukutumika kwa saa kadhaa, tovuti iliacha kusoma: mpigie msanidi programu. Ufunguo ukionyesha Imezimwa, mpe ufunguo mpya.",
   "If it is used but still wrong, ask the developer to read the whole stock list each time (since does not apply to stock) and to add up all stores and batches.":
@@ -692,7 +681,7 @@ export const SW_CONNECT: Record<string, string> = {
   "Check that alerts reach phones and email": "Hakikisha tahadhari zinafika kwenye simu na barua pepe",
   "Alerts always appear under the bell. Phone notifications and alert emails need a one-time server setup, and a background check that looks for overdue invoices, expiring stock and more every 5 minutes.":
     "Tahadhari zinaonekana daima chini ya kengele. Arifa za simu na barua pepe za tahadhari zinahitaji mpangilio wa seva mara moja, na ukaguzi wa nyuma unaotafuta ankara zilizochelewa, stoku inayoisha muda na mengine kila dakika 5.",
-  "Open More → Settings → Alerts setup.": "Fungua Zaidi → Mipangilio → Mipangilio ya tahadhari.",
+  "Open Settings → Alerts setup.": "Fungua Mipangilio → Mipangilio ya tahadhari.",
   "Check that the Status shows 3 of 3 connected and that Last alert check: is a few minutes ago.":
     "Hakikisha Hali inaonyesha 3 kati ya 3 zimeunganishwa na kwamba Ukaguzi wa mwisho wa tahadhari: ni dakika chache zilizopita.",
   "If a part shows Not set, follow its steps with whoever manages your hosting, then press Run the check and send now.":
@@ -709,8 +698,7 @@ export const SW_CONNECT: Record<string, string> = {
   "2 of 3 connected": "2 kati ya 3 zimeunganishwa",
   "Nobody gets alert emails": "Hakuna anayepata barua pepe za tahadhari",
   "Phone notifications work, but no alert email ever arrives.": "Arifa za simu zinafanya kazi, lakini hakuna barua pepe ya tahadhari inayofika.",
-  "Open More → Settings → Alerts setup and look at Alert emails. If it shows Not set, the email part was never finished.":
-    "Fungua Zaidi → Mipangilio → Mipangilio ya tahadhari na uangalie Barua pepe za tahadhari. Ikionyesha Haijawekwa, sehemu ya barua pepe haikukamilishwa.",
+  "Open Settings → Alerts setup and look at Alert emails. If it shows Not set, the email part was never finished.": "Fungua Mipangilio → Mipangilio ya tahadhari na uangalie Barua pepe za tahadhari. Ikionyesha Haijawekwa, sehemu ya barua pepe haikukamilishwa.",
   "Give the steps on that page to whoever manages your hosting, then press Run the check and send now.":
     "Mpe anayesimamia seva yako hatua zilizo kwenye ukurasa huo, kisha bonyeza Fanya ukaguzi na tuma sasa.",
   "Each person also needs Emails to ticked on their own Notifications page.": "Kila mtu pia anahitaji kuweka alama kwenye Barua pepe kwa kwenye ukurasa wake wa Arifa.",
@@ -798,10 +786,8 @@ export const SW_CONNECT: Record<string, string> = {
     "Kuna njia nne za kutoa data kutoka LeMoSp. Zinafanana lakini zinafanya kazi tofauti.",
   "Accounting export (Integrations & API): one month of invoices, payments, supplier bills and expenses in accounting columns. For your accountant.":
     "Faili za uhasibu (Miunganisho na API): mwezi mmoja wa ankara, malipo, bili za wasambazaji na matumizi kwa safu za uhasibu. Kwa mhasibu wako.",
-  "Export data (More → Settings → Export data): one table as CSV for Excel, or everything in one JSON file. For your own analysis or moving to other software.":
-    "Hamisha data (Zaidi → Mipangilio → Hamisha data): jedwali moja kama CSV kwa Excel, au kila kitu kwenye faili moja la JSON. Kwa uchambuzi wako mwenyewe au kuhamia programu nyingine.",
-  "Backups (More → Settings → Backups): a full daily copy of every record. For safety and restoring.":
-    "Nakala rudufu (Zaidi → Mipangilio → Nakala rudufu): nakala kamili ya kila siku ya kila kumbukumbu. Kwa usalama na kurejesha.",
+  "Export data (Settings → Export data): one table as CSV for Excel, or everything in one JSON file. For your own analysis or moving to other software.": "Hamisha data (Mipangilio → Hamisha data): jedwali moja kama CSV kwa Excel, au kila kitu kwenye faili moja la JSON. Kwa uchambuzi wako mwenyewe au kuhamia programu nyingine.",
+  "Backups (Settings → Backups): a full daily copy of every record. For safety and restoring.": "Nakala rudufu (Mipangilio → Nakala rudufu): nakala kamili ya kila siku ya kila kumbukumbu. Kwa usalama na kurejesha.",
   "API keys: another system reads your data by itself, all the time. For your website or accounting software.":
     "Funguo za API: mfumo mwingine unasoma data zako wenyewe, wakati wote. Kwa tovuti yako au programu ya uhasibu.",
   "Which tool": "Chombo kipi",
@@ -816,7 +802,7 @@ export const SW_CONNECT: Record<string, string> = {
   "Backups: check, back up now, keep your own copy": "Nakala rudufu: angalia, hifadhi nakala sasa, weka nakala yako mwenyewe",
   "A copy of all your company's records is taken every day early in the morning. You can also back up by hand before a big change, and download a copy to keep.":
     "Nakala ya kumbukumbu zote za kampuni yako inachukuliwa kila siku alfajiri. Unaweza pia kuhifadhi nakala kwa mkono kabla ya badiliko kubwa, na kupakua nakala ya kuweka.",
-  "Open More → Settings → Backups and read Last automatic backup:.": "Fungua Zaidi → Mipangilio → Nakala rudufu na usome Nakala rudufu ya kiotomatiki ya mwisho:.",
+  "Open Settings → Backups and read Last automatic backup:.": "Fungua Mipangilio → Nakala rudufu na usome Nakala rudufu ya kiotomatiki ya mwisho:.",
   "Press Back up now before a big change, for example before connecting a new system or importing many records.":
     "Bonyeza Hifadhi nakala sasa kabla ya badiliko kubwa, kwa mfano kabla ya kuunganisha mfumo mpya au kuingiza kumbukumbu nyingi.",
   "Once a month, press Download on the newest backup and keep the file somewhere safe, such as a USB stick in the safe.":
@@ -843,7 +829,7 @@ export const SW_CONNECT: Record<string, string> = {
   "Export data: tables for Excel, or everything": "Hamisha data: majedwali kwa Excel, au kila kitu",
   "Download one table at a time as a CSV file for Excel, or everything in one JSON file. Signatures, photos and logos are not included.":
     "Pakua jedwali moja kwa wakati kama faili la CSV kwa Excel, au kila kitu kwenye faili moja la JSON. Sahihi, picha na nembo hazijumuishwi.",
-  "Open More → Settings → Export data.": "Fungua Zaidi → Mipangilio → Hamisha data.",
+  "Open Settings → Export data.": "Fungua Mipangilio → Hamisha data.",
   "Press Download CSV next to a table, or Download everything (one JSON file).": "Bonyeza Pakua CSV karibu na jedwali, au Pakua kila kitu (faili moja la JSON).",
   "You may be asked for your password again first. Every download is recorded.": "Huenda ukaombwa nenosiri lako tena kwanza. Kila upakuaji unaandikwa.",
   "Export your data": "Hamisha data zako",
@@ -856,8 +842,7 @@ export const SW_CONNECT: Record<string, string> = {
   "The auditor asks for every invoice of 2026 in one file, with client TINs.": "Mkaguzi anaomba kila ankara ya 2026 kwenye faili moja, pamoja na TIN za wateja.",
   "For accounting columns with TIN and VRN, download the Invoices file of the Accounting export for each month, January to December, and put them together in Excel.":
     "Kwa safu za uhasibu zenye TIN na VRN, pakua faili la Ankara la Faili za uhasibu kwa kila mwezi, Januari hadi Desemba, na uyaunganishe kwenye Excel.",
-  "Or open More → Settings → Export data and press Download CSV next to the invoices table for every invoice in one file, with the raw columns.":
-    "Au fungua Zaidi → Mipangilio → Hamisha data na ubonyeze Pakua CSV karibu na jedwali la ankara kupata kila ankara kwenye faili moja, kwa safu ghafi.",
+  "Or open Settings → Export data and press Download CSV next to the invoices table for every invoice in one file, with the raw columns.": "Au fungua Mipangilio → Hamisha data na ubonyeze Pakua CSV karibu na jedwali la ankara kupata kila ankara kwenye faili moja, kwa safu ghafi.",
   "Send the files from the company email, not by WhatsApp.": "Tuma mafaili kutoka barua pepe ya kampuni, si kwa WhatsApp.",
   "You want to try other software": "Unataka kujaribu programu nyingine",
   "Neema wants to see her data in another program before deciding anything.": "Neema anataka kuona data zake kwenye programu nyingine kabla ya kuamua chochote.",
@@ -865,4 +850,38 @@ export const SW_CONNECT: Record<string, string> = {
     "Bonyeza Pakua kila kitu (faili moja la JSON) kwenye Hamisha data. Timu ya programu nyingine inaweza kulisoma.",
   "Or download the tables they ask for as CSV.": "Au pakua majedwali wanayoomba kama CSV.",
   "Nothing in LeMoSp changes when you export. You can keep working as usual.": "Hakuna kinachobadilika kwenye LeMoSp unapohamisha. Unaweza kuendelea kufanya kazi kama kawaida.",
+  "Search or ask from the top bar": "Tafuta au uliza kutoka upau wa juu",
+  "The quickest way to ask is the search box at the top of every screen. It finds records and screens as you type, and Ask AI answers questions about the business, the App guide or the papers you need, with the sources.": "Njia ya haraka zaidi ya kuuliza ni kisanduku cha kutafuta juu ya kila skrini. Kinapata rekodi na skrini unapoandika, na Uliza AI inajibu maswali kuhusu biashara, Mwongozo wa programu au nyaraka unazohitaji, pamoja na vyanzo.",
+  "Click the search box (on a laptop press / or Ctrl+K; on a phone tap the magnifying glass).": "Bofya kisanduku cha kutafuta (kwenye kompyuta bonyeza / au Ctrl+K; kwenye simu gusa kioo cha kukuza).",
+  "Type a question in English, Kiswahili or both, for example nataka kuongeza mteja mpya or When is VAT due?": "Andika swali kwa Kiingereza, Kiswahili au vyote viwili, kwa mfano nataka kuongeza mteja mpya au VAT inatakiwa lini?",
+  "The best match shows its steps: press Take me there. Press Ask AI for a written answer, then Open the full answer.": "Jibu bora linaonyesha hatua zake: bonyeza Nipeleke huko. Bonyeza Uliza AI kwa jibu la maandishi, kisha Fungua jibu kamili.",
+  "If the app does not do it yet, it says so with what to do instead. Press Ask for this in the app to send the idea to the Suggestion Box.": "Kama programu bado haifanyi hivyo, inasema hivyo pamoja na cha kufanya badala yake. Bonyeza Omba hiki kiwekwe kwenye programu kutuma wazo kwenye Sanduku la Mapendekezo.",
+  "Written AI answers need the AI service switched on by management. Screens and guides are found even offline.": "Majibu ya maandishi ya AI yanahitaji huduma ya AI iwashwe na uongozi. Skrini na miongozo vinapatikana hata bila mtandao.",
+  "Let AI read the paperwork, and bring email into the app": "Acha AI isome makaratasi, na ulete barua pepe kwenye programu",
+  "Two time savers: AI reads receipts, supplier invoices and certificates so nobody types them, and the Inbox brings client and supplier emails and WhatsApp messages into LeMoSp.": "Viokoa muda viwili: AI inasoma risiti, ankara za wasambazaji na vyeti ili mtu asiviandike, na Kikasha kinaleta barua pepe na ujumbe wa WhatsApp wa wateja na wasambazaji ndani ya LeMoSp.",
+  "Switch on the AI service": "Washa huduma ya AI",
+  "Scan receipt, Read with AI and the Ask AI answers use an AI service. Management switches it on once for the whole company.": "Soma risiti, Soma kwa AI na majibu ya Uliza AI vinatumia huduma ya AI. Uongozi unaiwasha mara moja kwa kampuni nzima.",
+  "Ask whoever manages your hosting to add ANTHROPIC_API_KEY in Netlify (Site configuration → Environment variables).": "Mwombe anayesimamia mfumo wako aongeze ANTHROPIC_API_KEY kwenye Netlify (Site configuration → Environment variables).",
+  "Until it is added, the buttons say reading with AI is off; everything else works as before.": "Hadi utakapoongezwa, vitufe vinasema kusoma kwa AI kumezimwa; kila kitu kingine kinafanya kazi kama kawaida.",
+  "Scan receipts and supplier invoices": "Soma risiti na ankara za wasambazaji",
+  "A photo of a receipt fills in the expense form: who was paid, the date, the amount, VAT and the receipt number. The same works for a supplier's invoice on a new bill.": "Picha ya risiti inajaza fomu ya matumizi: aliyelipwa, tarehe, kiasi, VAT na namba ya risiti. Vivyo hivyo kwa ankara ya msambazaji kwenye bili mpya.",
+  "Open + New expense and press Scan receipt. Take the photo or choose a PDF.": "Fungua + Matumizi mapya na ubonyeze Soma risiti. Piga picha au chagua PDF.",
+  "Read by AI — check before saving shows how clear the picture was. Fields marked check could not be read for sure.": "Imesomwa na AI — kagua kabla ya kuhifadhi inaonyesha picha ilikuwa wazi kiasi gani. Sehemu zilizowekwa alama ya kukagua hazikusomeka kwa uhakika.",
+  "Correct anything wrong and press Save expense. The photo is attached as the receipt.": "Sahihisha chochote kilicho na kosa na ubonyeze Hifadhi matumizi. Picha inaambatishwa kama risiti.",
+  "For supplier invoices: Finance → Supplier bills → + Bill → Scan receipt, then Save bill.": "Kwa ankara za wasambazaji: Fedha → Bili za wasambazaji → + Bili → Soma risiti, kisha Hifadhi bili.",
+  "Scanned receipt": "Risiti iliyosomwa",
+  "Read by AI": "Imesomwa na AI",
+  "Check before saving": "Kagua kabla ya kuhifadhi",
+  "Read certificates and licences with AI": "Soma vyeti na leseni kwa AI",
+  "On a new document, a licence or a compliance upload, Read with AI takes the name, number, issuer and dates from the photo or PDF.": "Kwenye hati mpya, leseni au upakiaji wa utiifu, Soma kwa AI inachukua jina, namba, aliyetoa na tarehe kutoka picha au PDF.",
+  "Open + Document (or + Licence in Legal & compliance) and choose the file.": "Fungua + Hati (au + Leseni kwenye Sheria na utiifu) na uchague faili.",
+  "Press Read with AI. The details are filled in below.": "Bonyeza Soma kwa AI. Maelezo yanajazwa hapa chini.",
+  "Check the expiry date above all, then save. For a document already saved, open it and press Read the file with AI.": "Kagua tarehe ya kuisha kuliko yote, kisha uhifadhi. Kwa hati iliyokwisha hifadhiwa, ifungue na ubonyeze Soma faili kwa AI.",
+  "Bring client email and WhatsApp into the Inbox": "Leta barua pepe na WhatsApp za wateja kwenye Kikasha",
+  "With the company mailbox connected, new emails come in every few minutes and the team is told. Replies go out from the same mailbox and are kept with the conversation.": "Sanduku la barua la kampuni likiwa limeunganishwa, barua pepe mpya zinaingia kila baada ya dakika chache na timu inaarifiwa. Majibu yanatoka kwenye sanduku hilo hilo na kuhifadhiwa pamoja na mazungumzo.",
+  "A manager opens Inbox → Setup, enters the company mailbox and presses Check for new emails now.": "Meneja anafungua Kikasha → Usanidi, anaweka sanduku la barua la kampuni na kubonyeza Angalia barua pepe mpya sasa.",
+  "For WhatsApp, follow the WhatsApp Business steps on Setup with whoever manages your hosting.": "Kwa WhatsApp, fuata hatua za WhatsApp Business kwenye Usanidi pamoja na anayesimamia mfumo wako.",
+  "Each day, open Inbox, link each conversation to the client or supplier and reply with Send email or Send WhatsApp.": "Kila siku, fungua Kikasha, unganisha kila mazungumzo na mteja au msambazaji na ujibu kwa Tuma barua pepe au Tuma WhatsApp.",
+  "Not connected for sending yet? Your mail app or WhatsApp opens with the reply filled in, and it is noted as sent by hand.": "Bado haijaunganishwa kwa kutuma? Programu yako ya barua pepe au WhatsApp inafunguka na jibu likiwa limejazwa, na linaandikwa kuwa limetumwa kwa mkono.",
+  "Management, sales, procurement and finance": "Uongozi, mauzo, ununuzi na fedha",
 };

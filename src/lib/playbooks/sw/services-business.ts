@@ -351,8 +351,6 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Record hours in Timesheets": "Rekodi saa kwenye Rejista za saa",
   "Every hour on a job or project is recorded, billable or not. Management sets each person's hourly rate and cost once, so invoices and profit use the right figures.":
     "Kila saa kwenye kazi au mradi inarekodiwa, iwe ya kutoza au la. Uongozi unaweka kiwango cha saa na gharama ya kila mtu mara moja, ili ankara na faida zitumie takwimu sahihi.",
-  "Management opens Timesheets, then Team rates, and sets each person's Hourly rate charged and Cost per hour.":
-    "Uongozi unafungua Rejista za saa, kisha Viwango vya timu, na kuweka Kiwango cha saa kinachotozwa na Gharama kwa saa ya kila mtu.",
   "Each person opens Timesheets daily and presses Record hours: the day, the job or project, the hours and what they did.":
     "Kila mtu anafungua Rejista za saa kila siku na kubonyeza Rekodi saa: siku, kazi au mradi, saa na alichofanya.",
   "Untick Billable to the client for time the client should not pay for, such as travel included in the price.":
@@ -365,7 +363,6 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Hours": "Saa",
   "What was done": "Kilichofanyika",
   "Pipe network calculations": "Hesabu za mtandao wa mabomba",
-  "Hourly rate charged": "Kiwango cha saa kinachotozwa",
   "Cost per hour": "Gharama kwa saa",
   "The project is using more hours than budgeted": "Mradi unatumia saa nyingi kuliko bajeti",
   "PRJ-012 had a budget of 400 hours; 360 are used and the design report is not finished.":
@@ -396,14 +393,11 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Add overhead per hour: vehicle, fuel, tools, phone, office rent and admin staff, divided by all billable hours.":
     "Ongeza gharama za uendeshaji kwa saa: gari, mafuta, zana, simu, kodi ya ofisi na wafanyakazi wa utawala, ukigawanya kwa saa zote za kutoza.",
   "Add your margin, then round.": "Ongeza faida yako, kisha kadiria.",
-  "Enter the result as the price of the Labour item and as the person's Hourly rate charged in Team rates.":
-    "Weka jibu kama bei ya kitu cha Nguvu kazi na kama Kiwango cha saa kinachotozwa cha mtu huyo kwenye Viwango vya timu.",
   "Hourly rate": "Kiwango kwa saa",
   "Priced": "Bei imewekwa",
   "Cost per hour (salary, NSSF)": "Gharama kwa saa (mshahara, NSSF)",
   "Overhead per hour (van, tools, office)": "Gharama za uendeshaji kwa saa (gari, zana, ofisi)",
   "Margin 30%": "Faida 30%",
-  "Hourly rate charged (rounded)": "Kiwango cha saa kinachotozwa (kilichokadiriwa)",
   "Choose fixed price, time and materials, or call-out fee": "Chagua bei maalum, muda na vifaa, au ada ya kuitwa",
   "A fixed price suits work you know well, like a standard AC service. Time and materials suits repairs where you cannot know the problem in advance. A call-out fee covers the cost of going to the site at all.":
     "Bei maalum inafaa kazi unayoijua vizuri, kama huduma ya kawaida ya AC. Muda na vifaa inafaa ukarabati ambao huwezi kujua tatizo mapema. Ada ya kuitwa inafidia gharama ya kwenda eneo la kazi hata kidogo.",
@@ -521,8 +515,6 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "Open Profit & loss: income, costs and profit for the month.": "Fungua Faida na hasara: mapato, gharama na faida ya mwezi.",
   "Give your accountant the sales and purchases for the VAT return, due by the 20th of the next month.":
     "Mpe mhasibu wako mauzo na manunuzi kwa ajili ya ritani ya VAT, inayotakiwa kabla ya tarehe 20 ya mwezi unaofuata.",
-  "Pay PAYE, NSSF and WCF on time, and check certificates and insurance expiring in Documents.":
-    "Lipa PAYE, NSSF na WCF kwa wakati, na uangalie vyeti na bima zinazoisha kwenye Nyaraka.",
   "Profit & loss": "Faida na hasara",
   "Management and Finance": "Uongozi na Fedha",
   "Due dates in this list are general guidance. Confirm the current dates for VAT, PAYE, NSSF and WCF with TRA or your accountant.":
@@ -531,8 +523,16 @@ export const SW_SERVICES_BUSINESS: Record<string, string> = {
   "The yearly dates that keep you allowed to work.": "Tarehe za kila mwaka zinazokuwezesha kuendelea kuruhusiwa kufanya kazi.",
   "Renew the business licence, ERB, CRB, EWURA and OSHA registrations as they fall due.":
     "Huisha leseni ya biashara, na usajili wa ERB, CRB, EWURA na OSHA kadri muda wake unavyofika.",
-  "Renew insurance and file the BRELA annual return (companies).": "Huisha bima na uwasilishe ritani ya mwaka ya BRELA (kwa makampuni).",
   "Give your accountant all withholding tax certificates for the year.": "Mpe mhasibu wako vyeti vyote vya kodi ya zuio vya mwaka.",
   "Review prices and hourly rates against last year's costs.": "Pitia bei na viwango kwa saa ukilinganisha na gharama za mwaka uliopita.",
   "Owner and Management": "Mmiliki na Uongozi",
+  "Scan each certificate into Documents with its expiry date, so the app reminds you before it ends. In Legal & compliance, press Set up my checklist and record each licence under Licences; Read with AI fills in the details from a photo.": "Skani kila cheti kwenye Nyaraka pamoja na tarehe ya kwisha, ili programu ikukumbushe kabla hakijaisha. Kwenye Sheria na utiifu, bonyeza Andaa orodha yangu na urekodi kila leseni chini ya Leseni; Soma kwa AI inajaza maelezo kutoka picha.",
+  "Pay PAYE, NSSF and WCF on time, and check certificates and insurance expiring in Documents. Mark each one done in Legal & compliance → Tax & filing calendar.": "Lipa PAYE, NSSF na WCF kwa wakati, na uangalie vyeti na bima zinazoisha kwenye Nyaraka. Weka kila moja imekamilika kwenye Sheria na utiifu → Kalenda ya kodi na uwasilishaji.",
+  "Renew insurance and file the BRELA annual return (companies). The Tax & filing calendar in Legal & compliance reminds you before it is due.": "Huisha bima na uwasilishe ritani ya mwaka ya BRELA (kwa makampuni). Kalenda ya kodi na uwasilishaji kwenye Sheria na utiifu inakukumbusha kabla ya tarehe yake.",
+  "Management opens Timesheets, presses Rates and sets each person's Charged per hour and Cost per hour.": "Uongozi unafungua Rejista za saa, unabonyeza Viwango na kuweka kwa kila mtu Kinachotozwa kwa saa na Gharama kwa saa.",
+  "At the end of the week, each person presses Submit week. Where timesheet approval is on, management approves it with Approve weeks; approved weeks are locked.": "Mwisho wa wiki, kila mtu anabonyeza Wasilisha wiki. Pale uidhinishaji wa rejista za saa umewashwa, uongozi unaidhinisha kwa Idhinisha wiki; wiki zilizoidhinishwa zinafungwa.",
+  "Charged per hour": "Kinachotozwa kwa saa",
+  "Charged per hour (rounded)": "Kinachotozwa kwa saa (kilichokadiriwa)",
+  "Enter the result as the price of the Labour item and as the person's Charged per hour in Timesheets → Rates.": "Weka jibu kama bei ya kitu cha Nguvu kazi na kama Kinachotozwa kwa saa cha mtu huyo kwenye Rejista za saa → Viwango.",
+  "With staff on salary, add them in Administration → Employees and run Finance → Payroll in LeMoSp: PAYE, NSSF, SDL and WCF are worked out for you.": "Ukiwa na wafanyakazi wa mshahara, waongeze kwenye Usimamizi → Wafanyakazi na uendeshe Fedha → Mishahara kwenye LeMoSp: PAYE, NSSF, SDL na WCF vinakokotolewa kwa ajili yako.",
 };

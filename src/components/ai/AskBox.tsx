@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import type { AskAnswer } from "@/lib/ai/ask";
-import { askQuestion, quickSearch, sendWish, type QuickResults } from "@/lib/ai/ask-actions";
+import { askQuestion, quickSearch, ruleStatus, searchIndex, sendWish, type QuickResults, type RuleStatus } from "@/lib/ai/ask-actions";
+import { buildIndex, FINDER_EXAMPLES, isQuestion, rank, type FinderEntry, type FinderHit, type FinderIndex, type FinderResult } from "@/lib/ai/finder";
 import { useTr } from "@/lib/tr-client";
 import { AnswerView } from "./AnswerView";
 import s from "./AskBox.module.css";
 
 type Item = { href: string; title: string; sub: string; side?: string; group: string };
 
+// ---------- recent searches (this browser only) ----------
 const RECENT = "lemosp.search.recent";
 const recent = (): string[] => {
   try {
@@ -29,42 +31,158 @@ const remember = (q: string) => {
   }
 };
 
-export const ASK_EXAMPLES = [
-  "Who owes us money?",
-  "What documents do I need to supply lubricants to a mine?",
-  "What do I need ready for a TRA audit?",
-  "When is VAT due?",
-  "How do I record an expense?",
-  "What should we reorder?",
-];
+// ---------- the search index (screens, guide, compliance, playbooks), kept for offline use ----------
+const INDEX_KEY = "lemosp.search.index.v1";
+let loaded: { v: string; index: FinderIndex } | null = null;
+let loading: Promise<FinderIndex | null> | null = null;
+
+function cachedEntries(): { v: string; entries: FinderEntry[] } | null {
+  try {
+    const raw = localStorage.getItem(INDEX_KEY);
+    const v = raw ? JSON.parse(raw) : null;
+    return v && typeof v.v === "string" && Array.isArray(v.entries) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Loads the index once per page load: the copy in this browser at once, then the server's if it changed. */
+function loadIndex(onReady: (i: FinderIndex) => void): void {
+  if (loaded) return onReady(loaded.index);
+  const cached = cachedEntries();
+  if (cached) {
+    loaded = { v: cached.v, index: buildIndex(cached.entries) };
+    onReady(loaded.index);
+  }
+  loading ??= searchIndex(cached?.v)
+    .then((r) => {
+      if (r.entries) {
+        loaded = { v: r.v, index: buildIndex(r.entries) };
+        try {
+          localStorage.setItem(INDEX_KEY, JSON.stringify({ v: r.v, entries: r.entries }));
+        } catch {
+          /* full or private: keep it in memory */
+        }
+      }
+      return loaded?.index ?? null;
+    })
+    .catch(() => loaded?.index ?? null);
+  void loading.then((i) => i && onReady(i));
+}
+
+// ---------- opening the box from anywhere ----------
+const OPEN_EVENT = "lemosp:ask";
+/** Opens the Ask box (the one in the top bar), optionally with words already typed. For "Ask AI" buttons anywhere. */
+export function openAsk(q = ""): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: q }));
+}
+/** Only one Ask box answers the keyboard shortcut and openAsk (the first one on the screen). */
+let shortcutOwner: symbol | null = null;
+
+// ---------- voice ----------
+type Recognition = { lang: string; interimResults: boolean; start: () => void; onresult: ((e: { results: { 0: { transcript: string } }[] }) => void) | null; onend: (() => void) | null; onerror: ((e: { error?: string }) => void) | null };
+function speechCtor(): (new () => Recognition) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as { SpeechRecognition?: new () => Recognition; webkitSpeechRecognition?: new () => Recognition };
+  const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+  if (!Ctor) return null;
+  // The site's Permissions-Policy decides whether the microphone may be used at all.
+  const d = document as unknown as { permissionsPolicy?: { allowsFeature: (f: string) => boolean }; featurePolicy?: { allowsFeature: (f: string) => boolean } };
+  const policy = d.permissionsPolicy ?? d.featurePolicy;
+  if (policy && !policy.allowsFeature("microphone")) return null;
+  return Ctor;
+}
+
+export const ASK_EXAMPLES = FINDER_EXAMPLES;
+
+const LANG_LABEL = { en: "English", sw: "Kiswahili", mix: "Kiswahili + English" } as const;
 
 /**
- * Search and Ask AI in one box, for the top bar (works like Cocozania's Tafuta). As you type it shows
- * matching screens, App guide topics and records; questions about the figures (money owed, sales,
- * stock…) are answered at once from the records. Enter or "Ask AI" answers anything about the business
- * with sources. When nothing in the app matches, the AI answers by itself after a moment, and the words
- * can be sent to the Suggestion Box as a wish for the app. Arrow keys move through the matches; Escape closes.
+ * Search and Ask AI in one box, for the top bar (works like Cocozania's Tafuta):
+ * - As you type it understands English, Kiswahili or a mix, forgives spelling slips, and shows the best
+ *   match with its steps and a "Take me there" button, related screens and guides, and your records.
+ *   The screens and guides are ranked in the browser, so they appear at once and still work offline.
+ * - Questions about the figures (money owed, sales, stock…) are answered at once from the records.
+ * - When the app does not do something it says so, with what to do instead and "Ask for this in the app".
+ * - Enter opens the best match, or asks the AI for a question; when nothing matches, the AI answers by
+ *   itself after a moment. Arrow keys move through the matches, Escape closes, "/" or Ctrl+K opens it.
  */
-export function AskBox({ placeholder, autoFocus = false, className }: { placeholder?: string; autoFocus?: boolean; className?: string }) {
+export function AskBox({ placeholder, autoFocus = false, className, shortcut = true }: { placeholder?: string; autoFocus?: boolean; className?: string; shortcut?: boolean }) {
   const tr = useTr();
   const router = useRouter();
   const id = useId();
   const wrap = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const [q, setQ] = useState("");
+  const [deb, setDeb] = useState("");
   const [open, setOpen] = useState(false);
+  const [index, setIndex] = useState<FinderIndex | null>(null);
   const [quick, setQuick] = useState<QuickResults | null>(null);
+  const [offline, setOffline] = useState(false);
   const [active, setActive] = useState(-1);
   const [answer, setAnswer] = useState<AskAnswer | null>(null);
   const [asking, setAsking] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [wished, setWished] = useState("");
   const [recents, setRecents] = useState<string[]>([]);
+  const [live, setLive] = useState<{ code: string; s: RuleStatus | null } | null>(null);
+  const [voiceLang, setVoiceLang] = useState<"sw-TZ" | "en-US">("sw-TZ");
+  const [listening, setListening] = useState(false);
+  const [voiceOk, setVoiceOk] = useState(false);
   const seq = useRef(0);
   const asked = useRef<string | null>(null);
   const text = q.trim();
 
-  // Instant matches, a moment after typing stops.
+  useEffect(() => setVoiceOk(!!speechCtor()), []);
+
+  const wake = () => {
+    setOpen(true);
+    setRecents(recent());
+    loadIndex(setIndex);
+  };
+
+  // "/" or Ctrl+K (Cmd+K) opens the box; openAsk("…") from anywhere opens it with words typed.
+  useEffect(() => {
+    if (!shortcut) return;
+    const me = Symbol("ask");
+    if (!shortcutOwner) shortcutOwner = me;
+    const onKey = (e: KeyboardEvent) => {
+      if (shortcutOwner !== me) return;
+      const inField = (e.target as HTMLElement | null)?.closest?.("input, textarea, select, [contenteditable='true']");
+      if ((e.key === "/" && !inField) || (e.key.toLowerCase() === "k" && (e.ctrlKey || e.metaKey))) {
+        e.preventDefault();
+        input.current?.focus();
+        wake();
+      }
+    };
+    const onOpen = (e: Event) => {
+      if (shortcutOwner !== me) return;
+      const v = String((e as CustomEvent).detail ?? "");
+      if (v) {
+        setQ(v);
+        setDeb(v.trim());
+        setAnswer(null);
+      }
+      input.current?.focus();
+      wake();
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener(OPEN_EVENT, onOpen);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(OPEN_EVENT, onOpen);
+      if (shortcutOwner === me) shortcutOwner = null;
+    };
+  }, [shortcut]);
+
+  // Rank the screens and guides a moment after typing stops (in the browser).
+  useEffect(() => {
+    const t = setTimeout(() => setDeb(text), 140);
+    return () => clearTimeout(t);
+  }, [text]);
+  const found: FinderResult | null = useMemo(() => (index && deb.length >= 2 ? rank(index, deb) : null), [index, deb]);
+
+  // Records and figures come from the server.
   useEffect(() => {
     if (text.length < 2) {
       setQuick(null);
@@ -72,19 +190,41 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
     }
     const mine = ++seq.current;
     const t = setTimeout(async () => {
+      if (typeof navigator !== "undefined" && navigator.onLine === false) return setOffline(true);
       try {
         const r = await quickSearch(text);
-        if (mine === seq.current) setQuick(r);
+        if (mine === seq.current) {
+          setQuick(r);
+          setOffline(false);
+        }
       } catch {
-        /* offline: keep what is shown */
+        if (mine === seq.current) setOffline(true);
       }
     }, 250);
     return () => clearTimeout(t);
   }, [text]);
 
+  // Is the best match (a licence or registration) in place for this company?
+  const bestCode = found?.confident ? found.best?.e.code : undefined;
+  useEffect(() => {
+    if (!bestCode || offline || live?.code === bestCode) return;
+    let stop = false;
+    ruleStatus(bestCode)
+      .then((r) => !stop && setLive({ code: bestCode, s: r }))
+      .catch(() => {});
+    return () => {
+      stop = true;
+    };
+  }, [bestCode, offline, live?.code]);
+
   const ask = async (question: string, ai: boolean) => {
     const qq = question.trim();
     if (qq.length < 2) return;
+    if (offline) {
+      setOpen(true);
+      setFailed(true);
+      return;
+    }
     asked.current = `${ai ? "ai" : "fig"}:${qq}`;
     setOpen(true);
     setFailed(false);
@@ -108,8 +248,18 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quick]);
 
-  // Nothing in the app matches a real question: the AI takes over by itself after a moment.
-  const stuck = !!quick && quick.q === text && quick.aiOn && !quick.figures && quick.pages.length + quick.guide.length + quick.records.length === 0 && text.split(" ").length >= 3;
+  // Nothing in the app or the records answers a real question: the AI takes over by itself after a moment.
+  const records = quick && quick.q === text ? quick.records : [];
+  const stuck =
+    !!quick &&
+    quick.q === text &&
+    quick.aiOn &&
+    !quick.figures &&
+    !!found &&
+    !found.confident &&
+    !found.missing &&
+    records.length === 0 &&
+    text.split(" ").length >= 3;
   useEffect(() => {
     if (!stuck || asked.current === `ai:${text}`) return;
     const t = setTimeout(() => ask(text, true), 1500);
@@ -130,19 +280,22 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
     };
   }, []);
 
-  const items: Item[] = quick
-    ? [
-        ...quick.pages.map((h) => ({ ...h, group: tr("Screens") })),
-        ...quick.guide.map((h) => ({ ...h, group: tr("App guide") })),
-        ...quick.records.flatMap((g) => g.hits.map((h) => ({ ...h, group: g.title }))),
-      ].slice(0, 14)
-    : [];
+  const best = found?.confident && !found.missing ? found.best : undefined;
+  const missing = found?.missing;
+  const related: FinderHit[] = found ? found.others.filter((h) => h.e.id !== best?.e.id && h.e.to).slice(0, 6) : [];
+  const items: Item[] = [
+    ...(best?.e.to ? [{ href: best.e.to, title: best.e.title, sub: best.e.path.join(" → "), group: "" }] : []),
+    ...related.map((h) => ({ href: h.e.to, title: h.e.title, sub: h.e.path.join(" → "), group: tr("Related") })),
+    ...records.flatMap((g) => g.hits.map((h) => ({ ...h, group: g.title }))),
+  ].slice(0, 16);
+  const firstListItem = best?.e.to ? 1 : 0;
 
   const close = () => {
     setOpen(false);
     setActive(-1);
   };
   const go = (href: string) => {
+    if (!href) return;
     if (text) remember(text);
     close();
     router.push(href);
@@ -170,17 +323,42 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (active >= 0 && items[active]) go(items[active].href);
+      else if (best?.e.to && !isQuestion(text) && !quick?.figures) go(best.e.to);
       else ask(text, true);
     }
   };
 
   const wish = async () => {
-    const r = await sendWish(text);
+    const r = await sendWish(text).catch(() => ({ ok: false }));
     if (r.ok) setWished(text);
   };
 
-  const nothing = !!quick && quick.q === text && items.length === 0 && !quick.figures;
+  const listen = () => {
+    const Ctor = speechCtor();
+    if (!Ctor) return;
+    const rec = new Ctor();
+    rec.lang = voiceLang;
+    rec.interimResults = false;
+    rec.onresult = (e) => {
+      const said = e.results[0]?.[0]?.transcript ?? "";
+      if (said) setQuestion(said);
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = (e) => {
+      setListening(false);
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") setVoiceOk(false);
+    };
+    setListening(true);
+    try {
+      rec.start();
+    } catch {
+      setListening(false);
+    }
+  };
+
+  const nothing = !!found && !best && !missing && records.length === 0 && !(quick?.figures && quick.q === text);
   const showAnswer = !!asking || !!answer || failed;
+  const showAlt = (e: FinderEntry) => !!e.alt && e.alt !== e.title && found?.lang !== "en";
   let lastGroup = "";
 
   return (
@@ -195,12 +373,9 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
           autoFocus={autoFocus}
           maxLength={500}
           onChange={(e) => setQuestion(e.target.value)}
-          onFocus={() => {
-            setOpen(true);
-            setRecents(recent());
-          }}
+          onFocus={wake}
           onKeyDown={onKey}
-          placeholder={placeholder ?? tr("Search or ask anything about the business")}
+          placeholder={placeholder ?? tr("Search or ask anything… / Uliza chochote")}
           aria-label={tr("Search or ask")}
           aria-expanded={open}
           aria-controls={`${id}-panel`}
@@ -208,6 +383,23 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
           role="combobox"
           aria-activedescendant={active >= 0 ? `${id}-i${active}` : undefined}
         />
+        {voiceOk && (
+          <>
+            <button type="button" className={`btn btn-small ${s.voice}${listening ? ` ${s.on}` : ""}`} onClick={listen} aria-label={tr("Search by voice")} title={tr("Search by voice")}>
+              {listening ? (
+                "…"
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <rect x="9" y="3" width="6" height="11" rx="3" />
+                  <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+                </svg>
+              )}
+            </button>
+            <button type="button" className={`btn btn-small ${s.voice}`} onClick={() => setVoiceLang((v) => (v === "sw-TZ" ? "en-US" : "sw-TZ"))} title={tr("Voice language")}>
+              {voiceLang === "sw-TZ" ? "SW" : "EN"}
+            </button>
+          </>
+        )}
         <button type="button" className={`btn btn-small btn-primary ${s.askBtn}`} onClick={() => ask(text, true)} disabled={text.length < 2 || !!asking}>
           {asking ? "…" : tr("Ask AI")}
         </button>
@@ -242,8 +434,19 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
                   </button>
                 ))}
               </div>
+              <p className="muted small" style={{ margin: "8px 10px 0" }}>
+                {tr("Tip: press / or Ctrl+K to search from any screen.")}
+              </p>
             </div>
           )}
+
+          {found && found.understood.length > 0 && text.length >= 2 && (
+            <p className={`${s.under} small muted`}>
+              <span className={`badge tone-${found.lang === "en" ? "info" : found.lang === "sw" ? "ok" : "warn"}`}>{tr(LANG_LABEL[found.lang])}</span> {tr("Understood")}:{" "}
+              {found.understood.slice(0, 6).join(" · ")}
+            </p>
+          )}
+          {offline && text.length >= 2 && <p className="small muted" style={{ margin: "4px 10px" }}>{tr("You are offline: showing screens and guides only. Records and the AI answer when you are back online.")}</p>}
 
           {showAnswer && (
             <div className={s.answerWrap} aria-live="polite">
@@ -254,7 +457,7 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
                   <span />
                 </p>
               ) : failed ? (
-                <p className="muted small">{tr("Something went wrong. Please try again.")}</p>
+                <p className="muted small">{offline ? tr("The AI answers when you are online.") : tr("Something went wrong. Please try again.")}</p>
               ) : answer ? (
                 <>
                   <AnswerView a={answer} compact onNavigate={close} onAsk={(f) => setQuestion(f)} />
@@ -275,18 +478,86 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
 
           {text.length >= 2 && (
             <>
+              {missing && (
+                <div className={`${s.card} ${s.miss}`}>
+                  <p className={s.kind}>{tr("This isn't in the app yet")}</p>
+                  <h3>{missing.e.title}</h3>
+                  {missing.e.why && <p className="small">{missing.e.why}</p>}
+                  <p className={s.group}>{tr("What you can do instead")}</p>
+                  <ol className={s.steps}>
+                    {(missing.e.instead ?? []).map((x, k) => (
+                      <li key={k}>
+                        {x.to ? (
+                          <Link
+                            href={x.to}
+                            onClick={() => {
+                              remember(text);
+                              close();
+                            }}
+                          >
+                            {x.text} ›
+                          </Link>
+                        ) : (
+                          x.text
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                  {quick?.canWish && (
+                    <button type="button" className="btn btn-small" onClick={wish} disabled={wished === text}>
+                      {wished === text ? tr("Sent to the Suggestion Box") : tr("Ask for this in the app")}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {best && !showAnswer && (
+                <div className={`${s.card}${active === 0 && best.e.to ? ` ${s.active}` : ""}`} id={best.e.to ? `${id}-i0` : undefined}>
+                  <p className={s.kind}>{tr("Best answer")}</p>
+                  <h3>{best.e.title}</h3>
+                  {showAlt(best.e) && <p className="small muted">{best.e.alt}</p>}
+                  {best.e.code && live?.code === best.e.code && live.s && (
+                    <p className="small">
+                      <span className={`badge tone-${live.s.tone}`}>{live.s.label}</span>
+                    </p>
+                  )}
+                  {best.e.path.length > 0 && <p className={`${s.path} small muted`}>{best.e.path.join(" › ")}</p>}
+                  {best.e.steps.length > 0 && (
+                    <ol className={s.steps}>
+                      {best.e.steps.slice(0, 6).map((x, k) => (
+                        <li key={k}>{x}</li>
+                      ))}
+                    </ol>
+                  )}
+                  <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                    {best.e.to && (
+                      <button type="button" className="btn btn-small btn-primary" onClick={() => go(best.e.to)}>
+                        {tr("Take me there")} ›
+                      </button>
+                    )}
+                    {best.e.page && (
+                      <button type="button" className="btn btn-small" onClick={() => go(best.e.page!)}>
+                        {tr("Open the guide")}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {!answer && !asking && (
                 <button type="button" className={s.askRow} onClick={() => ask(text, true)}>
                   <Icon name="help" size={18} />
                   <span>
                     {tr("Ask AI")}: <strong>“{text}”</strong>
                   </span>
-                  <span className="muted small">Enter</span>
+                  <span className="muted small">{best && !isQuestion(text) ? "" : "Enter"}</span>
                 </button>
               )}
-              {items.length > 0 && (
+
+              {items.length > firstListItem && (
                 <ul className={s.list} role="listbox">
                   {items.map((it, i) => {
+                    if (i < firstListItem) return null;
                     const head = it.group !== lastGroup ? it.group : null;
                     lastGroup = it.group;
                     return (
@@ -314,9 +585,11 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
                   })}
                 </ul>
               )}
-              {nothing && (
+              {nothing && !showAnswer && (
                 <div className={s.wish}>
-                  <span className="muted small">{quick?.aiOn ? tr("Nothing in the app matches. The AI answers in a moment, or press Enter.") : tr("No screens or records match.")}</span>
+                  <span className="muted small">
+                    {quick?.aiOn ? tr("I couldn't find that in the app. The AI answers in a moment, or press Enter.") : tr("I couldn't find that in the app. Try other words.")}
+                  </span>
                   {quick?.canWish && text.length >= 3 && (
                     <button type="button" className="btn btn-small" onClick={wish} disabled={wished === text}>
                       {wished === text ? tr("Sent to the Suggestion Box") : tr("Ask for this in the app")}

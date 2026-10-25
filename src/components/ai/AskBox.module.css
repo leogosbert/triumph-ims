@@ -258,3 +258,44 @@
   align-items: center;
   padding: 8px 6px;
 }
+
+/* Super search: best match, missing feature, language line, voice */
+.under {
+  margin: 4px 10px 6px;
+}
+.card {
+  margin: 4px 2px 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--soft, transparent);
+}
+.card h3 {
+  margin: 2px 0 4px;
+  font-size: 1rem;
+}
+.card.active {
+  border-color: var(--brand);
+}
+.miss {
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
+}
+.kind {
+  margin: 0;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.path {
+  margin: 0 0 4px;
+}
+.voice {
+  border-radius: 999px;
+  min-width: 34px;
+  padding-inline: 8px;
+}
+.voice.on {
+  color: var(--brand);
+  border-color: var(--brand);
+}

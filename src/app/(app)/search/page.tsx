@@ -2,7 +2,8 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { AskPanel } from "@/components/ai/AskPanel";
 import { Icon } from "@/components/Icon";
-import { findGuide, findPages, findRecords, guideHref, type Hit } from "@/lib/ai/search";
+import { buildIndex, rank } from "@/lib/ai/finder";
+import { findRecords, searchEntries, type Hit } from "@/lib/ai/search";
 import { getAppContext } from "@/lib/context";
 import { getDict } from "@/lib/lang";
 import { type SearchParams } from "@/lib/messages";
@@ -22,7 +23,7 @@ const GROUP_KEY: Record<string, string> = {
 };
 
 export default async function SearchPage({ searchParams }: { searchParams: SearchParams }) {
-  await primeLang();
+  const lang = await primeLang();
   const sp = (await searchParams) ?? {};
   const asked = (typeof sp.q === "string" ? sp.q : "").replace(/\s+/g, " ").trim().slice(0, 500);
   const q = cleanSearch(asked);
@@ -35,10 +36,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
   const groups: { title: string; hits: Hit[] }[] = [];
   if (q.length >= 2) {
     const records = await findRecords(ctx, q);
-    const screens = [
-      ...findPages(ctx, asked, 6),
-      ...findGuide(ctx, asked, 4).map((g) => ({ href: g.topic.href ?? guideHref(g.topic), title: tr(g.topic.title), sub: tr(g.topic.summary), side: tr("App guide") })),
-    ];
+    // The same ranking as the Ask box: screens, guide topics, compliance requirements and playbooks.
+    const found = rank(buildIndex(searchEntries(ctx, lang)), asked);
+    const KIND: Record<string, string> = { page: "Screen", howto: "App guide", rule: "Legal & compliance", guide: "Playbooks" };
+    const screens: Hit[] = [found.best, ...found.others]
+      .filter((h): h is NonNullable<typeof h> => !!h && !!h.e.to && h.cover >= 0.34)
+      .filter((h, i, all) => all.findIndex((x) => x.e.to === h.e.to) === i)
+      .slice(0, 8)
+      .map((h) => ({ href: h.e.to, title: h.e.title, sub: h.e.path.join(" → "), side: tr(KIND[h.e.kind] ?? "") }));
     if (screens.length) groups.push({ title: tr("Screens and guide"), hits: screens });
     for (const g of records) groups.push({ title: (t as Record<string, string>)[GROUP_KEY[g.key]] ?? tr(g.title), hits: g.hits });
   }

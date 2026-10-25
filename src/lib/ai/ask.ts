@@ -2,7 +2,8 @@ import { AI_TIMEOUT_MS, aiReady, callClaude } from "@/lib/ai/claude";
 import { ANSWER_SCHEMA, askSystem, askUser, checkAnswer, type PromptSource } from "@/lib/ai/ask-prompt";
 import { extractJson } from "@/lib/ai/receipt";
 import { isLegalQuestion, LEGAL_NOTE, searchKnowledge, type KnowledgeItem } from "@/lib/ai/knowledge";
-import { appSections, findGuide, findPages, findRecords, guideHref, type Hit, type HitGroup, type SearchCtx } from "@/lib/ai/search";
+import { buildIndex, MISSING, rank, understand, type FinderIndex } from "@/lib/ai/finder";
+import { appSections, findGuide, findPages, findRecords, guideHref, searchEntries, type Hit, type HitGroup, type SearchCtx } from "@/lib/ai/search";
 import { builtInAnswer, detectTopic, type Answer } from "@/lib/assistant";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
@@ -132,6 +133,19 @@ const ruleView = (k: KnowledgeItem, complianceOn: boolean) => ({
   verify: k.verify,
 });
 
+const indexes = new Map<string, FinderIndex>();
+/** The super search index for this person's role, features and language (kept between requests on this server). */
+function finderIndex(ctx: SearchCtx, lang: "en" | "sw"): FinderIndex {
+  const key = `${lang}|${ctx.role}|${ctx.isManager}|${ctx.isPlatformAdmin ? 1 : 0}|${ctx.features.list.map((f) => (ctx.features.on(f.key) ? f.key : "")).join(",")}`;
+  let i = indexes.get(key);
+  if (!i) {
+    if (indexes.size > 50) indexes.clear();
+    i = buildIndex(searchEntries(ctx, lang));
+    indexes.set(key, i);
+  }
+  return i;
+}
+
 export async function askBusiness(
   ctx: SearchCtx,
   rawQuestion: string,
@@ -154,6 +168,9 @@ export async function askBusiness(
   ]);
   const guideFound = findGuide(ctx, question, legal ? 2 : 3);
   const pages = findPages(ctx, question, 5);
+  // The super search's ranking (the same as the Ask box): best match, and what the app does not do.
+  const found = rank(finderIndex(ctx, lang), question);
+  const typed = understand(question).lang;
   const usefulFigures = figures && figures.topic !== "help" ? figures : undefined;
 
   // Numbered sources (the same numbers the AI cites).
@@ -194,7 +211,17 @@ export async function askBusiness(
       [g.topic.summary, `Where: ${g.topic.laptop.join(" → ")} (phone: ${g.topic.phone.join(" → ")})`, ...g.topic.steps.slice(0, 8).map((s, i) => `${i + 1}. ${s}`)].join("\n"),
     );
   }
-  for (const p of pages.slice(0, 3)) add({ kind: "screen", title: p.title, href: p.href }, `${p.title}: ${p.sub}`);
+  const listed = new Set([...guideFound.map((g) => g.topic.href ?? guideHref(g.topic)), ...rulesFound.map((k) => (complianceOn ? k.item.href : ""))]);
+  for (const h of [found.best, ...found.others].filter((x): x is NonNullable<typeof x> => !!x && x.cover >= 0.5).slice(0, 2)) {
+    if (!h.e.to || listed.has(h.e.to) || h.e.kind === "rule") continue;
+    listed.add(h.e.to);
+    add({ kind: h.e.kind === "page" ? "screen" : "guide", title: h.e.title, href: h.e.to }, [`Where: ${h.e.path.join(" → ")} (${h.e.to})`, ...h.e.steps.slice(0, 6).map((x, i) => `${i + 1}. ${x}`)].join("\n"));
+  }
+  if (found.missing) {
+    const m = found.missing.e;
+    add({ kind: "screen", title: `${tr("Not in the app yet")}: ${m.title}` }, [`NOT AVAILABLE: ${m.title}`, m.why ?? "", ...(m.instead ?? []).map((x) => `Instead: ${x.text}${x.to ? ` (${x.to})` : ""}`)].join("\n"));
+  }
+  for (const p of pages.slice(0, 3)) if (!listed.has(p.href)) add({ kind: "screen", title: p.title, href: p.href }, `${p.title}: ${p.sub}`);
   for (const g of records) for (const h of g.hits.slice(0, 2)) add({ kind: "record", title: `${tr(g.title)}: ${h.title}`, href: h.href }, `${g.title}: ${h.title} ${h.sub} ${h.side ?? ""}`);
 
   const guideView = guideFound.map((g) => ({
@@ -230,6 +257,11 @@ export async function askBusiness(
     base.text = usefulFigures.text;
     const to = usefulFigures.links?.[0]?.href;
     if (to) base.where = { path: [usefulFigures.links![0].label], to };
+  } else if (found.missing) {
+    const m = found.missing.e;
+    base.title = m.title;
+    base.text = `${tr("This isn't in the app yet")}. ${m.why ?? ""}`.trim();
+    base.steps = (m.instead ?? []).map((x) => ({ text: x.text, to: x.to }));
   } else if (top && (legal || !guideFound.length)) {
     base.text = `${tr(top.summary)}${top.when ? ` ${tr("When")}: ${tr(top.when)}` : ""}`.trim();
     base.title = tr(top.title);
@@ -240,6 +272,12 @@ export async function askBusiness(
     base.text = g.summary;
     base.steps = g.steps.slice(0, 10).map((t) => ({ text: t }));
     base.where = { path: g.path, to: g.href };
+  } else if (found.confident && found.best?.e.to) {
+    const b = found.best.e;
+    base.title = b.title;
+    base.text = b.steps[0] ?? "";
+    base.steps = b.steps.slice(b.kind === "page" ? 1 : 0, 10).map((t) => ({ text: t }));
+    base.where = { path: b.path, to: b.to };
   } else if (pages.length || records.length) {
     base.text = tr("These screens and records match your question.");
     if (pages[0]) base.where = { path: [pages[0].side ?? "", pages[0].title].filter(Boolean), to: pages[0].href };
@@ -264,9 +302,17 @@ export async function askBusiness(
     }
     const sections = appSections(ctx);
     const routes = [...new Set([...sections.map((x) => x.href), ...sources.map((x) => x.href).filter((h): h is string => !!h), "/guide", "/search", "/assistant", ...(complianceOn ? ["/compliance"] : [])])];
-    const withScreens = [...prompt, { n: prompt.length + 1, kind: "app_sections", title: "Screens in the app", body: sections.map((x) => `${x.path.join(" → ")}: ${x.href}`).join("\n") }];
+    const withScreens = [
+      ...prompt,
+      {
+        n: prompt.length + 1,
+        kind: "app_sections",
+        title: "Screens in the app",
+        body: [...sections.map((x) => `${x.path.join(" → ")}: ${x.href}`), ...MISSING.map((m) => `NOT AVAILABLE: ${m.title}`)].join("\n"),
+      },
+    ];
     const res = await callClaude({
-      system: askSystem({ company: ctx.company.name, lang, today, legal: base.legal, routes }),
+      system: askSystem({ company: ctx.company.name, lang, today, legal: base.legal, routes, typed }),
       content: [{ type: "text", text: askUser(question, withScreens) }],
       maxTokens: 1500,
       timeoutMs: AI_TIMEOUT_MS,

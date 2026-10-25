@@ -874,8 +874,6 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "For each branch, go through Margin, Expenses, Clients owe and Stock value.":
     "Kwa kila tawi, pitia Faida, Matumizi, Wateja wanadaiwa na Thamani ya stoku.",
   "Use ← Earlier to see if a problem is new or has lasted three months.": "Tumia ← Awali kuona kama tatizo ni jipya au limedumu miezi mitatu.",
-  "Agree one action per branch, with a date, and check it at the next meeting.":
-    "Kubalianeni hatua moja kwa kila tawi, pamoja na tarehe, na mkaikague kwenye kikao kijacho.",
   "Management and branch managers": "Uongozi na mameneja wa matawi",
   "Monthly review": "Tathmini ya kila mwezi",
   "October meeting": "Kikao cha Oktoba",
@@ -1151,4 +1149,5 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "Total cost to the company is gross pay plus employer NSSF, SDL and WCF.": "Gharama yote kwa kampuni ni mshahara ghafi pamoja na NSSF ya mwajiri, SDL na WCF.",
   "Every quarter: press Set as reorder levels on Purchase planning, and check Documents → Expiring and Legal & compliance → Licences for the next three months.": "Kila robo mwaka: bonyeza Weka kama viwango vya kuagiza tena kwenye Mipango ya ununuzi, na uangalie Nyaraka → Zinazoisha muda na Sheria na utiifu → Leseni kwa miezi mitatu ijayo.",
   "First week of the month: close the books, approve the payroll, Budgets vs actual and the branch review on Head-office figures.": "Wiki ya kwanza ya mwezi: funga vitabu, idhinisha mishahara, Bajeti dhidi ya halisi na tathmini ya matawi kwenye Takwimu za makao makuu.",
+  "Agree one action per branch, with a date, and check it at the next meeting. Hold the review in Administration → Meetings, so the actions go to each branch manager's My actions.": "Kubalianeni hatua moja kwa kila tawi, pamoja na tarehe, na mkague kwenye mkutano unaofuata. Fanyeni tathmini kwenye Usimamizi → Mikutano, ili hatua ziende kwenye Hatua zangu za kila meneja wa tawi.",
 };

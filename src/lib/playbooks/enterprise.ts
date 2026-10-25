@@ -1320,7 +1320,7 @@ export const ENTERPRISE: Playbook = {
             "In the first week of the month, open Head-office figures on last month.",
             "For each branch, go through Margin, Expenses, Clients owe and Stock value.",
             "Use ← Earlier to see if a problem is new or has lasted three months.",
-            "Agree one action per branch, with a date, and check it at the next meeting.",
+            "Agree one action per branch, with a date, and check it at the next meeting. Hold the review in Administration → Meetings, so the actions go to each branch manager's My actions.",
           ],
           where: ["Reports", "Head-office figures"],
           href: "/head-office",

@@ -76,8 +76,8 @@ const SIDE_GROUPS: [string, string[]][] = [
 /** The Glass sidebar groups the same links a little more finely. */
 const GLASS_GROUPS: [string, string[]][] = [
   ["Overview", ["/", "/driver"]],
-  ["Operations", ["/sales", "/clients", "/purchasing", "/products", "/stock", "/deliveries", "/jobs"]],
-  ["People", ["/hr", "/compliance"]],
+  ["Operations", ["/sales", "/inbox", "/clients", "/purchasing", "/products", "/stock", "/deliveries", "/jobs"]],
+  ["People", ["/hr", "/meetings", "/calendar", "/compliance"]],
   ["Finance", ["/finance", "/invoices", "/reports"]],
   ["Company", ["/settings", "/help", "/more"]],
 ];

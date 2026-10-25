@@ -73,6 +73,22 @@ export const ROUTINES: Playbook = {
           scales: "all",
         },
         {
+          id: "calendar",
+          title: "See every date in one calendar",
+          body: "Meetings, your actions, deliveries, due dates, filings, licences and leave all show in Calendar, and can follow you on your phone's own calendar.",
+          do: [
+            "Open Administration → Calendar and choose Month, Week or List.",
+            "Use the filter to show only some kinds of date, for example My actions.",
+            "Press + Add a date for anything else, and choose Who is reminded and Who sees it.",
+            "Open Phone calendar (Google Calendar, iPhone, Outlook) and make your private link once.",
+          ],
+          where: ["Administration", "Calendar"],
+          href: "/calendar",
+          who: "Everyone",
+          scales: "all",
+          tip: "Keep the phone calendar link private: anyone with it sees your dates.",
+        },
+        {
           id: "search",
           title: "Find any record or answer in seconds",
           body:
@@ -287,6 +303,44 @@ export const ROUTINES: Playbook = {
             },
           ],
           scales: "all",
+        },
+        {
+          id: "owner-meeting",
+          title: "Every week: the team meeting",
+          body: "A short meeting on the same day every week, planned and minuted in the app, so every decision has an owner and a date.",
+          do: [
+            "Open Administration → Meetings → Regular meetings and press + Regular meeting once, for example every Monday at 8:00.",
+            "Before the meeting, open it and press Suggest topics: money owed, quotations waiting and open actions from last time. Tick the ones to discuss.",
+            "At the time, open the room, read the notice and press Start the meeting. Type the actions as you agree them, with who does it and when.",
+            "Press End the meeting, check the minutes and press Approve the minutes. Each owner finds their action under My actions.",
+          ],
+          where: ["Administration", "Meetings"],
+          href: "/meetings",
+          who: "Management",
+          scales: "all",
+          example: {
+            kind: "Minutes",
+            title: "Monday team meeting",
+            lines: [
+              ["Decision", "Call Geita Gold about the late invoice"],
+              ["Action", "Juma to deliver the oil to Geita on Friday"],
+              ["Open from last time", "1"],
+            ],
+            stamp: "Minutes approved",
+            tone: "ok",
+          },
+          scenarios: [
+            {
+              title: "The same action comes back every week",
+              problem: "An action has no owner or date, so nobody does it.",
+              fix: [
+                "Before approving the minutes, give every action an owner and a due date.",
+                "At the next meeting, open actions from last time show first. Ask the owner for an answer.",
+              ],
+              tone: "warn",
+            },
+          ],
+          tip: "Without AI, write lines starting Action:, Decision: or Issue: in the notes and they become those points in the minutes.",
         },
         {
           id: "owner-people",

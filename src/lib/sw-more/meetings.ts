@@ -3,6 +3,8 @@
 export const SW_MEETINGS: Record<string, string> = {
   // Menu and tabs
   Meetings: "Mikutano",
+  Week: "Wiki",
+  List: "Orodha",
   Calendar: "Kalenda",
   "Team meetings and meetings with clients and suppliers: agenda, video in the app, live notes, minutes and follow-up.":
     "Mikutano ya timu na mikutano na wateja na wasambazaji: ajenda, video ndani ya programu, maelezo ya moja kwa moja, kumbukumbu za kikao na ufuatiliaji.",

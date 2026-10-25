@@ -235,7 +235,17 @@ export function ScanDocument({
   useEffect(() => {
     if (!enabled || !autoRead || !documentId || autoDone.current) return;
     autoDone.current = true;
-    void scanStored(documentId).then((c) => apply(c, null));
+    void scanStored(documentId).then((c) => {
+      apply(c, null);
+      // Read once: a refresh of the page does not read (and count) it again.
+      try {
+        const u = new URL(window.location.href);
+        u.searchParams.delete("read");
+        window.history.replaceState(window.history.state, "", u.toString());
+      } catch {
+        /* old browser */
+      }
+    });
   }, [enabled, autoRead, documentId, scanStored, apply]);
 
   async function onClick() {

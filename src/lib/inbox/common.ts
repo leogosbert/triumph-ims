@@ -5,7 +5,7 @@ import type { Role } from "@/lib/roles";
 export const INBOX_ROLES: Role[] = ["management", "sales", "procurement", "finance"];
 export const canUseInbox = (role: Role) => INBOX_ROLES.includes(role);
 
-export type Channel = "email" | "whatsapp";
+export type Channel = "email" | "whatsapp" | "portal";
 
 export type Conversation = {
   id: string;

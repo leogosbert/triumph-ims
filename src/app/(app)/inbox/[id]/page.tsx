@@ -82,7 +82,7 @@ export default async function ConversationPage({ params, searchParams }: { param
         <Link href="/inbox">{tr("← Inbox")}</Link>
       </p>
       <h1 style={{ overflowWrap: "anywhere" }}>
-        {c.channel === "whatsapp" ? "💬 " : "✉️ "}
+        {c.channel === "whatsapp" ? "💬 " : c.channel === "portal" ? "🌐 " : "✉️ "}
         {who}
       </h1>
       <p className="muted small" style={{ overflowWrap: "anywhere" }}>

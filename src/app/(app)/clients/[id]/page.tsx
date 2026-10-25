@@ -16,6 +16,7 @@ import { StatusBadge } from "@/lib/sales";
 import { addContact, removeContact, saveClient, setClientActive } from "../actions";
 import { ClientCrm } from "../../crm/ClientCrm";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
+import { PortalAccess } from "@/components/PortalAccess";
 
 export const metadata = { title: "Client" };
 
@@ -205,6 +206,7 @@ export default async function ClientPage({
       {can(role, "seeDocuments") && features.on("documents") && (
         <LinkedDocuments supabase={supabase} companyId={company.id} field="client_id" id={client.id} back={`/clients/${client.id}#documents`} />
       )}
+      <PortalAccess supabase={supabase} companyId={company.id} role={role} features={features} party="client" partyId={client.id} contacts={contacts} />
 
       <form action={saveClient}>
         <input type="hidden" name="id" value={client.id} />

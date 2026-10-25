@@ -9,6 +9,7 @@ import { canUseInbox, replyToAddress, type Conversation, type InboxMessage, type
 import { addressList, messageIds, quoteForReply, replySubject } from "@/lib/inbox/sanitize";
 import { inboxChannels, pollMailbox, sendEmailReply } from "@/lib/inbox/server";
 import { sendWhatsAppText } from "@/lib/inbox/whatsapp";
+import { portalLoginUrl, sendPortalEmail } from "@/lib/portal/server";
 
 async function ctx() {
   const c = await getAppContext();
@@ -40,6 +41,24 @@ export async function sendReply(form: FormData): Promise<ReplyResult> {
   const s = settings as InboxSettings | null;
   if (!c) return { error: "Conversation not found." };
   const channels = inboxChannels();
+
+  // Client or supplier portal: the reply shows on their Messages page; an email tells them it is there.
+  if (c.channel === "portal") {
+    const { error } = await supabase.rpc("inbox_record_outbound", {
+      p_conversation: c.id,
+      p_msg: { status: "sent", text, provider: "portal", to: [c.counterpart_address], from: s?.reply_name || company.name },
+    });
+    refresh(c.id);
+    if (error) return { error: friendlyError(error.message) };
+    await sendPortalEmail({
+      to: c.counterpart_address,
+      fromName: (s?.reply_name || company.name).slice(0, 80),
+      subject: `New message from ${company.name}`,
+      lines: [`${company.name} answered your message on the portal:`, text.length > 600 ? `${text.slice(0, 600)}…` : text, "Sign in to the portal to reply."],
+      button: { label: "Open the portal", url: portalLoginUrl(company.id, c.counterpart_address) },
+    });
+    return { ok: "Reply sent to their portal." };
+  }
 
   if (c.channel === "email") {
     if (!channels.emailSend) return { error: "Email sending is not set up yet. See Inbox → Setup." };

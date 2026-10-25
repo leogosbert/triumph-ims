@@ -11,6 +11,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
+import { PortalAccess } from "@/components/PortalAccess";
 import { saveSupplier, setSupplierActive } from "../actions";
 
 export const metadata = { title: "Supplier" };
@@ -88,6 +89,15 @@ export default async function SupplierPage({
       {can(role, "seeDocuments") && features.on("documents") && (
         <LinkedDocuments supabase={supabase} companyId={company.id} field="supplier_id" id={id} back={`/suppliers/${id}#documents`} kind="certificate" />
       )}
+      <PortalAccess
+        supabase={supabase}
+        companyId={company.id}
+        role={role}
+        features={features}
+        party="supplier"
+        partyId={supplier.id}
+        contacts={supplier.email ? [{ id: supplier.id, name: supplier.contact_person ?? supplier.name, email: supplier.email, position: null, phone: supplier.phone ?? null }] : []}
+      />
 
       <form action={saveSupplier}>
         <input type="hidden" name="id" value={supplier.id} />

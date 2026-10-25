@@ -6,6 +6,7 @@ import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
 import { getAppContext } from "@/lib/context";
+import { sendRfqViaPortal } from "@/app/(app)/portal-admin/actions";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -48,7 +49,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
   if (!can(role, "editPurchasing")) redirect("/");
 
   const { data: r } = await supabase.from("supplier_rfqs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
@@ -193,6 +194,15 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
       <section className="card" id="suppliers">
         <h2>{tr("Suppliers asked (")}{invites.length})</h2>
         {invites.length === 0 && <p className="muted small">{tr("Add the suppliers you want prices from.")}</p>}
+        {open && features.on("supplier_portal") && lines.length > 0 && invites.some((i) => i.status === "invited") && (
+          <form action={sendRfqViaPortal} className="inline-form" style={{ margin: "4px 0 8px", flexWrap: "wrap" }}>
+            <input type="hidden" name="id" value={r.id} />
+            <SubmitButton className="btn btn-small" pendingText={tr("Sending…")}>
+              {tr("Send via portal")}
+            </SubmitButton>
+            <span className="small muted">{tr("Emails the suppliers' portal contacts a link to answer online. Their prices land here.")}</span>
+          </form>
+        )}
         <ul className="list">
           {invites.map((inv) => (
             <li key={inv.id}>

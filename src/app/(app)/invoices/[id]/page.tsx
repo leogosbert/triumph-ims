@@ -7,6 +7,7 @@ import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
 import { PayMethodFields } from "@/components/PayMethodFields";
 import { InvoiceReminderCard } from "@/components/FollowUpCards";
+import { InvoiceMoneyCards } from "@/components/getpaid/InvoiceMoneyCards";
 import { getAppContext, stage13Ready } from "@/lib/context";
 import { daysOverdue, INVOICE_STATUS, isOpen, methodLabel, n, shownStatus } from "@/lib/finance";
 import { formatDate, formatDateTime } from "@/lib/format";
@@ -265,6 +266,8 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
           )}
         </section>
       )}
+
+      <InvoiceMoneyCards supabase={supabase} company={company} role={role} on={(k) => features.on(k)} inv={{ id: inv.id, number: inv.number, status: inv.status, currency: ccy, total: n(inv.total), amount_paid: n(inv.amount_paid), client_id: inv.client_id, client_name: inv.client?.name ?? "", contact_name: inv.contact_name }} />
 
       {stage13Ready(company) && features.on("reminders") && can(role, "followUpInvoices") && open && !isDraft && (
         <InvoiceReminderCard

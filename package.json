@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test:db": "bash supabase/tests/run.sh"
+    "test:db": "bash supabase/tests/run.sh",
+    "test:money": "tsx --test scripts/test-money.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

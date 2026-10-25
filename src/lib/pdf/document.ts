@@ -1,4 +1,5 @@
 import { degrees, PDFDocument, rgb, StandardFonts, type PDFFont, type PDFImage, type PDFPage, type RGB } from "pdf-lib";
+import { encodeQr } from "@/lib/getpaid/qr";
 
 /** Everything needed to print a business document (quotation, purchase order, request for quotation). */
 export type DocCompany = {
@@ -49,6 +50,8 @@ export type DocData = {
   signature?: string | null;
   watermark?: string | null;
   showBank?: boolean;
+  /** QR codes printed after the text blocks (TRA verification link, pay link), each with a few lines beside it. */
+  qrs?: { title: string; text: string; lines: string[] }[];
   /** Delivery note sign-off: empty boxes to sign on paper, or the captured signature. */
   signoff?: {
     deliveredBy: string | null;
@@ -356,6 +359,28 @@ export async function buildDocumentPdf(d: DocData): Promise<Uint8Array> {
       y -= 11;
     }
     y -= 8;
+  }
+
+  // ---------------- QR codes ----------------
+  for (const q of d.qrs ?? []) {
+    let grid: boolean[][];
+    try {
+      grid = encodeQr(q.text, "M");
+    } catch {
+      continue;
+    }
+    const size = 72;
+    if (y - size - 12 < 70) newPage(false);
+    const top = y + 4;
+    const cell = size / grid.length;
+    grid.forEach((row, r) =>
+      row.forEach((on, c) => {
+        if (on) page.drawRectangle({ x: M + c * cell, y: top - (r + 1) * cell, width: cell, height: cell, color: rgb(0, 0, 0) });
+      }),
+    );
+    text(q.title.toUpperCase(), M + size + 14, top - 10, { f: bold, size: 8, color: brand });
+    q.lines.slice(0, 5).forEach((t, k) => text(t, M + size + 14, top - 24 - k * 11, { size: 8.5 }));
+    y = top - size - 14;
   }
 
   if (d.signoff) {

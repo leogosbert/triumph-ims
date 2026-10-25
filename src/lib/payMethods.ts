@@ -25,5 +25,6 @@ export const MOBILE_MONEY: Record<string, string> = {
 export function methodLabel(method: string, provider?: string | null) {
   if (method === "mobile_money" && provider && MOBILE_MONEY[provider]) return MOBILE_MONEY[provider];
   if (method === "withholding_tax") return WITHHOLDING_LABEL;
+  if (method === "credit_note") return "Credit note";
   return PAY_METHODS[method] ?? method;
 }

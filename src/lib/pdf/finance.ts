@@ -37,6 +37,10 @@ export type InvoicePdfData = {
   };
   client: Party;
   lines: DocLine[];
+  /** TRA fiscal receipt (when entered or accepted by TRA): printed with its verification QR code. */
+  fiscal?: { receipt_no: string | null; z_number: string | null; verification_code: string | null; receipt_at: string | null; verify_url: string } | null;
+  /** The invoice's pay link (mobile money and cards): printed with a QR code. */
+  payUrl?: string | null;
 };
 
 export function buildInvoicePdf(d: InvoicePdfData) {
@@ -85,6 +89,25 @@ export function buildInvoicePdf(d: InvoicePdfData) {
       { title: "Terms", body: i.terms },
     ],
     showBank: true,
+    qrs: [
+      ...(d.fiscal
+        ? [
+            {
+              title: "TRA fiscal receipt",
+              text: d.fiscal.verify_url,
+              lines: [
+                [d.fiscal.receipt_no ? `Receipt no. ${d.fiscal.receipt_no}` : null, d.fiscal.z_number ? `Z no. ${d.fiscal.z_number}` : null].filter(Boolean).join("   "),
+                d.fiscal.verification_code ? `Verification code: ${d.fiscal.verification_code}` : "",
+                d.fiscal.receipt_at ? `Date: ${pdfDate(d.fiscal.receipt_at.slice(0, 10))}` : "",
+                "Scan to verify on the TRA website.",
+              ].filter(Boolean),
+            },
+          ]
+        : []),
+      ...(d.payUrl && !draft && balance > 0
+        ? [{ title: "Pay online", text: d.payUrl, lines: ["Scan to pay by mobile money or card,", "or open:", d.payUrl] }]
+        : []),
+    ],
     signature: i.issued_by ? `Issued by: ${i.issued_by}\nFor and on behalf of ${d.company.name}` : null,
     watermark: draft ? "DRAFT - NOT ISSUED" : i.status === "cancelled" ? "CANCELLED" : i.status === "paid" ? "PAID" : null,
   });

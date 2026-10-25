@@ -1,4 +1,5 @@
 import { displayName, type Profile } from "@/lib/context";
+import { invoicePdfExtras } from "@/lib/getpaid/pdf-extras";
 import { buildInvoicePdf } from "@/lib/pdf/finance";
 import { loadLogo, pdfResponse } from "@/lib/pdf/load";
 import { quoteNo } from "@/lib/sales";
@@ -56,7 +57,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     line_total: Number(l.line_total),
   }));
 
+  const extras = await invoicePdfExtras(supabase, inv);
   const bytes = await buildInvoicePdf({
+    ...extras,
     company,
     logo: await loadLogo(supabase, company.logo_path),
     invoice: {

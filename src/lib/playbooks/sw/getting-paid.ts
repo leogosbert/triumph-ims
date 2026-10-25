@@ -657,4 +657,9 @@ export const SW_GETTING_PAID: Record<string, string> = {
   "Offer a way forward: part of the old debt now and the rest on a promised date. Log the promise on the invoices with + Log a reminder or promise to pay.": "Toa njia ya kusonga mbele: sehemu ya deni la zamani sasa na iliyobaki kwenye tarehe iliyoahidiwa. Rekodi ahadi kwenye ankara kwa + Rekodi kikumbusho au ahadi ya kulipa.",
   "Prepare the quotation and the goods, but dispatch only when the agreed payment is recorded.": "Andaa nukuu na bidhaa, lakini tuma tu malipo yaliyokubaliwa yakisharekodiwa.",
   "If management decides to deliver anyway, the invoice above the credit limit needs a manager to issue it, so the decision is on record.": "Uongozi ukiamua kuwasilisha hata hivyo, ankara iliyozidi kikomo cha mkopo inahitaji meneja aitoe, hivyo uamuzi unabaki kwenye kumbukumbu.",
+  "When the client answers by email or WhatsApp": "Mteja anapojibu kwa barua pepe au WhatsApp",
+  "Where the Inbox is connected, the client's answer to the company email or WhatsApp arrives in the app, so finance and sales see the same promise.": "Pale Kikasha kimeunganishwa, jibu la mteja kwa barua pepe au WhatsApp ya kampuni linaingia kwenye programu, ili fedha na mauzo waone ahadi ile ile.",
+  "Open Inbox and open the client's message. Link it to the client if it is not linked yet.": "Fungua Kikasha na ufungue ujumbe wa mteja. Uunganishe na mteja kama bado haujaunganishwa.",
+  "If they promise a date, open the invoice and record it with + Log a reminder or promise to pay. Reminders pause until that date.": "Wakiahidi tarehe, fungua ankara na uirekodi kwa + Rekodi kikumbusho au ahadi ya kulipa. Vikumbusho vinasimama hadi tarehe hiyo.",
+  "Answer in the same conversation with Send email or Send WhatsApp, and thank them.": "Jibu kwenye mazungumzo hayo hayo kwa Tuma barua pepe au Tuma WhatsApp, na uwashukuru.",
 };

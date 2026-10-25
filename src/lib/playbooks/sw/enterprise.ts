@@ -14,7 +14,7 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "Know the signs that you are ready": "Jua dalili kwamba uko tayari",
   "Enterprise level is for companies with branches, many stores, a large team or high volumes. LeMoSp watches your figures and suggests the move when it sees them, but you decide.":
     "Kiwango cha Kubwa ni kwa kampuni zenye matawi, maghala mengi, timu kubwa au kiasi kikubwa cha biashara. LeMoSp inafuatilia takwimu zako na kupendekeza kuhamia inapoziona, lakini wewe ndiye unayeamua.",
-  "Open More → Growth & recommendations.": "Fungua Zaidi → Ukuaji na mapendekezo.",
+  "Open Settings → Growth & recommendations.": "Fungua Mipangilio → Ukuaji na mapendekezo.",
   "Read Your business level and Next level. Under Recommended for you, read Why we suggest it.":
     "Soma Kiwango cha biashara yako na Kiwango kinachofuata. Chini ya Imependekezwa kwako, soma Kwa nini tunakipendekeza.",
   "Press Check now to let LeMoSp look at your figures again.": "Bonyeza Kagua sasa ili LeMoSp iangalie takwimu zako tena.",
@@ -38,13 +38,13 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "You only need one Enterprise tool": "Unahitaji zana moja tu ya Kubwa",
   "Kilimanjaro Supplies has one location but three trucks. Neema wants the vehicle reminders, not branches or approval steps.":
     "Kilimanjaro Supplies ina eneo moja lakini malori matatu. Neema anataka vikumbusho vya magari, si matawi wala hatua za kuidhinisha.",
-  "Do not change the level. Open More → Features & business level.": "Usibadilishe kiwango. Fungua Zaidi → Vipengele na kiwango cha biashara.",
+  "Do not change the level. Open Settings → Features & business level.": "Usibadilishe kiwango. Fungua Mipangilio → Vipengele na kiwango cha biashara.",
   "Find Fleet & logistics tracking and press switch on.": "Tafuta Ufuatiliaji wa magari na usafirishaji kisha bonyeza washa.",
   "Vehicles now appears under Deliveries. Everything else stays as it was.": "Magari sasa yanaonekana chini ya Uwasilishaji. Kila kitu kingine kinabaki kama kilivyokuwa.",
   "Switch the company to Enterprise": "Hamishia kampuni kwenye kiwango cha Kubwa",
   "The level only decides which tools are switched on. Moving up never deletes anything, and you can move back at any time. Only management can change it.":
     "Kiwango kinaamua tu zana zipi zimewashwa. Kupanda kiwango hakufuti chochote, na unaweza kurudi wakati wowote. Uongozi pekee ndio unaweza kukibadilisha.",
-  "Open More → Features & business level.": "Fungua Zaidi → Vipengele na kiwango cha biashara.",
+  "Open Settings → Features & business level.": "Fungua Mipangilio → Vipengele na kiwango cha biashara.",
   "Under Business level, choose Enterprise.": "Chini ya Kiwango cha biashara, chagua Kubwa.",
   "Read the question Switch to Enterprise level? and press Yes, switch to Enterprise.":
     "Soma swali Hamia kiwango cha Kubwa? kisha bonyeza Ndiyo, hamia Kubwa.",
@@ -73,8 +73,7 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "You want to go back to Medium": "Unataka kurudi kwenye Kati",
   "After two months, Neema decides the company is not ready for branches and budgets.":
     "Baada ya miezi miwili, Neema anaamua kampuni haiko tayari kwa matawi na bajeti.",
-  "Open More → Features & business level and choose Medium. Press Yes, switch to Medium.":
-    "Fungua Zaidi → Vipengele na kiwango cha biashara kisha chagua Kati. Bonyeza Ndiyo, hamia Kati.",
+  "Open Settings → Features & business level and choose Medium. Press Yes, switch to Medium.": "Fungua Mipangilio → Vipengele na kiwango cha biashara kisha chagua Kati. Bonyeza Ndiyo, hamia Kati.",
   "Branches, budgets and vehicles you entered are kept. They come back as they were if you move up again or switch the feature on.":
     "Matawi, bajeti na magari uliyoingiza yanahifadhiwa. Yanarudi kama yalivyokuwa ukipanda kiwango tena au ukiwasha kipengele.",
   "Know what Enterprise switches on": "Jua kiwango cha Kubwa kinawasha nini",
@@ -108,8 +107,7 @@ export const SW_ENTERPRISE: Record<string, string> = {
     "Joseph, meneja wa tawi la Mwanza, ana jukumu la Mauzo na haoni Takwimu za makao makuu wala Bajeti dhidi ya halisi.",
   "This is on purpose: head-office figures, budgets and the cash forecast are for Management and Finance.":
     "Hii ni kwa makusudi: takwimu za makao makuu, bajeti na utabiri wa fedha ni kwa Uongozi na Fedha.",
-  "If Joseph must see them, change his role in More → Team & roles and press Update.":
-    "Kama Joseph lazima azione, badilisha jukumu lake kwenye Zaidi → Timu na majukumu kisha bonyeza Sasisha.",
+  "If Joseph must see them, change his role in Settings → Team & roles and press Update.": "Kama Joseph lazima azione, badilisha jukumu lake kwenye Mipangilio → Timu na majukumu kisha bonyeza Sasisha.",
   "Remember that the role also decides what else he sees, such as profit and costs. See the Keep your team and data safe playbook.":
     "Kumbuka kuwa jukumu pia linaamua anachoona kingine, kama faida na gharama. Tazama mwongozo wa Linda timu yako na data zako.",
 
@@ -243,8 +241,7 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "A branch manager leaves": "Meneja wa tawi anaondoka",
   "Baraka, the Dar es Salaam manager, resigns. His access must stop, and someone must take over the branch.":
     "Baraka, meneja wa Dar es Salaam, anajiuzulu. Ufikiaji wake lazima usimame, na mtu lazima achukue tawi.",
-  "Open More → Team & roles, switch Baraka's access off and press Update. Everything he recorded stays.":
-    "Fungua Zaidi → Timu na majukumu, zima ufikiaji wa Baraka kisha bonyeza Sasisha. Kila alichorekodi kinabaki.",
+  "Open Settings → Team & roles, switch Baraka's access off and press Update. Everything he recorded stays.": "Fungua Mipangilio → Timu na majukumu, zima ufikiaji wa Baraka kisha bonyeza Sasisha. Kila alichorekodi kinabaki.",
   "Open More → Branches, press Change on Dar es Salaam, choose the new Branch manager and press Save. The app will not save a manager who is no longer in the team.":
     "Fungua Zaidi → Matawi, bonyeza Badilisha kwenye Dar es Salaam, chagua Meneja wa tawi mpya kisha bonyeza Hifadhi. Programu haitahifadhi meneja ambaye hayupo tena kwenye timu.",
   "Open Quotations and Money owed to us, and give Baraka's open quotations and clients to the new person.":
@@ -840,8 +837,7 @@ export const SW_ENTERPRISE: Record<string, string> = {
     "Panga uwasilishaji wa Arusha kwa lori jingine, au la kukodi, na iambie ghala.",
   "A driver leaves": "Dereva anaondoka",
   "Juma, the usual driver of T 482 DKL, leaves the company.": "Juma, dereva wa kawaida wa T 482 DKL, anaondoka kwenye kampuni.",
-  "Open More → Team & roles, switch his access off and press Update. His past deliveries and log entries stay.":
-    "Fungua Zaidi → Timu na majukumu, zima ufikiaji wake kisha bonyeza Sasisha. Uwasilishaji wake wa zamani na kumbukumbu zake zinabaki.",
+  "Open Settings → Team & roles, switch his access off and press Update. His past deliveries and log entries stay.": "Fungua Mipangilio → Timu na majukumu, zima ufikiaji wake kisha bonyeza Sasisha. Uwasilishaji wake wa zamani na kumbukumbu zake zinabaki.",
   "Open the vehicle, press Change details and choose the new Usual driver.": "Fungua gari, bonyeza Badilisha taarifa na uchague Dereva wa kawaida mpya.",
   "Ask the new driver to log a Kilometres reading on the first day, so the figures start clean.":
     "Mwombe dereva mpya arekodi Kipimo cha kilomita siku ya kwanza, ili takwimu zianze safi.",
@@ -878,8 +874,6 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "For each branch, go through Margin, Expenses, Clients owe and Stock value.":
     "Kwa kila tawi, pitia Faida, Matumizi, Wateja wanadaiwa na Thamani ya stoku.",
   "Use ← Earlier to see if a problem is new or has lasted three months.": "Tumia ← Awali kuona kama tatizo ni jipya au limedumu miezi mitatu.",
-  "Agree one action per branch, with a date, and check it at the next meeting.":
-    "Kubalianeni hatua moja kwa kila tawi, pamoja na tarehe, na mkaikague kwenye kikao kijacho.",
   "Management and branch managers": "Uongozi na mameneja wa matawi",
   "Monthly review": "Tathmini ya kila mwezi",
   "October meeting": "Kikao cha Oktoba",
@@ -1005,8 +999,7 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "Rehema sees the alert in the app, but no email arrives.": "Rehema anaona tahadhari kwenye programu, lakini barua pepe haifiki.",
   "Open the bell at the top right, then Notifications, and check which alerts she also gets by email.":
     "Fungua kengele iliyo juu kulia, kisha Arifa, na kagua ni tahadhari zipi anazopata pia kwa barua pepe.",
-  "Management checks More → Settings → Alerts setup: it shows whether emails are working, with a test button.":
-    "Uongozi unakagua Zaidi → Mipangilio → Mipangilio ya tahadhari: inaonyesha kama barua pepe zinafanya kazi, pamoja na kitufe cha majaribio.",
+  "Management checks Settings → Alerts setup: it shows whether emails are working, with a test button.": "Uongozi unakagua Mipangilio → Mipangilio ya tahadhari: inaonyesha kama barua pepe zinafanya kazi, pamoja na kitufe cha majaribio.",
   "Check her spam folder once, and mark the email as safe.": "Kagua folda yake ya spam mara moja, na weka barua pepe hiyo kama salama.",
 
   // Chapter: documents
@@ -1016,13 +1009,10 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "Add a document with its expiry date": "Ongeza hati pamoja na tarehe yake ya kuisha",
   "Each document has a type, a name, a number, the dates and the file. Add the expiry date and how many days before it you want to be reminded.":
     "Kila hati ina aina, jina, namba, tarehe na faili. Ongeza tarehe ya kuisha na siku ngapi kabla yake unataka kukumbushwa.",
-  "Open Company → Documents and press + Document.": "Fungua Kampuni → Nyaraka kisha bonyeza + Hati.",
   "Choose the Type, such as Licence or permit, Tax (TIN, VAT, clearance) or Safety data sheet (SDS). Type the Document name and the Number.":
     "Chagua Aina, kama Leseni au kibali, Kodi (TIN, VAT, hati ya kodi) au Karatasi ya taarifa za usalama (SDS). Andika Jina la hati na Namba.",
   "Enter Issued on and Expires on, and Remind me (days before), for example 60.":
     "Ingiza Imetolewa tarehe na Inaisha tarehe, na Nikumbushe (siku kabla), kwa mfano 60.",
-  "Add the File (PDF, photo, Word or Excel, up to 20 MB) and press Save document.":
-    "Ongeza Faili (PDF, picha, Word au Excel, hadi MB 20) kisha bonyeza Hifadhi hati.",
   Company: "Kampuni",
   Documents: "Nyaraka",
   "Management and Finance": "Uongozi na Fedha",
@@ -1048,14 +1038,12 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "A client asks for the SDS at the mine gate": "Mteja anaomba SDS kwenye geti la mgodi",
   "The security officer at a mine in Geita will not let Juma's truck in without the safety data sheet for the oil drums.":
     "Afisa usalama wa mgodi mmoja Geita hataruhusu lori la Juma kuingia bila karatasi ya taarifa za usalama ya mapipa ya mafuta.",
-  "Anyone in the office opens Company → Documents and searches for the product.": "Mtu yeyote ofisini anafungua Kampuni → Nyaraka na kutafuta bidhaa.",
   "Open the document and press Open / download. The link works for one hour.": "Fungua hati kisha bonyeza Fungua / pakua. Kiungo kinafanya kazi kwa saa moja.",
   "Download the file and send it to Juma and the client on WhatsApp or by email.": "Pakua faili na umtumie Juma na mteja kwa WhatsApp au barua pepe.",
   "Next time, print the SDS with the delivery note for hazardous goods.": "Wakati ujao, chapisha SDS pamoja na hati ya uwasilishaji kwa bidhaa hatari.",
   "Renew before anything expires": "Huisha kabla chochote hakijaisha muda",
   "The Expiring tab lists documents that run out soon, the earliest first. Reminders arrive before the date you chose.":
     "Kichupo cha Zinazoisha muda kinaorodhesha nyaraka zinazoisha karibuni, za mapema kwanza. Vikumbusho vinafika kabla ya tarehe uliyochagua.",
-  "Open Company → Documents and press Expiring.": "Fungua Kampuni → Nyaraka kisha bonyeza Zinazoisha muda.",
   "Start the renewal for each one; government renewals can take weeks.": "Anza kuhuisha kila moja; uhuishaji wa serikali unaweza kuchukua wiki kadhaa.",
   "When the new paper arrives, open the document, press Upload a new version and change Expires on under Edit details. Press Save.":
     "Karatasi mpya ikifika, fungua hati, bonyeza Pakia toleo jipya na badilisha Inaisha tarehe chini ya Hariri taarifa. Bonyeza Hifadhi.",
@@ -1105,7 +1093,7 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "Connect your accountant and other systems": "Unganisha mhasibu wako na mifumo mingine",
   "Integrations & API gives your accountant monthly files and lets other systems read your data with a key. Set it up once, with the Connect and automate playbook.":
     "Miunganisho na API inampa mhasibu wako faili za kila mwezi na inaruhusu mifumo mingine kusoma data zako kwa ufunguo. Iandae mara moja, kwa mwongozo wa Unganisha na endesha kiotomatiki.",
-  "Open More → Integrations & API.": "Fungua Zaidi → Miunganisho na API.",
+  "Open Settings → Integrations & API.": "Fungua Mipangilio → Miunganisho na API.",
   "Under Accounting export, choose the month and press Download CSV for each file.":
     "Chini ya Faili za uhasibu, chagua mwezi kisha bonyeza Pakua CSV kwa kila faili.",
   "API keys are for a developer connecting another system. Follow the Connect and automate playbook step by step.":
@@ -1117,10 +1105,6 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "Every day: approve what waits for you on Approval steps.": "Kila siku: idhinisha kinachokusubiri kwenye Hatua za kuidhinisha.",
   "Every Monday: update Cash today, read the forecast, and check What to reorder and Vehicles.":
     "Kila Jumatatu: sasisha Fedha za leo, soma utabiri, na kagua Cha kuagiza tena na Magari.",
-  "First week of the month: Budgets vs actual and the branch review on Head-office figures.":
-    "Wiki ya kwanza ya mwezi: Bajeti dhidi ya halisi na tathmini ya matawi kwenye Takwimu za makao makuu.",
-  "Every quarter: press Set as reorder levels on Purchase planning, and check Documents → Expiring for the next three months.":
-    "Kila robo mwaka: bonyeza Weka kama viwango vya kuagiza tena kwenye Mipango ya ununuzi, na kagua Nyaraka → Zinazoisha muda kwa miezi mitatu ijayo.",
   "Every year: set next year's budgets in November.": "Kila mwaka: weka bajeti za mwaka ujao mwezi Novemba.",
   Routine: "Utaratibu",
   "On track": "Iko kwenye mstari",
@@ -1132,4 +1116,38 @@ export const SW_ENTERPRISE: Record<string, string> = {
   "Budgets · branch review": "Bajeti · tathmini ya matawi",
   Quarterly: "Kila robo mwaka",
   "Reorder levels · documents": "Viwango vya kuagiza tena · nyaraka",
+  "Open More → Company & account → Documents and press + Document.": "Fungua Zaidi → Kampuni na akaunti → Nyaraka kisha bonyeza + Hati.",
+  "Anyone in the office opens Documents and searches for the product.": "Mtu yeyote ofisini anafungua Nyaraka na kutafuta bidhaa.",
+  "Open More → Company & account → Documents and press Expiring.": "Fungua Zaidi → Kampuni na akaunti → Nyaraka kisha bonyeza Zinazoisha muda.",
+  "Add the File (PDF, photo, Word or Excel, up to 20 MB) and press Save document. With a photo or PDF, press Read with AI first: the name, number and dates are filled in for you to check.": "Ongeza Faili (PDF, picha, Word au Excel, hadi MB 20) kisha bonyeza Hifadhi hati. Ukiwa na picha au PDF, bonyeza Soma kwa AI kwanza: jina, namba na tarehe vinajazwa ili uvikague.",
+  "Accounts, fixed assets and payroll": "Hesabu, mali za kudumu na mishahara",
+  "A bigger business needs proper books for the bank, the auditor and TRA. In LeMoSp they keep themselves from the invoices, bills, expenses and payroll you already record; finance only checks, adjusts and closes.": "Biashara kubwa inahitaji vitabu sahihi kwa benki, mkaguzi na TRA. Kwenye LeMoSp vinajiweka vyenyewe kutoka ankara, bili, matumizi na mishahara unayorekodi tayari; fedha wanakagua, kurekebisha na kufunga tu.",
+  "Read the books every month": "Soma vitabu kila mwezi",
+  "The Accounts overview says whether the books balance and match your open invoices and bills, and opens the profit & loss, balance sheet, trial balance and VAT return for any dates.": "Muhtasari wa Hesabu unasema kama vitabu vinalingana na ankara na bili zilizo wazi, na unafungua faida na hasara, mizania, urari na ritani ya VAT kwa tarehe zozote.",
+  "Open Finance → Accounts and read the top line: The books balance and match your invoices and bills.": "Fungua Fedha → Hesabu na usome mstari wa juu: Vitabu vinalingana na vinakubaliana na ankara na bili zako.",
+  "If Posting problems shows documents, fix each document, then press Post everything again.": "Kama Matatizo ya kuingiza yanaonyesha nyaraka, rekebisha kila hati, kisha ubonyeze Ingiza kila kitu upya.",
+  "Open Trial balance and VAT return for last month and send them to your accountant.": "Fungua Urari na Ritani ya VAT kwa mwezi uliopita na uzitume kwa mhasibu wako.",
+  "Adjustments the accountant asks for go in Journals → + Journal.": "Marekebisho anayoomba mhasibu yanaingia kwenye Majarida → + Jarida.",
+  "October 2026": "Oktoba 2026",
+  "Books balance": "Vitabu vinalingana",
+  "Close the books when the month is final": "Funga vitabu mwezi ukishakamilika",
+  "Once the accountant has finished a month, close it, so nobody changes the figures the bank or TRA has seen.": "Mhasibu akishamaliza mwezi, ufunge, ili mtu asibadilishe takwimu ambazo benki au TRA wameziona.",
+  "Open Finance → Accounts → Close the books.": "Fungua Fedha → Hesabu → Funga vitabu.",
+  "Choose the last day of the month under Close everything up to and including, and confirm.": "Chagua siku ya mwisho ya mwezi chini ya Funga kila kitu hadi na pamoja na, na uthibitishe.",
+  "A document changed later still posts, on the first open day.": "Hati inayobadilishwa baadaye bado inaingizwa, kwenye siku ya kwanza iliyo wazi.",
+  "Only management can close the books or open them again.": "Ni uongozi pekee unaoweza kufunga vitabu au kuvifungua tena.",
+  "Record vehicles and machines as fixed assets": "Rekodi magari na mashine kama mali za kudumu",
+  "Trucks, forklifts, generators and computers last for years. As fixed assets, their cost is spread over their life, so the monthly profit is real.": "Malori, forklifti, jenereta na kompyuta hudumu kwa miaka. Zikiwa mali za kudumu, gharama yake inagawanywa kwa muda wa matumizi, ili faida ya kila mwezi iwe halisi.",
+  "Open Finance → Fixed assets and press + Asset: what it is, when it was bought, the cost, how it was paid and how many years it lasts.": "Fungua Fedha → Mali za kudumu na ubonyeze + Mali: ni nini, ilinunuliwa lini, gharama, ilivyolipwa na itadumu miaka mingapi.",
+  "Each month press Post depreciation. A month already posted is skipped.": "Kila mwezi bonyeza Ingiza uchakavu. Mwezi ulioshaingizwa unarukwa.",
+  "When an asset is sold or scrapped, open it and press Sell or scrap.": "Mali ikiuzwa au kutupwa, ifungue na ubonyeze Uza au tupa.",
+  "Approve the payroll once a month": "Idhinisha mishahara mara moja kwa mwezi",
+  "Finance prepares the pay run; management checks it and approves. Approval posts it to the accounts and puts the payslips on each person's phone.": "Fedha wanaandaa mishahara ya mwezi; uongozi unaikagua na kuidhinisha. Kuidhinisha kunaiingiza kwenye hesabu na kuweka hati za mishahara kwenye simu ya kila mtu.",
+  "Open Finance → Payroll and open the draft pay run.": "Fungua Fedha → Mishahara na ufungue mishahara ya mwezi iliyo rasimu.",
+  "Compare the total with last month. Ask about any large overtime, bonus or new person.": "Linganisha jumla na mwezi uliopita. Uliza kuhusu saa nyingi za ziada, bonasi au mtu mpya.",
+  "Press Approve. Finance pays from the payment list and presses Mark as paid.": "Bonyeza Idhinisha. Fedha wanalipa kutoka orodha ya malipo na kubonyeza Weka kuwa imelipwa.",
+  "Total cost to the company is gross pay plus employer NSSF, SDL and WCF.": "Gharama yote kwa kampuni ni mshahara ghafi pamoja na NSSF ya mwajiri, SDL na WCF.",
+  "Every quarter: press Set as reorder levels on Purchase planning, and check Documents → Expiring and Legal & compliance → Licences for the next three months.": "Kila robo mwaka: bonyeza Weka kama viwango vya kuagiza tena kwenye Mipango ya ununuzi, na uangalie Nyaraka → Zinazoisha muda na Sheria na utiifu → Leseni kwa miezi mitatu ijayo.",
+  "First week of the month: close the books, approve the payroll, Budgets vs actual and the branch review on Head-office figures.": "Wiki ya kwanza ya mwezi: funga vitabu, idhinisha mishahara, Bajeti dhidi ya halisi na tathmini ya matawi kwenye Takwimu za makao makuu.",
+  "Agree one action per branch, with a date, and check it at the next meeting. Hold the review in Administration → Meetings, so the actions go to each branch manager's My actions.": "Kubalianeni hatua moja kwa kila tawi, pamoja na tarehe, na mkague kwenye mkutano unaofuata. Fanyeni tathmini kwenye Usimamizi → Mikutano, ili hatua ziende kwenye Hatua zangu za kila meneja wa tawi.",
 };

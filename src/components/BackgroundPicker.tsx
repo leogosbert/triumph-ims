@@ -3,6 +3,7 @@ import { BACKGROUNDS, getBackgroundPref } from "@/lib/background";
 import { setBackground } from "@/app/theme-actions";
 
 const LABELS: Record<(typeof BACKGROUNDS)[number], string> = {
+  photos: "Photos",
   architecture: "Architecture",
   aurora: "Aurora",
   grid: "Grid",

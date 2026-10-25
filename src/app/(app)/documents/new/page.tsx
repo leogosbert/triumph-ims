@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
+import { aiReady } from "@/lib/ai/claude";
 import { getAppContext } from "@/lib/context";
 import { DOC_KINDS, isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -16,7 +17,7 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, isManager } = await getAppContext();
   if (!can(role, "seeDocuments")) redirect("/");
   const probe = await supabase.from("documents").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New document" />;
@@ -38,6 +39,8 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
         companyId={company.id}
         back={back}
         links={links}
+        aiOn={aiReady()}
+        isManager={isManager}
         start={{
           kind,
           product_id: pick("product"),

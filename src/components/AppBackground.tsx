@@ -1,14 +1,17 @@
 import type { BackgroundPref } from "@/lib/background";
 import { ArchitectureScene } from "@/components/ArchitectureScene";
+import { PhotoScene } from "@/components/PhotoScene";
+import type { Section } from "@/lib/scenes";
 
 /**
  * The decorative layer behind every screen, drawn in the company's own colours (--brand, --brand-dark).
  * Fixed behind the page, never clickable, hidden when printing; movement stops for "reduce motion".
  */
-export function AppBackground({ kind }: { kind: BackgroundPref }) {
+export function AppBackground({ kind, section, onlyGlass }: { kind: BackgroundPref; section?: Section; onlyGlass?: boolean }) {
   if (kind === "plain") return null;
   return (
     <div className="app-bg" data-bg={kind} aria-hidden="true">
+      {kind === "photos" && <PhotoScene section={section} onlyGlass={onlyGlass} />}
       {kind === "architecture" && <ArchitectureScene />}
       {kind === "aurora" && (
         <>

@@ -34,7 +34,7 @@ export const GETTING_PAID: Playbook = {
             "Under Standard invoice terms, write your rules in one or two lines, for example \"Payment within 30 days. Please quote the invoice number as the reference.\"",
             "Press Save company details.",
           ],
-          where: ["More", "Company details & branding"],
+          where: ["Settings", "Company details & branding"],
           href: "/settings/company",
           who: "Management",
           example: {
@@ -64,7 +64,7 @@ export const GETTING_PAID: Playbook = {
             "Set Repeat overdue reminders every (days), for example 7. These are paused while a promised payment date has not passed.",
             "Press Save company details.",
           ],
-          where: ["More", "Company details & branding"],
+          where: ["Settings", "Company details & branding"],
           href: "/settings/company",
           who: "Management",
           example: {
@@ -397,6 +397,20 @@ export const GETTING_PAID: Playbook = {
             },
           ],
           tip: "On the Enterprise level, the Cash-flow forecast counts each unpaid invoice on its promised date instead of its due date, so your forecast becomes more real with every promise you log.",
+          scales: "all",
+        },
+        {
+          id: "inbox-replies",
+          title: "When the client answers by email or WhatsApp",
+          body: "Where the Inbox is connected, the client's answer to the company email or WhatsApp arrives in the app, so finance and sales see the same promise.",
+          do: [
+            "Open Inbox and open the client's message. Link it to the client if it is not linked yet.",
+            "If they promise a date, open the invoice and record it with + Log a reminder or promise to pay. Reminders pause until that date.",
+            "Answer in the same conversation with Send email or Send WhatsApp, and thank them.",
+          ],
+          where: ["Sales", "Inbox"],
+          href: "/inbox",
+          who: "Finance, Sales or Management",
           scales: "all",
         },
         {

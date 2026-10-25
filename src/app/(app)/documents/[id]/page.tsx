@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ScanDocument } from "@/components/ai/ScanDocument";
+import { aiReady } from "@/lib/ai/claude";
 import { getAppContext } from "@/lib/context";
 import { daysUntil, docKindLabel } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
@@ -25,7 +27,8 @@ export default async function DocumentPage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const sp = (await searchParams) ?? {};
+  const { supabase, company, role, isManager } = await getAppContext();
   if (!can(role, "seeDocuments")) redirect("/");
   const { data: d } = await supabase.from("documents").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!d) notFound();
@@ -37,6 +40,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
   const url = signed.data?.signedUrl ?? null;
   const isImage = typeof d.file_type === "string" && d.file_type.startsWith("image/");
   const left = daysUntil(d.expires_on);
+  const aiReadable = !d.archived_at && !!d.file_path && ["image/png", "image/jpeg", "image/webp", "application/pdf"].includes(String(d.file_type));
   const linked: { href: string; label: string }[] = [];
   const add = (list: { id: string; name: string }[], v: string | null, base: string, label: string) => {
     if (!v) return;
@@ -100,14 +104,15 @@ export default async function DocumentPage({ params, searchParams }: { params: P
         ) : (
           <p className="muted small">{tr("No file yet.")}</p>
         )}
-        {!d.archived_at && <FilePicker companyId={company.id} documentId={d.id} hasFile={!!d.file_path} />}
+        {!d.archived_at && <FilePicker companyId={company.id} documentId={d.id} hasFile={!!d.file_path} readAfter={aiReady()} />}
       </section>
 
-      <details className="card" open={!d.file_path && !d.archived_at}>
+      <details className="card" id="details" open={(!d.file_path && !d.archived_at) || sp.read === "1"}>
         <summary>{tr("Edit details")}</summary>
         <form action={saveDocument} style={{ marginTop: 10 }}>
           <input type="hidden" name="id" value={d.id} />
           <fieldset className="plain" disabled={!!d.archived_at}>
+            {aiReadable && <ScanDocument enabled={aiReady()} isManager={isManager} documentId={d.id} autoRead={sp.read === "1"} />}
             <DocumentFields v={d} links={links} />
             {!d.archived_at && <SubmitButton>{tr("Save")}</SubmitButton>}
           </fieldset>

@@ -1,6 +1,7 @@
 import type { IconName } from "@/components/Icon";
 import type { Dict } from "@/lib/i18n";
 import { can, type Role } from "@/lib/roles";
+import { canUseInbox } from "@/lib/inbox/common";
 
 /** `feature`: hidden when that feature is switched off for the company (see src/lib/features.ts). */
 export type NavItem = { href: string; label: string; icon: IconName; match: string[]; plain?: boolean; feature?: string };
@@ -11,7 +12,7 @@ const allOn: FeatureCheck = () => true;
 
 const M = {
   home: ["/"],
-  sales: ["/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
+  sales: ["/inbox", "/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
   clients: ["/clients"],
   products: ["/products"],
   purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers", "/requisitions", "/approvals"],
@@ -20,9 +21,12 @@ const M = {
   finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow", "/accounts", "/payroll"],
   services: ["/jobs", "/maintenance", "/equipment", "/projects", "/timesheets", "/hire", "/service-reports"],
   reports: ["/reports", "/head-office", "/scheduled-reports"],
-  admin: ["/hr", "/hse", "/quality"],
-  more: ["/more", "/hr", "/hse", "/quality", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
+  admin: ["/hr", "/hse", "/quality", "/meetings", "/calendar"],
+  more: ["/more", "/hr", "/hse", "/quality", "/guide", "/documents", "/compliance", "/meetings", "/calendar", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
 };
+
+/** The screens behind each menu section (read by src/lib/scenes.ts to colour and picture each section). */
+export const NAV_PATHS: Readonly<Record<keyof typeof M, readonly string[]>> = M;
 
 /** Phone bottom bar: at most five items, most-used first for each role. */
 export function bottomNav(role: Role, t: Dict, on: FeatureCheck = allOn): NavItem[] {
@@ -71,7 +75,11 @@ export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services 
     ];
   }
   const out: NavItem[] = [{ href: "/", label: t["nav.home"], icon: "home", match: M.home }];
-  if (can(role, "seeSales")) out.push({ href: "/sales", label: t["nav.sales"], icon: "sales", match: M.sales });
+  // Screens with their own sidebar link (Inbox, Meetings, Calendar, Legal & compliance) are not also lit under Sales, Administration or More.
+  const own = new Set(["/inbox", "/meetings", "/calendar", "/compliance"]);
+  const rest = (paths: string[]) => paths.filter((p) => !own.has(p));
+  if (can(role, "seeSales")) out.push({ href: "/sales", label: t["nav.sales"], icon: "sales", match: rest(M.sales) });
+  if (canUseInbox(role)) out.push({ href: "/inbox", label: t["nav.inbox"], icon: "inbox", match: ["/inbox"], feature: "inbox" });
   out.push({ href: "/clients", label: t["nav.clients"], icon: "clients", match: M.clients, feature: "customers" });
   if (can(role, "seePurchasing")) out.push({ href: "/purchasing", label: t["nav.purchasing"], icon: "purchasing", match: M.purchasing });
   out.push({ href: "/products", label: t["nav.products"], icon: "products", match: M.products, feature: "products" });
@@ -80,7 +88,10 @@ export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services 
   // Service jobs and the other service screens (only once the goods-and-services update is in and switched on).
   if (services && role !== "procurement") out.push({ href: "/jobs", label: t["nav.services"], icon: "tools", match: M.services });
   // Administration: employees, leave, health & safety and quality (once that update is in and switched on).
-  if (admin) out.push({ href: "/hr", label: t["nav.admin"], icon: "team", match: M.admin });
+  if (admin) out.push({ href: "/hr", label: t["nav.admin"], icon: "team", match: rest(M.admin) });
+  out.push({ href: "/meetings", label: t["nav.meetings"], icon: "team", match: ["/meetings"], feature: "meetings" });
+  out.push({ href: "/calendar", label: t["nav.calendar"], icon: "clock", match: ["/calendar"], feature: "calendar" });
+  if (can(role, "seeDocuments")) out.push({ href: "/compliance", label: t["nav.compliance"], icon: "shield", match: ["/compliance"], feature: "compliance" });
   if (can(role, "seeFinance")) out.push({ href: "/finance", label: t["nav.finance"], icon: "finance", match: M.finance });
   else if (can(role, "seeInvoices")) out.push({ href: "/invoices", label: t["nav.finance"], icon: "finance", match: M.finance, feature: "invoices" });
   out.push({ href: "/reports", label: t["nav.reports"], icon: "report", match: M.reports });
@@ -91,7 +102,7 @@ export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services 
     href: "/more",
     label: t["nav.more"],
     icon: "more",
-    match: M.more.filter((p) => p !== "/help" && p !== "/guide" && p !== "/reports" && !(settings && p === "/settings") && !(admin && M.admin.includes(p))),
+    match: rest(M.more).filter((p) => p !== "/help" && p !== "/guide" && p !== "/reports" && !(settings && p === "/settings") && !(admin && M.admin.includes(p))),
   });
   return out.filter((i) => on(i.feature));
 }

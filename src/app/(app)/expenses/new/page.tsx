@@ -1,6 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
+import { aiReady } from "@/lib/ai/claude";
 import { getAppContext, stage13Ready } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { todayTz } from "@/lib/sales";
@@ -11,7 +12,7 @@ export const metadata = { title: "New expense" };
 export default async function NewExpensePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company } = await getAppContext();
+  const { supabase, company, isManager } = await getAppContext();
   if (!stage13Ready(company)) {
     return (
       <>
@@ -41,6 +42,8 @@ export default async function NewExpensePage({ searchParams }: { searchParams: S
         base={company.base_currency}
         categories={categories}
         withProvider
+        aiOn={aiReady()}
+        isManager={isManager}
         start={{
           category_id: null,
           spent_on: todayTz(),

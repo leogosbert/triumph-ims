@@ -11,6 +11,9 @@ import { clearAway } from "@/lib/applock";
 import { createClient } from "@/lib/supabase/client";
 import { useAdminHost } from "@/lib/host-client";
 import { AppBackground } from "@/components/AppBackground";
+import { GlassSplash } from "@/components/GlassSplash";
+import { BRAND_COOKIE, brandByKey, type Brand } from "@/lib/brands";
+import { SectionTracker } from "@/components/SectionTracker";
 import { LangSwitch } from "@/components/LangSwitch";
 import { recordSignIn } from "@/app/security-actions";
 import { LEAKED_MESSAGE, timesLeaked } from "@/lib/pwned";
@@ -66,6 +69,14 @@ export default function LoginPage() {
   const [info, setInfo] = useState<string | null>(null);
 
   // Show messages passed back from the email-confirmation link.
+  // A company brand remembered on this device (src/lib/brands.ts): its logo, LeMoSp as "powered by".
+  const [brand, setBrand] = useState<Brand | null>(null);
+  useEffect(() => {
+    if (adminApp) return;
+    const key = document.cookie.split("; ").find((c) => c.startsWith(`${BRAND_COOKIE}=`))?.slice(BRAND_COOKIE.length + 1);
+    setBrand(brandByKey(key));
+  }, [adminApp]);
+
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     if (p.get("error")) setError(p.get("error"));
@@ -177,10 +188,27 @@ export default function LoginPage() {
 
   return (
     <div className="auth-wrap">
+      {/* Classic: the drawn architecture. Glass: photos under a brand wash (the other one is hidden by glass.css). */}
       <AppBackground kind="architecture" />
+      <AppBackground kind="photos" section="login" onlyGlass />
+      <SectionTracker section="login" />
+      {/* Glass: soft lights rising over the photo (hidden in Classic). */}
+      <div className="auth-orbs" aria-hidden="true">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <i key={i} style={{ "--i": i } as React.CSSProperties} />
+        ))}
+      </div>
+      {!adminApp &&
+        (brand ? (
+          <GlassSplash key={brand.key} logo={`/brands/${brand.key}/mark.svg`} name={brand.shortName} tagline={`${tr("Powered by")} LeMoSp`} />
+        ) : (
+          <GlassSplash name="LeMoSp" tagline={tr("a LeMo Tech Solutions product")} />
+        ))}
       <LangSwitch className="auth-lang" />
       {adminApp ? (
         <img className="auth-logo auth-logo-admin" src="/brand/lemosp-admin-on-dark.svg" alt="LeMoSp ADMIN" />
+      ) : brand ? (
+        <img className="auth-logo" src={brand.logoOnDark} alt={brand.name} />
       ) : (
         <img className="auth-logo" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
       )}
@@ -238,7 +266,7 @@ export default function LoginPage() {
         )}
       </div>
       <p className="auth-foot">
-        {tr("LeMoSp · a LeMo Tech Solutions product")}
+        {brand ? `${tr("Powered by")} ${tr("LeMoSp · a LeMo Tech Solutions product")}` : tr("LeMoSp · a LeMo Tech Solutions product")}
       </p>
     </div>
   );

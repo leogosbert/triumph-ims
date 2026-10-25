@@ -40,7 +40,7 @@ export const ORDER_TO_CASH: Playbook = {
             stamp: "Live example",
             tone: "info",
           },
-          tip: "To practise without touching real data, sign out and open a Medium demo company from the sign-in page, then follow this playbook in it.",
+          tip: "To practise without touching real data, open Help → Demos, start a Medium demo company and follow this playbook in it.",
           scales: "all",
         },
         {
@@ -84,7 +84,7 @@ export const ORDER_TO_CASH: Playbook = {
             "Fill in Bank details and Mobile money pay numbers. They print on every invoice and reminder.",
             "Under Follow-ups and reminders, set Follow up sent quotations after (days), Clients pay within (days), Remind before an invoice is due (days) and Repeat overdue reminders every (days).",
           ],
-          where: ["More", "Company details & branding"],
+          where: ["Settings", "Company details & branding"],
           href: "/settings/company",
           who: "Management",
           example: {
@@ -478,6 +478,22 @@ export const ORDER_TO_CASH: Playbook = {
           ],
           tip: "An RFQ that passes its due date shows as Overdue on the list and on Sales, so a late answer is visible to everyone.",
           scales: "all",
+        },
+        {
+          id: "inbox-rfq",
+          title: "A request that arrives in the Inbox",
+          body: "When the company email or WhatsApp is connected, Asha's email lands in the Inbox. Turn it into a client RFQ from there, so the conversation and the RFQ stay together.",
+          do: [
+            "Open Inbox and open the conversation.",
+            "Under Who handles it, and link, choose Kilimanjaro Hotels Ltd and press Save.",
+            "Press + RFQ from this request. The new RFQ opens with the client filled in; add the reference, Quote due by and the items.",
+            "Reply in the same conversation that you have received the request, with Send email.",
+          ],
+          where: ["Sales", "Inbox"],
+          href: "/inbox",
+          who: "Sales",
+          scales: "all",
+          tip: "Add Asha's email address to the client's contacts: her next messages are linked to Kilimanjaro Hotels Ltd by themselves.",
         },
       ],
     },
@@ -1771,7 +1787,7 @@ export const ORDER_TO_CASH: Playbook = {
           do: [
             "Open the purchase order and press Record supplier's invoice.",
             "Enter the Supplier's invoice no., Invoice date and Due date.",
-            "Check Amount before VAT and VAT amount against the paper invoice, then press Save bill.",
+            "Check Amount before VAT and VAT amount against the paper invoice, then press Save bill. With the AI service on, press Scan receipt and take a photo of the supplier's invoice: the number, date and amounts are filled in for you to check.",
           ],
           where: ["Finance", "Supplier bills"],
           href: "/bills",
@@ -2009,9 +2025,9 @@ export const ORDER_TO_CASH: Playbook = {
           do: [
             "Open Expenses and press + Expense.",
             "Enter the amount paid (VAT included), the date, the category, who was paid and what for, for example Fuel for delivery to Arusha.",
-            "Choose how it was paid, take a photo of the receipt, and press Save expense.",
+            "Choose how it was paid, take a photo of the receipt, and press Save expense. With the AI service on, press Scan receipt first: the photo fills in the form and is attached as the receipt.",
           ],
-          where: ["More", "Expenses"],
+          where: ["Finance", "Expenses"],
           href: "/expenses",
           who: "Everyone",
           example: {
@@ -2053,7 +2069,7 @@ export const ORDER_TO_CASH: Playbook = {
             "To remove an expense that should not be there, management or finance opens it, opens Void this expense, writes the reason and presses Void. It stays on record, struck through.",
             "Management can press Edit categories to rename the categories, add one with New category name and Add, or Switch off one you no longer use.",
           ],
-          where: ["More", "Expenses"],
+          where: ["Finance", "Expenses"],
           href: "/expenses",
           who: "Management and Finance",
           example: {

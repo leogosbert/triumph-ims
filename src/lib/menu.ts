@@ -3,6 +3,7 @@ import { featureForRoute, type FeatureRow } from "@/lib/features";
 import { can, type Role } from "@/lib/roles";
 import { adminUrl } from "@/lib/hosts";
 import { canPlanService, canSeeAllService } from "@/lib/services";
+import { canUseInbox } from "@/lib/inbox/common";
 
 /**
  * `feature`: hidden when that feature is switched off (defaults to the feature of the link's route).
@@ -26,7 +27,7 @@ export type MenuOptions = {
 
 const SERVICE_FEATURES = new Set(["service_jobs", "maintenance_contracts", "equipment_register", "projects", "timesheets", "hire_rentals", "service_reports"]);
 /** Administration, payroll and accounts screens: shown once their database update has been run. */
-const ERP_FEATURES = new Set(["hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets"]);
+const ERP_FEATURES = new Set(["hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets", "inbox", "compliance", "meetings", "calendar"]);
 
 export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {}): MenuCategory[] {
   const on = opts.on ?? (() => true);
@@ -38,6 +39,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       label: "Sales",
       icon: "sales",
       items: [
+        canUseInbox(role) && { href: "/inbox", title: "Inbox", sub: "Client and supplier emails and WhatsApp in one place", icon: "inbox", feature: "inbox" },
         c("seeCrm") && { href: "/crm", title: "Pipeline", sub: "Opportunities from first call to order, follow-ups", icon: "activity" },
         c("seeSales") && { href: "/rfqs", title: "Client RFQs", sub: "Requests for quotation from clients", icon: "inbox" },
         c("seeSales") && { href: "/quotations", title: "Quotations", sub: "Prices sent to clients, approvals", icon: "doc" },
@@ -132,6 +134,8 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       label: "Administration",
       icon: "team",
       items: [
+        { href: "/meetings", title: "Meetings", sub: "Team, client and supplier meetings: agenda, video, minutes and actions", icon: "team" },
+        { href: "/calendar", title: "Calendar", sub: "Meetings, actions, deliveries, due dates and leave in one place, also on your phone", icon: "clock" },
         { href: "/hr", title: c("seeEmployees") ? "Employees" : "My employee file", sub: c("seeEmployees") ? "Employee files, contracts, certificates and licences with expiry" : "Your details, certificates and leave balance", icon: "team" },
         { href: "/hr/leave", title: "Leave", sub: c("manageHr") ? "Leave requests to approve, who is away and balances" : "Ask for leave and see your balance", icon: "clock" },
         c("manageHr") && { href: "/timesheets/approve", title: "Approve timesheets", sub: "Weeks of hours submitted by the team", icon: "check" },
@@ -173,6 +177,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
           sub: isManager ? "Name, TIN, VRN, logo, colours, bank details" : "View the company's details",
           icon: "building",
         },
+        c("seeDocuments") && { href: "/compliance", title: "Legal & compliance", sub: "Registrations, licences, tax calendar, inspections and directors", icon: "shield", feature: "compliance" },
         c("seeDocuments") && { href: "/documents", title: "Documents", sub: "Certificates, licences, SDS and other papers, with expiry reminders", icon: "doc" },
         isManager && { href: "/settings/team", title: "Team & roles", sub: "Invite people, change roles", icon: "team" },
         isManager && { href: "/branches", title: "Branches", sub: "Branches or business units with their stores and people", icon: "building" },

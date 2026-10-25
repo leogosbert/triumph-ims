@@ -102,9 +102,9 @@ export const GOODS_BUSINESS: Playbook = {
             "For food, cosmetics, medicines or medical devices, check TMDA and TBS requirements.",
             "For chemicals, register with the Government Chemist Laboratory Authority (GCLA) before you import or sell them.",
             "For imports, choose a licensed clearing agent and keep each import's customs papers with the purchase order.",
-            "Scan each licence and permit into Documents with its expiry date, so the app reminds you before it ends.",
+            "Scan each licence and permit into Documents with its expiry date, so the app reminds you before it ends. In Legal & compliance, press Set up my checklist and record each licence under Licences; Read with AI fills in the details from a photo.",
           ],
-          where: ["Company & account", "Documents"],
+          where: ["More", "Documents"],
           href: "/documents",
           who: "Owner or Management",
           example: {
@@ -131,6 +131,7 @@ export const GOODS_BUSINESS: Playbook = {
             "Deduct PAYE from salaries and pay it to TRA every month. With ten or more employees, SDL is also due.",
             "Open a bank account in the business name, and a mobile money lipa number for clients who pay by phone.",
             "Put the bank details and the pay numbers in Company details & branding: they are printed on every invoice.",
+            "With staff on salary, add them in Administration \u2192 Employees and run Finance \u2192 Payroll in LeMoSp: PAYE, NSSF, SDL and WCF are worked out for you.",
           ],
           where: ["Settings", "Company details & branding"],
           href: "/settings/company",
@@ -243,7 +244,7 @@ export const GOODS_BUSINESS: Playbook = {
             "Enter the Selling price (TZS) and the Reorder level, then press Add product.",
             "Many products? Use Import from spreadsheet with the template.",
           ],
-          where: ["Stock & delivery", "Products"],
+          where: ["Products"],
           href: "/products",
           who: "Management or Procurement",
           example: {
@@ -428,7 +429,7 @@ export const GOODS_BUSINESS: Playbook = {
             "Count every product in every store on a quiet day.",
             "Open Stock, press Load opening stock, fill the template and upload it.",
           ],
-          where: ["Stock & delivery", "Stock"],
+          where: ["Stock"],
           href: "/stock/import",
           who: "Management or Warehouse",
           example: {
@@ -454,7 +455,7 @@ export const GOODS_BUSINESS: Playbook = {
             "Check the suggested quantities against what you expect to sell.",
             "Press Order to create draft purchase orders, one per main supplier.",
           ],
-          where: ["Stock & delivery", "What to reorder"],
+          where: ["Stock", "What to reorder"],
           href: "/stock/reorder",
           who: "Procurement",
           example: {
@@ -481,7 +482,7 @@ export const GOODS_BUSINESS: Playbook = {
             "Write the real reason, for example \"Pump damaged in store, returned to supplier\".",
             "Management looks at all adjustments at month end.",
           ],
-          where: ["Stock & delivery", "Stock"],
+          where: ["Stock"],
           href: "/stock",
           who: "Warehouse; Management checks",
           example: {
@@ -544,7 +545,7 @@ export const GOODS_BUSINESS: Playbook = {
             "Set the Selling price (TZS) on the product; quotations start from it.",
             "Set the Minimum margin % in Company details & branding.",
           ],
-          where: ["Stock & delivery", "Products"],
+          where: ["Products"],
           href: "/products",
           who: "Management",
           example: {
@@ -614,7 +615,7 @@ export const GOODS_BUSINESS: Playbook = {
             "At the client, the driver presses Record proof of delivery: name of the receiver, signature and a photo of the stamped note.",
             "The delivery note becomes Delivered and is ready to invoice.",
           ],
-          where: ["Stock & delivery", "Deliveries"],
+          where: ["Deliveries"],
           href: "/deliveries",
           who: "Warehouse and Driver",
           example: {
@@ -893,7 +894,7 @@ export const GOODS_BUSINESS: Playbook = {
             "Look at margin by product in Profit and raise prices where costs went up.",
             "Look at Slow stock in Business insights and plan to clear it.",
             "Give your accountant the sales and purchases for the VAT return, due by the 20th of the next month.",
-            "Pay PAYE, NSSF and WCF on time.",
+            "Pay PAYE, NSSF and WCF on time. Mark each one done in Legal & compliance → Tax & filing calendar.",
           ],
           where: ["Finance", "Profit & loss"],
           href: "/profit-loss",
@@ -921,7 +922,7 @@ export const GOODS_BUSINESS: Playbook = {
           body: "The yearly dates that, if missed, bring fines or stop you trading.",
           do: [
             "Renew the business licence and any product permits.",
-            "File the BRELA annual return (companies).",
+            "File the BRELA annual return (companies). The Tax & filing calendar in Legal & compliance reminds you before it is due.",
             "Do a full stock count of every store at the year end.",
             "Review your business level in Features & business level: move up when you add stores, branches or staff.",
           ],

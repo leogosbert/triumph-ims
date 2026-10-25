@@ -9,7 +9,8 @@ import { adminUrl, allowedOnAdminHost, isAdminHost } from "@/lib/hosts";
 // /how-it-works, /pricing and the /playbooks list teach the app, also to visitors before they sign up
 // (a playbook itself opens only for companies LeMo Tech has given it to).
 // /api/v1 is the data API for other systems; each call carries its own API key (see /integrations).
-const PUBLIC_PATHS = ["/how-it-works", "/playbooks", "/pricing", "/api/v1", "/login", "/auth", "/forgot-password", "/api/outbox", "/api/version", "/api/app-manifest", "/delete-account"];
+// /api/inbound receives email and WhatsApp webhooks; each request carries the provider's signature.
+const PUBLIC_PATHS = ["/how-it-works", "/playbooks", "/pricing", "/api/v1", "/login", "/auth", "/forgot-password", "/api/outbox", "/api/inbound", "/api/version", "/api/app-manifest", "/delete-account", "/meet", "/api/calendar"];
 
 /**
  * Keeps the sign-in session fresh and sends signed-out visitors to /login.

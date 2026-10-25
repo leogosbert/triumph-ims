@@ -6,7 +6,7 @@ import { useTr } from "@/lib/tr-client";
 import { uploadDocumentFile } from "./upload";
 
 /** Add or replace the file of a library document. */
-export function FilePicker({ companyId, documentId, hasFile }: { companyId: string; documentId: string; hasFile: boolean }) {
+export function FilePicker({ companyId, documentId, hasFile, readAfter = false }: { companyId: string; documentId: string; hasFile: boolean; readAfter?: boolean }) {
   const tr = useTr();
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
@@ -22,7 +22,9 @@ export function FilePicker({ companyId, documentId, hasFile }: { companyId: stri
     const res = await uploadDocumentFile(companyId, documentId, file);
     setBusy(false);
     if (res.error) return setError(tr(res.error));
-    router.refresh();
+    // With AI on, a new photo or PDF is read straight away and fills the details (the person checks and saves).
+    if (readAfter && (file.type === "application/pdf" || file.type.startsWith("image/"))) router.replace(`/documents/${documentId}?read=1#details`);
+    else router.refresh();
   }
 
   return (

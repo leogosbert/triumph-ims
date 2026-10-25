@@ -12,13 +12,13 @@ const allOn: FeatureCheck = () => true;
 
 const M = {
   home: ["/"],
-  sales: ["/inbox", "/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
+  sales: ["/inbox", "/portal-admin", "/catalogue", "/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
   clients: ["/clients"],
   products: ["/products"],
   purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers", "/requisitions", "/approvals"],
   stock: ["/stock", "/warehouses", "/receiving", "/grns", "/transfers", "/planning"],
   deliveries: ["/deliveries", "/backorders", "/fleet"],
-  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow", "/accounts", "/payroll"],
+  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow", "/accounts", "/payroll", "/getting-paid", "/financing"],
   services: ["/jobs", "/maintenance", "/equipment", "/projects", "/timesheets", "/hire", "/service-reports"],
   reports: ["/reports", "/head-office", "/scheduled-reports"],
   admin: ["/hr", "/hse", "/quality", "/meetings", "/calendar"],

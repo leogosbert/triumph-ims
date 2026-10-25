@@ -27,7 +27,7 @@ export type MenuOptions = {
 
 const SERVICE_FEATURES = new Set(["service_jobs", "maintenance_contracts", "equipment_register", "projects", "timesheets", "hire_rentals", "service_reports"]);
 /** Administration, payroll and accounts screens: shown once their database update has been run. */
-const ERP_FEATURES = new Set(["hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets", "inbox", "compliance", "meetings", "calendar"]);
+const ERP_FEATURES = new Set(["hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets", "inbox", "compliance", "meetings", "calendar", "tender_alerts", "online_catalogue", "lpo_financing", "tra_fiscal", "pay_links", "auto_reminders", "client_portal"]);
 
 export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {}): MenuCategory[] {
   const on = opts.on ?? (() => true);
@@ -40,11 +40,14 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       icon: "sales",
       items: [
         canUseInbox(role) && { href: "/inbox", title: "Inbox", sub: "Client and supplier emails and WhatsApp in one place", icon: "inbox", feature: "inbox" },
+        ["management", "sales", "procurement", "finance", "warehouse"].includes(role) && { href: "/portal-admin", title: "Portals", sub: "Client and supplier portals: access, documents to check, bank changes", icon: "team", feature: "client_portal" },
         c("seeCrm") && { href: "/crm", title: "Pipeline", sub: "Opportunities from first call to order, follow-ups", icon: "activity" },
         c("seeSales") && { href: "/rfqs", title: "Client RFQs", sub: "Requests for quotation from clients", icon: "inbox" },
         c("seeSales") && { href: "/quotations", title: "Quotations", sub: "Prices sent to clients, approvals", icon: "doc" },
         { href: "/clients", title: "Clients", sub: "Search, view and edit clients and their contacts", icon: "clients" },
         c("seeCrm") && { href: "/tenders", title: "Tenders", sub: "Bids with closing dates, checklist of papers, results", icon: "doc" },
+        c("seeCrm") && { href: "/tenders/alerts", title: "Tender alerts", sub: "Tender notices read and scored for you, bid or no bid", icon: "bell", feature: "tender_alerts" },
+        c("seeSales") && { href: "/catalogue", title: "Online catalogue", sub: "Public product page, PDF and QR code, enquiries from buyers", icon: "products", feature: "online_catalogue" },
         c("seeContracts") && { href: "/contracts", title: "Contracts", sub: "Framework agreements and agreed prices", icon: "doc" },
         c("seeSales") && { href: "/sales", title: "Sales overview", sub: "Client RFQs, quotations, approvals", icon: "sales" },
       ],
@@ -103,8 +106,12 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
         c("seeInvoices") && { href: "/invoices", title: "Invoices", sub: "Invoices and what clients owe", icon: "receipt" },
         c("seeFinance") && { href: "/payments", title: "Payments received", sub: "Money received from clients", icon: "cash" },
         c("seeFinance") && { href: "/receivables", title: "Money owed to us", sub: "Who owes what, and for how long", icon: "finance" },
+        c("seeFinance") && { href: "/getting-paid/tra", title: "TRA receipts", sub: "EFD / VFD fiscal receipts, daily totals and credit notes", icon: "receipt", feature: "tra_fiscal" },
+        c("seeFinance") && { href: "/getting-paid/links", title: "Pay links", sub: "Mobile money and card payments, match references", icon: "cash", feature: "pay_links" },
+        c("seeFinance") && { href: "/getting-paid/reminders", title: "Automatic reminders", sub: "Email, SMS and WhatsApp reminders with a log", icon: "bell", feature: "auto_reminders" },
         c("seeBills") && { href: "/bills", title: "Supplier bills", sub: "Suppliers' invoices and payments", icon: "receipt" },
         c("seeFinance") && { href: "/payables", title: "Money we owe", sub: "What we owe suppliers, and when", icon: "finance" },
+        c("seeFinance") && { href: "/financing", title: "LPO financing", sub: "Bank-ready pack for a client order, request status and reminders", icon: "finance", feature: "lpo_financing" },
         c("seeProfit") && { href: "/profit", title: "Profit", sub: "Profit by order, client and month", icon: "activity" },
         c("manageExpenses") && { href: "/expenses", title: "Expenses", sub: "Day-to-day spending, with receipt photos", icon: "cash" },
         c("seeProfit") && { href: "/profit-loss", title: "Profit & loss", sub: "Sales, cost of goods, expenses and profit by month", icon: "report" },

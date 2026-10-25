@@ -1,5 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { ScanDocument } from "@/components/ai/ScanDocument";
+import { aiReady } from "@/lib/ai/claude";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -170,7 +172,7 @@ export default async function LicencePage({ params, searchParams }: { params: Pr
           <summary>{tr("Edit details")}</summary>
           <form action={saveLicence} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={l.id} />
-            {/* ScanDocument goes here: it fills the named inputs below (name, authority, licence_no, issued_on, expires_on, product_scope, notes) */}
+            <ScanDocument enabled={aiReady()} isManager fields={{ title: "name", authority: "authority", reference: "licence_no", issued_on: "issued_on", expires_on: "expires_on", scope: "product_scope", notes: "notes" }} />
         <LicenceFields v={l} />
             <SubmitButton>{tr("Save")}</SubmitButton>
           </form>

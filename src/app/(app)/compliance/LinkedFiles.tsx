@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { aiReady } from "@/lib/ai/claude";
 import { tr } from "@/lib/tr";
 import { SubmitButton } from "@/components/SubmitButton";
 import { daysUntil, docKindLabel } from "@/lib/crm";
@@ -108,6 +109,8 @@ export async function LinkedFiles({
             defaultKind={defaultKind}
             defaultExpiry={defaultExpiry}
             defaultReference={defaultReference}
+            aiOn={aiReady()}
+            isManager={canEdit}
           />
           {others.length > 0 && (
             <form action={linkExistingDocument} className="inline-form" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>

@@ -1,5 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { ScanDocument } from "@/components/ai/ScanDocument";
+import { aiReady } from "@/lib/ai/claude";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -45,7 +47,7 @@ export default async function NewLicencePage({ searchParams }: { searchParams: S
       )}
       <form action={createLicence} className="card">
         {itemId && /^[0-9a-f-]{36}$/.test(itemId) && <input type="hidden" name="item_id" value={itemId} />}
-        {/* ScanDocument goes here: it fills the named inputs below (name, authority, licence_no, issued_on, expires_on, product_scope, notes) */}
+        <ScanDocument enabled={aiReady()} isManager fields={{ title: "name", authority: "authority", reference: "licence_no", issued_on: "issued_on", expires_on: "expires_on", scope: "product_scope", notes: "notes" }} />
         <LicenceFields
           v={{
             name: req ? tr(req.name) : "",

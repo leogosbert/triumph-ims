@@ -1,7 +1,7 @@
 "use server";
 
 import { aiReady, callClaude, type AiBlock } from "@/lib/ai/claude";
-import { checkReceipt, extractJson, receiptInstruction, RECEIPT_SYSTEM, type ReceiptCheck } from "@/lib/ai/receipt";
+import { checkReceipt, extractJson, receiptInstruction, RECEIPT_SCHEMA, RECEIPT_SYSTEM, type ReceiptCheck } from "@/lib/ai/receipt";
 import { getAppContext } from "@/lib/context";
 import { RECEIPT_TYPES } from "@/lib/image";
 import { can } from "@/lib/roles";
@@ -59,8 +59,11 @@ export async function readReceipt(form: FormData): Promise<ReadReceiptResult> {
     content: [picture, { type: "text", text: receiptInstruction(categories, company.base_currency, today) }],
     maxTokens: 4000,
     timeoutMs: 25000,
+    schema: RECEIPT_SCHEMA as unknown as Record<string, unknown>,
+    effort: "low",
   });
   if (!res.ok) {
+    if (res.reason === "refused") return { ok: false, error: "This does not look like a receipt. Check the picture." };
     return {
       ok: false,
       error: res.reason === "timeout" ? "The AI service took too long. Try again, or fill in the form by hand." : "The receipt could not be read. Fill in the form by hand.",

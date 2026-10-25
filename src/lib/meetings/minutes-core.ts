@@ -491,7 +491,7 @@ export function plainMinutes(b: MinutesBrief): MinutesPayload {
   const proposals: SaveProposal[] = [];
   const seen = new Set<string>();
   let nextMeeting = false;
-  for (const [i, l] of [...typed.map((x) => ({ ...x, typed: true })), ...spoken.map((x) => ({ ...x, typed: false }))].entries()) {
+  for (const l of [...typed.map((x) => ({ ...x, typed: true })), ...spoken.map((x) => ({ ...x, typed: false }))]) {
     if (points.length >= 60) break;
     let kind: SavePoint["kind"] | null = l.typed ? "note" : null;
     let body = l.text;
@@ -533,7 +533,6 @@ export function plainMinutes(b: MinutesBrief): MinutesPayload {
         payload: { title: body.slice(0, 200), kind: k === "meeting" ? "meeting" : k, starts_on: found.date, at_time: found.time ?? findTime(body), phrase: found.phrase },
       });
     }
-    void i;
   }
   const counts = (k: string) => points.filter((p) => p.kind === k).length;
   const summary =

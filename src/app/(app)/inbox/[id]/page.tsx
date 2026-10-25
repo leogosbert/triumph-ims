@@ -17,6 +17,7 @@ import { can } from "@/lib/roles";
 import { assignConversation, linkConversation, markUnread, setConversationStatus } from "../actions";
 import { HtmlFrame } from "../HtmlFrame";
 import { ReplyBox } from "../ReplyBox";
+import { noticeFromInbox } from "../../tenders/alerts/actions";
 
 export const metadata = { title: "Conversation" };
 
@@ -39,7 +40,7 @@ export default async function ConversationPage({ params, searchParams }: { param
   const { id } = await params;
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
   if (!canUseInbox(role)) redirect("/");
 
   const { data: conv, error } = await supabase
@@ -101,6 +102,15 @@ export default async function ConversationPage({ params, searchParams }: { param
           </Link>
         )}
       </p>
+      {c.channel === "email" && lastIn && can(role, "seeCrm") && features.ready && features.list.some((f) => f.key === "tender_alerts" && f.enabled) && (
+        <form action={noticeFromInbox} className="small" style={{ margin: "0 0 8px" }}>
+          <input type="hidden" name="message_id" value={lastIn.id} />
+          <input type="hidden" name="back" value={`/inbox/${c.id}`} />
+          <button type="submit" className="btn btn-small">
+            {tr("Read as a tender notice")}
+          </button>
+        </form>
+      )}
       <Notice {...notice} />
 
       <section aria-label={tr("Messages")} style={{ display: "grid", gap: 10, margin: "12px 0" }}>

@@ -1,0 +1,153 @@
+/* Tender alerts, LPO financing and the catalogue settings (screens inside the app).
+   Uses the app's colour tokens so light, dark and the glass look all apply. */
+
+.gt-score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 3px solid var(--line);
+  flex-shrink: 0;
+}
+.gt-score.ok {
+  border-color: var(--ok, #1f8a4c);
+  color: var(--ok, #1f8a4c);
+}
+.gt-score.warn {
+  border-color: var(--warn, #b26a00);
+  color: var(--warn, #b26a00);
+}
+.gt-score.off {
+  color: var(--muted);
+}
+.gt-score.small {
+  min-width: 34px;
+  height: 34px;
+  font-size: 0.85rem;
+  border-width: 2px;
+}
+
+.gt-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.gt-head > .gt-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.gt-reasons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.gt-reasons li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 0.92rem;
+}
+.gt-reasons li::before {
+  content: "✓";
+  font-weight: 700;
+  color: var(--ok, #1f8a4c);
+  flex-shrink: 0;
+  width: 1em;
+}
+.gt-reasons li.bad::before {
+  content: "!";
+  color: var(--warn, #b26a00);
+}
+
+.gt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.gt-chips li {
+  font-size: 0.78rem;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--off-bg);
+  color: var(--text, inherit);
+}
+
+.gt-raw {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow: auto;
+  font-size: 0.85rem;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--off-bg);
+}
+
+.gt-share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gt-qr {
+  width: 180px;
+  max-width: 60vw;
+  height: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 6px;
+}
+
+.gt-prod {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.gt-prod img,
+.gt-prod .gt-ph {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--off-bg);
+  flex-shrink: 0;
+}
+.gt-prod .gt-main {
+  flex: 1;
+  min-width: 0;
+}
+.gt-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.78rem;
+}
+.gt-steps li {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.gt-steps li.on {
+  border-color: currentColor;
+  color: var(--ok, #1f8a4c);
+  font-weight: 600;
+}
+.gt-steps li.now {
+  background: var(--off-bg);
+  color: inherit;
+  font-weight: 600;
+}

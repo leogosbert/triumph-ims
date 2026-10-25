@@ -365,6 +365,16 @@ export default async function QuotationPage({
         </section>
       )}
 
+      {q.status === "accepted" && can(role, "seeFinance") && features.ready && features.list.some((f) => f.key === "lpo_financing" && f.enabled) && (
+        <section className="card">
+          <h2>{tr("LPO financing")}</h2>
+          <p className="muted small">{tr("Need cash to buy the goods before the client pays? Make a bank-ready financing pack for this order.")}</p>
+          <Link href={`/financing/new?quotation=${q.id}`} className="btn">
+            {tr("Finance this LPO")}
+          </Link>
+        </section>
+      )}
+
       {q.status === "accepted" && canPlanService(role) && features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled) && (
         <section className="card">
           <h2>{tr("Installation and service work")}</h2>

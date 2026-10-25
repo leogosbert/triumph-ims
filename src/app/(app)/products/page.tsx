@@ -32,7 +32,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const category = typeof sp.category === "string" ? sp.category : "";
   const archived = sp.archived === "1";
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
   const showCosts = can(role, "seeCosts");
 
   let query = supabase
@@ -73,6 +73,11 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
         <h1>{tr("Products")}</h1>
         <span className="muted small">{count ?? 0}{" "}{tr("found")}</span>
       </div>
+      {features.ready && features.list.some((f) => f.key === "online_catalogue" && f.enabled) && (
+        <p className="small" style={{ margin: "0 0 8px" }}>
+          <Link href="/catalogue">{tr("Online catalogue: choose what buyers see and share the link")}</Link>
+        </p>
+      )}
       <Notice {...notice} />
       <ListToolbar
         q={q}

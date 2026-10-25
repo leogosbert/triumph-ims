@@ -31,7 +31,7 @@ export default async function TendersPage({ searchParams }: { searchParams: Sear
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, features } = await getAppContext();
   if (!can(role, "seeCrm")) redirect("/");
   const view = sp.view === "decided" ? "decided" : "open";
   const { data, error } = await supabase
@@ -57,9 +57,16 @@ export default async function TendersPage({ searchParams }: { searchParams: Sear
       </p>
       <div className="page-head">
         <h1>{tr("Tenders")}</h1>
-        <Link href="/tenders/new" className="btn btn-primary btn-small">
-          {tr("+ Tender")}
-        </Link>
+        <span style={{ display: "flex", gap: 8 }}>
+          {features.ready && features.list.some((f) => f.key === "tender_alerts" && f.enabled) && (
+            <Link href="/tenders/alerts" className="btn btn-small">
+              {tr("Tender alerts")}
+            </Link>
+          )}
+          <Link href="/tenders/new" className="btn btn-primary btn-small">
+            {tr("+ Tender")}
+          </Link>
+        </span>
       </div>
       <Notice {...notice} />
       <nav className="tabs-row" aria-label={tr("Show")}>

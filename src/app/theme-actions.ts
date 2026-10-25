@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isThemePref, THEME_COOKIE } from "@/lib/theme";
 import { BG_COOKIE, isBackgroundPref } from "@/lib/background";
+import { isLookPref, LOOK_COOKIE } from "@/lib/look";
 
 /** Saves Auto / Light / Dark and returns to the same page. */
 export async function setTheme(form: FormData) {
@@ -14,7 +15,16 @@ export async function setTheme(form: FormData) {
   await back();
 }
 
-/** Saves the app background (Architecture, Aurora, Grid, Waves, Mountains or Plain) and returns to the same page. */
+/** Saves the app style (Glass or Classic) and returns to the same page. */
+export async function setLook(form: FormData) {
+  const look = form.get("look");
+  if (isLookPref(look)) {
+    (await cookies()).set(LOOK_COOKIE, look, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  }
+  await back();
+}
+
+/** Saves the app background (Photos, Architecture, Aurora, Grid, Waves, Mountains or Plain) and returns to the same page. */
 export async function setBackground(form: FormData) {
   const bg = form.get("bg");
   if (isBackgroundPref(bg)) {

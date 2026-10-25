@@ -3,6 +3,8 @@ import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { getLang } from "@/lib/lang";
 import { LangProvider } from "@/lib/tr-client";
 import { getThemePref, THEME_SCRIPT } from "@/lib/theme";
+import { LOOK_SCRIPT } from "@/lib/look";
+import { getLookPref } from "@/lib/look-server";
 import { Splash, SPLASH_SCRIPT } from "@/components/Splash";
 import { NavProgress } from "@/components/NavProgress";
 import { InstallPrompt } from "@/components/InstallPrompt";
@@ -14,6 +16,7 @@ import "./look.css";
 import "./billing.css";
 import "./services.css";
 import "./polish.css";
+import "./glass.css";
 
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-mono", display: "swap" });
@@ -49,17 +52,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const lang = await getLang();
   const theme = await getThemePref();
   const adminHost = await onAdminHost();
+  // Glass or Classic (Account → Appearance → Style). LeMoSp ADMIN keeps its own look.
+  const look = adminHost ? "classic" : await getLookPref();
   return (
     <html
       lang={lang}
       data-app={adminHost ? "admin" : undefined}
+      data-look={look}
       className={`${sans.variable} ${mono.variable}`}
       data-theme-pref={theme}
       data-theme={theme === "auto" ? undefined : theme}
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + SPLASH_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + SPLASH_SCRIPT + LOOK_SCRIPT }} />
       </head>
       <body>
         <Splash />

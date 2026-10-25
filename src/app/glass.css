@@ -1,0 +1,1116 @@
+/* =====================================================================
+   LeMoSp — "Glass" style (Account → Appearance → Style; the default).
+   Everything here is scoped under :root[data-look="glass"] (set by the root layout from the
+   "look" cookie), so the Classic style is exactly as it was. The only unscoped rules are the
+   Photos background (.scene, which either style may choose) and the hidden-by-default splash.
+
+   - Company colours stay in charge: --brand / --brand-dark. Each section gets accent shades
+     mixed from the brand with a gentle tint (--acc1..3), which blend smoothly when you move
+     between sections (registered custom properties; html[data-section], SectionTracker).
+   - Frosted surfaces: cards, lists, tables, forms, buttons, notices, top bar, menus.
+   - Floating sidebar that folds to an icon rail (data-side="rail" on <html>).
+   - Start animation (GlassSplash), screen entrances, hover lift, soft focus rings.
+   Motion stops for prefers-reduced-motion; decorative layers are hidden when printing.
+   ===================================================================== */
+
+@property --acc1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1c4c9b;
+}
+@property --acc2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2a7fbf;
+}
+@property --acc3 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #123a7a;
+}
+
+/* ---------- Tokens ---------- */
+:root[data-look="glass"] {
+  --g-ease: cubic-bezier(0.22, 0.9, 0.27, 1);
+  --g-blur: blur(20px) saturate(1.35);
+  --g-surface: rgba(255, 255, 255, 0.74);
+  --g-strong: rgba(255, 255, 255, 0.9);
+  --g-field: rgba(255, 255, 255, 0.84);
+  --g-border: rgba(255, 255, 255, 0.7);
+  --g-edge: rgba(20, 33, 58, 0.1);
+  --g-hi: rgba(20, 33, 58, 0.05);
+  --g-shadow: 0 1px 2px rgba(11, 31, 58, 0.05), 0 18px 40px -26px rgba(11, 31, 58, 0.4);
+  --g-radius: 22px;
+  --photo-strength: 0.2;
+  --side-w: 272px;
+  --rail-w: 84px;
+}
+:root[data-look="glass"][data-theme="dark"] {
+  --g-surface: rgba(17, 27, 45, 0.68);
+  --g-strong: rgba(13, 21, 36, 0.9);
+  --g-field: rgba(9, 16, 29, 0.66);
+  --g-border: rgba(255, 255, 255, 0.09);
+  --g-edge: rgba(255, 255, 255, 0.07);
+  --g-hi: rgba(255, 255, 255, 0.05);
+  --g-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 22px 46px -26px rgba(0, 0, 0, 0.8);
+  --photo-strength: 0.3;
+}
+@media (max-width: 719px) {
+  /* Lighter blur on phones: same look, less work for the phone. */
+  :root[data-look="glass"] {
+    --g-blur: blur(14px) saturate(1.3);
+  }
+}
+
+/* ---------- Section accents (mixed from the company colours) ---------- */
+:root[data-look="glass"] :is(.shell, .auth-wrap) {
+  --acc1: var(--brand);
+  --acc2: color-mix(in srgb, var(--brand) 62%, #06b6d4);
+  --acc3: var(--brand-dark);
+  transition:
+    --acc1 1.3s var(--g-ease),
+    --acc2 1.3s var(--g-ease),
+    --acc3 1.3s var(--g-ease);
+}
+:root[data-look="glass"][data-section="sales"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 68%, #10b981);
+  --acc2: color-mix(in srgb, var(--brand) 50%, #22d3ee);
+  --acc3: color-mix(in srgb, var(--brand-dark) 80%, #047857);
+}
+:root[data-look="glass"][data-section="purchasing"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 68%, #6366f1);
+  --acc2: color-mix(in srgb, var(--brand) 50%, #a78bfa);
+  --acc3: color-mix(in srgb, var(--brand-dark) 80%, #4338ca);
+}
+:root[data-look="glass"][data-section="stock"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 66%, #14b8a6);
+  --acc2: color-mix(in srgb, var(--brand) 50%, #f59e0b);
+  --acc3: color-mix(in srgb, var(--brand-dark) 80%, #0f766e);
+}
+:root[data-look="glass"][data-section="deliveries"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 70%, #f59e0b);
+  --acc2: color-mix(in srgb, var(--brand) 55%, #38bdf8);
+  --acc3: color-mix(in srgb, var(--brand-dark) 82%, #b45309);
+}
+:root[data-look="glass"][data-section="services"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 70%, #f97316);
+  --acc2: color-mix(in srgb, var(--brand) 55%, #14b8a6);
+  --acc3: color-mix(in srgb, var(--brand-dark) 82%, #c2410c);
+}
+:root[data-look="glass"][data-section="administration"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 68%, #8b5cf6);
+  --acc2: color-mix(in srgb, var(--brand) 52%, #f472b6);
+  --acc3: color-mix(in srgb, var(--brand-dark) 80%, #6d28d9);
+}
+:root[data-look="glass"][data-section="finance"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 66%, #22c55e);
+  --acc2: color-mix(in srgb, var(--brand) 52%, #eab308);
+  --acc3: color-mix(in srgb, var(--brand-dark) 80%, #15803d);
+}
+:root[data-look="glass"][data-section="reports"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 66%, #0ea5e9);
+  --acc2: color-mix(in srgb, var(--brand) 52%, #818cf8);
+  --acc3: color-mix(in srgb, var(--brand-dark) 80%, #0369a1);
+}
+:root[data-look="glass"][data-section="settings"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 72%, #64748b);
+  --acc2: color-mix(in srgb, var(--brand) 56%, #94a3b8);
+  --acc3: color-mix(in srgb, var(--brand-dark) 82%, #334155);
+}
+:root[data-look="glass"][data-section="compliance"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 70%, #ef4444);
+  --acc2: color-mix(in srgb, var(--brand) 55%, #f59e0b);
+  --acc3: color-mix(in srgb, var(--brand-dark) 82%, #b91c1c);
+}
+:root[data-look="glass"][data-section="help"] .shell {
+  --acc1: color-mix(in srgb, var(--brand) 64%, #06b6d4);
+  --acc2: color-mix(in srgb, var(--brand) 52%, #14b8a6);
+  --acc3: color-mix(in srgb, var(--brand-dark) 80%, #0e7490);
+}
+:root[data-look="glass"] .auth-wrap {
+  --acc1: color-mix(in srgb, var(--brand) 70%, #06b6d4);
+  --acc2: color-mix(in srgb, var(--brand) 55%, #6366f1);
+  --acc3: var(--brand-dark);
+}
+
+/* =====================================================================
+   Photos background (either style can choose it): src/components/PhotoScene.tsx
+   ===================================================================== */
+.app-bg[data-bg="photos"] {
+  background: var(--bg);
+  --acc1: var(--brand);
+  --acc2: color-mix(in srgb, var(--brand) 62%, #06b6d4);
+  --acc3: var(--brand-dark);
+}
+:root[data-look="glass"] .app-bg[data-bg="photos"] {
+  /* Glass: follow the section colours set on the shell. */
+  --acc1: inherit;
+  --acc2: inherit;
+  --acc3: inherit;
+}
+.scene,
+.scene-photo,
+.scene-wash,
+.scene-grain {
+  position: absolute;
+  inset: 0;
+}
+.scene {
+  overflow: hidden;
+}
+.app-bg[data-bg="photos"] {
+  --photo-strength: 0.2;
+}
+[data-theme="dark"] .app-bg[data-bg="photos"] {
+  --photo-strength: 0.3;
+}
+.scene-photo {
+  inset: -6%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+  filter: saturate(1.08) blur(var(--photo-blur, 1px));
+  animation:
+    scene-in 2.6s var(--ease-out, ease-out) forwards,
+    scene-kenburns 38s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+.scene-photo.out {
+  animation:
+    scene-out 2.6s ease forwards,
+    scene-kenburns 38s ease-in-out infinite alternate;
+}
+.scene-wash {
+  background:
+    radial-gradient(1100px 700px at 108% -12%, color-mix(in srgb, var(--acc1) 30%, transparent), transparent 62%),
+    radial-gradient(900px 700px at -12% 112%, color-mix(in srgb, var(--acc2) 24%, transparent), transparent 62%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 52%, transparent), color-mix(in srgb, var(--bg) 90%, transparent) 88%);
+}
+.scene.wash-neutral .scene-wash {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 55%, transparent), color-mix(in srgb, var(--bg) 90%, transparent) 88%);
+}
+.scene.wash-none .scene-wash {
+  display: none;
+}
+.scene-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.32;
+  mix-blend-mode: screen;
+  animation: scene-drift 26s ease-in-out infinite alternate;
+}
+:root:not([data-theme="dark"]) .scene-blob {
+  mix-blend-mode: multiply;
+  opacity: 0.14;
+}
+.scene-blob.s1 {
+  width: 46vmax;
+  height: 46vmax;
+  top: -18vmax;
+  right: -10vmax;
+  background: var(--acc1);
+}
+.scene-blob.s2 {
+  width: 38vmax;
+  height: 38vmax;
+  bottom: -16vmax;
+  left: -8vmax;
+  background: var(--acc2);
+  animation-duration: 32s;
+  animation-delay: -8s;
+}
+.scene-blob.s3 {
+  width: 28vmax;
+  height: 28vmax;
+  top: 35%;
+  left: 40%;
+  background: var(--acc3);
+  animation-duration: 40s;
+  animation-delay: -14s;
+}
+.scene-speck {
+  position: absolute;
+  bottom: -30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.9), color-mix(in srgb, var(--acc2) 70%, transparent) 45%, transparent 72%);
+  opacity: 0;
+  animation: scene-rise linear infinite;
+}
+:root:not([data-theme="dark"]) .scene-speck {
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), color-mix(in srgb, var(--acc1) 55%, transparent) 45%, transparent 72%);
+}
+.scene-grain {
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes scene-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--photo-strength);
+  }
+}
+@keyframes scene-out {
+  from {
+    opacity: var(--photo-strength);
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes scene-kenburns {
+  from {
+    transform: scale(1.04) translate(0, 0);
+  }
+  to {
+    transform: scale(1.16) translate(-2%, -1.5%);
+  }
+}
+@keyframes scene-drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(6vmax, 4vmax) scale(1.12);
+  }
+  100% {
+    transform: translate(-4vmax, 7vmax) scale(0.94);
+  }
+}
+@keyframes scene-rise {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.6);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.5;
+  }
+  88% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-110vh) translateX(30px) scale(1.1);
+    opacity: 0;
+  }
+}
+/* look.css stops every .app-bg animation for "reduce motion": show the photo without its fade. */
+@media (prefers-reduced-motion: reduce) {
+  .scene-photo {
+    opacity: var(--photo-strength);
+  }
+  .scene-photo.out,
+  .scene-speck {
+    display: none;
+  }
+}
+
+/* Sign-in: the photo shows a little more, under the navy of the sign-in screen. */
+.auth-wrap .scene {
+  --bg: #0b1f3a;
+  --photo-strength: 0.42;
+}
+:root[data-look="glass"] .auth-wrap > .app-bg[data-bg="architecture"],
+:root:not([data-look="glass"]) .auth-wrap > .app-bg[data-bg="photos"] {
+  display: none;
+}
+
+/* =====================================================================
+   Start animation (src/components/GlassSplash.tsx)
+   ===================================================================== */
+.gsplash-screen {
+  display: none;
+}
+:root[data-look="glass"].gsplash .gsplash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background:
+    radial-gradient(60% 50% at 50% 44%, color-mix(in srgb, var(--brand) 55%, transparent), transparent 72%),
+    linear-gradient(160deg, var(--brand-dark), color-mix(in srgb, var(--brand-dark) 45%, #03080f));
+  transition:
+    opacity 0.6s var(--g-ease),
+    visibility 0s linear 0.6s;
+}
+:root[data-look="glass"].gsplash-done .gsplash-screen {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+/* The LeMoSp launch drawing gives way to this one in Glass. */
+:root[data-look="glass"] body:has(.gsplash-screen) .splash {
+  display: none;
+}
+.gsplash-glow {
+  position: absolute;
+  width: 60vmin;
+  height: 60vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, #06b6d4 40%, transparent), transparent 65%);
+  filter: blur(20px);
+  animation: gs-breathe 2.4s ease-in-out infinite alternate;
+}
+.gsplash-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: -4vh;
+  padding: 0 16px;
+  text-align: center;
+}
+.gsplash-orbit {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  display: grid;
+  place-items: center;
+  perspective: 700px;
+}
+.gsplash-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 55%, color-mix(in srgb, #5eead4 85%, transparent), #fff 92%, transparent 96%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  animation: gs-spin 1.1s linear infinite;
+}
+.gsplash-logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  padding: 10px;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 0 40px color-mix(in srgb, #5eead4 45%, transparent),
+    0 18px 40px -12px rgba(0, 0, 0, 0.6);
+  animation: gs-revolve 1.3s var(--g-ease) both;
+}
+.gsplash-logo.is-mark {
+  padding: 0;
+  background: transparent;
+}
+.gsplash-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  max-width: 80vw;
+  animation: gs-rise 0.7s var(--g-ease) 0.45s both;
+}
+.gsplash-bar {
+  width: 120px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+  position: relative;
+  animation: gs-rise 0.6s var(--g-ease) 0.6s both;
+}
+.gsplash-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5eead4, #fff);
+  transform-origin: left;
+  animation: gs-fill 1.4s var(--g-ease) 0.2s both;
+}
+@keyframes gs-revolve {
+  from {
+    opacity: 0;
+    transform: rotateY(-540deg) scale(0.4);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes gs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes gs-breathe {
+  from {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+@keyframes gs-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes gs-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gsplash-screen *,
+  .gsplash-bar::after {
+    animation: none !important;
+  }
+  :root[data-look="glass"].gsplash .gsplash-screen {
+    transition: opacity 0.15s linear, visibility 0s linear 0.15s;
+  }
+}
+
+/* =====================================================================
+   App shell
+   ===================================================================== */
+
+/* ---------- Top bar ---------- */
+:root[data-look="glass"] .topbar {
+  background: color-mix(in srgb, var(--brand-dark) 82%, transparent);
+  -webkit-backdrop-filter: var(--g-blur);
+  backdrop-filter: var(--g-blur);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0 14px 30px -20px rgba(3, 10, 25, 0.7);
+}
+:root[data-look="glass"][data-theme="dark"] .topbar {
+  background: color-mix(in srgb, color-mix(in srgb, var(--brand-dark) 55%, #050b16) 82%, transparent);
+}
+:root[data-look="glass"] .topbar-brand img,
+:root[data-look="glass"] .topbar-brand .mark {
+  border-radius: 12px;
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.6);
+}
+@media (max-width: 400px) {
+  :root[data-look="glass"] .theme-btn {
+    display: none;
+  }
+}
+
+/* ---------- Phone bar: frosted brand glass ---------- */
+:root[data-look="glass"] .bottomnav {
+  background: color-mix(in srgb, var(--brand-dark) 80%, transparent);
+  -webkit-backdrop-filter: var(--g-blur);
+  backdrop-filter: var(--g-blur);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 26px;
+  box-shadow: 0 18px 40px -16px rgba(3, 10, 25, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+:root[data-look="glass"][data-theme="dark"] .bottomnav {
+  background: color-mix(in srgb, color-mix(in srgb, var(--brand-dark) 50%, #050b16) 82%, transparent);
+}
+:root[data-look="glass"] .bottomnav a {
+  color: #c6d3ea;
+}
+:root[data-look="glass"] .bottomnav > .nav-pill {
+  border-radius: 18px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--acc1) 60%, rgba(255, 255, 255, 0.2)), color-mix(in srgb, var(--acc2) 45%, transparent));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 8px 22px -10px var(--acc1);
+}
+
+/* ---------- The More sheet and the company sheet ---------- */
+:root[data-look="glass"] .msheet-panel,
+:root[data-look="glass"] .csheet-panel {
+  background: var(--g-strong);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid var(--g-border);
+}
+:root[data-look="glass"] .msheet-backdrop {
+  background: color-mix(in srgb, var(--brand-dark) 35%, rgba(6, 14, 28, 0.4));
+}
+:root[data-look="glass"] .msheet-ico {
+  background: color-mix(in srgb, var(--acc1) 14%, transparent);
+}
+
+/* ---------- Laptops: floating glass sidebar that folds to a rail ---------- */
+.side-rail-btn {
+  display: none;
+}
+@media (min-width: 1024px) {
+  :root[data-look="glass"] .sidenav {
+    position: sticky;
+    top: 14px;
+    align-self: flex-start;
+    height: calc(100dvh - 28px);
+    margin: 14px 0 14px 14px;
+    width: var(--side-w);
+    padding: 16px 12px 14px;
+    border-radius: 28px;
+    overflow: visible;
+    background:
+      radial-gradient(130% 36% at 0% 0%, color-mix(in srgb, var(--acc1) 40%, transparent), transparent 70%),
+      linear-gradient(180deg, color-mix(in srgb, var(--brand-dark) 84%, transparent), color-mix(in srgb, color-mix(in srgb, var(--brand-dark) 70%, #03080f) 90%, transparent));
+    -webkit-backdrop-filter: blur(22px) saturate(1.4);
+    backdrop-filter: blur(22px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 26px 60px -30px rgba(3, 10, 25, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition:
+      width 0.38s var(--g-ease),
+      padding 0.38s var(--g-ease);
+  }
+  :root[data-look="glass"][data-theme="dark"] .sidenav {
+    background:
+      radial-gradient(130% 36% at 0% 0%, color-mix(in srgb, var(--acc1) 28%, transparent), transparent 70%),
+      linear-gradient(180deg, color-mix(in srgb, color-mix(in srgb, var(--brand-dark) 50%, #050b16) 82%, transparent), rgba(6, 12, 24, 0.86));
+  }
+  :root[data-look="glass"] .sidenav nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0 -4px;
+    padding: 0 4px 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+  }
+
+  /* Brand: the logo on a tile with a slow turning halo; it revolves once in a while. */
+  :root[data-look="glass"] .sidenav-brand {
+    position: relative;
+    gap: 12px;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 0;
+    overflow: hidden;
+  }
+  :root[data-look="glass"] .sidenav-brand img,
+  :root[data-look="glass"] .sidenav-brand .mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    padding: 5px;
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--acc2) 55%, transparent),
+      0 8px 22px -8px rgba(0, 0, 0, 0.6);
+    animation: g-logo-turn 60s linear infinite;
+  }
+  :root[data-look="glass"] .sidenav-brand strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: opacity 0.25s;
+  }
+
+  /* Fold button on the sidebar's edge. */
+  :root[data-look="glass"] .side-rail-btn {
+    position: absolute;
+    top: 34px;
+    right: -14px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--g-edge);
+    background: var(--g-strong);
+    color: var(--text);
+    box-shadow: 0 6px 16px -6px rgba(3, 10, 25, 0.5);
+    cursor: pointer;
+    transition:
+      transform 0.3s var(--snap, ease),
+      background 0.2s;
+  }
+  :root[data-look="glass"] .side-rail-btn svg {
+    transform: rotate(180deg);
+    transition: transform 0.38s var(--g-ease);
+  }
+  :root[data-look="glass"] .side-rail-btn:hover {
+    transform: scale(1.12);
+  }
+  :root[data-look="glass"][data-side="rail"] .side-rail-btn svg {
+    transform: none;
+  }
+
+  /* Group headings */
+  :root[data-look="glass"] .sidenav .nav-group {
+    padding: 14px 12px 4px;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    color: rgba(214, 226, 245, 0.62);
+    white-space: nowrap;
+    transition:
+      opacity 0.2s,
+      padding 0.3s;
+  }
+  /* Links: icon tiles, and a pill that glides (NavPills) in the section colours. */
+  :root[data-look="glass"] .sidenav nav a {
+    height: 44px;
+    gap: 12px;
+    padding: 0 8px;
+    border-radius: 14px;
+    color: #c9d6ec;
+    white-space: nowrap;
+  }
+  :root[data-look="glass"] .sidenav nav a:hover {
+    padding-left: 10px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+  }
+  :root[data-look="glass"] .sidenav nav a[aria-current="page"] {
+    color: #fff;
+    background: linear-gradient(120deg, color-mix(in srgb, var(--acc1) 50%, transparent), color-mix(in srgb, var(--acc2) 30%, transparent));
+  }
+  :root[data-look="glass"] .sidenav nav a[aria-current="page"]::before {
+    display: none;
+  }
+  :root[data-look="glass"] .sidenav nav.has-pill > a[aria-current="page"] {
+    background: transparent;
+  }
+  :root[data-look="glass"] .sidenav nav > .nav-pill {
+    border-radius: 14px;
+    background: linear-gradient(120deg, color-mix(in srgb, var(--acc1) 55%, transparent), color-mix(in srgb, var(--acc2) 32%, transparent));
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--acc2) 45%, transparent),
+      0 10px 28px -12px var(--acc1);
+  }
+  :root[data-look="glass"] .sidenav .nav-ico {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.07);
+    transition:
+      background 0.3s,
+      transform 0.3s var(--snap, ease);
+  }
+  :root[data-look="glass"] .sidenav nav a[aria-current="page"] .nav-ico {
+    background: color-mix(in srgb, var(--acc2) 40%, rgba(255, 255, 255, 0.12));
+  }
+  :root[data-look="glass"] .sidenav nav a:hover svg {
+    transform: none;
+  }
+  :root[data-look="glass"] .sidenav nav a:hover .nav-ico {
+    transform: scale(1.1);
+  }
+  :root[data-look="glass"] .sidenav .nav-txt {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.25s;
+  }
+  :root[data-look="glass"] .sidenav .powered {
+    margin-top: 8px;
+    padding: 12px 8px 2px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Rail: icons only (each link keeps its words for screen readers and as a tooltip). */
+  :root[data-look="glass"][data-side="rail"] .sidenav {
+    width: var(--rail-w);
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  :root[data-look="glass"][data-side="rail"] .sidenav-brand {
+    justify-content: center;
+    padding: 8px 0;
+    background: transparent;
+    border-color: transparent;
+  }
+  :root[data-look="glass"][data-side="rail"] :is(.sidenav-brand strong, .sidenav .nav-txt, .sidenav .powered span) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    opacity: 0;
+  }
+  :root[data-look="glass"][data-side="rail"] .sidenav .nav-group {
+    height: 1px;
+    margin: 10px 12px;
+    padding: 0;
+    overflow: hidden;
+    color: transparent;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  :root[data-look="glass"][data-side="rail"] .sidenav nav a {
+    justify-content: center;
+    padding: 0;
+  }
+  :root[data-look="glass"][data-side="rail"] .sidenav nav a:hover {
+    padding-left: 0;
+  }
+  :root[data-look="glass"][data-side="rail"] .sidenav .nav-ico {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+  }
+  :root[data-look="glass"][data-side="rail"] .sidenav .powered {
+    align-items: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  :root[data-look="glass"][data-side="rail"] .sidenav .powered img {
+    width: 36px;
+    height: 40px;
+    object-fit: cover;
+    object-position: left center;
+  }
+
+  /* Top bar: a floating glass strip with a big search field. */
+  :root[data-look="glass"] .topbar {
+    top: 14px;
+    margin: 14px 22px 0 22px;
+    min-height: 64px;
+    padding: 10px 14px 10px 18px;
+    border-radius: 22px;
+    background: var(--g-surface);
+    color: var(--text);
+    border: 1px solid var(--g-border);
+    box-shadow: var(--g-shadow);
+  }
+  :root[data-look="glass"][data-theme="dark"] .topbar {
+    background: var(--g-surface);
+  }
+  :root[data-look="glass"] .topbar-search {
+    max-width: 560px;
+    height: 46px;
+    border-radius: 999px;
+    padding: 0 18px;
+    background: var(--g-field);
+    border: 1px solid var(--g-edge);
+  }
+  :root[data-look="glass"] .topbar-search:focus-within {
+    border-color: color-mix(in srgb, var(--acc1) 70%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--acc1) 18%, transparent);
+  }
+  :root[data-look="glass"] .topbar .icon-btn {
+    border-radius: 50%;
+    background: var(--g-hi);
+  }
+  :root[data-look="glass"] .topbar .icon-btn:hover {
+    background: color-mix(in srgb, var(--acc1) 14%, transparent);
+  }
+  :root[data-look="glass"] .topbar-user {
+    background: var(--g-field);
+    border-color: var(--g-edge);
+  }
+  :root[data-look="glass"] .topbar-user .avatar {
+    background: linear-gradient(135deg, var(--acc1), var(--acc2));
+    box-shadow: 0 6px 16px -6px var(--acc1);
+  }
+  :root[data-look="glass"] main.page {
+    padding-top: 26px;
+  }
+}
+@keyframes g-logo-turn {
+  /* Mostly still; one slow revolution now and then. */
+  0%,
+  88% {
+    transform: none;
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+/* =====================================================================
+   Surfaces
+   ===================================================================== */
+:root[data-look="glass"] :is(.card, .rec-list, .tower-card, .stat, .stats-block, .auth-card) {
+  background: var(--g-surface);
+  border-color: var(--g-border);
+  -webkit-backdrop-filter: var(--g-blur);
+  backdrop-filter: var(--g-blur);
+  box-shadow: var(--g-shadow);
+}
+:root[data-look="glass"] :is(.card, .rec-list, .tower-card, .stat) {
+  border-radius: var(--g-radius);
+}
+:root[data-look="glass"] :is(.tile, .tower-col, .sv-card, .pr-plan, .pr-list, .lvl-card, .grow-rec, .feat-list, .board-card, .quick-grid a, .st-item, .bg-picker button) {
+  background: var(--g-surface);
+  border-color: var(--g-border);
+}
+/* Cards that mark something keep their own edge; empty-list cards stay see-through. */
+:root[data-look="glass"] :is(.danger-zone, .adm-danger) {
+  border-color: var(--err-line);
+}
+:root[data-look="glass"] p.card.muted {
+  background: color-mix(in srgb, var(--g-surface) 45%, transparent);
+  border-color: var(--line-strong);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+/* Glass inside glass: no second blur (cheaper, and it looks the same). */
+:root[data-look="glass"] :is(.card, .rec-list, .tower-card) :is(.card, .stat, .rec-list, .tile) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  background: color-mix(in srgb, var(--g-surface) 60%, transparent);
+}
+/* A thin light edge along the top of each card, in the section colour. */
+:root[data-look="glass"] .page .card:not(.muted) {
+  background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc2) 45%, transparent), transparent);
+  background-size: 70% 1px;
+  background-position: 50% 0;
+  background-repeat: no-repeat;
+}
+:root[data-look="glass"] .rec-list a:hover {
+  background: color-mix(in srgb, var(--acc1) 8%, transparent);
+}
+:root[data-look="glass"] .rec-list li + li {
+  border-top-color: var(--g-edge);
+}
+
+/* Hover lift (the separate translate property, so the scroll-in animations are not disturbed). */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :root[data-look="glass"] :is(a.card, .tile, .stat, .quick-grid a, .sv-card, .st-item, .tower-card, .lvl-card, .board-card) {
+    transition:
+      translate 0.35s var(--g-ease),
+      box-shadow 0.35s var(--g-ease),
+      border-color 0.25s;
+  }
+  :root[data-look="glass"] :is(a.card, a.tile, a.stat, .quick-grid a, .sv-card, a.st-item, .tower-card, .lvl-card, .board-card):hover {
+    translate: 0 -3px;
+    box-shadow: 0 2px 4px rgba(11, 31, 58, 0.06), 0 22px 40px -22px color-mix(in srgb, var(--acc1) 65%, transparent);
+  }
+  :root[data-look="glass"] .page .card {
+    transition: box-shadow 0.35s var(--g-ease);
+  }
+  :root[data-look="glass"] .page .card:hover {
+    box-shadow: 0 1px 2px rgba(11, 31, 58, 0.05), 0 22px 44px -26px color-mix(in srgb, var(--acc1) 55%, transparent);
+  }
+}
+
+/* ---------- Tables ---------- */
+:root[data-look="glass"] table.compare thead th {
+  background: color-mix(in srgb, var(--soft) 70%, transparent);
+}
+:root[data-look="glass"] table.compare :is(th, td) {
+  border-bottom-color: var(--g-edge);
+}
+:root[data-look="glass"] table.compare tbody tr {
+  transition: background 0.2s;
+}
+:root[data-look="glass"] table.compare tbody tr:hover > td {
+  background-color: color-mix(in srgb, var(--acc1) 6%, var(--card));
+}
+
+/* ---------- Forms ---------- */
+:root[data-look="glass"] :is(input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="url"], input[type="number"], input[type="date"], input[type="search"], select, textarea) {
+  background: var(--g-field);
+  border-color: var(--g-edge);
+  border-radius: 12px;
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s,
+    background 0.25s;
+}
+:root[data-look="glass"] :is(input, select, textarea):focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--acc1) 75%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--acc1) 20%, transparent);
+}
+:root[data-look="glass"] .topbar-search input:focus {
+  box-shadow: none;
+}
+:root[data-look="glass"] .seg {
+  background: var(--g-hi);
+}
+:root[data-look="glass"] .seg button[aria-pressed="true"] {
+  background: var(--g-strong);
+  box-shadow: 0 4px 12px -6px color-mix(in srgb, var(--acc1) 60%, transparent);
+}
+
+/* ---------- Buttons ---------- */
+:root[data-look="glass"] .btn {
+  border-radius: 14px;
+  background: var(--g-field);
+  border-color: var(--g-edge);
+  transition:
+    translate 0.25s var(--g-ease),
+    box-shadow 0.3s,
+    background 0.3s,
+    border-color 0.2s;
+}
+:root[data-look="glass"] .btn-primary {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 55%, var(--brand-dark)));
+  box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--brand) 85%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+:root[data-look="glass"] .btn-primary:hover {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 90%, #fff), var(--brand));
+  border-color: transparent;
+}
+:root[data-look="glass"] .btn-danger {
+  background: color-mix(in srgb, var(--err-bg) 80%, transparent);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :root[data-look="glass"] .btn:not(:disabled):hover {
+    translate: 0 -2px;
+  }
+  :root[data-look="glass"] .btn:not(:disabled):active {
+    translate: 0 0;
+  }
+}
+:root[data-look="glass"] .tabs-row a:not([aria-current="page"]) {
+  background: var(--g-surface);
+  border-color: var(--g-edge);
+}
+:root[data-look="glass"] .tabs-row > .nav-pill {
+  background: linear-gradient(120deg, var(--brand), color-mix(in srgb, var(--brand) 60%, var(--brand-dark)));
+}
+
+/* ---------- Notices ---------- */
+:root[data-look="glass"] .notice {
+  border-radius: 16px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* ---------- Focus: soft rings in the section colour ---------- */
+:root[data-look="glass"] :is(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--acc1, var(--brand)) 80%, #fff);
+  outline-offset: 3px;
+  border-radius: 12px;
+  transition: outline-offset 0.15s var(--g-ease);
+}
+
+/* ---------- Home banner: brand glass with the section glow ---------- */
+:root[data-look="glass"] .hero {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 50px -30px rgba(3, 10, 25, 0.8);
+}
+@media (min-width: 1024px) {
+  :root[data-look="glass"] .hero {
+    border-radius: 30px;
+  }
+}
+
+/* =====================================================================
+   Screen changes: fade in, rise a little, come into focus
+   ===================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  /* Backwards fill only: no filter or opacity stays on afterwards (that would stop the glass blurring).
+     !important: replaces the plain rise of globals.css for this wrapper (its start-up delay still applies). */
+  :root[data-look="glass"] .app-page {
+    animation: g-page-in 0.5s var(--g-ease) backwards !important;
+  }
+}
+@keyframes g-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* =====================================================================
+   Sign-in
+   ===================================================================== */
+:root[data-look="glass"] .auth-wrap {
+  position: relative;
+  overflow: hidden;
+}
+:root[data-look="glass"] .auth-card {
+  position: relative;
+  border-radius: 28px;
+  border: 1px solid var(--g-border);
+  padding: 26px 24px;
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+:root[data-look="glass"] .auth-card .tabs {
+  background: var(--g-hi);
+  border-radius: 14px;
+}
+:root[data-look="glass"]:not([data-theme="dark"]) .auth-card {
+  background: rgba(255, 255, 255, 0.86);
+}
+:root[data-look="glass"] .auth-card .tabs button[aria-pressed="true"] {
+  border-radius: 11px;
+  background: var(--g-strong);
+}
+/* Dark: brand-blue words lightened so they stay readable on the dark glass. */
+:root[data-look="glass"][data-theme="dark"] .auth-card :is(.tabs button[aria-pressed="true"], .password-toggle) {
+  color: color-mix(in srgb, var(--brand) 40%, #fff);
+}
+:root[data-look="glass"] .auth-logo {
+  filter: drop-shadow(0 10px 26px color-mix(in srgb, #06b6d4 45%, transparent));
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-look="glass"] .auth-logo {
+    animation: g-auth-revolve 1.4s var(--g-ease) 0.1s both;
+  }
+  :root[data-look="glass"] .auth-card {
+    animation: g-page-in 0.7s var(--g-ease) 0.35s backwards;
+  }
+  :root[data-look="glass"] .auth-foot {
+    animation: gs-rise 0.6s var(--g-ease) 0.7s backwards;
+  }
+  /* After the start animation, the sign-in arrives as it lifts away. */
+  :root[data-look="glass"].gsplash .auth-logo {
+    animation-delay: 1.1s;
+  }
+  :root[data-look="glass"].gsplash .auth-card {
+    animation-delay: 1.35s;
+  }
+  :root[data-look="glass"].gsplash .auth-foot {
+    animation-delay: 1.6s;
+  }
+}
+@keyframes g-auth-revolve {
+  from {
+    opacity: 0;
+    transform: perspective(700px) rotateY(-300deg) scale(0.7);
+  }
+  65% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* =====================================================================
+   Print: paper gets the content only
+   ===================================================================== */
+@media print {
+  .gsplash-screen,
+  .side-rail-btn,
+  .scene {
+    display: none !important;
+  }
+  :root[data-look="glass"] :is(.card, .rec-list, .tower-card, .stat, .stats-block) {
+    background: #fff !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+}

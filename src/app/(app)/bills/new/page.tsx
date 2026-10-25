@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
+import { aiReady } from "@/lib/ai/claude";
 import { getAppContext } from "@/lib/context";
 import { n } from "@/lib/finance";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -10,6 +11,7 @@ import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { newBill } from "../actions";
 import { BillFields } from "../BillFields";
+import { BillScan } from "../BillScan";
 
 export const metadata = { title: "New supplier bill" };
 
@@ -18,7 +20,7 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const poId = typeof sp.po === "string" ? sp.po : null;
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, role, isManager } = await getAppContext();
   if (!can(role, "editBills")) redirect("/bills");
 
   const [{ data: po }, { data: sups }] = await Promise.all([
@@ -30,9 +32,9 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
           .eq("company_id", company.id)
           .maybeSingle()
       : Promise.resolve({ data: null }),
-    supabase.from("suppliers").select("id, name, code, currency").eq("company_id", company.id).eq("active", true).order("name").limit(2000),
+    supabase.from("suppliers").select("id, name, code, currency, tax_no").eq("company_id", company.id).eq("active", true).order("name").limit(2000),
   ]);
-  const suppliers = (sups ?? []) as { id: string; name: string; code: string; currency: string }[];
+  const suppliers = (sups ?? []) as { id: string; name: string; code: string; currency: string; tax_no: string | null }[];
 
   return (
     <>
@@ -44,6 +46,12 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
       </p>
       <Notice {...notice} />
       <form action={newBill} className="card">
+        <BillScan
+          enabled={aiReady()}
+          isManager={isManager}
+          supplierFixed={!!po}
+          suppliers={suppliers.map((s) => ({ id: s.id, name: s.name, tax_no: s.tax_no }))}
+        />
         {po ? (
           <>
             <input type="hidden" name="po_id" value={po.id} />

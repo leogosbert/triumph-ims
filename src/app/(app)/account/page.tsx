@@ -10,6 +10,7 @@ import { RemoveFromPhone } from "@/components/RemoveFromPhone";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ThemePicker } from "@/components/ThemePicker";
 import { BackgroundPicker } from "@/components/BackgroundPicker";
+import { LookPicker } from "@/components/LookPicker";
 import Link from "next/link";
 import { signOut, switchCompany } from "@/app/actions";
 import { setLanguage } from "@/app/lang-actions";
@@ -145,6 +146,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
         <p className="st-card-lead">{tr("Auto follows your phone's light or dark setting.")}</p>
         <div className="st-seg-wrap">
           <ThemePicker />
+        </div>
+        <h3 className="st-sub-title">{tr("Style")}</h3>
+        <p className="st-card-lead">{tr("Glass: frosted panels over photos, colours that follow each section and a menu that folds away. Classic: the earlier look.")}</p>
+        <div className="st-seg-wrap">
+          <LookPicker />
         </div>
         <h3 className="st-sub-title">{tr("Background")}</h3>
         <BackgroundPicker />

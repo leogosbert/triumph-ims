@@ -14,6 +14,10 @@ import { Icon } from "@/components/Icon";
 import { getThemePref } from "@/lib/theme";
 import { getBackgroundPref } from "@/lib/background";
 import { AppBackground } from "@/components/AppBackground";
+import { getLookPref } from "@/lib/look-server";
+import { GlassSplash } from "@/components/GlassSplash";
+import { SectionTracker } from "@/components/SectionTracker";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { brandingUrl, getAppContext } from "@/lib/context";
 import type { Key } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
@@ -37,12 +41,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
   const { supabase, company, role, user, isManager, profile, memberships, features, isPlatformAdmin } = await getAppContext();
   // Everything else the frame needs, at the same time.
-  const [{ lang, t }, { count: unread }, theme, background] = await Promise.all([
+  const [{ lang, t }, { count: unread }, theme, background, look] = await Promise.all([
     getDict(),
     // Unread notifications (0 until the Stage 7 database update has been run).
     supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("read_at", null),
     getThemePref(),
     getBackgroundPref(),
+    getLookPref(),
   ]);
   const logo = brandingUrl(supabase, company.logo_path);
   const initials = company.name
@@ -113,7 +118,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="shell" style={brandStyle}>
       <AppBackground kind={background} />
-      <SideNav items={sideNav(role, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled), isManager)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
+      {look === "glass" && (
+        <>
+          <SectionTracker />
+          <GlassSplash logo={logo} name={company.name} />
+        </>
+      )}
+      <SideNav look={look} items={sideNav(role, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled), isManager)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">
           <CompanyButton className="topbar-brand" title={company.name}>
@@ -137,6 +148,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <span aria-current={lang === "en" ? "true" : undefined}>{tr("EN")}</span>·<span aria-current={lang === "sw" ? "true" : undefined}>{tr("SW")}</span>
               </button>
             </form>
+            {look === "glass" && <ThemeToggle />}
             {isManager && (
               <Link href="/settings" className="icon-btn only-phone" aria-label={t["nav.settings"]}>
                 <Icon name="settings" />

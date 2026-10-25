@@ -22,13 +22,14 @@ const sb = supabaseOrigins();
  * Next.js 15 needs 'unsafe-inline' for its own start-up scripts (and the theme/splash script in the layout)
  * unless every page gets a nonce; 'unsafe-eval' is only needed by the development server.
  * Outside services used from the browser: Supabase (data, sign-in, logo images) and
- * api.pwnedpasswords.com (leaked-password check). Push, email (Resend) and PDFs run on the server.
+ * api.pwnedpasswords.com (leaked-password check), images.pexels.com (the Glass style's background photos,
+ * src/lib/scenes.ts). Push, email (Resend) and PDFs run on the server.
  */
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${sb.https}`,
+  `img-src 'self' data: blob: ${sb.https} https://images.pexels.com`,
   "font-src 'self' data:",
   `connect-src 'self' ${sb.https} ${sb.wss} https://api.pwnedpasswords.com`,
   "worker-src 'self'",

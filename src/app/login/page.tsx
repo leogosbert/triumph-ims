@@ -11,6 +11,8 @@ import { clearAway } from "@/lib/applock";
 import { createClient } from "@/lib/supabase/client";
 import { useAdminHost } from "@/lib/host-client";
 import { AppBackground } from "@/components/AppBackground";
+import { GlassSplash } from "@/components/GlassSplash";
+import { SectionTracker } from "@/components/SectionTracker";
 import { LangSwitch } from "@/components/LangSwitch";
 import { recordSignIn } from "@/app/security-actions";
 import { LEAKED_MESSAGE, timesLeaked } from "@/lib/pwned";
@@ -177,7 +179,11 @@ export default function LoginPage() {
 
   return (
     <div className="auth-wrap">
+      {/* Classic: the drawn architecture. Glass: photos under a brand wash (the other one is hidden by glass.css). */}
       <AppBackground kind="architecture" />
+      <AppBackground kind="photos" section="login" onlyGlass />
+      <SectionTracker section="login" />
+      {!adminApp && <GlassSplash name="LeMoSp" />}
       <LangSwitch className="auth-lang" />
       {adminApp ? (
         <img className="auth-logo auth-logo-admin" src="/brand/lemosp-admin-on-dark.svg" alt="LeMoSp ADMIN" />

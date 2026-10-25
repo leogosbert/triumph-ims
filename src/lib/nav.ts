@@ -24,6 +24,9 @@ const M = {
   more: ["/more", "/hr", "/hse", "/quality", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
 };
 
+/** The screens behind each menu section (read by src/lib/scenes.ts to colour and picture each section). */
+export const NAV_PATHS: Readonly<Record<keyof typeof M, readonly string[]>> = M;
+
 /** Phone bottom bar: at most five items, most-used first for each role. */
 export function bottomNav(role: Role, t: Dict, on: FeatureCheck = allOn): NavItem[] {
   if (role === "driver") {

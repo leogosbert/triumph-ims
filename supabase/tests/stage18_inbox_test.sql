@@ -147,6 +147,18 @@ select tests.check(public.inbox_record_inbound(jsonb_build_object(
 select tests.check(public.inbox_record_inbound(jsonb_build_object(
   'channel', 'whatsapp', 'provider', 'whatsapp', 'provider_message_id', 'wamid.2', 'phone_number_id', '999',
   'from', '255754111222', 'text', 'x')) ->> 'status' = 'no_company', 'an unknown WhatsApp number is not recorded');
+-- Company-mailbox mode (IMAP): the mailbox address is delivered_to; our own sent copies are skipped.
+select tests.check(public.inbox_record_inbound(jsonb_build_object(
+  'channel', 'email', 'provider', 'imap', 'provider_message_id', '<own@in.test>', 'message_id', '<own@in.test>',
+  'from', 'Inbox Co <inbox-co@in.test>', 'to', jsonb_build_array('asha.buyer@ggm.co.tz'),
+  'delivered_to', jsonb_build_array('inbox-co@in.test'), 'subject', 'Our own copy')) ->> 'status' = 'ignored',
+  'a copy of our own email in the mailbox is not a new message');
+select public.inbox_mailbox_state(:'co', 555, 9, null);
+select tests.check((select mailbox_uidvalidity = 555 and mailbox_last_uid = 9 and mailbox_checked_at is not null from public.inbox_settings where company_id = :'co'),
+  'the mailbox job notes where it stopped');
+select public.inbox_mailbox_state(:'co', null, null, 'login refused');
+select tests.check((select mailbox_last_uid = 9 and mailbox_error = 'login refused' from public.inbox_settings where company_id = :'co'),
+  'an error keeps the place and is shown');
 -- Attachment upload by the webhook.
 reset role;  -- (the storage API puts the file there; here it is added directly)
 insert into storage.objects (bucket_id, name) values ('inbox', :'co' || '/' || :'conv' || '/' || :'att' || '-spec.pdf');
@@ -250,7 +262,9 @@ select tests.check(not has_function_privilege('authenticated', 'public.inbox_rec
                    and not has_function_privilege('authenticated', 'public.inbox_attachment_stored(uuid, text)', 'EXECUTE')
                    and has_function_privilege('service_role', 'public.inbox_record_inbound(jsonb)', 'EXECUTE')
                    and not has_function_privilege('anon', 'public.inbox_unread_count(uuid)', 'EXECUTE')
-                   and has_function_privilege('authenticated', 'public.inbox_record_outbound(uuid, jsonb)', 'EXECUTE'),
+                   and has_function_privilege('authenticated', 'public.inbox_record_outbound(uuid, jsonb)', 'EXECUTE')
+                   and not has_function_privilege('authenticated', 'public.inbox_mailbox_state(uuid, bigint, bigint, text)', 'EXECUTE')
+                   and has_function_privilege('service_role', 'public.inbox_mailbox_state(uuid, bigint, bigint, text)', 'EXECUTE'),
   'grants: only the webhooks record what arrives; users reply');
 select tests.check((select bool_and(relrowsecurity) from pg_class
                      where oid in ('public.inbox_settings'::regclass, 'public.inbox_conversations'::regclass,

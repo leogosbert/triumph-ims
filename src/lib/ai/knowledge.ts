@@ -120,12 +120,35 @@ const STOP = new Set(
   ),
 );
 
+/**
+ * Kiswahili words and roots → the English words the screens, guide and catalogue use, so a question in
+ * Kiswahili or a mix ("nataka ku-add mteja mpya", "nyaraka za mgodi") still finds them (as in Cocozania's search).
+ */
+const SW_WORDS: Record<string, string> = {
+  nyaraka: "documents", hati: "document", cheti: "certificate", vyeti: "certificates", leseni: "licence", kibali: "permit licence", vibali: "permit licence",
+  kodi: "tax", ushuru: "tax", ukaguzi: "audit inspection", mkaguzi: "inspection", kagu: "inspection audit", sheria: "law legal", kisheria: "legal", usajili: "registration register", sajili: "register",
+  mgodi: "mine mining", migodi: "mine mining", madini: "mining", vilainishi: "lubricants", mafuta: "oil lubricants fuel", kemikali: "chemicals", zabuni: "tender", serikali: "government",
+  wakurugenzi: "directors", mkurugenzi: "director", hisa: "shares", wanahisa: "shareholders", bima: "insurance", moto: "fire", usalama: "safety", afya: "health", mazingira: "environment",
+  risiti: "receipt", stakabadhi: "receipt", ankara: "invoice bill", nukuu: "quotation", matumizi: "expense", gharama: "expense cost", mshahara: "payroll salary", mishahara: "payroll salary",
+  mteja: "client", wateja: "clients", msambazaji: "supplier", wasambazaji: "suppliers", bidhaa: "product", stoku: "stock", stoki: "stock", ghala: "store warehouse", deni: "owed", madeni: "owed",
+  mauzo: "sales", uza: "sell sales", nunu: "purchase", agiz: "order", oda: "order", malipo: "payment", lipa: "pay", faida: "profit", ripoti: "report", mfanyakazi: "employee", wafanyakazi: "employees",
+  likizo: "leave", gari: "vehicle", magari: "vehicles", dereva: "driver delivery", usafirishaji: "delivery", mkataba: "contract", mikataba: "contracts", ongez: "add new", weka: "add record", rekodi: "record",
+  andik: "write record", tuma: "send", badil: "change edit", futa: "delete", tafut: "search find", mpya: "new", mwezi: "month", leo: "today",
+};
+const SW_ROOTS = Object.keys(SW_WORDS).sort((a, b) => b.length - a.length);
+
 export function words(q: string): string[] {
-  return q
+  const base = q
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s-]/gu, " ")
-    .split(/\s+/)
+    .split(/[\s-]+/)
     .filter((w) => w.length > 1 && !STOP.has(w));
+  const out = [...base];
+  for (const w of base) {
+    const hit = SW_WORDS[w] ?? SW_WORDS[SW_ROOTS.find((r) => r.length >= 4 && w.includes(r)) ?? ""];
+    if (hit) out.push(...hit.split(" "));
+  }
+  return [...new Set(out)];
 }
 
 /** The best entries for a question, best first. Activity guides win ties (they answer "what do I need to…"). */
@@ -142,7 +165,7 @@ export function searchKnowledge(q: string, limit = 4): { item: KnowledgeItem; sc
       if (item.keywords.some((k) => k === w || (stem.length >= 3 && k.startsWith(stem)))) score += 3;
       else if (body.includes(stem)) score += 1;
     }
-    if (item.kind === "activity" && score > 0) score += 1;
+    if (item.kind === "activity" && score >= 6) score += 3;
     return { item, score };
   });
   return scored

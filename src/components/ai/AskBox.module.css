@@ -229,3 +229,32 @@
   margin: 6px 0 0;
   padding-left: 22px;
 }
+.steps {
+  margin: 0;
+  padding-left: 22px;
+  display: grid;
+  gap: 4px;
+}
+.steps a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong, var(--line));
+  text-underline-offset: 3px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.start {
+  display: grid;
+  gap: 8px;
+  padding: 6px 4px;
+}
+.wish {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 8px 6px;
+}

@@ -2,9 +2,10 @@
 -- Shared inbox: client and supplier emails and WhatsApp messages in the app.
 --
 --   inbox_settings       per company: the email address that brings mail to
---                        this company (e.g. triumph-k3x9@in.example.co.tz or,
---                        later, info@ourdomain.co.tz) and the WhatsApp
---                        Business phone number id.
+--                        this company (e.g. triumph-k3x9@abc.resend.app, the
+--                        company's own Gmail read over IMAP, or later
+--                        info@ourdomain.co.tz) and the WhatsApp Business
+--                        phone number id.
 --   inbox_conversations  one thread with one person: email or WhatsApp, open
 --                        or closed, who handles it, unread count, linked to
 --                        the client or supplier when the address or phone
@@ -14,8 +15,9 @@
 --                        "inbox" storage bucket: <company>/<conversation>/<file>.
 --
 -- How messages arrive: the webhooks /api/inbound/email and
--- /api/inbound/whatsapp check the provider's signature and call
--- inbox_record_inbound() with the service role key. Nobody else can call it.
+-- /api/inbound/whatsapp check the provider's signature, and the mailbox job
+-- (/api/inbound/mailbox, every 5 minutes) reads the company mailbox over IMAP;
+-- all call inbox_record_inbound() with the service role key. Nobody else can.
 --
 -- Who sees what: management, sales, procurement and finance read the inbox
 -- of their company and reply. Warehouse and drivers do not. Every change
@@ -23,6 +25,21 @@
 --
 -- Safe to run more than once.
 -- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- 0. The feature row (Settings, then Features)
+-- ---------------------------------------------------------------------
+insert into public.features (key, name, description, module, default_level, status, audience, benefits, tutorial, route, sort)
+values
+('inbox', 'Inbox (email and WhatsApp)',
+ 'Emails and WhatsApp messages from clients and suppliers arrive in the app with a notification, linked to the client or supplier, and you reply by email or WhatsApp from the same screen.',
+ 'Sales', 'small', 'live', 'Every company that talks to clients and suppliers by email or WhatsApp.',
+ 'No missed enquiry, everyone sees the same conversation, and replies are kept with the client.',
+ '[{"title": "Connect the mailbox", "body": "Open Inbox, then Set up. Enter the company email and its app password, or use the forwarding address shown."},
+   {"title": "Answer from the app", "body": "New messages show a notification. Open the conversation, write the reply and choose email or WhatsApp."},
+   {"title": "Keep it tidy", "body": "Assign a conversation to a colleague, link it to the client or supplier, and close it when it is done."}]'::jsonb,
+ '/inbox', 135)
+on conflict (key) do nothing;
 
 -- ---------------------------------------------------------------------
 -- 1. Helpers
@@ -85,6 +102,11 @@ create table if not exists public.inbox_settings (
   created_at                timestamptz not null default now(),
   updated_at                timestamptz not null default now()
 );
+-- Company-mailbox mode (IMAP): where the last check stopped. Written only by the server job.
+alter table public.inbox_settings add column if not exists mailbox_uidvalidity bigint;
+alter table public.inbox_settings add column if not exists mailbox_last_uid bigint;
+alter table public.inbox_settings add column if not exists mailbox_checked_at timestamptz;
+alter table public.inbox_settings add column if not exists mailbox_error text;
 create unique index if not exists inbox_settings_address_key on public.inbox_settings (inbound_address) where inbound_address is not null;
 create unique index if not exists inbox_settings_wa_key on public.inbox_settings (whatsapp_phone_number_id) where whatsapp_phone_number_id is not null;
 
@@ -492,6 +514,20 @@ begin
 end;
 $$;
 
+-- The mailbox job (service role) notes how far it read the company mailbox, or why it could not.
+create or replace function public.inbox_mailbox_state(p_company uuid, p_uidvalidity bigint, p_last_uid bigint, p_error text)
+returns void language plpgsql security definer set search_path = ''
+as $$
+begin
+  update public.inbox_settings
+     set mailbox_uidvalidity = coalesce(p_uidvalidity, mailbox_uidvalidity),
+         mailbox_last_uid = case when p_uidvalidity is not null then p_last_uid else mailbox_last_uid end,
+         mailbox_checked_at = now(),
+         mailbox_error = nullif(left(coalesce(p_error, ''), 300), '')
+   where company_id = p_company;
+end;
+$$;
+
 -- ---------------------------------------------------------------------
 -- 7. What people do in the app
 -- ---------------------------------------------------------------------
@@ -753,7 +789,7 @@ revoke execute on function
   public.inbox_roles(), public.inbox_email_of(text), public.inbox_phone_of(text), public.inbox_field_has(text, text, boolean),
   public.inbox_subject_key(text), public.can_use_inbox_file(text), public.add_inbox_cleanup(),
   public.inbox_match_party(uuid, text, text), public.inbox_record_inbound(jsonb), public.inbox_attachment_stored(uuid, text),
-  public.inbox_conversation_for_update(uuid), public.inbox_set_status(uuid, text), public.inbox_assign(uuid, uuid),
+  public.inbox_mailbox_state(uuid, bigint, bigint, text), public.inbox_conversation_for_update(uuid), public.inbox_set_status(uuid, text), public.inbox_assign(uuid, uuid),
   public.inbox_mark_read(uuid, boolean), public.inbox_link(uuid, uuid, uuid),
   public.inbox_start_conversation(uuid, text, text, text, text, uuid, uuid), public.inbox_record_outbound(uuid, jsonb),
   public.inbox_save_settings(uuid, jsonb), public.inbox_unread_count(uuid)
@@ -769,7 +805,8 @@ to authenticated;
 
 -- Only the webhooks (server side, service role key) record what arrives.
 grant execute on function
-  public.inbox_record_inbound(jsonb), public.inbox_attachment_stored(uuid, text)
+  public.inbox_record_inbound(jsonb), public.inbox_attachment_stored(uuid, text),
+  public.inbox_mailbox_state(uuid, bigint, bigint, text)
 to service_role;
 
 notify pgrst, 'reload schema';

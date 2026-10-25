@@ -182,9 +182,15 @@ create table if not exists public.compliance_settings (
   shares_decided_at  timestamptz,
   shareholding_note  text check (shareholding_note is null or char_length(shareholding_note) <= 4000),
   board_note         text check (board_note is null or char_length(board_note) <= 4000),
+  -- The tax and legal numbers the screens use (src/lib/compliance/rules.ts holds the defaults); {} = the law as shipped.
+  legal_rules        jsonb not null default '{}'::jsonb,
   created_at         timestamptz not null default now(),
   updated_at         timestamptz not null default now()
 );
+alter table public.compliance_settings add column if not exists legal_rules jsonb not null default '{}'::jsonb;
+alter table public.compliance_settings drop constraint if exists compliance_settings_legal_rules_check;
+alter table public.compliance_settings add constraint compliance_settings_legal_rules_check
+  check (jsonb_typeof(legal_rules) = 'object' and pg_column_size(legal_rules) <= 8000);
 
 -- ---------------------------------------------------------------------
 -- 4. Licences register
@@ -265,6 +271,9 @@ create table if not exists public.compliance_deadlines (
   filed_on      date,
   reference     text check (reference is null or char_length(reference) <= 120),
   note          text check (note is null or char_length(note) <= 500),
+  amount          numeric(18, 2) check (amount is null or amount >= 0),
+  control_number  text check (control_number is null or char_length(control_number) <= 60),
+  paid_on         date,
   filed_by      uuid references auth.users (id) on delete set null,
   filed_at      timestamptz,
   created_at    timestamptz not null default now(),
@@ -273,6 +282,10 @@ create table if not exists public.compliance_deadlines (
   foreign key (item_id, company_id) references public.compliance_items (id, company_id) on delete cascade,
   check (period_end >= period_start)
 );
+alter table public.compliance_deadlines
+  add column if not exists amount numeric(18, 2) check (amount is null or amount >= 0),
+  add column if not exists control_number text check (control_number is null or char_length(control_number) <= 60),
+  add column if not exists paid_on date;
 create index if not exists compliance_deadlines_company_idx on public.compliance_deadlines (company_id, status, due_on);
 
 -- ---------------------------------------------------------------------
@@ -381,7 +394,9 @@ begin
   elsif tg_table_name = 'compliance_deadlines' then
     if tg_op = 'UPDATE' and not v_flag
        and (new.status is distinct from old.status or new.filed_on is distinct from old.filed_on
-            or new.reference is distinct from old.reference or new.filed_by is distinct from old.filed_by) then
+            or new.reference is distinct from old.reference or new.filed_by is distinct from old.filed_by
+            or new.amount is distinct from old.amount or new.control_number is distinct from old.control_number
+            or new.paid_on is distinct from old.paid_on) then
       raise exception 'Use Mark filed to record a filing.' using errcode = '42501';
     end if;
   elsif tg_table_name = 'company_directors' then
@@ -471,9 +486,14 @@ begin
   insert into public.compliance_settings (company_id) values (p_company) on conflict (company_id) do nothing;
   insert into public.compliance_items (company_id, code, name, category, authority, frequency, due_day, due_offset_months,
                                        finance_ok, sort)
-  select p_company, k.code, k.name, k.category, left(k.authority, 160), k.frequency, k.due_day, k.due_offset_months,
-         k.finance, k.sort
+  select p_company, k.code, k.name, k.category, left(k.authority, 160), k.frequency,
+         -- the company's own due day from Tax & legal rules, if it set one
+         coalesce(case when jsonb_typeof(s.legal_rules -> x.rule) = 'number' then (s.legal_rules ->> x.rule)::numeric::integer end, k.due_day),
+         k.due_offset_months, k.finance, k.sort
     from public.compliance_catalogue k
+    left join (values ('TRA_VAT_RETURN', 'vat_due_day'), ('TRA_PAYE', 'paye_due_day'), ('TRA_SDL', 'paye_due_day'),
+                      ('TRA_WHT', 'wht_due_day')) x(code, rule) on x.code = k.code
+    left join public.compliance_settings s on s.company_id = p_company
    where k.code = any (v_codes)
   on conflict (company_id, code) where code is not null do nothing;
   get diagnostics v_n = row_count;
@@ -628,12 +648,17 @@ begin
 end;
 $$;
 
-create or replace function public.compliance_mark_filed(p_deadline uuid, p_filed_on date, p_reference text, p_note text)
+-- Earlier drafts took four arguments; one version only.
+drop function if exists public.compliance_mark_filed(uuid, date, text, text);
+create or replace function public.compliance_mark_filed(p_deadline uuid, p_filed_on date, p_reference text, p_note text,
+                                                        p_amount numeric default null, p_control_number text default null,
+                                                        p_paid_on date default null)
 returns void language plpgsql security definer set search_path = ''
 as $$
 declare
-  d public.compliance_deadlines;
-  i public.compliance_items;
+  d       public.compliance_deadlines;
+  i       public.compliance_items;
+  v_today date := (now() at time zone 'Africa/Dar_es_Salaam')::date;
 begin
   select * into d from public.compliance_deadlines where id = p_deadline;
   select * into i from public.compliance_items where id = d.item_id;
@@ -643,13 +668,17 @@ begin
   if d.status <> 'open' then
     raise exception 'This filing is already marked.' using errcode = '22023';
   end if;
-  if p_filed_on is not null and p_filed_on > (now() at time zone 'Africa/Dar_es_Salaam')::date then
+  if (p_filed_on is not null and p_filed_on > v_today) or (p_paid_on is not null and p_paid_on > v_today) then
     raise exception 'The filing date cannot be in the future.' using errcode = '22023';
+  end if;
+  if p_amount is not null and p_amount < 0 then
+    raise exception 'The amount cannot be negative.' using errcode = '22023';
   end if;
   perform set_config('ims.status_change', 'on', true);
   update public.compliance_deadlines
-     set status = 'filed', filed_on = coalesce(p_filed_on, (now() at time zone 'Africa/Dar_es_Salaam')::date),
+     set status = 'filed', filed_on = coalesce(p_filed_on, v_today),
          reference = nullif(btrim(coalesce(p_reference, '')), ''), note = nullif(btrim(coalesce(p_note, '')), ''),
+         amount = round(p_amount, 2), control_number = nullif(btrim(coalesce(p_control_number, '')), ''), paid_on = p_paid_on,
          filed_by = auth.uid(), filed_at = now()
    where id = p_deadline;
   perform set_config('ims.status_change', '', true);
@@ -677,7 +706,8 @@ begin
   end if;
   perform set_config('ims.status_change', 'on', true);
   update public.compliance_deadlines
-     set status = 'not_required', note = btrim(p_note), filed_by = auth.uid(), filed_at = now(), filed_on = null, reference = null
+     set status = 'not_required', note = btrim(p_note), filed_by = auth.uid(), filed_at = now(), filed_on = null, reference = null,
+         amount = null, control_number = null, paid_on = null
    where id = p_deadline;
   perform set_config('ims.status_change', '', true);
 end;
@@ -697,7 +727,8 @@ begin
   end if;
   perform set_config('ims.status_change', 'on', true);
   update public.compliance_deadlines
-     set status = 'open', filed_on = null, reference = null, note = null, filed_by = null, filed_at = null
+     set status = 'open', filed_on = null, reference = null, note = null, filed_by = null, filed_at = null,
+         amount = null, control_number = null, paid_on = null
    where id = p_deadline;
   perform set_config('ims.status_change', '', true);
 end;
@@ -760,6 +791,65 @@ begin
   values (p_company, coalesce(p_decided, false), case when p_decided then now() end)
   on conflict (company_id) do update
     set shares_decided = excluded.shares_decided, shares_decided_at = excluded.shares_decided_at;
+end;
+$$;
+
+-- Tax & legal rules: the company's own numbers over the defaults in src/lib/compliance/rules.ts.
+-- {} goes back to the law as shipped. The due days of the usual TRA filings follow the rules.
+create or replace function public.compliance_save_rules(p_company uuid, p_rules jsonb)
+returns void language plpgsql security definer set search_path = ''
+as $$
+declare
+  v_rules jsonb := '{}'::jsonb;
+  r       record;
+  v_day   integer;
+begin
+  if not public.has_role(p_company, public.finance_roles()) then
+    raise exception 'Only management and finance can change the tax and legal rules.' using errcode = '42501';
+  end if;
+  if p_rules is null or jsonb_typeof(p_rules) <> 'object' then
+    raise exception 'The rules must be a list of names and values.' using errcode = '22023';
+  end if;
+  for r in select key, value from jsonb_each(p_rules) loop
+    if r.key !~ '^[a-z][a-z0-9_]{1,40}$' then
+      raise exception 'Unknown rule %.', r.key using errcode = '22023';
+    end if;
+    continue when jsonb_typeof(r.value) = 'null';
+    if jsonb_typeof(r.value) not in ('number', 'boolean', 'string')
+       or (jsonb_typeof(r.value) = 'string' and char_length(r.value #>> '{}') > 200)
+       or (jsonb_typeof(r.value) = 'number' and ((r.value #>> '{}')::numeric < 0 or (r.value #>> '{}')::numeric > 1e13)) then
+      raise exception 'The value of % is not allowed.', r.key using errcode = '22023';
+    end if;
+    v_rules := v_rules || jsonb_build_object(r.key, r.value);
+  end loop;
+  for r in select * from (values ('vat_due_day', 'TRA_VAT_RETURN'), ('paye_due_day', 'TRA_PAYE'), ('paye_due_day', 'TRA_SDL'),
+                                 ('wht_due_day', 'TRA_WHT')) x(rule, code) loop
+    if v_rules ? r.rule and (jsonb_typeof(v_rules -> r.rule) <> 'number'
+                             or (v_rules ->> r.rule)::numeric not between 1 and 31) then
+      raise exception 'A due day must be from 1 to 31.' using errcode = '22023';
+    end if;
+  end loop;
+  insert into public.compliance_settings (company_id, legal_rules) values (p_company, v_rules)
+  on conflict (company_id) do update set legal_rules = excluded.legal_rules;
+  -- The usual TRA filings move with the rule (or back to the catalogue's day); open future filings are rebuilt.
+  for r in select * from (values ('vat_due_day', 'TRA_VAT_RETURN'), ('paye_due_day', 'TRA_PAYE'), ('paye_due_day', 'TRA_SDL'),
+                                 ('wht_due_day', 'TRA_WHT')) x(rule, code) loop
+    select coalesce((v_rules ->> r.rule)::numeric::integer, c.due_day) into v_day
+      from public.compliance_catalogue c where c.code = r.code;
+    continue when v_day is null;
+    update public.compliance_items set due_day = v_day
+     where company_id = p_company and code = r.code and due_day is distinct from v_day;
+  end loop;
+  -- The final income tax return: months after the year end.
+  if v_rules ? 'return_months' and (jsonb_typeof(v_rules -> 'return_months') <> 'number'
+                                   or (v_rules ->> 'return_months')::numeric not between 1 and 12) then
+    raise exception 'The months to file the final return must be from 1 to 12.' using errcode = '22023';
+  end if;
+  update public.compliance_items i
+     set due_offset_months = coalesce((v_rules ->> 'return_months')::numeric::integer, c.due_offset_months)
+    from public.compliance_catalogue c
+   where c.code = i.code and i.company_id = p_company and i.code = 'TRA_FINAL_RETURN'
+     and i.due_offset_months is distinct from coalesce((v_rules ->> 'return_months')::numeric::integer, c.due_offset_months);
 end;
 $$;
 
@@ -1128,11 +1218,12 @@ revoke execute on function
   public.compliance_period_label(date, date),
   public.compliance_generate_deadlines(uuid, date),
   public.compliance_refresh_calendar(uuid),
-  public.compliance_mark_filed(uuid, date, text, text),
+  public.compliance_mark_filed(uuid, date, text, text, numeric, text, date),
   public.compliance_skip_filing(uuid, text),
   public.compliance_reopen_filing(uuid),
   public.compliance_save_settings(uuid, integer, date, text, text),
   public.compliance_set_shares_decided(uuid, boolean),
+  public.compliance_save_rules(uuid, jsonb),
   public.compliance_summary(uuid),
   public.run_compliance_alerts(uuid),
   public.run_all_alerts(text),
@@ -1146,11 +1237,12 @@ grant execute on function
   public.compliance_can_link(uuid, uuid, uuid),
   public.compliance_period_label(date, date),
   public.compliance_refresh_calendar(uuid),
-  public.compliance_mark_filed(uuid, date, text, text),
+  public.compliance_mark_filed(uuid, date, text, text, numeric, text, date),
   public.compliance_skip_filing(uuid, text),
   public.compliance_reopen_filing(uuid),
   public.compliance_save_settings(uuid, integer, date, text, text),
   public.compliance_set_shares_decided(uuid, boolean),
+  public.compliance_save_rules(uuid, jsonb),
   public.compliance_summary(uuid),
   public.refresh_alerts(uuid)
 to authenticated;

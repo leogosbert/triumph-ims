@@ -75,6 +75,7 @@ export function UploadDocument({
         <input ref={fileRef} id="cd-file" name="file" type="file" accept="application/pdf,image/*,.doc,.docx,.xls,.xlsx" required />
         <span className="hint">{tr("PDF, photo, Word or Excel, up to 20 MB.")}</span>
       </div>
+      {/* ScanDocument goes here: it fills the named inputs below (title, reference, issued_on, expires_on). */}
       <div className="field" style={{ gridColumn: "1 / -1" }}>
         <label htmlFor="cd-title">{tr("Document name")}</label>
         <input id="cd-title" name="title" type="text" required minLength={2} maxLength={200} defaultValue={defaultTitle} />

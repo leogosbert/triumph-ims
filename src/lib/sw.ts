@@ -14,6 +14,11 @@ import { SW_HR } from "./sw-more/hr";
 import { SW_HSE } from "./sw-more/hse";
 import { SW_LEDGER } from "./sw-more/ledger";
 import { SW_PAYROLL } from "./sw-more/payroll";
+import { SW_LOOK } from "./sw-more/look";
+import { SW_AI } from "./sw-more/ai";
+import { SW_INBOX } from "./sw-more/inbox";
+import { SW_BRAND } from "./sw-more/brand";
+import { SW_COMPLIANCE } from "./sw-more/compliance";
 
 export const SW: Record<string, string> = {
   "Remove LeMoSp from this phone": "Ondoa LeMoSp kwenye simu hii",
@@ -4555,6 +4560,6 @@ export const SW: Record<string, string> = {
 };
 
 // Later screens keep their Kiswahili in src/lib/sw-more/; the texts above win if a key is in both.
-for (const extra of [SW_SETTINGS, SW_STAGE16, SW_SERVICES, SW_MAINTENANCE, SW_PROJECTS, SW_HIRE, SW_TAILORED, SW_BACKUPS, SW_ORDERS, SW_ERP, SW_HR, SW_HSE, SW_LEDGER, SW_PAYROLL]) {
+for (const extra of [SW_SETTINGS, SW_STAGE16, SW_SERVICES, SW_MAINTENANCE, SW_PROJECTS, SW_HIRE, SW_TAILORED, SW_BACKUPS, SW_ORDERS, SW_ERP, SW_HR, SW_HSE, SW_LEDGER, SW_PAYROLL, SW_LOOK, SW_AI, SW_INBOX, SW_BRAND, SW_COMPLIANCE]) {
   for (const [k, v] of Object.entries(extra)) if (!(k in SW)) SW[k] = v;
 }

@@ -8,6 +8,10 @@ import { cleanSearch } from "@/lib/records";
 import { can, type Role } from "@/lib/roles";
 import { tr } from "@/lib/tr";
 import { words } from "@/lib/ai/knowledge";
+import { MISSING, type FinderEntry } from "@/lib/ai/finder";
+import { ACTIVITY_GUIDES, COMPLIANCE_CATALOGUE, requirement } from "@/lib/compliance/catalogue";
+import { PLAYBOOKS } from "@/lib/playbooks";
+import { SW } from "@/lib/sw";
 
 /**
  * Search shared by the /search page and the Ask box: screens from the menu, App guide topics and
@@ -164,4 +168,132 @@ export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | 
     },
   ];
   return groups.filter((g) => g.hits.length > 0);
+}
+
+/** Every screen this person can open, for the AI to point to (and for checking the routes it gives). */
+export function appSections(ctx: Pick<SearchCtx, "role" | "isManager" | "isPlatformAdmin" | "features">): { href: string; path: string[] }[] {
+  const seen = new Set<string>();
+  const out: { href: string; path: string[] }[] = [];
+  for (const cat of moreMenu(ctx.role, ctx.isManager, { on: ctx.features.on, isPlatformAdmin: ctx.isPlatformAdmin, features: ctx.features.list })) {
+    for (const i of cat.items) {
+      if (i.soon || i.plain || seen.has(i.href) || !i.href.startsWith("/")) continue;
+      seen.add(i.href);
+      out.push({ href: i.href, path: [cat.label, i.title] });
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The super search index (ranked in the browser by src/lib/ai/finder.ts)
+// ---------------------------------------------------------------------------------------------
+
+const cut = (t: string, n = 220) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
+
+/**
+ * Everything the Ask box can match for this person, in their language, with the Kiswahili or English
+ * title alongside: the screens they can open, the App guide topics for their role and features, the
+ * compliance requirements and "What do I need?" guides (when the compliance feature is on and their
+ * role sees documents), the playbooks (titles only; their content stays behind their own access), and
+ * what the app does not do yet. No company records here: those are searched on the server as you type.
+ */
+export function searchEntries(ctx: Pick<SearchCtx, "role" | "isManager" | "isPlatformAdmin" | "features">, lang: "en" | "sw"): FinderEntry[] {
+  const alt = (en: string) => (lang === "sw" ? en : SW[en]);
+  const out: FinderEntry[] = [];
+  const seen = new Set<string>();
+  for (const cat of moreMenu(ctx.role, ctx.isManager, { on: ctx.features.on, isPlatformAdmin: ctx.isPlatformAdmin, features: ctx.features.list })) {
+    for (const i of cat.items) {
+      if (i.soon || i.plain || seen.has(i.href) || !i.href.startsWith("/")) continue;
+      seen.add(i.href);
+      out.push({
+        id: `page:${i.href}`,
+        // "+ New …" screens are actions: they rank with the how-tos
+        kind: i.title.startsWith("+") ? "howto" : "page",
+        title: tr(i.title).replace(/^\+\s*/, ""),
+        alt: alt(i.title)?.replace(/^\+\s*/, ""),
+        path: [tr(cat.label), tr(i.title).replace(/^\+\s*/, "")],
+        to: i.href,
+        steps: [`${tr("Open")} ${tr(cat.label)} → ${tr(i.title).replace(/^\+\s*/, "")}`, tr(i.sub)],
+        words: `${i.sub} ${SW[i.sub] ?? ""} ${cat.label} ${i.title.startsWith("+") ? "add new create" : ""}`,
+      });
+    }
+  }
+  for (const sec of GUIDE) {
+    for (const t of sec.topics) {
+      if (!guideAllowed(t, ctx.role, ctx.isManager, ctx.features.on)) continue;
+      out.push({
+        id: `guide:${t.id}`,
+        kind: "howto",
+        title: tr(t.title),
+        alt: alt(t.title),
+        path: t.laptop.map(tr),
+        to: t.href ?? guideHref(t),
+        page: t.href ? guideHref(t) : undefined,
+        steps: t.steps.slice(0, 8).map((x) => cut(tr(x))),
+        words: `${t.summary} ${SW[t.summary] ?? ""} ${sec.title} ${(t.tips ?? []).join(" ")}`,
+      });
+    }
+  }
+  if (can(ctx.role, "seeDocuments")) {
+    const complianceOn = ctx.features.on("compliance");
+    const where = complianceOn ? tr("Legal & compliance") : tr("Documents");
+    for (const g of ACTIVITY_GUIDES) {
+      const reqs = g.codes.map((c) => requirement(c)).filter((r): r is NonNullable<typeof r> => !!r);
+      out.push({
+        id: `activity:${g.key}`,
+        kind: "rule",
+        title: tr(g.title),
+        alt: alt(g.title),
+        path: [where, tr("What do I need?")],
+        to: complianceOn ? (g.links[0]?.href.startsWith("/compliance") ? g.links[0].href : "/compliance") : "/documents",
+        steps: reqs.slice(0, 10).map((r) => `${tr(r.name)} (${r.authority})`),
+        words: `${g.question} ${SW[g.question] ?? ""} ${g.summary} ${g.tips.join(" ")} documents need required legal`,
+      });
+    }
+    for (const r of COMPLIANCE_CATALOGUE) {
+      out.push({
+        id: `rule:${r.code}`,
+        kind: "rule",
+        code: r.code,
+        title: tr(r.name),
+        alt: alt(r.name),
+        path: [where, r.authority],
+        to: complianceOn ? `/compliance#${r.code}` : "/documents",
+        steps: [
+          cut(tr(r.purpose)),
+          ...r.documentsNeeded.slice(0, 6).map((d) => cut(tr(d))),
+          [r.dueRule && `${tr("When")}: ${tr(r.dueRule)}`, r.renewal && `${tr("Renewal")}: ${tr(r.renewal)}`].filter(Boolean).join(" · "),
+        ].filter(Boolean),
+        words: `${r.authority} ${r.category.replace(/_/g, " ")} ${r.tags.join(" ").replace(/_/g, " ")} ${(r.keywords ?? []).join(" ")} ${r.condition ?? ""} licence certificate document legal`,
+      });
+    }
+  }
+  for (const p of PLAYBOOKS) {
+    out.push({
+      id: `playbook:${p.id}`,
+      kind: "guide",
+      title: tr(p.title),
+      alt: alt(p.title),
+      path: [tr("Help"), tr("Playbooks")],
+      to: `/playbooks/${p.id}`,
+      steps: [cut(tr(p.tagline))],
+      words: `${p.tagline} ${p.audience} ${p.chapters.map((c) => c.title).join(" ")} playbook guide`,
+    });
+  }
+  MISSING.forEach((m, k) =>
+    out.push({
+      id: `missing:${k}`,
+      kind: "missing",
+      title: tr(m.title),
+      alt: alt(m.title),
+      path: [],
+      to: "",
+      steps: [],
+      words: m.words,
+      why: tr(m.why),
+      // Only links to screens this person can open.
+      instead: m.instead.map((x) => ({ text: tr(x.text), to: x.to && [...seen].some((h) => x.to === h || x.to!.startsWith(`${h}/`)) ? x.to : undefined })),
+    }),
+  );
+  return out;
 }

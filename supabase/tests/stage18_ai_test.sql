@@ -51,8 +51,19 @@ reset role;
 select tests.login('m19@e.test'); set role authenticated;
 select tests.check(public.use_ai_receipt(:'cid'), 'manager has a separate allowance');
 select tests.check((select count(*) from public.assistant_usage) = 1, 'others'' usage is private');
+-- Documents: own counter, own allowance
+select tests.check(public.use_ai_document(:'cid', 2), 'first document allowed');
+select tests.check(public.use_ai_document(:'cid', 2), 'second document allowed');
+select tests.check(not public.use_ai_document(:'cid', 2), 'third document over the allowance');
+select tests.check((select documents from public.assistant_usage where user_id = :'m19') = 3, 'documents counted on their own');
+select tests.check((select receipts from public.assistant_usage where user_id = :'m19') = 1, 'documents do not count as receipts');
+select tests.blocked(format('select public.use_ai_document(%L)', :'other'), 'documents: not for another company');
+reset role;
+select tests.login('d19@e.test'); set role authenticated;
+select tests.blocked(format('select public.use_ai_document(%L)', :'cid'), 'drivers do not use the documents library');
 reset role;
 
 set role anon;
 select tests.blocked(format('select public.use_ai_receipt(%L)', :'cid'), 'not without signing in');
+select tests.blocked(format('select public.use_ai_document(%L)', :'cid'), 'documents: not without signing in');
 reset role;

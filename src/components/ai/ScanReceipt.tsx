@@ -4,21 +4,9 @@ import { useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { readReceipt } from "@/lib/ai/receipt-actions";
 import type { ReceiptCheck } from "@/lib/ai/receipt";
-import { RECEIPT_TYPES, shrinkImage } from "@/lib/image";
+import { RECEIPT_TYPES } from "@/lib/image";
+import { forAiReading } from "@/lib/ai/shrink";
 import { useTr } from "@/lib/tr-client";
-
-const SEND_MAX = 900 * 1024;
-
-/** Makes the picture small enough to send (a phone photo of a receipt reads well at 1600 px). */
-async function forSending(file: File): Promise<{ blob: Blob; error?: string }> {
-  if (file.type === "application/pdf") {
-    return file.size > SEND_MAX ? { blob: file, error: "This PDF is too large to read. Take a photo of the receipt instead." } : { blob: file };
-  }
-  let { blob } = await shrinkImage(file, 1600, 0.8);
-  if (blob.size > SEND_MAX) ({ blob } = await shrinkImage(file, 1200, 0.7));
-  if (blob.size > SEND_MAX) return { blob, error: "The photo is too large to read. Try again closer to the receipt." };
-  return { blob };
-}
 
 /**
  * "Scan receipt": pick or take a photo (or a PDF), the server reads it with AI, and `onRead` gets the
@@ -49,7 +37,7 @@ export function ScanReceipt({
     if (!RECEIPT_TYPES.includes(file.type) && !file.type.startsWith("image/")) return setError(tr("Please choose a photo (JPG, PNG, WebP) or a PDF."));
     setBusy(true);
     try {
-      const { blob, error: sizeError } = await forSending(file);
+      const { blob, error: sizeError } = await forAiReading(file, "receipt");
       if (sizeError) return setError(tr(sizeError));
       const form = new FormData();
       form.set("purpose", purpose);
@@ -74,7 +62,7 @@ export function ScanReceipt({
           {enabled
             ? tr("Take a photo of the receipt and AI fills in the form. Check it before saving.")
             : isManager
-              ? tr("Reading receipts with AI is off. Set ANTHROPIC_API_KEY and ANTHROPIC_MODEL in Netlify (Site configuration → Environment variables) to switch it on.")
+              ? tr("Reading receipts with AI is off. Add ANTHROPIC_API_KEY in Netlify (Site configuration → Environment variables) to switch it on.")
               : tr("Reading receipts with AI is off. Management can switch it on.")}
         </span>
       </div>

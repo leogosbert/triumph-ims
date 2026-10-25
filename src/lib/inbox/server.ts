@@ -1,7 +1,9 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_URL } from "@/lib/supabase/env";
 import type { InboundRecord, PendingFile, ResendAttachmentList, ResendReceivedEmail } from "./email";
-import { safeFileName } from "./sanitize";
+import { imapFetchNew, mailboxAddress, mailboxConfig, smtpSend } from "./mailbox";
+import { addressHeader, buildMail, parseMail } from "./mime";
+import { addressList, htmlToText, messageIds, parseAddress, safeFileName, sanitizeEmailHtml } from "./sanitize";
 import { fetchWhatsAppMedia } from "./whatsapp";
 
 /**
@@ -18,6 +20,9 @@ import { fetchWhatsAppMedia } from "./whatsapp";
  *   WHATSAPP_APP_SECRET         Meta → App settings → Basic → App secret
  *   WHATSAPP_VERIFY_TOKEN       any long random text; the same text goes in Meta's webhook form
  *   WHATSAPP_PHONE_NUMBER_ID    optional: suggested on the setup page for the company's own number
+ * Or, instead of Resend, the company's own mailbox (no own domain needed; see mailbox.ts):
+ *   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, IMAP_HOST, IMAP_PORT
+ *   (read every 5 minutes by netlify/functions/inbox-mailbox-cron.mts, which uses OUTBOX_SECRET)
  */
 
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
@@ -29,18 +34,23 @@ export type InboxChannels = {
   whatsappReceive: boolean;
   whatsappSend: boolean;
   inboundDomain: string | null;
+  /** The company mailbox (IMAP + SMTP) is set; it belongs to the company whose inbox address is this address. */
+  mailbox: string | null;
 };
 
 /** What is switched on in the server settings (never the values). */
 export function inboxChannels(): InboxChannels {
   const e = process.env;
+  const mbox = mailboxConfig(e);
+  const mailbox = mbox && mbox.smtpHost ? mailboxAddress(mbox) : null;
   return {
     database: Boolean(e.SUPABASE_SERVICE_ROLE_KEY),
-    emailReceive: Boolean(e.SUPABASE_SERVICE_ROLE_KEY && (e.RESEND_WEBHOOK_SECRET || e.INBOUND_EMAIL_SECRET)),
-    emailSend: Boolean(e.RESEND_API_KEY && e.EMAIL_FROM),
+    emailReceive: Boolean(e.SUPABASE_SERVICE_ROLE_KEY && (e.RESEND_WEBHOOK_SECRET || e.INBOUND_EMAIL_SECRET || mailbox)),
+    emailSend: Boolean((e.RESEND_API_KEY && e.EMAIL_FROM) || mailbox),
     whatsappReceive: Boolean(e.SUPABASE_SERVICE_ROLE_KEY && e.WHATSAPP_APP_SECRET && e.WHATSAPP_VERIFY_TOKEN),
     whatsappSend: Boolean(e.WHATSAPP_TOKEN),
     inboundDomain: e.INBOUND_EMAIL_DOMAIN?.trim().toLowerCase() || null,
+    mailbox,
   };
 }
 
@@ -68,7 +78,7 @@ export async function recordInbound(db: SupabaseClient, rec: InboundRecord): Pro
   return data as RecordResult;
 }
 
-async function store(db: SupabaseClient, r: RecordResult, attachmentId: string, fileName: string, bytes: Buffer, contentType: string | null) {
+export async function store(db: SupabaseClient, r: RecordResult, attachmentId: string, fileName: string, bytes: Buffer, contentType: string | null) {
   const path = `${r.company_id}/${r.conversation_id}/${attachmentId.slice(0, 8)}-${safeFileName(fileName)}`;
   const up = await db.storage.from("inbox").upload(path, bytes, { contentType: contentType ?? "application/octet-stream", upsert: true });
   if (up.error) throw new Error(`upload: ${up.error.message}`);
@@ -168,7 +178,36 @@ export type EmailReply = {
  * domain must be verified in Resend). Reply-To: the company's inbox address (alias+<conversation>@domain),
  * so the client's answer comes back into the same conversation.
  */
-export async function sendEmailReply(m: EmailReply): Promise<{ ok: true; id: string; from: string } | { ok: false; error: string }> {
+export async function sendEmailReply(
+  m: EmailReply,
+  companyInbox: string | null,
+): Promise<{ ok: true; id: string; from: string; messageId: string | null; via: "mailbox" | "resend" } | { ok: false; error: string }> {
+  // The company's own mailbox (SMTP), when it is this company's inbox address.
+  const mbox = mailboxConfig();
+  const mbAddress = mailboxAddress(mbox);
+  if (mbox && mbox.smtpHost && mbAddress && companyInbox && mbAddress === companyInbox.toLowerCase()) {
+    const fromName = parseAddress(mbox.from)?.name ?? m.fromName;
+    const from = addressHeader(fromName, mbAddress);
+    const messageId = `<${crypto.randomUUID()}@${mbAddress.split("@")[1]}>`;
+    try {
+      const data = buildMail({
+        from,
+        to: m.to,
+        cc: m.cc,
+        replyTo: m.replyTo,
+        subject: m.subject,
+        text: m.text,
+        html: m.html,
+        messageId,
+        inReplyTo: m.inReplyTo,
+        references: m.references,
+      });
+      await smtpSend(mbox, { from: mbAddress, to: [...m.to, ...m.cc] }, data);
+      return { ok: true, id: messageId, from, messageId, via: "mailbox" };
+    } catch (e) {
+      return { ok: false, error: (e as Error).message.slice(0, 300) };
+    }
+  }
   const key = process.env.RESEND_API_KEY;
   const fromEnv = process.env.EMAIL_FROM;
   if (!key || !fromEnv) return { ok: false, error: "Email sending is not set up (RESEND_API_KEY and EMAIL_FROM)." };
@@ -195,8 +234,91 @@ export async function sendEmailReply(m: EmailReply): Promise<{ ok: true; id: str
     });
     const json = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
     if (!res.ok || !json.id) return { ok: false, error: (json.message ?? `HTTP ${res.status}`).slice(0, 300) };
-    return { ok: true, id: json.id, from };
+    return { ok: true, id: json.id, from, messageId: null, via: "resend" };
   } catch (e) {
     return { ok: false, error: (e as Error).message.slice(0, 300) };
+  }
+}
+
+/**
+ * Company-mailbox mode: reads new mail over IMAP and records it. Safe to call often (the cursor and
+ * the Message-ID make repeats harmless). Stops before `budgetMs` so the server call is not cut off.
+ */
+export async function pollMailbox(budgetMs = 7_000): Promise<{ status: string; recorded: number; more?: boolean; error?: string }> {
+  const started = Date.now();
+  const db = inboxAdmin();
+  const cfg = mailboxConfig();
+  const address = mailboxAddress(cfg);
+  if (!db || !cfg || !address || !cfg.imapHost) return { status: "not set up", recorded: 0 };
+  const { data: co, error } = await db
+    .from("inbox_settings")
+    .select("company_id, mailbox_uidvalidity, mailbox_last_uid")
+    .eq("inbound_address", address)
+    .maybeSingle();
+  if (error) return { status: "error", recorded: 0, error: error.message };
+  if (!co) return { status: `no company has ${address} as its inbox address`, recorded: 0 };
+  let recorded = 0;
+  try {
+    const got = await imapFetchNew(
+      cfg,
+      { uidValidity: co.mailbox_uidvalidity == null ? null : Number(co.mailbox_uidvalidity), lastUid: co.mailbox_last_uid == null ? null : Number(co.mailbox_last_uid) },
+      { max: 10, deadline: started + budgetMs - 2_500 },
+    );
+    let last = Number(co.mailbox_uidvalidity) === got.uidValidity ? Number(co.mailbox_last_uid ?? 0) : 0;
+    for (const f of got.mails) {
+      if (Date.now() - started > budgetMs) break;
+      const p = parseMail(f.raw);
+      const from = parseAddress(p.from);
+      if (from) {
+        const html = sanitizeEmailHtml(p.html);
+        const text = (p.text.trim() || htmlToText(html)).slice(0, 200_000);
+        const files = f.tooLarge ? [] : p.attachments.slice(0, 20);
+        const rec: InboundRecord = {
+          channel: "email",
+          provider: "imap",
+          provider_message_id: (p.messageId ?? `uid:${got.uidValidity}:${f.uid}`).slice(0, 300),
+          from: from.address,
+          from_name: from.name,
+          to: addressList(p.to),
+          cc: addressList(p.cc),
+          delivered_to: [address, ...addressList(p.deliveredTo)],
+          subject: p.subject.slice(0, 300) || null,
+          text: f.tooLarge ? `${text}\n\n[This email is too large for the app. Open it in the company mailbox.]`.trim() : text,
+          html: html || null,
+          message_id: p.messageId,
+          in_reply_to: p.inReplyTo,
+          references: messageIds(p.references),
+          attachments: files.map((a, i) => ({
+            file_name: a.fileName.slice(0, 200),
+            content_type: a.contentType,
+            size: a.content.length,
+            provider_attachment_id: `${f.uid}#${i}`,
+          })),
+        };
+        const r = await recordInbound(db, rec);
+        if (r.status === "recorded") {
+          recorded++;
+          for (const [i, a] of files.entries()) {
+            const attId = r.attachments?.find((x) => x.provider_attachment_id === `${f.uid}#${i}`)?.id;
+            if (!attId || a.content.length > MAX_ATTACHMENT_BYTES) continue;
+            await store(db, r, attId, a.fileName, a.content, a.contentType).catch((e) =>
+              console.warn(`inbox mailbox ${r.message_id}: file not saved: ${(e as Error).message.slice(0, 120)}`),
+            );
+          }
+        }
+      }
+      last = f.uid;
+      await db.rpc("inbox_mailbox_state", { p_company: co.company_id, p_uidvalidity: got.uidValidity, p_last_uid: last, p_error: null });
+    }
+    if (!got.mails.length) {
+      // Nothing new: remember where the mailbox ends, so the next check only asks for newer mail.
+      const end = last || (got.uidNext ? got.uidNext - 1 : null);
+      await db.rpc("inbox_mailbox_state", { p_company: co.company_id, p_uidvalidity: got.uidValidity, p_last_uid: end, p_error: null });
+    }
+    return { status: "ok", recorded, more: got.more };
+  } catch (e) {
+    const msg = (e as Error).message.slice(0, 300);
+    await db.rpc("inbox_mailbox_state", { p_company: co.company_id, p_uidvalidity: null, p_last_uid: null, p_error: msg });
+    return { status: "error", recorded, error: msg };
   }
 }

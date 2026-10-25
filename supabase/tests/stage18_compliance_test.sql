@@ -210,15 +210,23 @@ select tests.login('fin.cp@g.test'); set role authenticated;
 select tests.blocked(format('update public.compliance_deadlines set status = %L where id = %L', 'filed', :'dl_late'),
   'filings are marked only through the function');
 select tests.blocked(format('select public.compliance_mark_filed(%L, current_date + 1, null, null)', :'dl_late'), 'no filing date in the future');
-select public.compliance_mark_filed(:'dl_late', current_date, 'PAYE-CN-991234', 'Paid by bank');
-select tests.check((select status = 'filed' and reference = 'PAYE-CN-991234' and filed_by = :'fin' from public.compliance_deadlines where id = :'dl_late'),
-  'finance marks PAYE filed with the reference');
+select tests.blocked(format('select public.compliance_mark_filed(%L, current_date, null, null, -5)', :'dl_late'), 'no negative amount');
+select public.compliance_mark_filed(:'dl_late', current_date, 'PAYE-CN-991234', 'Paid by bank', 412500.456, ' 991100223344 ', current_date);
+select tests.check((select status = 'filed' and reference = 'PAYE-CN-991234' and filed_by = :'fin' and amount = 412500.46
+                           and control_number = '991100223344' and paid_on = current_date
+                      from public.compliance_deadlines where id = :'dl_late'),
+  'finance marks PAYE filed with the reference, amount, control number and payment date');
+select tests.blocked(format('update public.compliance_deadlines set amount = 1 where id = %L', :'dl_late'), 'the amount is changed only through the functions');
 select tests.blocked(format('select public.compliance_mark_filed(%L, null, null, null)', :'dl_late'), 'cannot mark twice');
 select tests.blocked(format('select public.compliance_skip_filing(%L, %L)', :'dl_next', ''), 'nothing to file needs a reason');
 select public.compliance_skip_filing(:'dl_vat', 'Not VAT registered yet');
 select tests.check((select status from public.compliance_deadlines where id = :'dl_vat') = 'not_required', 'a period with nothing to file');
 select public.compliance_reopen_filing(:'dl_vat');
 select tests.check((select status = 'open' and note is null from public.compliance_deadlines where id = :'dl_vat'), 'a marked filing can be opened again');
+select public.compliance_mark_filed(:'dl_vat', null, null, null, 1000, '9911', null);
+select public.compliance_reopen_filing(:'dl_vat');
+select tests.check((select status = 'open' and amount is null and control_number is null and paid_on is null from public.compliance_deadlines where id = :'dl_vat'),
+  'opening a filing again clears its amount and control number');
 reset role;
 -- The late PAYE period is filed; make another one late for the alerts below.
 select tests.login('boss.cp@g.test'); set role authenticated;
@@ -405,6 +413,9 @@ select tests.check(public.refresh_alerts(:'co') >= 0, 'opening the app runs the 
 reset role;
 select tests.check(not has_function_privilege('authenticated', 'public.run_compliance_alerts(uuid)', 'EXECUTE')
                    and not has_function_privilege('authenticated', 'public.compliance_generate_deadlines(uuid, date)', 'EXECUTE')
+                   and not has_function_privilege('anon', 'public.compliance_save_rules(uuid, jsonb)', 'EXECUTE')
+                   and has_function_privilege('authenticated', 'public.compliance_save_rules(uuid, jsonb)', 'EXECUTE')
+                   and not has_function_privilege('anon', 'public.compliance_mark_filed(uuid, date, text, text, numeric, text, date)', 'EXECUTE')
                    and not has_function_privilege('anon', 'public.compliance_summary(uuid)', 'EXECUTE')
                    and has_function_privilege('authenticated', 'public.compliance_summary(uuid)', 'EXECUTE')
                    and has_function_privilege('anon', 'public.run_all_alerts(text)', 'EXECUTE'),
@@ -431,6 +442,47 @@ reset role;
 select tests.login('fin.cp@g.test'); set role authenticated;
 delete from public.compliance_items where id = :'it_fin';
 select tests.check(exists (select 1 from public.compliance_items where id = :'it_fin'), 'finance cannot delete items');
+reset role;
+
+-- ---- 10b. Tax & legal rules --------------------------------------------------------------------------
+select tests.login('sales.cp@g.test'); set role authenticated;
+select tests.blocked(format('select public.compliance_save_rules(%L, %L::jsonb)', :'co', '{"vat_due_day": 18}'), 'sales cannot change the rules');
+reset role;
+select tests.login('fin.cp@g.test'); set role authenticated;
+select tests.blocked(format('select public.compliance_save_rules(%L, %L::jsonb)', :'co', '[1]'), 'the rules must be an object');
+select tests.blocked(format('select public.compliance_save_rules(%L, %L::jsonb)', :'co', '{"vat_due_day": 40}'), 'a due day stays within 1 to 31');
+select tests.blocked(format('select public.compliance_save_rules(%L, %L::jsonb)', :'co', '{"Bad Key": 1}'), 'rule names are checked');
+select tests.blocked(format('select public.compliance_save_rules(%L, %L::jsonb)', :'co', '{"x_rule": {"a": 1}}'), 'values are plain numbers, yes/no or short text');
+select tests.blocked(format('select public.compliance_save_rules(%L, %L::jsonb)', :'co', '{"late_filing_min": -1}'), 'no negative numbers');
+select public.compliance_save_rules(:'co', '{"vat_due_day": 18, "paye_due_day": 9, "return_months": 4, "dpo_name": "Asha", "next_working_day": false, "unused": null}');
+select tests.check((select legal_rules = '{"vat_due_day": 18, "paye_due_day": 9, "return_months": 4, "dpo_name": "Asha", "next_working_day": false}'::jsonb
+                      from public.compliance_settings where company_id = :'co'),
+  'finance saves the rules (empty values dropped)');
+select tests.check((select due_day from public.compliance_items where id = :'it_vat') = 18
+                   and (select due_day from public.compliance_items where id = :'it_paye') = 9
+                   and (select due_offset_months from public.compliance_items where id = :'it_final') = 4,
+  'the usual TRA filings follow the rules');
+select public.compliance_refresh_calendar(:'co') \gset x_
+select tests.check(not exists (select 1 from public.compliance_deadlines where item_id = :'it_vat' and status = 'open' and due_on >= current_date
+                                 and extract(day from due_on) <> 18)
+                   and exists (select 1 from public.compliance_deadlines where item_id = :'it_vat' and status = 'open' and due_on >= current_date),
+  'open VAT filings move to the 18th');
+reset role;
+select tests.login('boss.cp@g.test'); set role authenticated;
+select public.compliance_save_rules(:'co', '{"wht_due_day": 10}');
+select public.compliance_adopt(:'co', array['TRA_WHT']) \gset x_
+select tests.check((select due_day from public.compliance_items where company_id = :'co' and code = 'TRA_WHT') = 10,
+  'a filing added later takes the company''s due day');
+select public.compliance_save_rules(:'co', '{}');
+select tests.check((select due_day from public.compliance_items where id = :'it_vat') = 20
+                   and (select due_day from public.compliance_items where id = :'it_paye') = 7
+                   and (select due_offset_months from public.compliance_items where id = :'it_final') = 6
+                   and (select due_day from public.compliance_items where company_id = :'co' and code = 'TRA_WHT') = 7
+                   and (select legal_rules from public.compliance_settings where company_id = :'co') = '{}'::jsonb,
+  'reset to the law: the catalogue''s due days come back');
+reset role;
+select tests.login('ware.cp@g.test'); set role authenticated;
+select tests.blocked(format('select public.compliance_save_rules(%L, %L::jsonb)', :'co', '{}'), 'other roles cannot reset the rules');
 reset role;
 
 -- ---- 11. Clearing test transactions keeps the legal set-up --------------------------------------------

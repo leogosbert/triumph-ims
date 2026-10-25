@@ -243,6 +243,23 @@ export const GUIDE: GuideSection[] = [
     intro: "From a client's request to a won order.",
     topics: [
       {
+        id: "inbox",
+        title: "Inbox (email and WhatsApp)",
+        summary: "Client and supplier emails and WhatsApp messages arrive in the app, and you reply from the same screen.",
+        phone: ["More", "Sales", "Inbox"],
+        laptop: ["Sales", "Inbox"],
+        href: "/inbox",
+        roles: ["management", "sales", "procurement", "finance"],
+        feature: "inbox",
+        steps: [
+          "A manager opens Inbox, then Set up, and connects the company email (address and app password) or the forwarding address.",
+          "New messages show a notification and a number on Inbox. Open the conversation to read it.",
+          "Write the reply and choose email or WhatsApp. It is sent and kept with the conversation.",
+          "Assign the conversation to a colleague, link it to the client or supplier, and close it when done.",
+        ],
+        tips: ["WhatsApp replies need the WhatsApp Business number connected in Set up."],
+      },
+      {
         id: "client-rfqs",
         title: "Client RFQs (requests for quotation)",
         summary: "Record every request for prices, however it arrives: email, phone, WhatsApp, visit or tender.",
@@ -1389,6 +1406,24 @@ export const GUIDE: GuideSection[] = [
           "Link it to a client, supplier, product, tender or contract. It then shows on that page too.",
           "When a new version comes, open the document and upload it. Old documents can be moved to the archive.",
         ],
+      },
+      {
+        id: "compliance",
+        title: "Legal & compliance",
+        summary: "What the company must register, renew and file, with reminders and inspection packs.",
+        phone: ["More", "Legal & compliance"],
+        laptop: ["Company & account", "Legal & compliance"],
+        href: "/compliance",
+        roles: NOT_DRIVER,
+        feature: "compliance",
+        steps: [
+          "Open Legal & compliance and press Set up my checklist: the usual requirements for a new general supply company are ticked.",
+          "Add licences in Licences (as many as you need) with their expiry dates; upload each certificate.",
+          "The Tax & filing calendar lists PAYE, VAT, NSSF and other filings; press Mark done with the amount and control number.",
+          "Before a TRA, OSHA, GCLA or mine visit, open Inspections & audits and print the pack.",
+          "Ask What do I need? for any activity, for example supplying lubricants to a mine.",
+        ],
+        tips: ["Guidance, not legal advice: confirm with the authority.", "Change thresholds and due days in Tax & legal rules; Reset to the law undoes it."],
       },
       {
         id: "branches",

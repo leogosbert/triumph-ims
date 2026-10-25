@@ -7,10 +7,11 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { getAppContext } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { canUseInbox, suggestInboxAddress, type InboxSettings } from "@/lib/inbox/common";
+import { formatDateTime } from "@/lib/format";
 import { inboxChannels } from "@/lib/inbox/server";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { siteUrl } from "@/lib/supabase/env";
-import { saveInboxSettings } from "../actions";
+import { checkMailboxNow, saveInboxSettings } from "../actions";
 
 export const metadata = { title: "Inbox setup" };
 
@@ -32,10 +33,11 @@ export default async function InboxSetupPage({ searchParams }: { searchParams: S
   if (!canUseInbox(role)) redirect("/");
   const { data, error } = await supabase.from("inbox_settings").select("*").eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Inbox setup" />;
-  const s = (data ?? null) as InboxSettings | null;
+  const s = (data ?? null) as (InboxSettings & { mailbox_checked_at?: string | null; mailbox_error?: string | null }) | null;
   const ch = inboxChannels();
   const site = siteUrl();
-  const suggested = suggestInboxAddress(company.name, ch.inboundDomain);
+  const suggested = ch.mailbox ?? suggestInboxAddress(company.name, ch.inboundDomain);
+  const mailboxOurs = Boolean(ch.mailbox && s?.inbound_address === ch.mailbox);
   const waEnv = process.env.WHATSAPP_PHONE_NUMBER_ID ?? "";
 
   return (
@@ -53,6 +55,7 @@ export default async function InboxSetupPage({ searchParams }: { searchParams: S
         <h2>{tr("What is connected")}</h2>
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }} className="small">
           <Status on={ch.database} label="Server key for the inbox (SUPABASE_SERVICE_ROLE_KEY)" />
+          <Status on={mailboxOurs} label="Company mailbox (reads and sends from your own email)" />
           <Status on={ch.emailReceive && Boolean(s?.inbound_address)} label="Receiving emails" />
           <Status on={ch.emailSend} label="Sending email replies" />
           <Status on={ch.whatsappReceive && Boolean(s?.whatsapp_phone_number_id)} label="Receiving WhatsApp messages" />
@@ -62,6 +65,31 @@ export default async function InboxSetupPage({ searchParams }: { searchParams: S
           {tr("Without WhatsApp Business connected you can still answer: the app opens WhatsApp on your phone with the text filled in, and notes it in the conversation.")}
         </p>
       </section>
+
+      {ch.mailbox && (
+        <section className="card">
+          <h2>{tr("Company mailbox")}</h2>
+          <p className="small">
+            {tr("The server is set up to read and send from")} <strong style={code}>{ch.mailbox}</strong>.{" "}
+            {mailboxOurs
+              ? tr("New emails there are brought into the Inbox every 5 minutes; nothing is deleted or marked as read in the mailbox.")
+              : tr("Save this address as your inbox email address below to use it for this company.")}
+          </p>
+          {mailboxOurs && (
+            <p className="small muted">
+              {s?.mailbox_checked_at ? `${tr("Last checked")} ${formatDateTime(s.mailbox_checked_at)}` : tr("Not checked yet.")}
+              {s?.mailbox_error && <span className="text-warn"> · {s.mailbox_error}</span>}
+            </p>
+          )}
+          {mailboxOurs && isManager && (
+            <form action={checkMailboxNow}>
+              <SubmitButton className="btn btn-small" pendingText={tr("Checking…")}>
+                {tr("Check for new emails now")}
+              </SubmitButton>
+            </form>
+          )}
+        </section>
+      )}
 
       <section className="card">
         <h2>{tr("Your company's inbox")}</h2>
@@ -115,7 +143,32 @@ export default async function InboxSetupPage({ searchParams }: { searchParams: S
       </section>
 
       <details className="card" open={!ch.emailReceive}>
-        <summary>{tr("Step by step: emails")}</summary>
+        <summary>{tr("Quickest: use the email you already have (no own domain needed)")}</summary>
+        <ol className="small" style={{ paddingLeft: 18, lineHeight: 1.55 }}>
+          <li>
+            {tr("Pick the mailbox clients already write to, for example your company Gmail. In Gmail: Google account → Security → turn on 2-Step Verification, then App passwords → create one called LeMoSp. (Outlook and most hosting mail work the same way; ask your email provider for the SMTP and IMAP server names.)")}
+          </li>
+          <li>
+            {tr("In Netlify → Site configuration → Environment variables, add:")}
+            <ul style={{ paddingLeft: 18 }}>
+              <li><code>SMTP_HOST</code> — {tr("e.g.")} <code>smtp.gmail.com</code>; <code>SMTP_PORT</code> — <code>465</code></li>
+              <li><code>SMTP_USER</code> — {tr("the full email address")}; <code>SMTP_PASS</code> — {tr("the app password")}</li>
+              <li><code>SMTP_FROM</code> — {tr("optional, e.g.")} <code>Triumph Sales &lt;yourname@gmail.com&gt;</code></li>
+              <li><code>IMAP_HOST</code> — {tr("e.g.")} <code>imap.gmail.com</code> ({tr("optional when it is the SMTP name with imap. in front")})</li>
+              <li><code>SUPABASE_SERVICE_ROLE_KEY</code> {tr("and")} <code>OUTBOX_SECRET</code> ({tr("already there if phone alerts work")})</li>
+            </ul>
+            {tr("Then redeploy the site (Deploys → Trigger deploy).")}
+          </li>
+          <li>{tr("Come back here and save the same email address as your inbox email address. Press Check for new emails now to try it.")}</li>
+          <li>
+            {tr("From then on the app reads new emails every 5 minutes (it never deletes or marks them read), tells management and sales, and replies go out from that same mailbox, so they also appear in its Sent folder.")}
+          </li>
+        </ol>
+        <p className="small muted">{tr("The password stays on the server; the app and your team never see it.")}</p>
+      </details>
+
+      <details className="card">
+        <summary>{tr("Or: receive through Resend (instant, needs a receiving domain)")}</summary>
         <ol className="small" style={{ paddingLeft: 18, lineHeight: 1.55 }}>
           <li>
             {tr("Database: LeMo Tech runs the inbox update once in Supabase → SQL Editor")} (<code style={code}>supabase/migrations/20261026000200_inbox.sql</code>).

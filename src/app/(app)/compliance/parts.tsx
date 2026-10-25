@@ -7,8 +7,10 @@ const TABS = [
   { href: "/compliance", label: "Overview" },
   { href: "/compliance/checklist", label: "Checklist" },
   { href: "/compliance/licences", label: "Licences" },
+  { href: "/compliance/audits", label: "Inspections & audits" },
   { href: "/compliance/calendar", label: "Tax & filing calendar" },
   { href: "/compliance/directors", label: "Directors & shares" },
+  { href: "/compliance/rules", label: "Tax & legal rules" },
   { href: "/compliance/guide", label: "What do I need?" },
 ] as const;
 

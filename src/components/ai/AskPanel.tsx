@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { AskAnswer } from "@/lib/ai/ask";
 import { askQuestion } from "@/lib/ai/ask-actions";
@@ -9,6 +10,7 @@ import { AnswerView } from "./AnswerView";
 /** The answer on the /search page: asked at once with ?ask=1, otherwise on a tap. */
 export function AskPanel({ question, auto }: { question: string; auto: boolean }) {
   const tr = useTr();
+  const router = useRouter();
   const [answer, setAnswer] = useState<AskAnswer | null>(null);
   const [failed, setFailed] = useState(false);
   const [pending, start] = useTransition();
@@ -42,7 +44,7 @@ export function AskPanel({ question, auto }: { question: string; auto: boolean }
           <span />
         </p>
       ) : answer ? (
-        <AnswerView a={answer} />
+        <AnswerView a={answer} onAsk={(f) => router.push(`/search?q=${encodeURIComponent(f)}&ask=1`)} />
       ) : failed ? (
         <p className="muted small">{tr("Something went wrong. Please try again.")}</p>
       ) : (

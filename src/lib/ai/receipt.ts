@@ -118,7 +118,7 @@ export function receiptInstruction(categories: string[], baseCurrency: string, t
     "is_receipt (false if this is not a bill or receipt); vendor (who was paid: the seller's name); tin; vrn; receipt_no (RECEIPT NO or invoice number); z_no;",
     "date (YYYY-MM-DD); currency (ISO code such as TZS or USD); subtotal (before VAT); vat (0 if none shown); total (amount paid, VAT included);",
     "payment_method (cash, mobile_money, bank_transfer, cheque, card or other; empty if not shown); mobile_provider (mpesa, tigopesa, airtel_money, halopesa, azampesa or other; empty if not mobile money);",
-    "transaction_ref (mobile-money or bank transaction code); items (each line: description, qty, unit_price, amount); category; description (what was bought, at most 12 words);",
+    "transaction_ref (mobile-money or bank transaction code); items (each line: description, qty, unit_price, amount; at most 20 lines, short descriptions); category; description (what was bought, at most 12 words);",
     "unreadable (the names of the fields you could not read); confidence (high, medium or low: how clear the picture is).",
     "Numbers are plain JSON numbers without currency or thousands separators (12500.5, not \"12,500.50\"). Use an empty string or 0 for anything you cannot read.",
     "For category, choose the best match from the company's spending categories, copied exactly, or an empty string if none fits:",

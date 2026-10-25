@@ -68,7 +68,11 @@ export type Deadline = {
   reference: string | null;
   note: string | null;
   filed_by: string | null;
+  amount: number | null;
+  control_number: string | null;
+  paid_on: string | null;
 };
+export const DEADLINE_FIELDS = "id, item_id, period_start, period_end, due_on, status, filed_on, reference, note, filed_by, amount, control_number, paid_on";
 
 export type Director = {
   id: string;
@@ -98,6 +102,7 @@ export type ComplianceSettings = {
   shares_decided_at: string | null;
   shareholding_note: string | null;
   board_note: string | null;
+  legal_rules: Record<string, unknown>;
 };
 
 /** compliance_summary(): counts for the overview and the home card. */

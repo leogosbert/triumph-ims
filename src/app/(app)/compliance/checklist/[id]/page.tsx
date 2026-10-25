@@ -13,6 +13,7 @@ import { categoryLabel, requirement } from "@/lib/compliance/catalogue";
 import {
   canSeeCompliance,
   canWriteItem,
+  DEADLINE_FIELDS,
   DEADLINE_STATUS,
   dueRuleText,
   FREQUENCIES,
@@ -50,7 +51,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
   const [deadlinesRes, licenceRes, licencesRes, people, names] = await Promise.all([
     supabase
       .from("compliance_deadlines")
-      .select("id, item_id, period_start, period_end, due_on, status, filed_on, reference, note, filed_by")
+      .select(DEADLINE_FIELDS)
       .eq("item_id", item.id)
       .order("due_on", { ascending: false })
       .limit(8),

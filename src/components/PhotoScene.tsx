@@ -21,7 +21,7 @@ const FADE_MS = 2600;
  * Background → Photos: a photo for the current section, cross-fading when the section changes
  * (and slowly between the section's photos), with a slow Ken Burns zoom under a wash of the
  * section colours, drifting blobs, grain and a few floating specks (styles in src/app/glass.css).
- * Only the photo on screen and the next one are downloaded. Decorative: hidden from screen readers
+ * Only the photo on screen and the next one are downloaded (phones: only the one on screen). Decorative: hidden from screen readers
  * and when printing; no movement for "reduce motion".
  * `section` fixes the scene (the sign-in page); `onlyGlass` draws nothing unless the Glass style is on.
  */
@@ -30,6 +30,9 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
   const section = fixed ?? sectionFor(pathname ?? "/");
   const list = photosFor(section, scenes);
   const [on, setOn] = useState(!onlyGlass);
+  // Phones: one photo per section and no floating specks; the phone's power goes to scrolling.
+  const [phone, setPhone] = useState(false);
+  useEffect(() => setPhone(window.matchMedia("(max-width: 720px)").matches), []);
   const [turn, setTurn] = useState(0);
   const [layers, setLayers] = useState<Layer[]>([]);
   const seq = useRef(0);
@@ -55,7 +58,7 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
       setLayers((old) => (old[old.length - 1]?.src === src ? old : [...old.slice(-1), { key: ++seq.current, src, focus: photo.focus }]));
       setTimeout(() => setLayers((old) => old.slice(-1)), FADE_MS + 400);
       // Fetch the next photo of this section in the background so the next change is instant.
-      if (list.length > 1) {
+      if (list.length > 1 && !phone) {
         const next = list[(turn + 1) % list.length];
         new Image().src = photoSrc(next.url, width());
       }
@@ -73,7 +76,7 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
 
   // Slowly move through the section's photos (not for "reduce motion", not while the tab is hidden).
   useEffect(() => {
-    if (!on || list.length < 2) return;
+    if (!on || phone || list.length < 2) return;
     let still = false;
     try {
       still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -85,7 +88,7 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
       if (document.visibilityState === "visible") setTurn((n) => n + 1);
     }, ROTATE_MS);
     return () => clearInterval(t);
-  }, [on, list.length, section]);
+  }, [on, phone, list.length, section]);
 
   if (!on) return null;
   const blend = scenes?.blend;
@@ -110,7 +113,7 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
       <span className="scene-blob s1" />
       <span className="scene-blob s2" />
       <span className="scene-blob s3" />
-      {SPECKS.map((s, i) => (
+      {!phone && SPECKS.map((s, i) => (
         <span
           key={i}
           className="scene-speck"

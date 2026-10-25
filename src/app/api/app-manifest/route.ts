@@ -1,4 +1,5 @@
 import { isAdminHost } from "@/lib/hosts";
+import { brandByKey, brandIcons } from "@/lib/brands";
 
 /**
  * The install details ("web app manifest") for whichever app this address is:
@@ -45,7 +46,21 @@ const ADMIN = {
 
 export function GET(request: Request) {
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? new URL(request.url).host;
-  const body = isAdminHost(host) ? ADMIN : MAIN;
+  // ?brand=<key>: a company with its own name and icon (src/lib/brands.ts); the page asks for it.
+  const brand = isAdminHost(host) ? null : brandByKey(new URL(request.url).searchParams.get("brand"));
+  const body = isAdminHost(host)
+    ? ADMIN
+    : brand
+      ? {
+          ...MAIN,
+          name: brand.name,
+          short_name: brand.shortName,
+          description: brand.description,
+          background_color: brand.themeColor,
+          theme_color: brand.themeColor,
+          icons: brandIcons(brand),
+        }
+      : MAIN;
   return new Response(JSON.stringify(body, null, 2), {
     headers: {
       "Content-Type": "application/manifest+json; charset=utf-8",

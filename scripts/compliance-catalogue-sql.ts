@@ -6,6 +6,7 @@
 // The block sits between the BEGIN/END markers in supabase/migrations/20261026000100_compliance.sql.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { AUDIT_PACKS } from "../src/lib/compliance/audits";
 import { ACTIVITY_GUIDES, CATALOGUE_REVIEWED_ON, COMPLIANCE_CATALOGUE, COMPLIANCE_CATEGORIES } from "../src/lib/compliance/catalogue";
 
 const FILE = join(__dirname, "..", "supabase", "migrations", "20261026000100_compliance.sql");
@@ -32,6 +33,7 @@ function problems(): string[] {
     if (r.website && !/^https:\/\/[a-z0-9.-]+\.(go|or)\.tz$/.test(r.website)) out.push(`${r.code}: website must be an official https .go.tz / .or.tz site`);
   }
   for (const g of ACTIVITY_GUIDES) for (const c of g.codes) if (!codes.has(c)) out.push(`guide ${g.key}: unknown code ${c}`);
+  for (const p of AUDIT_PACKS) for (const l of p.lines) if ("code" in l && !codes.has(l.code)) out.push(`audit pack ${p.key}: unknown code ${l.code}`);
   return out;
 }
 

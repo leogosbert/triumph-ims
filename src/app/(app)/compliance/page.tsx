@@ -10,6 +10,9 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { addDays, canSeeCompliance, LICENCE_STATUS, num, periodLabel, type ComplianceSummary } from "@/lib/compliance/model";
 import { StatusBadge } from "@/lib/sales";
 import { todayTz } from "@/lib/services";
+import { legalRules } from "@/lib/compliance/rules";
+import { HashToGuide } from "./HashToGuide";
+import { LegalHealth } from "./LegalHealth";
 import { ComplianceTabs, Disclaimer } from "./parts";
 
 export const metadata = { title: "Legal & compliance" };
@@ -34,7 +37,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: S
   const today = todayTz();
   const until = addDays(today, 30);
 
-  const [filingsRes, itemsRes, licRes] = await Promise.all([
+  const [filingsRes, itemsRes, licRes, setRes] = await Promise.all([
     supabase
       .from("compliance_deadlines")
       .select("id, due_on, period_start, period_end, item:compliance_items!inner(id, name, status)")
@@ -62,7 +65,9 @@ export default async function CompliancePage({ searchParams }: { searchParams: S
       .lte("expires_on", addDays(today, 90))
       .order("expires_on")
       .limit(12),
+    supabase.from("compliance_settings").select("legal_rules").eq("company_id", company.id).maybeSingle(),
   ]);
+  const rules = legalRules(setRes.data?.legal_rules);
   const filings = (filingsRes.data ?? []) as unknown as DueFiling[];
   const items = (itemsRes.data ?? []) as DueItem[];
   const licences = (licRes.data ?? []) as ExpLicence[];
@@ -90,6 +95,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: S
       </div>
       <p className="muted small">{tr("What the company must register, renew and file in Tanzania, with the papers to prove it.")}</p>
       <ComplianceTabs current="/compliance" />
+      <HashToGuide />
       <Notice {...notice} />
 
       {!s.set_up ? (
@@ -137,6 +143,8 @@ export default async function CompliancePage({ searchParams }: { searchParams: S
           </div>
         </>
       )}
+
+      {s.set_up && <LegalHealth supabase={supabase} company={company} role={role} isManager={isManager} rules={rules} today={today} />}
 
       {(filings.length > 0 || items.length > 0) && (
         <section className="card">

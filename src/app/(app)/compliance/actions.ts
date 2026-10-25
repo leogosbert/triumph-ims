@@ -6,7 +6,8 @@ import { getAppContext } from "@/lib/context";
 import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
-import { COMPLIANCE_CATEGORIES } from "@/lib/compliance/catalogue";
+import { COMPLIANCE_CATALOGUE, COMPLIANCE_CATEGORIES, requirement } from "@/lib/compliance/catalogue";
+import { legalRules, RULE_DEFS, TZ_LEGAL } from "@/lib/compliance/rules";
 
 const isDate = (v: string | null) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v);
 const isId = (v: string | null | undefined) => !!v && /^[0-9a-f-]{36}$/.test(v);
@@ -189,6 +190,8 @@ export async function createLicence(form: FormData) {
     .select("id")
     .single();
   if (error) fail(path, error.message);
+  const itemId = optional(form, "item_id");
+  if (isId(itemId)) await supabase.from("compliance_items").update({ licence_id: data.id }).eq("id", itemId).eq("company_id", company.id);
   done(`/compliance/licences/${data.id}`, "Licence added. Upload the certificate below.");
 }
 
@@ -226,12 +229,18 @@ export async function deleteLicence(form: FormData) {
 export async function markFiled(form: FormData) {
   const path = backTo(form, "/compliance/calendar");
   const on = optional(form, "filed_on");
+  const paid = optional(form, "paid_on");
+  const amount = toNumber(str(form, "amount"));
+  if (amount !== null && (Number.isNaN(amount) || amount < 0)) fail(path, "The amount must be a number.");
   const { supabase } = await getAppContext();
   const { error } = await supabase.rpc("compliance_mark_filed", {
     p_deadline: str(form, "id"),
     p_filed_on: isDate(on) ? on : null,
     p_reference: optional(form, "reference"),
     p_note: optional(form, "note"),
+    p_amount: amount,
+    p_control_number: optional(form, "control_number"),
+    p_paid_on: isDate(paid) ? paid : null,
   });
   if (error) fail(path, error.message);
   done(path, "Marked filed.");
@@ -324,4 +333,122 @@ export async function saveComplianceSettings(form: FormData) {
   });
   if (error) fail(path, error.message);
   done(path, "Saved.");
+}
+
+// ------------------------------------------------------------------ tax & legal rules
+
+export async function saveRules(form: FormData) {
+  const path = "/compliance/rules";
+  const { supabase, company } = await getAppContext();
+  const { data: row } = await supabase.from("compliance_settings").select("legal_rules").eq("company_id", company.id).maybeSingle();
+  const current = legalRules(row?.legal_rules);
+  const out: Record<string, unknown> = {};
+  for (const def of RULE_DEFS) {
+    const base = TZ_LEGAL[def.key];
+    let v: unknown;
+    if (typeof base === "boolean") v = form.has(`${def.key}__shown`) ? str(form, def.key) === "1" : current[def.key];
+    else if (typeof base === "string") v = form.has(def.key) ? str(form, def.key).slice(0, 200) : current[def.key];
+    else {
+      if (!form.has(def.key)) v = current[def.key];
+      else {
+        const n = toNumber(str(form, def.key));
+        if (n === null || Number.isNaN(n)) fail(path, `Enter a number for: ${def.label}`);
+        if ((def.min !== undefined && n < def.min) || (def.max !== undefined && n > def.max) || n < 0) fail(path, `The value is out of range for: ${def.label}`);
+        v = def.unit === "day" || def.unit === "days" || def.unit === "months" || def.unit === "years" || def.unit === "hours" ? Math.round(n) : n;
+      }
+    }
+    // Only what differs from the law as shipped is kept.
+    if (v !== base) out[def.key] = v;
+  }
+  const { error } = await supabase.rpc("compliance_save_rules", { p_company: company.id, p_rules: out });
+  if (error) fail(path, error.message);
+  done(path, "Rules saved. The filing calendar follows the new due days.");
+}
+
+export async function resetRules(form: FormData) {
+  const path = "/compliance/rules";
+  const key = optional(form, "key");
+  const { supabase, company } = await getAppContext();
+  let rules: Record<string, unknown> = {};
+  if (key) {
+    const { data: row } = await supabase.from("compliance_settings").select("legal_rules").eq("company_id", company.id).maybeSingle();
+    rules = { ...((row?.legal_rules as Record<string, unknown>) ?? {}) };
+    delete rules[key];
+  }
+  const { error } = await supabase.rpc("compliance_save_rules", { p_company: company.id, p_rules: rules });
+  if (error) fail(path, error.message);
+  done(path, key ? "Back to the law for that rule." : "All rules are back to the law as shipped.");
+}
+
+// ------------------------------------------------------------------ audits and "not needed"
+
+/** "Not needed for us": the requirement goes on the checklist as Does not apply (kept, and can be switched back). */
+export async function markNotNeeded(form: FormData) {
+  const code = str(form, "code");
+  const path = backTo(form, "/compliance/audits");
+  if (!requirement(code)) fail(path, "That requirement was not found.");
+  const { supabase, company } = await getAppContext();
+  const { error: adoptError } = await supabase.rpc("compliance_adopt", { p_company: company.id, p_codes: [code], p_registered: false });
+  if (adoptError) fail(path, adoptError.message);
+  const { data: item } = await supabase.from("compliance_items").select("id, status").eq("company_id", company.id).eq("code", code).maybeSingle();
+  if (!item) fail(path, "That requirement was not found.");
+  if (item.status !== "not_applicable") {
+    const { error } = await supabase.rpc("compliance_set_status", {
+      p_item: item.id,
+      p_status: "not_applicable",
+      p_note: optional(form, "note") ?? "Not needed for us.",
+    });
+    if (error) fail(path, error.message);
+  }
+  done(path, "Marked as not needed for us. Open it on the checklist to switch it back.");
+}
+
+/** Add the requirements of an audit pack to the checklist (those not there yet). */
+export async function adoptPack(form: FormData) {
+  const path = backTo(form, "/compliance/audits");
+  const codes = form.getAll("code").filter((c): c is string => typeof c === "string" && !!requirement(c));
+  if (!codes.length) fail(path, "Everything in this pack is already on your checklist.");
+  const { supabase, company } = await getAppContext();
+  const { data, error } = await supabase.rpc("compliance_adopt", { p_company: company.id, p_codes: codes, p_registered: false });
+  if (error) fail(path, error.message);
+  const n = Number(data ?? 0);
+  done(path, n === 1 ? "1 requirement added to your checklist." : `${n} requirements added to your checklist.`);
+}
+
+/** Cocozania's "Add the usual licences": every licence on the checklist gets a line in the register to fill in. */
+export async function addUsualLicences(form: FormData) {
+  const path = backTo(form, "/compliance/licences");
+  const { supabase, company } = await getAppContext();
+  const [itemsRes, licRes, setRes] = await Promise.all([
+    supabase.from("compliance_items").select("id, code, name, authority, status, licence_id").eq("company_id", company.id).not("code", "is", null).limit(1000),
+    supabase.from("licences").select("catalogue_code").eq("company_id", company.id).not("catalogue_code", "is", null).limit(1000),
+    supabase.from("compliance_settings").select("legal_rules").eq("company_id", company.id).maybeSingle(),
+  ]);
+  if (itemsRes.error) fail(path, itemsRes.error.message);
+  const have = new Set(((licRes.data ?? []) as { catalogue_code: string }[]).map((l) => l.catalogue_code));
+  const licenceCodes = new Set(COMPLIANCE_CATALOGUE.filter((r) => r.kind === "licence").map((r) => r.code));
+  const remind = legalRules(setRes.data?.legal_rules).licence_remind_days;
+  const todo = ((itemsRes.data ?? []) as { id: string; code: string; name: string; authority: string | null; status: string; licence_id: string | null }[]).filter(
+    (i) => licenceCodes.has(i.code) && !i.licence_id && !have.has(i.code) && i.status !== "not_applicable",
+  );
+  if (!todo.length) fail(path, "Every licence on your checklist is already in the register. Add sector licences to the checklist first.");
+  let n = 0;
+  for (const i of todo) {
+    const { data, error } = await supabase
+      .from("licences")
+      .insert({
+        company_id: company.id,
+        name: i.name.slice(0, 160),
+        authority: i.authority,
+        catalogue_code: i.code,
+        status: i.status === "done" ? "active" : "planned",
+        remind_days: remind,
+      })
+      .select("id")
+      .single();
+    if (error) fail(path, error.message);
+    await supabase.from("compliance_items").update({ licence_id: data.id }).eq("id", i.id).eq("company_id", company.id);
+    n++;
+  }
+  done(path, n === 1 ? "1 licence added to the register. Fill in its number and dates." : `${n} licences added to the register. Fill in their numbers and dates.`);
 }

@@ -21,15 +21,20 @@ export async function askAssistant(question: string): Promise<Answer> {
     const a = await askBusiness({ supabase, company, role, isManager, isPlatformAdmin, features: { on: features.on, list: features.list } }, q, lang, { allowFigures: false });
     if (a.sources.length === 0) return builtInAnswer({ supabase, company, role }, q, "help");
     return {
-      topic: "help",
+      // Not "help": its rows would turn into buttons that ask the row as a question.
+      topic: "summary",
       title: a.title,
       text: [a.text.replace(/\s*\[\d+(?:,\s*\d+)*\]/g, ""), a.legalNote].filter(Boolean).join("\n\n"),
       ai: a.ai,
       rows: [
+        ...a.steps.map((st, i) => ({ label: `${i + 1}. ${st.text.replace(/\s*\[\d+(?:,\s*\d+)*\]/g, "")}`, value: "", href: st.to })),
         ...a.status.slice(0, 8).map((r) => ({ label: r.label, value: r.value, href: r.href, tone: r.tone })),
         ...a.sources.filter((s) => s.kind !== "status").map((s) => ({ label: tr(s.title), value: "", href: s.href })),
       ],
-      links: [{ label: tr("Open in search"), href: `/search?q=${encodeURIComponent(q)}&ask=1` }],
+      links: [
+        ...(a.where ? [{ label: a.where.path.map(tr).join(" → "), href: a.where.to }] : []),
+        { label: tr("Open in search"), href: `/search?q=${encodeURIComponent(q)}&ask=1` },
+      ],
     };
   }
 

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTr } from "@/lib/tr-client";
-import { recordManualWhatsApp, sendReply, type ReplyResult } from "./actions";
+import { recordManualEmail, recordManualWhatsApp, sendReply, type ReplyResult } from "./actions";
 
 function waHref(phone: string, text: string): string | null {
   const d = phone.replace(/[^\d]/g, "");
@@ -59,6 +59,21 @@ export function ReplyBox({
     start(async () => done(await recordManualWhatsApp(conversationId, text)));
   };
 
+  // No sending set up (or the person prefers it): the phone's mail app opens with everything filled in.
+  const openMailApp = (form: HTMLFormElement | null) => {
+    const body = text.trim();
+    if (!body) {
+      setResult({ error: "Write a message first." });
+      return;
+    }
+    const subj = (form?.elements.namedItem("subject") as HTMLInputElement | null)?.value ?? subject;
+    const cc = (form?.elements.namedItem("cc") as HTMLInputElement | null)?.value.trim() ?? "";
+    const short = body.length > 1800 ? `${body.slice(0, 1800)}\n…` : body;
+    const q = [cc && `cc=${encodeURIComponent(cc)}`, `subject=${encodeURIComponent(subj)}`, `body=${encodeURIComponent(short)}`].filter(Boolean).join("&");
+    window.location.href = `mailto:${encodeURIComponent(to)}?${q}`;
+    start(async () => done(await recordManualEmail(conversationId, body, subj)));
+  };
+
   return (
     <section className="card" id="reply">
       <h2>{tr("Reply")}</h2>
@@ -104,9 +119,21 @@ export function ReplyBox({
         {result.ok && <p className="notice small">{tr(result.ok)}</p>}
         <div className="actions">
           {channel === "email" ? (
-            <button type="submit" className="btn btn-primary" disabled={pending || !emailReady}>
-              {pending ? tr("Sending…") : tr("Send email")}
-            </button>
+            <>
+              {emailReady && (
+                <button type="submit" className="btn btn-primary" disabled={pending}>
+                  {pending ? tr("Sending…") : tr("Send email")}
+                </button>
+              )}
+              <button
+                type="button"
+                className={emailReady ? "btn" : "btn btn-primary"}
+                disabled={pending}
+                onClick={(e) => openMailApp(e.currentTarget.form)}
+              >
+                {tr("Open my mail app")}
+              </button>
+            </>
           ) : mode === "api" ? (
             <button type="submit" className="btn btn-primary" disabled={pending}>
               {pending ? tr("Sending…") : tr("Send WhatsApp")}
@@ -118,7 +145,9 @@ export function ReplyBox({
           )}
         </div>
         {channel === "email" && !emailReady && (
-          <p className="small muted">{tr("Email sending is not set up yet. See Inbox → Setup.")}</p>
+          <p className="small muted">
+            {tr("Sending from the app is not set up yet (see Inbox → Setup). Your mail app opens with the reply filled in; it is noted here as sent by hand.")}
+          </p>
         )}
         {channel === "whatsapp" && mode === "link" && (
           <p className="small muted">

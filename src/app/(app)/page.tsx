@@ -19,6 +19,7 @@ import { loadRecommendations } from "@/lib/features";
 import { TourInvite } from "@/components/tour/TourButton";
 import { isLevel, levelRank, type Level } from "@/lib/levels";
 import { AdminSummary } from "@/components/AdminSummary";
+import { ComplianceCard } from "@/components/ComplianceCard";
 
 export const metadata = { title: "Home" };
 
@@ -202,6 +203,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       {invitedToTour && <TourInvite tour={level} company={company.id} />}
       {growth && <GrowthCard level={level} featureRecs={growth.featureRecs} featureLevel={growth.featureLevel} levelRec={growth.levelRec} />}
       <AdminSummary />
+      <ComplianceCard />
 
       {(approvals.length > 0 || poApprovals.length > 0) && (
         <section className="card">

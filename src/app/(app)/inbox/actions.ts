@@ -7,7 +7,7 @@ import { formatDateTime, optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { canUseInbox, replyToAddress, type Conversation, type InboxMessage, type InboxSettings } from "@/lib/inbox/common";
 import { addressList, messageIds, quoteForReply, replySubject } from "@/lib/inbox/sanitize";
-import { inboxChannels, sendEmailReply } from "@/lib/inbox/server";
+import { inboxChannels, pollMailbox, sendEmailReply } from "@/lib/inbox/server";
 import { sendWhatsAppText } from "@/lib/inbox/whatsapp";
 
 async function ctx() {
@@ -72,7 +72,7 @@ export async function sendReply(form: FormData): Promise<ReplyResult> {
       fromName: s?.reply_name || company.name,
       inReplyTo,
       references: messageIds(references),
-    });
+    }, s?.inbound_address ?? null);
     const { error } = await supabase.rpc("inbox_record_outbound", {
       p_conversation: c.id,
       p_msg: {
@@ -82,8 +82,9 @@ export async function sendReply(form: FormData): Promise<ReplyResult> {
         subject,
         to: [c.counterpart_address],
         cc,
-        provider: "resend",
+        provider: sent.ok && sent.via === "mailbox" ? "smtp" : "resend",
         provider_message_id: sent.ok ? sent.id : null,
+        message_id: sent.ok ? sent.messageId : null,
         from: sent.ok ? sent.from : null,
         in_reply_to: inReplyTo,
         references,
@@ -129,6 +130,36 @@ export async function recordManualWhatsApp(conversationId: string, text: string)
   });
   refresh(conversationId);
   return error ? { error: friendlyError(error.message) } : { ok: "Noted as sent from WhatsApp." };
+}
+
+/** Opened the phone's mail app with the reply filled in (no sending set up): note it as sent by hand. */
+export async function recordManualEmail(conversationId: string, text: string, subject: string): Promise<ReplyResult> {
+  const { supabase } = await ctx();
+  const body = text.trim();
+  if (!body) return { error: "Write a message first." };
+  const { error } = await supabase.rpc("inbox_record_outbound", {
+    p_conversation: conversationId,
+    p_msg: { status: "manual", text: body, subject: subject.slice(0, 300), provider: "mail_app" },
+  });
+  refresh(conversationId);
+  return error ? { error: friendlyError(error.message) } : { ok: "Noted as sent from your mail app." };
+}
+
+/** Setup page: read the company mailbox now instead of waiting for the next 5-minute check. */
+export async function checkMailboxNow() {
+  const { isManager } = await ctx();
+  if (!isManager) redirect(withNotice("/inbox/setup", { error: "Only management can change the inbox settings." }));
+  const r = await pollMailbox(8_000);
+  revalidatePath("/inbox");
+  revalidatePath("/inbox/setup");
+  redirect(
+    withNotice(
+      "/inbox/setup",
+      r.status === "ok"
+        ? { msg: r.recorded ? `${r.recorded} new email(s) brought into the Inbox.` : "Checked: no new emails." }
+        : { error: r.error ?? r.status },
+    ),
+  );
 }
 
 export async function setConversationStatus(form: FormData) {

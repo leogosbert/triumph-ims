@@ -10,6 +10,7 @@ import { NavProgress } from "@/components/NavProgress";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { onAdminHost } from "@/lib/hosts-server";
+import { getBrand } from "@/lib/brand-server";
 import { AdminHostProvider } from "@/lib/host-client";
 import "./globals.css";
 import "./look.css";
@@ -27,7 +28,24 @@ const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["500", "600"], variabl
  * home-screen name from appleWebApp.title.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const name = (await onAdminHost()) ? "LeMoSp ADMIN" : "LeMoSp";
+  const admin = await onAdminHost();
+  // A company with its own brand (src/lib/brands.ts) installs under its own name and icon.
+  const brand = admin ? null : await getBrand();
+  if (brand) {
+    const dir = `/brands/${brand.key}`;
+    return {
+      title: { default: brand.shortName, template: `%s · ${brand.shortName}` },
+      description: brand.description,
+      applicationName: brand.shortName,
+      manifest: `/manifest.webmanifest?brand=${brand.key}`,
+      icons: {
+        icon: [{ url: `${dir}/favicon-48.png`, sizes: "48x48" }, { url: `${dir}/icon-192.png`, sizes: "192x192" }],
+        apple: `${dir}/icon-180.png`,
+      },
+      appleWebApp: { capable: true, title: brand.shortName, statusBarStyle: "black-translucent" },
+    };
+  }
+  const name = admin ? "LeMoSp ADMIN" : "LeMoSp";
   return {
     title: { default: name, template: `%s · ${name}` },
     description: "LeMoSp, a LeMo Tech Solutions product — sales, procurement, stock, delivery and finance for general supply companies.",

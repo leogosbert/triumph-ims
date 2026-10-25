@@ -1,7 +1,8 @@
-import { aiReady, callClaude } from "@/lib/ai/claude";
-import { askSystem, askUser, cleanAnswer, type PromptSource } from "@/lib/ai/ask-prompt";
+import { AI_TIMEOUT_MS, aiReady, callClaude } from "@/lib/ai/claude";
+import { ANSWER_SCHEMA, askSystem, askUser, checkAnswer, type PromptSource } from "@/lib/ai/ask-prompt";
+import { extractJson } from "@/lib/ai/receipt";
 import { isLegalQuestion, LEGAL_NOTE, searchKnowledge, type KnowledgeItem } from "@/lib/ai/knowledge";
-import { findGuide, findPages, findRecords, guideHref, type Hit, type HitGroup, type SearchCtx } from "@/lib/ai/search";
+import { appSections, findGuide, findPages, findRecords, guideHref, type Hit, type HitGroup, type SearchCtx } from "@/lib/ai/search";
 import { builtInAnswer, detectTopic, type Answer } from "@/lib/assistant";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
@@ -24,7 +25,14 @@ export type StatusRow = { label: string; value: string; href?: string; tone?: "o
 export type AskAnswer = {
   question: string;
   title: string;
+  /** The answer in a few sentences, with [n] source numbers (the intro). */
   text: string;
+  /** Numbered steps; `to` opens the screen for that step. */
+  steps: { text: string; to?: string }[];
+  /** Where the answer lives in the app: breadcrumb and route. */
+  where?: { path: string[]; to: string };
+  /** Short questions to ask next. */
+  followups: string[];
   ai: boolean;
   /** A documentation, legal or tax question: show the "guidance, not legal advice" note. */
   legal: boolean;
@@ -189,55 +197,85 @@ export async function askBusiness(
   for (const p of pages.slice(0, 3)) add({ kind: "screen", title: p.title, href: p.href }, `${p.title}: ${p.sub}`);
   for (const g of records) for (const h of g.hits.slice(0, 2)) add({ kind: "record", title: `${tr(g.title)}: ${h.title}`, href: h.href }, `${g.title}: ${h.title} ${h.sub} ${h.side ?? ""}`);
 
+  const guideView = guideFound.map((g) => ({
+    title: tr(g.topic.title),
+    href: g.topic.href ?? guideHref(g.topic),
+    summary: tr(g.topic.summary),
+    steps: g.topic.steps.map(tr),
+    where: g.topic.laptop.map(tr).join(" → "),
+    path: g.topic.laptop.map(tr),
+  }));
+  const isLegal = legal || rulesFound.length > 0;
   const base: AskAnswer = {
     question,
-    title: usefulFigures?.title ?? (legal && rulesFound.length ? tr("Documents and rules that apply") : guideFound.length ? tr("From the App guide") : tr("What I found")),
+    title: usefulFigures?.title ?? (isLegal && rulesFound.length ? tr("Documents and rules that apply") : guideFound.length ? tr(guideFound[0].topic.title) : tr("What I found")),
     text: "",
+    steps: [],
+    followups: [],
     ai: false,
-    legal: legal || rulesFound.length > 0,
-    legalNote: legal || rulesFound.length > 0 ? tr(LEGAL_NOTE) : undefined,
+    legal: isLegal,
+    legalNote: isLegal ? tr(LEGAL_NOTE) : undefined,
     sources,
     figures: usefulFigures,
-    guide: guideFound.map((g) => ({
-      title: tr(g.topic.title),
-      href: g.topic.href ?? guideHref(g.topic),
-      summary: tr(g.topic.summary),
-      steps: g.topic.steps.map(tr),
-      where: g.topic.laptop.map(tr).join(" → "),
-    })),
+    guide: guideView.map((g) => ({ title: g.title, href: g.href, summary: g.summary, steps: g.steps, where: g.where })),
     rules: rulesFound.map((k) => ruleView(k.item, complianceOn)),
     status,
     pages,
     records,
   };
 
-  // The built-in answer.
-  base.text = usefulFigures
-    ? usefulFigures.text
-    : rulesFound.length
-      ? tr("These requirements match your question. Each lists the documents to keep ready; open one to see more.")
-      : guideFound.length
-        ? `${tr(guideFound[0].topic.title)}: ${tr(guideFound[0].topic.summary)}`
-        : pages.length || records.length
-          ? tr("These screens and records match your question.")
-          : tr("I could not find an answer to that. Try other words, ask about money owed, sales or stock, or open the App guide.");
+  // The built-in answer: the best match as title, intro, steps and where (like Cocozania's best-match card).
+  const top = rulesFound[0]?.item;
+  if (usefulFigures) {
+    base.text = usefulFigures.text;
+    const to = usefulFigures.links?.[0]?.href;
+    if (to) base.where = { path: [usefulFigures.links![0].label], to };
+  } else if (top && (legal || !guideFound.length)) {
+    base.text = `${tr(top.summary)}${top.when ? ` ${tr("When")}: ${tr(top.when)}` : ""}`.trim();
+    base.title = tr(top.title);
+    base.steps = top.documents.slice(0, 12).map((d) => ({ text: tr(d), to: complianceOn ? top.href : "/documents" }));
+    base.where = complianceOn ? { path: [tr("Legal & compliance")], to: top.href } : { path: [tr("Documents")], to: "/documents" };
+  } else if (guideView.length) {
+    const g = guideView[0];
+    base.text = g.summary;
+    base.steps = g.steps.slice(0, 10).map((t) => ({ text: t }));
+    base.where = { path: g.path, to: g.href };
+  } else if (pages.length || records.length) {
+    base.text = tr("These screens and records match your question.");
+    if (pages[0]) base.where = { path: [pages[0].side ?? "", pages[0].title].filter(Boolean), to: pages[0].href };
+  } else {
+    base.text = tr("I could not find an answer to that. Try other words, ask about money owed, sales or stock, or open the App guide.");
+  }
+  base.followups = (isLegal
+    ? ["What do I need ready for a TRA audit?", "When is VAT due?", "What documents do I need to tender to government?"]
+    : ["How is the business doing?", "Who owes us money?", "How do I record an expense?"]
+  )
+    .filter((f) => f.toLowerCase() !== question.toLowerCase())
+    .slice(0, 3)
+    .map(tr);
 
-  // Worded by the AI service, when allowed.
-  if (opts.allowAi !== false && aiReady() && ctx.features.on("ai_assistant") && ctx.role !== "driver" && question && prompt.length) {
+  // Worded by the AI service, when allowed. Like Cocozania, the AI also answers when nothing matched:
+  // it gets the list of screens this person can open, so it can say plainly what the app does not do yet.
+  if (opts.allowAi !== false && aiReady() && ctx.features.on("ai_assistant") && ctx.role !== "driver" && question) {
     const { data: allowed, error } = await ctx.supabase.rpc("use_assistant", { p_company: ctx.company.id });
     if (error || allowed !== true) {
       base.notice = tr("Today's AI questions are used up; this answer is from the built-in search.");
       return base;
     }
+    const sections = appSections(ctx);
+    const routes = [...new Set([...sections.map((x) => x.href), ...sources.map((x) => x.href).filter((h): h is string => !!h), "/guide", "/search", "/assistant", ...(complianceOn ? ["/compliance"] : [])])];
+    const withScreens = [...prompt, { n: prompt.length + 1, kind: "app_sections", title: "Screens in the app", body: sections.map((x) => `${x.path.join(" → ")}: ${x.href}`).join("\n") }];
     const res = await callClaude({
-      system: askSystem({ company: ctx.company.name, lang, today, legal: base.legal }),
-      content: [{ type: "text", text: askUser(question, prompt) }],
-      maxTokens: 3000,
-      timeoutMs: 20000,
+      system: askSystem({ company: ctx.company.name, lang, today, legal: base.legal, routes }),
+      content: [{ type: "text", text: askUser(question, withScreens) }],
+      maxTokens: 1500,
+      timeoutMs: AI_TIMEOUT_MS,
+      schema: ANSWER_SCHEMA as unknown as Record<string, unknown>,
+      effort: "low",
     });
     if (res.ok) {
-      const text = cleanAnswer(res.text, sources.length);
-      if (text) return { ...base, text, ai: true };
+      const a = checkAnswer(extractJson(res.text), routes, sources.length);
+      if (a) return { ...base, title: a.title, text: a.intro, steps: a.steps, where: a.where ?? base.where, followups: a.followups.length ? a.followups : base.followups, ai: true };
     }
   }
   return base;

@@ -2,21 +2,48 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import type { AskAnswer } from "@/lib/ai/ask";
-import { askQuestion, quickSearch, type QuickResults } from "@/lib/ai/ask-actions";
+import { askQuestion, quickSearch, sendWish, type QuickResults } from "@/lib/ai/ask-actions";
 import { useTr } from "@/lib/tr-client";
 import { AnswerView } from "./AnswerView";
 import s from "./AskBox.module.css";
 
 type Item = { href: string; title: string; sub: string; side?: string; group: string };
 
+const RECENT = "lemosp.search.recent";
+const recent = (): string[] => {
+  try {
+    const v = JSON.parse(localStorage.getItem(RECENT) || "[]");
+    return Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(0, 6) : [];
+  } catch {
+    return [];
+  }
+};
+const remember = (q: string) => {
+  try {
+    localStorage.setItem(RECENT, JSON.stringify([q, ...recent().filter((x) => x !== q)].slice(0, 6)));
+  } catch {
+    /* private mode */
+  }
+};
+
+export const ASK_EXAMPLES = [
+  "Who owes us money?",
+  "What documents do I need to supply lubricants to a mine?",
+  "What do I need ready for a TRA audit?",
+  "When is VAT due?",
+  "How do I record an expense?",
+  "What should we reorder?",
+];
+
 /**
- * The search-and-ask box for the top bar. As you type it shows matching screens, App guide topics and
- * records; Enter (or "Ask") answers the question about the business in a panel below, with sources.
- * Arrow keys move through the matches; Enter on a match opens it; Escape closes.
- * `placeholder` overrides the default hint; `autoFocus` for a dedicated search screen.
+ * Search and Ask AI in one box, for the top bar (works like Cocozania's Tafuta). As you type it shows
+ * matching screens, App guide topics and records; questions about the figures (money owed, sales,
+ * stock…) are answered at once from the records. Enter or "Ask AI" answers anything about the business
+ * with sources. When nothing in the app matches, the AI answers by itself after a moment, and the words
+ * can be sent to the Suggestion Box as a wish for the app. Arrow keys move through the matches; Escape closes.
  */
 export function AskBox({ placeholder, autoFocus = false, className }: { placeholder?: string; autoFocus?: boolean; className?: string }) {
   const tr = useTr();
@@ -29,13 +56,16 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
   const [quick, setQuick] = useState<QuickResults | null>(null);
   const [active, setActive] = useState(-1);
   const [answer, setAnswer] = useState<AskAnswer | null>(null);
+  const [asking, setAsking] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
-  const [asking, startAsk] = useTransition();
+  const [wished, setWished] = useState("");
+  const [recents, setRecents] = useState<string[]>([]);
   const seq = useRef(0);
+  const asked = useRef<string | null>(null);
+  const text = q.trim();
 
   // Instant matches, a moment after typing stops.
   useEffect(() => {
-    const text = q.trim();
     if (text.length < 2) {
       setQuick(null);
       return;
@@ -50,7 +80,42 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
       }
     }, 250);
     return () => clearTimeout(t);
-  }, [q]);
+  }, [text]);
+
+  const ask = async (question: string, ai: boolean) => {
+    const qq = question.trim();
+    if (qq.length < 2) return;
+    asked.current = `${ai ? "ai" : "fig"}:${qq}`;
+    setOpen(true);
+    setFailed(false);
+    setAsking(qq);
+    if (ai) remember(qq);
+    try {
+      const a = await askQuestion(qq, ai);
+      if (asked.current === `${ai ? "ai" : "fig"}:${qq}`) setAnswer(a);
+    } catch {
+      setFailed(true);
+    } finally {
+      setAsking((cur) => (cur === qq ? null : cur));
+    }
+  };
+
+  // Questions about the figures are answered at once from the records (no AI allowance used).
+  useEffect(() => {
+    if (!quick || quick.q !== text || !quick.figures || answer?.question === text) return;
+    const t = setTimeout(() => ask(text, false), 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quick]);
+
+  // Nothing in the app matches a real question: the AI takes over by itself after a moment.
+  const stuck = !!quick && quick.q === text && quick.aiOn && !quick.figures && quick.pages.length + quick.guide.length + quick.records.length === 0 && text.split(" ").length >= 3;
+  useEffect(() => {
+    if (!stuck || asked.current === `ai:${text}`) return;
+    const t = setTimeout(() => ask(text, true), 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stuck, text]);
 
   // Close when tapping elsewhere.
   useEffect(() => {
@@ -73,24 +138,22 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
       ].slice(0, 14)
     : [];
 
-  const ask = () => {
-    const text = q.trim();
-    if (text.length < 2 || asking) return;
-    setOpen(true);
-    setFailed(false);
-    setAnswer(null);
-    startAsk(async () => {
-      try {
-        setAnswer(await askQuestion(text));
-      } catch {
-        setFailed(true);
-      }
-    });
-  };
-
   const close = () => {
     setOpen(false);
     setActive(-1);
+  };
+  const go = (href: string) => {
+    if (text) remember(text);
+    close();
+    router.push(href);
+  };
+  const setQuestion = (v: string) => {
+    setQ(v);
+    setOpen(true);
+    setActive(-1);
+    setAnswer(null);
+    setFailed(false);
+    input.current?.focus();
   };
 
   const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -106,14 +169,18 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
       input.current?.blur();
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (active >= 0 && items[active]) {
-        close();
-        router.push(items[active].href);
-      } else ask();
+      if (active >= 0 && items[active]) go(items[active].href);
+      else ask(text, true);
     }
   };
 
-  const showPanel = open && (q.trim().length >= 2 || answer || asking);
+  const wish = async () => {
+    const r = await sendWish(text);
+    if (r.ok) setWished(text);
+  };
+
+  const nothing = !!quick && quick.q === text && items.length === 0 && !quick.figures;
+  const showAnswer = !!asking || !!answer || failed;
   let lastGroup = "";
 
   return (
@@ -123,35 +190,64 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
         <input
           ref={input}
           type="search"
+          enterKeyHint="search"
           value={q}
           autoFocus={autoFocus}
           maxLength={500}
-          onChange={(e) => {
-            setQ(e.target.value);
+          onChange={(e) => setQuestion(e.target.value)}
+          onFocus={() => {
             setOpen(true);
-            setActive(-1);
-            if (answer) setAnswer(null);
+            setRecents(recent());
           }}
-          onFocus={() => setOpen(true)}
           onKeyDown={onKey}
           placeholder={placeholder ?? tr("Search or ask anything about the business")}
           aria-label={tr("Search or ask")}
-          aria-expanded={!!showPanel}
+          aria-expanded={open}
           aria-controls={`${id}-panel`}
           aria-autocomplete="list"
           role="combobox"
           aria-activedescendant={active >= 0 ? `${id}-i${active}` : undefined}
         />
-        <button type="button" className={`btn btn-small btn-primary ${s.askBtn}`} onClick={ask} disabled={q.trim().length < 2 || asking}>
+        <button type="button" className={`btn btn-small btn-primary ${s.askBtn}`} onClick={() => ask(text, true)} disabled={text.length < 2 || !!asking}>
           {asking ? "…" : tr("Ask AI")}
         </button>
       </div>
 
-      {showPanel && (
+      {open && (
         <div id={`${id}-panel`} className={`${s.panel} card`}>
-          {(asking || answer || failed) && (
+          {text.length < 2 && !showAnswer && (
+            <div className={s.start}>
+              <p className="small">
+                <strong>{tr("Search and Ask AI in one place")}</strong>
+                <br />
+                <span className="muted">{tr("Ask how to do something, ask about your business or the documents you need, in English, Kiswahili or both.")}</span>
+              </p>
+              {recents.length > 0 && (
+                <>
+                  <p className={s.group}>{tr("Recent")}</p>
+                  <div className={s.chips}>
+                    {recents.map((x) => (
+                      <button key={x} type="button" className="as-chip" onClick={() => setQuestion(x)}>
+                        {x}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+              <p className={s.group}>{tr("Try")}</p>
+              <div className={s.chips}>
+                {ASK_EXAMPLES.map((x) => (
+                  <button key={x} type="button" className="as-chip" onClick={() => setQuestion(tr(x))}>
+                    {tr(x)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {showAnswer && (
             <div className={s.answerWrap} aria-live="polite">
-              {asking ? (
+              {asking && !answer ? (
                 <p className="as-typing" aria-label={tr("Thinking…")}>
                   <span />
                   <span />
@@ -161,26 +257,33 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
                 <p className="muted small">{tr("Something went wrong. Please try again.")}</p>
               ) : answer ? (
                 <>
-                  <AnswerView a={answer} compact onNavigate={close} />
-                  <p className="small">
+                  <AnswerView a={answer} compact onNavigate={close} onAsk={(f) => setQuestion(f)} />
+                  <div className="row small" style={{ gap: 12, flexWrap: "wrap", marginTop: 6 }}>
+                    {!answer.ai && quick?.aiOn && (
+                      <button type="button" className="btn btn-small" onClick={() => ask(answer.question, true)} disabled={!!asking}>
+                        {asking ? "…" : tr("Ask AI")}
+                      </button>
+                    )}
                     <Link href={`/search?q=${encodeURIComponent(answer.question)}&ask=1`} onClick={close}>
                       {tr("Open the full answer")} ›
                     </Link>
-                  </p>
+                  </div>
                 </>
               ) : null}
             </div>
           )}
 
-          {!answer && !asking && (
+          {text.length >= 2 && (
             <>
-              <button type="button" className={s.askRow} onClick={ask}>
-                <Icon name="help" size={18} />
-                <span>
-                  {tr("Ask AI")}: <strong>“{q.trim()}”</strong>
-                </span>
-                <span className="muted small">Enter</span>
-              </button>
+              {!answer && !asking && (
+                <button type="button" className={s.askRow} onClick={() => ask(text, true)}>
+                  <Icon name="help" size={18} />
+                  <span>
+                    {tr("Ask AI")}: <strong>“{text}”</strong>
+                  </span>
+                  <span className="muted small">Enter</span>
+                </button>
+              )}
               {items.length > 0 && (
                 <ul className={s.list} role="listbox">
                   {items.map((it, i) => {
@@ -195,7 +298,10 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
                           aria-selected={i === active}
                           href={it.href}
                           className={`${s.item}${i === active ? ` ${s.active}` : ""}`}
-                          onClick={close}
+                          onClick={() => {
+                            remember(text);
+                            close();
+                          }}
                         >
                           <span className={s.itemMain}>
                             <span className={s.itemTitle}>{it.title}</span>
@@ -208,7 +314,16 @@ export function AskBox({ placeholder, autoFocus = false, className }: { placehol
                   })}
                 </ul>
               )}
-              {quick && items.length === 0 && q.trim().length >= 2 && <p className="muted small">{tr("No screens or records match. Press Enter to ask.")}</p>}
+              {nothing && (
+                <div className={s.wish}>
+                  <span className="muted small">{quick?.aiOn ? tr("Nothing in the app matches. The AI answers in a moment, or press Enter.") : tr("No screens or records match.")}</span>
+                  {quick?.canWish && text.length >= 3 && (
+                    <button type="button" className="btn btn-small" onClick={wish} disabled={wished === text}>
+                      {wished === text ? tr("Sent to the Suggestion Box") : tr("Ask for this in the app")}
+                    </button>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>

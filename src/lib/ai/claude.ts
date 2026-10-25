@@ -12,6 +12,13 @@
 
 export const DEFAULT_MODEL = "claude-opus-5-5";
 
+/**
+ * Each AI call must finish in about 9 seconds end to end: Netlify stops a server function at 10 s, and
+ * people on a phone will not wait longer. The request is cancelled (AbortController) at this limit and
+ * the caller shows "took too long, try a clearer or smaller photo". Keep max_tokens short and effort low.
+ */
+export const AI_TIMEOUT_MS = 8500;
+
 export function aiReady(): boolean {
   return !!process.env.ANTHROPIC_API_KEY;
 }
@@ -73,13 +80,17 @@ async function send(opts: Opts, rich: boolean, signal: AbortSignal): Promise<AiR
 /** One request, one answer. No temperature or other sampling settings: newer models refuse them. */
 export async function callClaude(opts: Opts): Promise<AiResult> {
   if (!aiReady()) return { ok: false, reason: "off" };
-  const signal = AbortSignal.timeout(opts.timeoutMs);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), Math.min(opts.timeoutMs, AI_TIMEOUT_MS));
+  const signal = controller.signal;
   try {
     const first = await send(opts, true, signal);
     if (!first.ok && first.reason === "failed" && first.status === 400) return await send(opts, false, signal);
     return first;
   } catch (e) {
     const name = (e as { name?: string } | null)?.name;
-    return { ok: false, reason: name === "TimeoutError" || name === "AbortError" ? "timeout" : "failed" };
+    return { ok: false, reason: name === "TimeoutError" || name === "AbortError" || signal.aborted ? "timeout" : "failed" };
+  } finally {
+    clearTimeout(timer);
   }
 }

@@ -2,12 +2,28 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ScanDocument } from "@/components/ai/ScanDocument";
 import { useTr } from "@/lib/tr-client";
 import { createDocument } from "./actions";
 import { DocumentFields, type DocValues, type LinkOptions } from "./DocumentFields";
 import { uploadDocumentFile } from "./upload";
 
-export function NewDocumentForm({ companyId, start, links, back }: { companyId: string; start: DocValues; links: LinkOptions; back: string | null }) {
+export function NewDocumentForm({
+  companyId,
+  start,
+  links,
+  back,
+  aiOn = false,
+  isManager = false,
+}: {
+  companyId: string;
+  start: DocValues;
+  links: LinkOptions;
+  back: string | null;
+  /** The AI service is set up (ANTHROPIC_API_KEY): a chosen photo or PDF is read and fills the form. */
+  aiOn?: boolean;
+  isManager?: boolean;
+}) {
   const tr = useTr();
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
@@ -52,6 +68,7 @@ export function NewDocumentForm({ companyId, start, links, back }: { companyId: 
         />
         <span className="hint">{fileName ?? tr("PDF, photo, Word or Excel, up to 20 MB. You can also add the file later.")}</span>
       </div>
+      <ScanDocument enabled={aiOn} isManager={isManager} watchFile="file" />
       <DocumentFields v={start} links={links} />
       {error && <div className="banner warn small">{tr(error)}</div>}
       <button type="submit" className="btn btn-primary btn-block" disabled={!!busy} aria-busy={!!busy}>

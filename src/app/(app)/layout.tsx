@@ -16,6 +16,9 @@ import { getBackgroundPref } from "@/lib/background";
 import { AppBackground } from "@/components/AppBackground";
 import { getLookPref } from "@/lib/look-server";
 import { GlassSplash } from "@/components/GlassSplash";
+import { BrandCookie } from "@/components/BrandCookie";
+import { AskBox } from "@/components/ai/AskBox";
+import { brandForCompany } from "@/lib/brands";
 import { SectionTracker } from "@/components/SectionTracker";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { brandingUrl, getAppContext } from "@/lib/context";
@@ -121,7 +124,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {look === "glass" && (
         <>
           <SectionTracker />
-          <GlassSplash logo={logo} name={company.name} />
+          <GlassSplash logo={logo} name={company.name} tagline={`${t["shell.poweredBy"]} LeMoSp`} />
         </>
       )}
       <SideNav look={look} items={sideNav(role, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled), isManager)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
@@ -134,10 +137,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <span>{t[`role.${role}` as Key]}</span>
             </span>
           </CompanyButton>
-          <form action="/search" className="topbar-search" role="search">
-            <Icon name="search" size={18} />
-            <input type="search" name="q" placeholder={t["shell.searchPlaceholder"]} aria-label={t["shell.search"]} />
-          </form>
+          <AskBox className="topbar-search" placeholder={t["shell.searchPlaceholder"]} />
           <div className="topbar-actions">
             <Link href="/search" className="icon-btn only-phone" aria-label={t["shell.search"]}>
               <Icon name="search" />
@@ -178,6 +178,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <main className="page">{children}</main>
       </div>
       <CompanySheet card={card} />
+      <BrandCookie brand={company.is_demo ? null : (brandForCompany(company.id)?.key ?? null)} />
       <IdleGuard minutes={company.idle_timeout_minutes ?? 0} />
       <PrivacyScreen />
       <AppLock

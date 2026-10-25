@@ -15,58 +15,80 @@ const KIND_LABEL: Record<AskSource["kind"], string> = {
   record: "Record",
 };
 
-function Cite({ ns, sources, onNavigate }: { ns: number[]; sources: AskSource[]; onNavigate?: () => void }) {
+/** Text with [n] source numbers turned into small links to the source. */
+function Cited({ text, sources, onNavigate }: { text: string; sources: AskSource[]; onNavigate?: () => void }) {
   return (
     <>
-      {ns.map((n) => {
-        const src = sources.find((x) => x.n === n);
-        if (!src) return null;
-        return src.href ? (
-          <Link key={n} href={src.href} className={s.cite} title={src.title} onClick={onNavigate}>
-            {n}
-          </Link>
+      {citationParts(text).map((p, j) =>
+        typeof p === "string" ? (
+          <span key={j}>{p}</span>
         ) : (
-          <span key={n} className={s.cite} title={src.title}>
-            {n}
-          </span>
-        );
-      })}
+          p.map((n) => {
+            const src = sources.find((x) => x.n === n);
+            if (!src) return null;
+            return src.href ? (
+              <Link key={`${j}-${n}`} href={src.href} className={s.cite} title={src.title} onClick={onNavigate}>
+                {n}
+              </Link>
+            ) : (
+              <span key={`${j}-${n}`} className={s.cite} title={src.title}>
+                {n}
+              </span>
+            );
+          })
+        ),
+      )}
     </>
   );
 }
 
-/** One answer: the text with numbered sources, then the figures, rules, checklist, guide steps and matches behind it. */
-export function AnswerView({ a, onNavigate, compact = false }: { a: AskAnswer; onNavigate?: () => void; compact?: boolean }) {
+/**
+ * One answer, laid out like Cocozania's search cards: title, a short intro, numbered steps (each can open
+ * its screen), a button to the screen where it lives, follow-up questions, then the figures, the company's
+ * checklist and the numbered sources behind it.
+ */
+export function AnswerView({ a, onNavigate, onAsk, compact = false }: { a: AskAnswer; onNavigate?: () => void; onAsk?: (q: string) => void; compact?: boolean }) {
   const tr = useTr();
-  const lines = a.text.split("\n");
-  const list: React.ReactNode[] = [];
-  let bullets: React.ReactNode[] = [];
-  const flush = () => {
-    if (bullets.length) list.push(<ul key={`u${list.length}`}>{bullets}</ul>);
-    bullets = [];
-  };
-  lines.forEach((line, i) => {
-    const t = line.trim();
-    if (!t) return flush();
-    const body = citationParts(t.replace(/^[-•*]\s+/, "")).map((p, j) =>
-      typeof p === "string" ? <span key={j}>{p}</span> : <Cite key={j} ns={p} sources={a.sources} onNavigate={onNavigate} />,
-    );
-    if (/^[-•*]\s+/.test(t)) bullets.push(<li key={i}>{body}</li>);
-    else {
-      flush();
-      list.push(<p key={i}>{body}</p>);
-    }
-  });
-  flush();
-
-  const limit = compact ? 3 : 50;
+  const paras = a.text.split(/\n+/).filter((l) => l.trim());
+  const moreRules = a.rules.slice(a.ai ? 0 : 1);
   return (
     <article className={s.answer}>
       <header className={s.answerHead}>
         <strong>{a.title}</strong>
         {a.ai ? <span className="badge tone-ok">{tr("AI")}</span> : <span className="badge tone-off">{tr("Built-in")}</span>}
       </header>
-      <div className={s.text}>{list}</div>
+      <div className={s.text}>
+        {paras.map((p, i) => (
+          <p key={i}>
+            <Cited text={p.replace(/^[-•*]\s+/, "")} sources={a.sources} onNavigate={onNavigate} />
+          </p>
+        ))}
+      </div>
+
+      {a.steps.length > 0 && (
+        <ol className={s.steps}>
+          {a.steps.slice(0, compact ? 6 : 12).map((st, i) => (
+            <li key={i}>
+              {st.to ? (
+                <Link href={st.to} onClick={onNavigate}>
+                  <Cited text={st.text} sources={a.sources} />
+                </Link>
+              ) : (
+                <Cited text={st.text} sources={a.sources} onNavigate={onNavigate} />
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {a.where && (
+        <p>
+          <Link href={a.where.to} className="btn btn-primary btn-small" onClick={onNavigate}>
+            {a.where.path.map(tr).join(" → ")} ›
+          </Link>
+        </p>
+      )}
+
       {a.notice && <p className="small muted">{a.notice}</p>}
 
       {a.figures?.rows && a.figures.rows.length > 0 && (
@@ -89,39 +111,6 @@ export function AnswerView({ a, onNavigate, compact = false }: { a: AskAnswer; o
         </ul>
       )}
 
-      {!a.ai && a.rules.length > 0 && (
-        <div className={s.block}>
-          {a.rules.slice(0, limit).map((r) => (
-            <section key={r.title} className={s.rule}>
-              <p>
-                <Link href={r.href} onClick={onNavigate}>
-                  <strong>{tr(r.title)}</strong>
-                </Link>
-                {r.authority && <span className="muted"> · {tr(r.authority)}</span>}
-              </p>
-              {r.summary && <p className="small">{tr(r.summary)}</p>}
-              {r.when && (
-                <p className="small">
-                  <strong>{tr("When")}:</strong> {tr(r.when)}
-                </p>
-              )}
-              {r.verify && (
-                <p className="small muted">
-                  {tr("To confirm with the authority")}: {tr(r.verify)}
-                </p>
-              )}
-              {r.documents.length > 0 && (
-                <ul className="small">
-                  {r.documents.slice(0, compact ? 5 : 20).map((d) => (
-                    <li key={d}>{tr(d)}</li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          ))}
-        </div>
-      )}
-
       {a.status.length > 0 && (
         <div className={s.block}>
           <p className="small">
@@ -140,27 +129,42 @@ export function AnswerView({ a, onNavigate, compact = false }: { a: AskAnswer; o
         </div>
       )}
 
-      {!a.ai && !a.figures && a.guide.length > 0 && (
+      {!compact && !a.ai && a.rules[0]?.verify && (
+        <p className="small muted">
+          {tr("To confirm with the authority")}: {tr(a.rules[0].verify)}
+        </p>
+      )}
+
+      {!compact && moreRules.length > 0 && (
         <div className={s.block}>
-          {a.guide.slice(0, compact ? 1 : 3).map((g) => (
-            <section key={g.href}>
-              <p className="small">
-                <Link href={g.href} onClick={onNavigate}>
-                  <strong>{g.title}</strong>
+          <p className="small">
+            <strong>{tr("Also applies")}</strong>
+          </p>
+          <ul className="small">
+            {moreRules.map((r) => (
+              <li key={r.title}>
+                <Link href={r.href} onClick={onNavigate}>
+                  {tr(r.title)}
                 </Link>
-                {g.where && <span className="muted"> · {g.where}</span>}
-              </p>
-              <ol className="small">
-                {g.steps.slice(0, compact ? 4 : 12).map((st, i) => (
-                  <li key={i}>{st}</li>
-                ))}
-              </ol>
-            </section>
-          ))}
+                {r.authority && <span className="muted"> · {tr(r.authority)}</span>}
+                {r.when && <span className="muted"> · {tr(r.when)}</span>}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
       {a.legal && a.legalNote && <p className={`small ${s.legal}`}>{a.legalNote}</p>}
+
+      {a.followups.length > 0 && onAsk && (
+        <div className={s.chips}>
+          {a.followups.map((f) => (
+            <button key={f} type="button" className="as-chip" onClick={() => onAsk(f)}>
+              {f}
+            </button>
+          ))}
+        </div>
+      )}
 
       {a.sources.length > 0 && (
         <details className={s.sources} open={!compact}>

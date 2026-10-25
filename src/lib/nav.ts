@@ -11,7 +11,7 @@ const allOn: FeatureCheck = () => true;
 
 const M = {
   home: ["/"],
-  sales: ["/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
+  sales: ["/inbox", "/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
   clients: ["/clients"],
   products: ["/products"],
   purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers", "/requisitions", "/approvals"],
@@ -21,7 +21,7 @@ const M = {
   services: ["/jobs", "/maintenance", "/equipment", "/projects", "/timesheets", "/hire", "/service-reports"],
   reports: ["/reports", "/head-office", "/scheduled-reports"],
   admin: ["/hr", "/hse", "/quality"],
-  more: ["/more", "/hr", "/hse", "/quality", "/guide", "/documents", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
+  more: ["/more", "/hr", "/hse", "/quality", "/guide", "/documents", "/compliance", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
 };
 
 /** The screens behind each menu section (read by src/lib/scenes.ts to colour and picture each section). */

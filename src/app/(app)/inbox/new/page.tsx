@@ -1,13 +1,13 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { canUseInbox } from "@/lib/inbox/common";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { clientOptions } from "@/lib/options";
 import { startConversation } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New message" };
 
@@ -17,8 +17,8 @@ export default async function NewConversationPage({ searchParams }: { searchPara
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canUseInbox(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canUseInbox(roles)) noAccess();
   const channel = pick(sp.channel) === "whatsapp" ? "whatsapp" : "email";
   const link = /^(client|supplier):[0-9a-f-]{36}$/i.test(pick(sp.link)) ? pick(sp.link) : "";
   const [clients, { data: suppliers }] = await Promise.all([
@@ -43,9 +43,7 @@ export default async function NewConversationPage({ searchParams }: { searchPara
 
   return (
     <>
-      <p className="small">
-        <Link href="/inbox">{tr("← Inbox")}</Link>
-      </p>
+      <BackLink href="/inbox" label="Inbox" />
       <h1>{tr("New message")}</h1>
       <p className="muted small">{tr("Start a conversation with a client or supplier. You write the message on the next screen.")}</p>
       <Notice {...notice} />

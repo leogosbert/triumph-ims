@@ -2,8 +2,10 @@
  * AI for meetings, on the server only (uses src/lib/ai/claude.ts; ANTHROPIC_API_KEY never reaches the browser).
  *   rankAgenda     "Suggest topics": the business items found in the company's data, phrased and ranked by the AI
  *                  (8.5 s limit). Without AI, or when it does not answer, the items are ranked by weight.
- *   minutesInline  short meetings: the minutes written within one screen request (8.5 s). Long meetings go to the
- *                  Netlify background function (netlify/functions/meeting-minutes-background.mts).
+ *   minutesInline  the minutes written within one screen request (8.5 s), only off Netlify or when the background
+ *                  function cannot be reached. On Netlify the minutes are written by the background function
+ *                  (netlify/functions/meeting-minutes-background.mts): paragraph minutes take longer than 8.5 s.
+ * The prompts read Kiswahili, Sheng and mixed Kiswahili/English (SWAHILI_GUIDE in src/lib/meetings/minutes-core.ts).
  * The answers are checked by hand-written code before anything is shown or saved; nothing changes until a person
  * approves it.
  */
@@ -11,6 +13,7 @@
 import { AI_TIMEOUT_MS, aiReady, callClaude } from "@/lib/ai/claude";
 import type { AgendaCandidate } from "@/lib/meetings/model";
 import { MINUTES_SCHEMA, MINUTES_SYSTEM, minutesUserText, parseJsonReply, validateMinutes, type MinutesBrief, type MinutesPayload } from "@/lib/meetings/minutes-core";
+import { RECORDING_SUMMARY_SCHEMA, RECORDING_SUMMARY_SYSTEM, recordingSummaryUser, validateRecordingSummary, type RecordingBrief } from "@/lib/meetings/recording-core";
 
 const AGENDA_SCHEMA = {
   type: "object",
@@ -29,9 +32,10 @@ const AGENDA_SCHEMA = {
   additionalProperties: false,
 };
 
-const AGENDA_SYSTEM = `You help the manager of a general supply company in Tanzania prepare a meeting agenda.
-You get business items found in the company's own data. Rank them by what most needs the team's attention now (money and safety first, then late work, then the rest) and rewrite each title in short, plain English (at most 12 words).
-Give "why" as one short sentence on why it matters now. Use only the facts given; never invent numbers, names or items. Return only the keys you were given.`;
+export const AGENDA_SYSTEM = `You help the manager of a general supply company in Tanzania prepare a meeting agenda.
+You get business items found in the company's own data. Some were typed in Kiswahili, Sheng or mixed Kiswahili and English (for example "Mteja hajalipa invoice ya Oktoba", "mzigo wa grease umechelewa"); you understand them fluently.
+Rank them by what most needs the team's attention now (money and safety first, then late work, then the rest) and rewrite each title in short, plain English (at most 12 words).
+Give "why" as one short sentence on why it matters now. Keep names, amounts (TZS), dates and product names exactly as given. Use only the facts given; never invent numbers, names or items. Return only the keys you were given.`;
 
 /** Ranked by the item's own weight (3 = urgent), follow-ups first within the same weight. */
 export function rankByWeight(items: AgendaCandidate[]): AgendaCandidate[] {
@@ -94,5 +98,18 @@ export async function minutesInline(brief: MinutesBrief): Promise<{ ok: true; mi
   return minutes ? { ok: true, minutes } : { ok: false, reason: "failed" };
 }
 
-/** Meetings with more than this much text go to the background function when it is available. */
-export const INLINE_LIMIT_CHARS = 6000;
+/** "Summarize this recording" within one screen request (short recordings, or off Netlify). */
+export async function recordingSummaryInline(b: RecordingBrief): Promise<{ ok: true; summary: string; summary_sw: string } | { ok: false; reason: string }> {
+  if (!aiReady()) return { ok: false, reason: "off" };
+  const res = await callClaude({
+    system: RECORDING_SUMMARY_SYSTEM,
+    content: [{ type: "text", text: recordingSummaryUser(b) }],
+    maxTokens: 1800,
+    timeoutMs: AI_TIMEOUT_MS,
+    schema: RECORDING_SUMMARY_SCHEMA,
+    effort: "low",
+  });
+  if (!res.ok) return { ok: false, reason: res.reason };
+  const v = validateRecordingSummary(parseJsonReply(res.text), b.swahili);
+  return v ? { ok: true, ...v } : { ok: false, reason: "failed" };
+}

@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { getAppContext } from "@/lib/context";
@@ -9,6 +8,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { removeRate, saveRate } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Exchange rates" };
 
@@ -17,8 +17,8 @@ type Rate = { id: string; currency: string; rate: number; updated_at: string; up
 export default async function RatesPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  const edit = can(role, "seeFinance");
+  const { supabase, company, roles } = await getAppContext();
+  const edit = can(roles, "seeFinance");
   const { data } = await supabase.from("exchange_rates").select("id, currency, rate, updated_at, updated_by").eq("company_id", company.id).order("currency");
   const rates = (data ?? []) as Rate[];
   const names = await namesFor(supabase, rates.map((r) => r.updated_by));
@@ -26,9 +26,7 @@ export default async function RatesPage({ searchParams }: { searchParams: Search
 
   return (
     <>
-      <p className="small">
-        <Link href={edit ? "/finance" : "/more"}>← {edit ? tr("Finance") : tr("More")}</Link>
-      </p>
+      <BackLink href={edit ? "/finance" : "/more"} label={edit ? "Finance" : "More"} />
       <h1>{tr("Exchange rates")}</h1>
       <p className="muted small">{tr("How many")}{" "}{base}{" "}{tr("for 1 unit of each currency. Quotations, purchase orders, invoices, bills and costs in a foreign currency take this rate automatically, and can only differ from it by up to 10%. This keeps approval limits, credit limits and margins honest.")}{" "}{edit ? tr("Update rates when the bank rate moves.") : tr("Only management and finance can change them.")}
       </p>

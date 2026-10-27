@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysUntil, isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -24,8 +23,8 @@ type ExpLicence = { id: string; name: string; authority: string | null; expires_
 export default async function CompliancePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) noAccess();
 
   // Bring the calendar up to date first (harmless when nothing repeats).
   const refresh = await supabase.rpc("compliance_refresh_calendar", { p_company: company.id });
@@ -144,7 +143,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: S
         </>
       )}
 
-      {s.set_up && <LegalHealth supabase={supabase} company={company} role={role} isManager={isManager} rules={rules} today={today} />}
+      {s.set_up && <LegalHealth supabase={supabase} company={company} role={roles} isManager={isManager} rules={rules} today={today} />}
 
       {(filings.length > 0 || items.length > 0) && (
         <section className="card">

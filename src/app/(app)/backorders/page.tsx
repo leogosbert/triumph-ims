@@ -1,15 +1,15 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { chunk, formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { quoteNo } from "@/lib/sales";
 import { fmtQty } from "@/lib/stock";
 import { newDelivery } from "../deliveries/actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Still to deliver" };
 
@@ -28,8 +28,8 @@ type DLine = { quotation_line_id: string; quantity: number; delivery: { status: 
 export default async function BackordersPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeDeliveries")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeDeliveries")) noAccess();
   const { data: qData, error } = await supabase
     .from("quotations")
     .select("id, number, revision, decided_at, updated_at, client:clients(name), lines:quotation_lines(id, line_no, product_id, description, quantity, unit)")
@@ -71,13 +71,11 @@ export default async function BackordersPage({ searchParams }: { searchParams: S
         .sort((a, b) => a.line_no - b.line_no),
     }))
     .filter((q) => q.lines.length > 0);
-  const canDeliver = can(role, "editDeliveries");
+  const canDeliver = can(roles, "editDeliveries");
 
   return (
     <>
-      <p className="small">
-        <Link href="/deliveries">{tr("← Deliveries")}</Link>
-      </p>
+      <BackLink href="/deliveries" label="Deliveries" />
       <h1>{tr("Still to deliver")}</h1>
       <p className="muted small">{tr("Accepted quotations whose goods have not all gone out yet, with the stock you have now.")}</p>
       <Notice {...notice} />

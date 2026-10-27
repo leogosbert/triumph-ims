@@ -1,24 +1,111 @@
 /* =====================================================================
-   LeMoSp polish (v1.21.3): cool colour blends drawn from each company's own
-   --brand, screens that fade in, pills that glide and snap between menu items,
-   gentle magnifying on menus and actions, and cards that fade up as they
-   scroll into view. Motion stops for prefers-reduced-motion.
+   LeMoSp polish (v1.25): one colour system and quick, light motion for both styles.
+
+   - Tokens on :root (light) and [data-theme="dark"]: accent gradients mixed from each company's
+     own --brand, status colours (success / warning / danger / info, each with a background and an
+     edge), chart colours, and a section accent (--sec, which Glass blends between sections).
+     Text colours on their own backgrounds meet WCAG AA (4.5:1) in both themes.
+   - Applied to the shared pieces: cards, buttons, chips and filter tabs, badges, KPI tiles, tables,
+     notices, empty states, fields and the phone bar.
+   - Motion: a screen change is a 160 ms fade and a small rise; taps answer at once (a press you can
+     see within one frame); nothing waits for scrolling to appear. prefers-reduced-motion: none.
    ===================================================================== */
 :root {
+  /* Status (aliases of the existing --ok / --warn / --err so older rules follow along) */
+  --success: var(--ok);
+  --success-bg: var(--ok-bg);
+  --success-line: #a6dcc0;
+  --warning: var(--warn);
+  --warning-bg: var(--warn-bg);
+  --warning-line: var(--warn-line);
+  --danger: var(--err);
+  --danger-bg: var(--err-bg);
+  --danger-line: var(--err-line);
+  --info: #1d4fb8;
+  --info-line: #bfd2f3;
+
+  /* Cool companions for the company colour */
   --cool-cyan: #06b6d4;
   --cool-teal: #14b8a6;
   --cool-indigo: #6366f1;
-  /* The company colour, cooled with cyan and indigo. */
+  --cool-violet: #8b5cf6;
+
+  /* Accent gradients */
+  --grad-success: linear-gradient(135deg, #10b981, #14b8a6);
+  --grad-warning: linear-gradient(135deg, #f59e0b, #f97316);
+  --grad-danger: linear-gradient(135deg, #ef4444, #e11d48);
+  --grad-info: linear-gradient(135deg, #0ea5e9, #6366f1);
+  --grad-violet: linear-gradient(135deg, #8b5cf6, #d946ef);
+
+  /* Charts: distinct in hue and lightness, readable on white and on the dark card */
+  --chart-2: #0d9488;
+  --chart-3: #f59e0b;
+  --chart-4: #8b5cf6;
+  --chart-5: #e11d48;
+  --chart-6: #0ea5e9;
+  --chart-7: #65a30d;
+  --chart-8: #64748b;
+
+
+  --snap: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --quick: 0.16s;
+}
+:root[data-theme="dark"] {
+  --success-line: #1f5a4f;
+  --warning-line: #5a4719;
+  --danger-line: #5b2b30;
+  --info: #a9c6ff;
+  --info-line: #2c4370;
+  --chart-2: #2dd4bf;
+  --chart-3: #fbbf24;
+  --chart-4: #a78bfa;
+  --chart-5: #fb7185;
+  --chart-6: #38bdf8;
+  --chart-7: #a3e635;
+  --chart-8: #94a3b8;
+}
+
+/* Mixed from the company colour: declared again inside the app shell (and the sign-in), where the
+   company's own --brand is set, so they follow it rather than the default. */
+:root,
+.shell,
+.auth-wrap {
   --cool-a: color-mix(in srgb, var(--brand) 62%, var(--cool-cyan));
   --cool-b: color-mix(in srgb, var(--brand) 62%, var(--cool-indigo));
   --blend: linear-gradient(135deg, var(--brand) 0%, var(--cool-a) 55%, var(--cool-b) 100%);
+  --grad-brand: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 55%, var(--cool-cyan)));
   --blend-soft: linear-gradient(
     135deg,
     color-mix(in srgb, var(--brand) 12%, var(--card)),
     color-mix(in srgb, var(--cool-cyan) 14%, var(--card))
   );
+  --chart-1: var(--brand);
+  /* The open section's accent; Glass blends it between sections (glass.css). */
+  --sec: var(--brand);
   --lift: 0 2px 4px rgba(11, 31, 58, 0.05), 0 14px 30px -14px color-mix(in srgb, var(--brand) 45%, transparent);
-  --snap: cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+:root[data-look="glass"] :is(.shell, .auth-wrap) {
+  --sec: var(--acc1);
+}
+:root[data-theme="dark"],
+:root[data-theme="dark"] :is(.shell, .auth-wrap) {
+  --chart-1: color-mix(in srgb, var(--brand) 55%, #fff);
+  --blend-soft: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--brand) 22%, var(--card)),
+    color-mix(in srgb, var(--cool-cyan) 14%, var(--card))
+  );
+  --lift: 0 2px 4px rgba(0, 0, 0, 0.3), 0 14px 30px -14px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- Links: calm underlines that firm up on hover ---------- */
+a:not(.btn) {
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+a:not(.btn):hover {
+  text-decoration-color: currentColor;
 }
 
 /* ---------- Home banner: a slow aurora of cool colours ---------- */
@@ -36,43 +123,54 @@
   background-clip: text;
   color: transparent;
 }
-/* Headline figures sit on frosted glass chips. */
+/* Headline figures sit on frosted chips; on phones two side by side. */
 .hero-kpis {
   gap: 10px;
 }
+@media (max-width: 639px) {
+  .hero-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 .hero-kpis a {
+  min-width: 0;
   padding: 9px 14px 10px;
   border-radius: 16px;
+  color: #fff;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transition: transform 0.3s var(--snap), background 0.25s;
+  transition:
+    transform var(--quick) var(--snap),
+    background 0.2s;
 }
-@supports (backdrop-filter: blur(6px)) {
-  .hero-kpis a {
-    backdrop-filter: blur(6px);
-  }
+.hero-kpis a .num {
+  overflow-wrap: break-word;
+}
+:root[data-theme="dark"] .hero-kpis a,
+:root[data-theme="dark"] .hero-kpis a .num {
+  color: #fff;
 }
 .hero-kpis a:hover {
   background: rgba(255, 255, 255, 0.17);
-  transform: translateY(-2px) scale(1.03);
 }
 .hero-kpis a:active {
   transform: scale(0.97);
 }
 
-/* ---------- Buttons: a cool blend, a glint on hover, a press you can feel ---------- */
+/* ---------- Buttons: a cool blend, a press you can feel at once ---------- */
 .btn {
   transition:
-    transform 0.18s var(--snap),
-    box-shadow 0.25s,
-    background-position 0.5s,
-    background-color 0.2s,
-    border-color 0.2s,
-    color 0.2s;
+    transform 0.08s ease-out,
+    box-shadow 0.2s,
+    background-position 0.4s,
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 .btn:active:not(:disabled) {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 .btn-primary {
   background-image: linear-gradient(120deg, var(--brand) 0%, var(--cool-a) 50%, var(--brand) 100%);
@@ -84,6 +182,19 @@
   background-position: 100% 0;
   box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--brand) 75%, transparent);
 }
+.btn-danger {
+  color: var(--danger);
+  border-color: var(--danger-line);
+}
+.btn-danger:hover:not(:disabled) {
+  background: var(--danger-bg);
+}
+.btn:disabled {
+  cursor: not-allowed;
+}
+.actions {
+  align-items: center;
+}
 
 /* ---------- Cards and tiles ---------- */
 .card,
@@ -91,64 +202,111 @@
 .tower-card {
   box-shadow: 0 1px 2px rgba(11, 31, 58, 0.04), 0 10px 28px -18px color-mix(in srgb, var(--brand) 40%, transparent);
 }
-/* Tiles that open something lift and show a cool edge. */
-a.stat,
+.card {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.card > :last-child {
+  margin-bottom: 0;
+}
+
+/* KPI tiles: each one wears a chart colour along its top edge, the figure stays in the text colour. */
+.stat-grid > .stat,
 .stat-grid > a {
+  --k: var(--chart-1);
+}
+.stat-grid > :nth-child(4n + 2) {
+  --k: var(--chart-2);
+}
+.stat-grid > :nth-child(4n + 3) {
+  --k: var(--chart-3);
+}
+.stat-grid > :nth-child(4n + 4) {
+  --k: var(--chart-4);
+}
+.stat {
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s var(--snap), box-shadow 0.3s, border-color 0.3s;
+  min-width: 0;
 }
-a.stat::before {
+.stat::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
   height: 3px;
-  background: var(--blend);
-  opacity: 0;
-  transition: opacity 0.3s;
+  background: linear-gradient(90deg, var(--k, var(--brand)), color-mix(in srgb, var(--k, var(--brand)) 30%, transparent));
+}
+.stat .n {
+  overflow-wrap: break-word;
+}
+.stat.alert {
+  --k: var(--chart-3);
+  border-color: var(--warning-line);
+  background: var(--warning-bg);
+}
+.stat.alert .n {
+  color: var(--warning);
+}
+a.stat {
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.2s,
+    border-color 0.2s;
 }
 a.stat:hover {
-  transform: translateY(-3px);
   box-shadow: var(--lift);
-  border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
-}
-a.stat:hover::before {
-  opacity: 1;
+  border-color: color-mix(in srgb, var(--k, var(--brand)) 40%, var(--line));
 }
 a.stat:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
-/* Quick actions: blended icon tiles that magnify under the finger or pointer. */
+/* Quick actions: blended icon tiles. */
 .quick-icon {
   background: var(--blend-soft);
   border-color: color-mix(in srgb, var(--brand) 16%, var(--line));
-  transition: transform 0.35s var(--snap), background 0.3s, color 0.3s, box-shadow 0.3s;
+  transition:
+    transform var(--quick) var(--snap),
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
 }
 .quick-grid a:hover .quick-icon,
 .quick-grid a:focus-visible .quick-icon {
   background: var(--blend);
   color: #fff;
   border-color: transparent;
-  transform: scale(1.12) translateY(-2px);
+  transform: translateY(-2px);
   box-shadow: 0 12px 22px -10px color-mix(in srgb, var(--brand) 70%, transparent);
 }
 .quick-grid a:active .quick-icon {
   transform: scale(0.94);
 }
 
-/* Lists: a cool tint on hover, a small press, the arrow leans in. */
+/* Lists: a cool tint on hover, an instant press. */
 .rec-list a {
-  transition: background 0.2s, transform 0.18s var(--snap);
+  transition: background 0.15s;
 }
 .rec-list a:hover {
   background: color-mix(in srgb, var(--brand) 5%, var(--card));
 }
 .rec-list a:active {
-  transform: scale(0.992);
+  background: color-mix(in srgb, var(--brand) 10%, var(--card));
+}
+.rec-list .main {
+  min-width: 0;
+}
+.rec-list .title,
+.rec-list .sub {
+  overflow-wrap: break-word;
+}
+.rec-list .side {
+  flex: none;
+  max-width: 48%;
+  text-align: right;
 }
 .waitlist a {
-  transition: background 0.2s, padding 0.25s var(--snap);
+  transition: background 0.15s;
   border-radius: 12px;
 }
 .waitlist a:hover {
@@ -157,33 +315,123 @@ a.stat:active {
 
 /* Control tower: rows open smoothly. */
 .tower-row summary {
-  transition: background 0.2s, transform 0.18s var(--snap);
+  transition: background 0.15s;
 }
 .tower-row summary:active {
-  transform: scale(0.99);
+  background: color-mix(in srgb, var(--brand) 8%, transparent);
 }
 .tower-chev {
-  transition: transform 0.35s var(--snap);
-}
-.tower-n {
-  transition: transform 0.35s var(--snap);
-}
-.tower-row:hover .tower-n {
-  transform: scale(1.12);
+  transition: transform 0.2s var(--snap);
 }
 
-/* Fields: a soft cool glow when you type. */
+/* ---------- Empty states: the centred dashed card (globals.css) in the section colour ---------- */
+p.card.muted {
+  border-color: color-mix(in srgb, var(--sec) 30%, var(--line-strong));
+  background: color-mix(in srgb, var(--sec) 4%, transparent);
+  line-height: 1.5;
+}
+p.card.muted::before {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5'/%3E%3C/svg%3E")
+      center / 24px no-repeat,
+    linear-gradient(135deg, var(--sec), color-mix(in srgb, var(--sec) 50%, var(--cool-cyan)));
+  box-shadow: 0 10px 20px -12px var(--sec);
+}
+
+/* ---------- Badges and chips: status colours with a small dot ---------- */
+.badge {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 16%, transparent);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+/* Status words (not counts) get a small dot. */
+.badge:is(.tone-ok, .tone-warn, .tone-bad) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.badge:is(.tone-ok, .tone-warn, .tone-bad)::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.badge.tone-ok {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.badge.tone-warn {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.badge.tone-bad {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.badge.tone-info {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+/* ---------- Notices and banners: a coloured edge you can read at a glance ---------- */
+.notice,
+.banner {
+  border: 1px solid transparent;
+  border-left-width: 4px;
+}
+.notice-ok,
+.banner.ok {
+  border-color: var(--success-line);
+  border-left-color: var(--success);
+}
+.notice-error,
+.banner.bad {
+  border-color: var(--danger-line);
+  border-left-color: var(--danger);
+}
+.banner.warn {
+  border-color: var(--warning-line);
+  border-left-color: var(--warning);
+}
+
+/* ---------- Tables ---------- */
+table.compare thead th {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+table.compare td.best {
+  background: var(--success-bg);
+  color: var(--success);
+}
+table.compare tbody tr:hover > td {
+  background-color: color-mix(in srgb, var(--sec) 5%, var(--card));
+}
+/* Wide tables scroll inside their card, never the whole screen. */
+.table-wrap,
+.card:has(> table.compare) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---------- Fields: a soft cool glow when you type ---------- */
 input:not([type="checkbox"]):not([type="radio"]):focus,
 select:focus,
 textarea:focus {
   border-color: var(--brand);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 14%, transparent), 0 0 0 1px color-mix(in srgb, var(--cool-cyan) 30%, transparent);
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s;
 }
-
-/* Badges: a touch of depth. */
-.badge {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 14%, transparent);
+input,
+select,
+textarea {
+  max-width: 100%;
 }
 
 /* ---------- Gliding pills (src/components/NavPills.tsx) ---------- */
@@ -205,10 +453,10 @@ textarea:focus {
 }
 .pill-ready > .nav-pill {
   transition:
-    transform 0.42s var(--snap),
-    width 0.42s var(--snap),
-    height 0.42s var(--snap),
-    opacity 0.2s;
+    transform 0.24s var(--snap),
+    width 0.24s var(--snap),
+    height 0.24s var(--snap),
+    opacity 0.15s;
 }
 .has-pill > a {
   position: relative;
@@ -245,7 +493,10 @@ textarea:focus {
   box-shadow: 0 8px 16px -8px color-mix(in srgb, var(--brand) 70%, transparent);
 }
 .tabs-row > a {
-  transition: color 0.25s, border-color 0.25s, transform 0.18s var(--snap);
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    transform 0.08s ease-out;
 }
 .tabs-row > a:active {
   transform: scale(0.95);
@@ -273,80 +524,71 @@ textarea:focus {
   }
 }
 
-/* ---------- Magnifying menus ---------- */
+/* ---------- Menus: instant presses, a gentle lift under the pointer ---------- */
+.bottomnav a {
+  transition: color 0.15s;
+}
 .bottomnav a svg {
-  transition: transform 0.32s var(--snap);
+  transition: transform var(--quick) var(--snap);
 }
 .bottomnav a:active svg {
-  transform: scale(0.85);
+  transform: scale(0.86);
 }
 .bottomnav a[aria-current="page"] svg {
-  transform: scale(1.12) translateY(-1px);
+  transform: scale(1.1) translateY(-1px);
 }
 @media (hover: hover) {
-  /* Dock-style: the item under the pointer grows, its neighbours a little. */
   .bottomnav a:hover svg {
-    transform: scale(1.3) translateY(-3px);
-  }
-  .bottomnav a:has(+ a:hover) svg,
-  .bottomnav a:hover + a svg {
-    transform: scale(1.12) translateY(-1px);
+    transform: scale(1.14) translateY(-2px);
   }
   .sidenav nav a svg {
-    transition: transform 0.3s var(--snap);
+    transition: transform var(--quick) var(--snap);
   }
   .sidenav nav a:hover svg {
-    transform: scale(1.22);
-  }
-  .sidenav nav a:hover {
-    padding-left: 15px;
+    transform: scale(1.12);
   }
 }
 .sidenav nav a {
-  transition: background 0.15s, color 0.15s, padding 0.3s var(--snap);
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
-/* The "More" sheet: items zoom gently, icons pop. */
+/* The "More" sheet */
 .msheet-list a,
 .msheet-list button {
-  transition: transform 0.25s var(--snap), background 0.2s;
-}
-.msheet-list a:hover,
-.msheet-list button:hover {
-  transform: scale(1.02);
+  transition:
+    transform 0.08s ease-out,
+    background 0.15s;
 }
 .msheet-list a:active,
 .msheet-list button:active {
   transform: scale(0.98);
 }
 .msheet-ico {
-  transition: transform 0.3s var(--snap), background 0.3s, color 0.3s;
+  transition:
+    transform var(--quick) var(--snap),
+    background 0.2s,
+    color 0.2s;
 }
 .msheet-list a:hover .msheet-ico,
 .msheet-list a:focus-visible .msheet-ico {
-  transform: scale(1.15) rotate(-4deg);
   background: var(--blend);
   color: #fff;
 }
 /* Top bar buttons */
 .icon-btn {
-  transition: transform 0.25s var(--snap), background 0.2s;
-}
-.icon-btn:hover {
-  transform: scale(1.08);
+  transition:
+    transform 0.08s ease-out,
+    background 0.15s;
 }
 .icon-btn:active {
   transform: scale(0.92);
 }
 .topbar-user .avatar {
   background: var(--blend);
-  transition: transform 0.3s var(--snap);
-}
-.topbar-user:hover .avatar,
-.topbar-brand:hover .mark {
-  transform: scale(1.08);
 }
 
-/* ---------- Loading outline: a cool shimmer ---------- */
+/* ---------- Loading outline ---------- */
 .sk {
   background-image: linear-gradient(
     90deg,
@@ -359,10 +601,10 @@ textarea:focus {
 }
 
 /* ---------- Motion ---------- */
-@keyframes pol-fade-up {
+@keyframes pol-in {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translate(calc(var(--page-dx, 0px) * 0.5), 6px);
   }
   to {
     opacity: 1;
@@ -399,7 +641,7 @@ textarea:focus {
 @keyframes pol-pop {
   from {
     opacity: 0;
-    transform: translateY(-4px) scale(0.98);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -408,66 +650,32 @@ textarea:focus {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* Each screen fades in and its blocks follow one after another (not LeMoSp ADMIN, which has its own). */
-  .app-page > :not(.adm-shell) {
-    animation: pol-fade-up 0.5s var(--ease-out) backwards;
+  /* Each screen fades in with a small rise: quick enough that a tap feels instant
+     (not LeMoSp ADMIN, which has its own). Backwards fill only, so nothing stays on afterwards. */
+  .app-page > :not(.adm-shell):not(:has(a.btn-primary[href$="/new"])) {
+    animation: pol-in 0.16s var(--ease-out) backwards;
   }
-  .app-page > :nth-child(2) { animation-delay: 0.04s; }
-  .app-page > :nth-child(3) { animation-delay: 0.08s; }
-  .app-page > :nth-child(4) { animation-delay: 0.12s; }
-  .app-page > :nth-child(5) { animation-delay: 0.16s; }
-  .app-page > :nth-child(6) { animation-delay: 0.2s; }
-  .app-page > :nth-child(n + 7) { animation-delay: 0.24s; }
-  /* Rows and tiles cascade in. */
-  .app-page .rec-list > li,
-  .app-page .quick-grid > a,
-  .app-page .hero-kpis > a,
-  .app-page .tower-row,
-  .app-page .waitlist > li {
-    animation: pol-fade-up 0.45s var(--ease-out) backwards;
+  /* A block holding the floating "+ New" button only fades (a moving parent would carry the button). */
+  .app-page > :has(a.btn-primary[href$="/new"]) {
+    animation: pol-fade 0.16s ease-out backwards;
   }
-  .app-page :is(.rec-list > li, .quick-grid > a, .hero-kpis > a, .tower-row, .waitlist > li):nth-child(2) { animation-delay: 0.1s; }
-  .app-page :is(.rec-list > li, .quick-grid > a, .hero-kpis > a, .tower-row, .waitlist > li):nth-child(3) { animation-delay: 0.15s; }
-  .app-page :is(.rec-list > li, .quick-grid > a, .hero-kpis > a, .tower-row, .waitlist > li):nth-child(4) { animation-delay: 0.2s; }
-  .app-page :is(.rec-list > li, .quick-grid > a, .hero-kpis > a, .tower-row, .waitlist > li):nth-child(5) { animation-delay: 0.25s; }
-  .app-page :is(.rec-list > li, .quick-grid > a, .hero-kpis > a, .tower-row, .waitlist > li):nth-child(6) { animation-delay: 0.3s; }
-  .app-page :is(.rec-list > li, .quick-grid > a, .waitlist > li):nth-child(n + 7) { animation-delay: 0.34s; }
   /* The banner's colours drift slowly. */
   .hero {
     animation: pol-aurora 22s ease-in-out infinite;
   }
   /* Opening a control tower row fades its items in. */
   .tower-row[open] ul {
-    animation: pol-pop 0.3s var(--ease-out);
+    animation: pol-pop 0.16s var(--ease-out);
   }
   .sk {
     animation: pol-shimmer 1.4s linear infinite;
   }
-  /* Notices and messages fade in. */
   .notice {
-    animation: pol-fade 0.4s ease-out;
-  }
-  /* Cards further down fade up as they scroll into view (browsers that support it). */
-  @supports (animation-timeline: view()) {
-    .app-page .card,
-    .app-page .stats-block,
-    .app-page .quick {
-      animation: pol-fade-up linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 40%;
-    }
+    animation: pol-fade 0.2s ease-out;
   }
 }
 
 /* ---------- Dark theme ---------- */
-:root[data-theme="dark"] {
-  --blend-soft: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--brand) 22%, var(--card)),
-    color-mix(in srgb, var(--cool-cyan) 14%, var(--card))
-  );
-  --lift: 0 2px 4px rgba(0, 0, 0, 0.3), 0 14px 30px -14px rgba(0, 0, 0, 0.7);
-}
 :root[data-theme="dark"] .card,
 :root[data-theme="dark"] .rec-list,
 :root[data-theme="dark"] .tower-card {
@@ -480,9 +688,42 @@ textarea:focus {
 :root[data-theme="dark"] .waitlist a:hover {
   background: color-mix(in srgb, var(--brand) 12%, var(--card));
 }
+/* Plain buttons keep readable text on the dark glass (the brand colour is too dark there). */
+:root[data-theme="dark"] .btn:not(.btn-primary):not(.btn-danger) {
+  color: var(--text);
+}
+:root[data-theme="dark"] .btn-danger {
+  color: var(--danger);
+}
+:root[data-theme="dark"] .badge.tone-info {
+  color: var(--info);
+}
 
 @media print {
-  .nav-pill {
+  .nav-pill,
+  p.card.muted::before,
+  .stat::before {
     display: none;
   }
+}
+
+/* ---------- Laptop arrangement ---------- */
+@media (min-width: 1024px) {
+  /* Full-width buttons in wide cards become a comfortable size (still full width in narrow ones). */
+  main.page .card .btn-block {
+    max-width: 360px;
+  }
+}
+
+/* ---------- Customer pages (pay link, meeting link, portal sign-in): a cool aurora, not flat navy ---------- */
+.auth-wrap:not(:has(> .app-bg)),
+:root[data-look="glass"] .auth-wrap:not(:has(> .app-bg[data-bg="photos"])) {
+  background:
+    radial-gradient(60% 45% at 85% 0%, color-mix(in srgb, var(--cool-cyan) 24%, transparent), transparent 70%),
+    radial-gradient(55% 45% at 0% 100%, color-mix(in srgb, var(--cool-indigo) 24%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--brand-dark) 85%, #050b16), #071426);
+}
+:root:not([data-theme="dark"]) .auth-wrap:not(:has(> .app-bg)) .auth-card,
+:root[data-look="glass"]:not([data-theme="dark"]) .auth-wrap:not(:has(> .app-bg[data-bg="photos"])) .auth-card {
+  background: rgba(255, 255, 255, 0.95);
 }

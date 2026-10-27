@@ -4,7 +4,7 @@
 set client_min_messages = notice;
 
 create schema if not exists tests;
-grant usage on schema tests to authenticated, anon;
+grant usage on schema tests to authenticated, anon, service_role;
 create or replace function tests.login(p_email text) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims',
@@ -39,7 +39,7 @@ exception when others then
   if sqlerrm not like p_message then raise exception 'FAILED: % (wrong message: %)', p_label, sqlerrm; end if;
   raise notice 'pass: % (blocked: %)', p_label, sqlerrm;
 end $$;
-grant execute on all functions in schema tests to authenticated, anon;
+grant execute on all functions in schema tests to authenticated, anon, service_role;
 
 insert into auth.users (email) values ('m10@d.test'), ('x10@d.test'), ('n10@d.test'), ('lonely10@d.test');
 insert into auth.users (is_anonymous) values (true) returning id as g1 \gset
@@ -189,7 +189,8 @@ select public.set_outbox_secret('stage10-outbox-secret-0123456789');
 select public.notify(:'real', :'m10', 'test', 'attention', 'Real alert', null, null, 'real-alert-10');
 select tests.check((select count(*) from public.notifications n join public.companies c on c.id = n.company_id
                      where c.is_demo and n.severity <> 'info' and n.dispatched_at is null) > 0, 'demo companies have pending alerts');
-set role anon;
+-- The scheduled job runs as the server (service role); the browser key (anon) cannot call it.
+set role service_role;
 create temp table claimed10 as select * from public.claim_outbox('stage10-outbox-secret-0123456789', 1000);
 reset role;
 select tests.check((select count(*) from claimed10 where title = 'Real alert') = 1, 'real company alerts are sent');
@@ -218,7 +219,7 @@ update auth.users set created_at = now() - interval '3 hours' where id in (:'g1'
    or email = 'lonely10@d.test';
 update public.companies set demo_expires_at = now() - interval '1 minute' where id = :'demo3';
 insert into storage.objects (bucket_id, name) values ('pod', :'demo3' || '/x/sig.png'), ('branding', :'real' || '/logo.png');
-set role anon;
+set role service_role;
 select public.run_all_alerts('stage10-outbox-secret-0123456789');
 reset role;
 select tests.check(not exists (select 1 from public.companies where id = :'demo3'), 'expired demo purged');

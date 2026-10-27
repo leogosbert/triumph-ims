@@ -22,6 +22,18 @@ export function str(form: FormData, key: string): string {
   return typeof v === "string" ? v.trim() : "";
 }
 
+/**
+ * A two-button choice (Approve / Send back, Client accepted / Client rejected): true for `yes`,
+ * false for `no`, and null when neither came through, so a lost button value is refused instead
+ * of being saved as the "no" answer.
+ */
+export function choice(form: FormData, key: string, yes: string, no: string): boolean | null {
+  const v = str(form, key);
+  return v === yes ? true : v === no ? false : null;
+}
+
+export const LOST_CHOICE = "Your choice didn't come through, so nothing was saved. Press the button again.";
+
 /** Empty strings become null so optional fields are stored as "not set". */
 export function optional(form: FormData, key: string): string | null {
   const v = str(form, key);

@@ -1,9 +1,11 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
-import { type SearchParams } from "@/lib/messages";
+import { getAppContext, noAccess } from "@/lib/context";
+import { readNotice, type SearchParams } from "@/lib/messages";
+import { Notice } from "@/components/Notice";
 import { getDict } from "@/lib/lang";
 import { DriverApp, type DriverDelivery } from "./DriverApp";
+import { BackLink } from "@/components/BackLink";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "My deliveries" };
 export const dynamic = "force-dynamic";
@@ -16,11 +18,12 @@ type Row = Omit<DriverDelivery, "client" | "lines"> & {
 
 export default async function DriverPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
+  const notice = await readNotice(searchParams);
   const only = typeof sp.d === "string" ? sp.d : null;
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   const { t } = await getDict();
-  const supervisor = role === "management" || role === "warehouse";
-  if (role !== "driver" && !supervisor) redirect("/");
+  const supervisor = hasRole(roles, "management") || hasRole(roles, "warehouse");
+  if (!hasRole(roles, "driver") && !supervisor) noAccess();
   if (supervisor && !only) redirect("/deliveries");
 
   let q = supabase
@@ -57,13 +60,12 @@ export default async function DriverPage({ searchParams }: { searchParams: Searc
   return (
     <>
       {only && (
-        <p className="small">
-          <Link href={`/deliveries/${only}`}>← Back to the delivery note</Link>
-        </p>
+        <BackLink href={`/deliveries/${only}`} label="Back to the delivery note" />
       )}
       <div className="page-head">
         <h1>{only ? t["dr.record"] : t["dr.title"]}</h1>
       </div>
+      <Notice {...notice} />
       <DriverApp companyId={company.id} userId={user.id} deliveries={deliveries} t={t} />
     </>
   );

@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { StepUpForm } from "@/components/ConfirmIdentity";
 import { Notice } from "@/components/Notice";
+import { LockPreference } from "@/components/LockPreference";
 import { SubmitButton } from "@/components/SubmitButton";
-import { displayName, getAppContext, type Profile } from "@/lib/context";
+import { displayName, getAppContext, type Profile, noAccess } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { EVENT_LABELS, type SecurityEventRow } from "@/lib/securityLabels";
@@ -91,7 +91,7 @@ export default async function SecuritySettingsPage({ searchParams }: { searchPar
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, isManager } = await getAppContext();
-  if (!isManager) redirect("/");
+  if (!isManager) noAccess();
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   const meWithCode = aal?.currentLevel === "aal2";
   const { t } = await getDict();
@@ -185,7 +185,7 @@ export default async function SecuritySettingsPage({ searchParams }: { searchPar
 
         <section className="card" id="idle">
           <h2>{tr("Automatic sign-out")}</h2>
-          <p className="muted small">{tr("Signs people out when the app is left open without use, e.g. on a shared office computer. A warning appears a minute before. The driver screen is not affected, so deliveries can be recorded offline.")}</p>
+          <p className="muted small">{tr("For everyone in the company: signs people out after this long without taps or typing, e.g. on a shared office computer. A warning appears a minute before, and they then need their email, password and code to sign in again. The driver screen is not affected, so deliveries can be recorded offline.")}</p>
           <div className="field">
             <label htmlFor="idle_select">{tr("Sign out when idle")}</label>
             <select id="idle_select" name="idle" defaultValue={String(company.idle_timeout_minutes ?? 0)} aria-describedby="idle-hint">
@@ -195,8 +195,14 @@ export default async function SecuritySettingsPage({ searchParams }: { searchPar
                 </option>
               ))}
             </select>
-            <Hint id="idle-hint">{tr("30 minutes suits most offices. Choose Never only if every device is personal and locked.")}</Hint>
+            <Hint id="idle-hint">{tr("30 minutes suits shared office computers. On personal phones a longer time (4 or 8 hours) with the password lock below is easier.")}</Hint>
           </div>
+          <h3 className="st-sub-title">{tr("Password lock on this device")}</h3>
+          <p className="muted small">
+            {tr("Different from signing out: each person chooses, on their own phone or computer, how long they can be away before the app asks for their password again (15 minutes unless changed). They stay signed in. Everyone finds it under")}{" "}
+            <Link href="/account#stay-signed-in">{tr("Your account → Stay signed in")}</Link>.
+          </p>
+          <LockPreference idleMinutes={company.idle_timeout_minutes ?? 0} />
         </section>
 
         <section className="card">

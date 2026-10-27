@@ -7,6 +7,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { deleteCategory, saveCategory, setFeatureCategory } from "../../../actions";
 import { CATEGORIES_MISSING, loadCategories } from "../../../categories";
 import { platformAdmin } from "../../../guard";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Feature category" };
 
@@ -25,9 +26,7 @@ export default async function AdminCategoryPage({ params, searchParams }: { para
   ]);
   const category = categories.list.find((c) => c.name === name);
   const back = (
-    <p className="small">
-      <Link href="/admin/features/categories">{tr("← Categories")}</Link>
-    </p>
+    <BackLink href="/admin/features/categories" label="Categories" />
   );
   if (!categories.ready || !category) {
     return (

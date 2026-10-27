@@ -1,10 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { canUseInbox, suggestInboxAddress, type InboxSettings } from "@/lib/inbox/common";
 import { formatDateTime } from "@/lib/format";
@@ -12,6 +10,7 @@ import { inboxChannels } from "@/lib/inbox/server";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { siteUrl } from "@/lib/supabase/env";
 import { checkMailboxNow, saveInboxSettings } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Inbox setup" };
 
@@ -29,8 +28,8 @@ const code: React.CSSProperties = { overflowWrap: "anywhere", wordBreak: "break-
 export default async function InboxSetupPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canUseInbox(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canUseInbox(roles)) noAccess();
   const { data, error } = await supabase.from("inbox_settings").select("*").eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Inbox setup" />;
   const s = (data ?? null) as (InboxSettings & { mailbox_checked_at?: string | null; mailbox_error?: string | null }) | null;
@@ -42,9 +41,7 @@ export default async function InboxSetupPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/inbox">{tr("← Inbox")}</Link>
-      </p>
+      <BackLink href="/inbox" label="Inbox" />
       <h1>{tr("Inbox setup")}</h1>
       <p className="muted small">
         {tr("When a client or supplier emails your company address or sends a WhatsApp to your business number, the message appears in the Inbox and management and sales get a notification on their phones. You reply from the app.")}

@@ -1,12 +1,12 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { methodLabel, monthRange, n } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Payments received" };
 
@@ -29,8 +29,8 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const sp = (await searchParams) ?? {};
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeInvoices")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeInvoices")) noAccess();
 
   const { data, error } = await supabase
     .from("payments")
@@ -46,9 +46,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Payments received")}</h1>
       <nav className="tabs-row" aria-label={tr("Month")}>
         <Link href={`/payments?m=${m.prev}`}>{tr("← Earlier")}</Link>

@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { NCR_SOURCES, NCR_STATUS } from "@/lib/hse";
@@ -28,8 +27,8 @@ export default async function QualityPage({ searchParams }: { searchParams: Sear
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeQuality")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeQuality")) noAccess();
   const tab = TABS.some((t) => t.key === sp.tab) ? String(sp.tab) : "open";
   const source = typeof sp.source === "string" && sp.source in NCR_SOURCES ? sp.source : "";
 

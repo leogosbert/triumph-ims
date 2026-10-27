@@ -1,0 +1,350 @@
+/* The public catalogue (/c/<slug>): its own simple look in the company's colours, light, mobile first. */
+
+.cat-page {
+  --cat-brand: #1c4d9c;
+  --cat-dark: #123a7a;
+  --cat-ink: #14202b;
+  --cat-muted: #5b6672;
+  --cat-line: #e1e6ec;
+  --cat-bg: #f5f7fa;
+  min-height: 100vh;
+  background: var(--cat-bg);
+  color: var(--cat-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  position: relative;
+  z-index: 1;
+}
+.cat-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.cat-hero {
+  background: linear-gradient(135deg, var(--cat-dark), var(--cat-brand));
+  color: #fff;
+  padding: 22px 0 26px;
+}
+.cat-brandrow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.cat-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 12px;
+  padding: 4px;
+}
+.cat-name {
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+.cat-kicker {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cat-hero h1 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  margin: 18px 0 6px;
+}
+.cat-intro {
+  opacity: 0.92;
+  max-width: 60ch;
+  white-space: pre-line;
+}
+.cat-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.cat-hero .cat-btn {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.cat-hero .cat-btn.on {
+  background: #fff;
+  color: var(--cat-dark);
+}
+.cat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--cat-line);
+  background: #fff;
+  color: var(--cat-brand);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.cat-btn.on {
+  background: var(--cat-brand);
+  border-color: var(--cat-brand);
+  color: #fff;
+}
+.cat-tools {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--cat-bg);
+  padding: 12px 0 8px;
+}
+.cat-tools input[type="search"] {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--cat-line);
+  background: #fff;
+  color: var(--cat-ink);
+}
+.cat-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 0 2px;
+  scrollbar-width: none;
+}
+.cat-chips button {
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--cat-line);
+  background: #fff;
+  color: var(--cat-ink);
+  cursor: pointer;
+}
+.cat-chips button.on {
+  background: var(--cat-ink);
+  color: #fff;
+  border-color: var(--cat-ink);
+}
+.cat-list {
+  display: grid;
+  gap: 10px;
+}
+.cat-group {
+  font-size: 1.05rem;
+  margin: 14px 0 4px;
+  color: var(--cat-dark);
+}
+.cat-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--cat-line);
+  border-radius: 14px;
+}
+.cat-item.on {
+  border-color: var(--cat-brand);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cat-brand) 25%, transparent);
+}
+.cat-item img,
+.cat-noimg {
+  width: 84px;
+  height: 84px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--cat-bg);
+}
+.cat-noimg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--cat-brand);
+  opacity: 0.5;
+}
+.cat-body {
+  flex: 1;
+  min-width: 0;
+}
+.cat-body h3 {
+  margin: 0 0 2px;
+  font-size: 1rem;
+}
+.cat-body p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+.cat-meta,
+.cat-muted {
+  color: var(--cat-muted);
+  font-size: 0.82rem;
+}
+.cat-spec {
+  white-space: pre-line;
+  color: var(--cat-muted);
+}
+.cat-docs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.cat-docs a {
+  color: var(--cat-brand);
+  font-size: 0.82rem;
+}
+.cat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.cat-price {
+  font-weight: 700;
+  color: var(--cat-dark);
+}
+.cat-price small {
+  font-weight: 400;
+  color: var(--cat-muted);
+}
+.cat-float {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 3;
+  background: var(--cat-brand);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  white-space: nowrap;
+}
+.cat-card {
+  background: #fff;
+  border: 1px solid var(--cat-line);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 22px 0;
+}
+.cat-card h2 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+}
+.cat-form {
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .cat-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  .cat-form .cat-wide,
+  .cat-form .cat-picked,
+  .cat-form .cat-err,
+  .cat-form .cat-submit,
+  .cat-form > .cat-muted {
+    grid-column: 1 / -1;
+  }
+  .cat-hero h1 {
+    font-size: 2rem;
+  }
+}
+.cat-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.cat-form input,
+.cat-form textarea {
+  font: inherit;
+  font-weight: 400;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--cat-line);
+  background: #fff;
+  color: var(--cat-ink);
+  min-width: 0;
+}
+.cat-picked {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.cat-picked li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.9rem;
+}
+.cat-picked li span {
+  flex: 1;
+  min-width: 0;
+}
+.cat-picked li input {
+  width: 80px;
+  padding: 6px 8px;
+}
+.cat-picked li button {
+  border: 0;
+  background: none;
+  color: var(--cat-muted);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.cat-hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.cat-submit {
+  font: inherit;
+  font-weight: 700;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 0;
+  background: var(--cat-brand);
+  color: #fff;
+  cursor: pointer;
+}
+.cat-submit:disabled {
+  opacity: 0.6;
+}
+.cat-ok {
+  padding: 12px;
+  border-radius: 10px;
+  background: #e7f5ee;
+  color: #067647;
+  font-weight: 600;
+}
+.cat-err {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.9rem;
+}
+.cat-foot {
+  padding-top: 8px;
+  padding-bottom: 80px;
+  font-size: 0.85rem;
+  color: var(--cat-muted);
+}
+.cat-foot a {
+  color: var(--cat-brand);
+}

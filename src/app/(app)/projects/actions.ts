@@ -43,8 +43,8 @@ function projectValues(form: FormData, path: string) {
 
 export async function createProject(form: FormData) {
   const path = "/projects/new";
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepProjects(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepProjects(roles)) fail(path, "You don't have permission to do that.");
   const values = projectValues(form, path);
   const clientId = str(form, "client_id");
   if (!clientId) fail(path, "Choose the client.");
@@ -61,8 +61,8 @@ export async function createProject(form: FormData) {
 export async function saveProject(form: FormData) {
   const id = str(form, "id");
   const path = `/projects/${id}`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepProjects(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepProjects(roles)) fail(path, "You don't have permission to do that.");
   const values = projectValues(form, path);
   const status = str(form, "status");
   const { data, error } = await supabase
@@ -81,8 +81,8 @@ export async function setProjectStatus(form: FormData) {
   const id = str(form, "id");
   const path = `/projects/${id}`;
   const status = str(form, "status");
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepProjects(role) || !(status in PROJECT_STATUS)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepProjects(roles) || !(status in PROJECT_STATUS)) fail(path, "You don't have permission to do that.");
   const { data, error } = await supabase.from("projects").update({ status }).eq("id", id).eq("company_id", company.id).select("id");
   if (error || !data?.length) fail(path, error?.message ?? "0 rows");
   revalidatePath("/projects");
@@ -93,8 +93,8 @@ export async function setProjectStatus(form: FormData) {
 export async function addMilestone(form: FormData) {
   const id = str(form, "project_id");
   const path = `/projects/${id}#milestones`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepProjects(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepProjects(roles)) fail(path, "You don't have permission to do that.");
   const title = str(form, "title");
   if (title.length < 2) fail(path, "Enter what the milestone is.");
   const { count } = await supabase.from("project_milestones").select("id", { count: "exact", head: true }).eq("project_id", id);
@@ -115,8 +115,8 @@ export async function markMilestone(form: FormData) {
   const id = str(form, "project_id");
   const path = `/projects/${id}#milestones`;
   const status = str(form, "status") === "open" ? "open" : "done";
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepProjects(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepProjects(roles)) fail(path, "You don't have permission to do that.");
   const { data, error } = await supabase
     .from("project_milestones")
     .update({ status })
@@ -132,8 +132,8 @@ export async function markMilestone(form: FormData) {
 export async function removeMilestone(form: FormData) {
   const id = str(form, "project_id");
   const path = `/projects/${id}#milestones`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepProjects(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepProjects(roles)) fail(path, "You don't have permission to do that.");
   const { data, error } = await supabase
     .from("project_milestones")
     .delete()
@@ -149,8 +149,8 @@ export async function removeMilestone(form: FormData) {
 export async function invoiceProject(form: FormData) {
   const id = str(form, "project_id");
   const path = `/projects/${id}#invoice`;
-  const { supabase, role } = await getAppContext();
-  if (!canInvoiceService(role)) fail(path, "Only management and finance can invoice projects.");
+  const { supabase, roles } = await getAppContext();
+  if (!canInvoiceService(roles)) fail(path, "Only management and finance can invoice projects.");
   const milestones = form.getAll("milestones").filter((v): v is string => typeof v === "string" && v !== "");
   const until = optional(form, "hours_until");
   if (!milestones.length && !until) fail(path, "Tick a milestone or choose the date to invoice hours up to.");

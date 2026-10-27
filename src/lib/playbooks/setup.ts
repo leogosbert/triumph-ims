@@ -2,7 +2,7 @@ import type { Playbook } from "./types";
 
 /**
  * Playbook: setting up LeMoSp from sign-up to go-live, for a sample company
- * (Kilimanjaro Supplies Ltd, a general supplier in Arusha). Kiswahili: ./sw/setup.ts.
+ * (Kilimanjaro Supplies Ltd, a general supplier in Arusha).
  */
 export const SETUP: Playbook = {
   id: "setup",
@@ -229,7 +229,7 @@ export const SETUP: Playbook = {
           title: "Open the Settings page",
           body: "The Settings page lists every setting screen in five groups. Each settings screen has a ← Settings link at the top that brings you back here.",
           do: [
-            "On a laptop, press Settings in the side menu. On a phone, tap the gear button at the top, or open More → Company & account → Settings.",
+            "On a laptop, press Settings in the side menu. On a phone, tap the gear button at the top, or open More → Company → Settings.",
             "From any settings screen, press ← Settings at the top to come back.",
             "Read the groups from top to bottom: Company, People & security, Features & growth, Data & backups and Alerts.",
             "Tap any line to open that screen. The small text under each title says what it is for.",
@@ -1436,9 +1436,10 @@ export const SETUP: Playbook = {
         {
           id: "app-lock",
           title: "App lock on each phone and laptop",
-          body: "When you come back to the app, it asks for your password (and your code, if two-step is on) before showing anything. It is on for everyone, on every phone and laptop. The driver screen is not locked.",
+          body: "When you come back to the app after being away for a while, it asks for your password (and your code, if two-step is on) before showing anything. It is on for everyone, on every phone and laptop; each person chooses how long they can be away (15 minutes unless changed). The driver screen is not locked.",
           do: [
-            "Leave the app and come back: the screen shows Welcome back with your name.",
+            "Choose the time under Your account → Stay signed in → Ask for my password again.",
+            "Leave the app for longer and come back: the screen shows Welcome back with your name.",
             "Type your password and press Unlock. With two-step on, type the 6-digit code too. You continue exactly where you were.",
             "A quick trip of a few seconds, for example to take a photo, does not lock the app. Not you? Press Not you? Sign out.",
           ],
@@ -1503,7 +1504,7 @@ export const SETUP: Playbook = {
           title: "Set up your stores",
           body: "Every company starts with a Main store. If you keep stock in more than one place, add each one with a short code.",
           do: [
-            "Open Stock → Stores. On a phone: More → Stock & delivery → Stores.",
+            "Open Stock → Stores. On a phone: More → Stock → Stores.",
             "Under Add a store, type a short Code, the Name and the Address.",
             "Press Add store. Close a store you no longer use; its history is kept.",
           ],
@@ -1941,13 +1942,13 @@ export const SETUP: Playbook = {
           title: "Add your licences and certificates",
           body: "Each document has a type, a name, an optional number and dates. With an expiry date the app reminds you some days before it runs out.",
           do: [
-            "Open More → Company & account → Documents (on a laptop, type Documents in the search box at the top) and press + Document.",
+            "Open More → Company → Documents (on a laptop, type Documents in the search box at the top) and press + Document.",
             "Choose the Type, for example Company registration, Tax (TIN, VAT, clearance) or Licence or permit.",
             "Type the Document name and the Number, then the Issued on and Expires on dates.",
             "Set Remind me (days before), for example 30, and add the file: PDF, photo, Word or Excel. With a photo or PDF you can press Read with AI first: the name, number and dates are filled in for you to check.",
             "Press Save document.",
           ],
-          where: ["More", "Documents"],
+          where: ["More", "Company", "Documents"],
           href: "/documents/new",
           who: "Management",
           scales: "medium+",
@@ -1983,13 +1984,13 @@ export const SETUP: Playbook = {
           title: "Set up your legal & compliance checklist",
           body: "Legal & compliance lists what a Tanzanian company must register, renew and file: BRELA, TRA, NSSF, WCF, OSHA, the council and sector licences. You tick what you have, upload the copies and get reminders before each due date.",
           do: [
-            "Open More → Company & account → Legal & compliance and press Set up my checklist.",
+            "Open More → Company → Legal & compliance and press Set up my checklist.",
             "The usual requirements for a new general supply company are ticked. Untick what does not apply and press Add to my checklist.",
             "Open Licences and press + Licence for each licence you hold or plan to get. Press Read with AI to fill it in from a photo of the certificate.",
             "Open Tax & filing calendar to see PAYE, VAT, NSSF and the other filings with their due dates.",
             "Open Directors & shares and add each director as on the BRELA certificate.",
           ],
-          where: ["More", "Legal & compliance"],
+          where: ["Legal & compliance"],
           href: "/compliance",
           who: "Management",
           scales: "all",
@@ -2031,12 +2032,12 @@ export const SETUP: Playbook = {
           title: "Add an employee file for everyone",
           body: "Each employee gets a file with their job, contract and probation dates, NIDA, TIN and NSSF numbers, and certificates with expiry dates. Linked to their login, they can ask for leave and see their own payslips.",
           do: [
-            "Open Administration (on a phone: More → Administration → Employees) and press + Employee.",
+            "Open People (on a phone: More → Team → Employees) and press + Employee.",
             "Fill in the name, job, contract dates and the NIDA, TIN and NSSF numbers.",
             "Under LeMoSp login, choose the person's account if they have one, then press Add employee.",
             "Add driving licences and other certificates with their expiry dates on the file.",
           ],
-          where: ["Administration", "Employees"],
+          where: ["People", "Employees"],
           href: "/hr",
           who: "Management",
           scales: "medium+",
@@ -2108,12 +2109,12 @@ export const SETUP: Playbook = {
           title: "Add your branches",
           body: "Each branch has its own stores and team, and its own figures. Quotations, invoices, purchase orders and expenses go to the branch of the person who makes them.",
           do: [
-            "Open More → Company & account → Branches and press + Branch.",
+            "Open More → Company → Branches and press + Branch.",
             "Enter the Name, a short Code and the Branch manager, then press Add branch.",
             "Under Stores and People, choose the branch of each store and each person.",
             "Press Save stores and people.",
           ],
-          where: ["More", "Branches"],
+          where: ["More", "Company", "Branches"],
           href: "/branches",
           who: "Management",
           scales: "enterprise",
@@ -2179,7 +2180,7 @@ export const SETUP: Playbook = {
           title: "Read the Alerts setup page",
           body: "At the top, a badge such as 2 of 3 connected and a progress bar show how far you are. The Status card lists the three parts as Connected or Not set, and when the background check last ran.",
           do: [
-            "Open Settings → Alerts setup (server), under Alerts. On a phone it is also More → Company & account → Alerts setup.",
+            "Open Settings → Alerts setup (server), under Alerts. On a phone it is also More → Company → Alerts setup.",
             "Under Status, read the three lines: 1. Server key (OUTBOX_SECRET), 2. Phone notifications (VAPID keys) and 3. Email sending (Resend).",
             "Read Last alert check: it should be a few minutes ago once everything is connected.",
             "Below Status, three numbered cards explain each part step by step.",
@@ -2443,7 +2444,7 @@ export const SETUP: Playbook = {
           title: "Find your way: menus, Settings and search",
           body: "The same screens are arranged a little differently on a phone and on a laptop. What you see depends on your role and the features switched on.",
           do: [
-            "On a phone, the bar at the bottom has your most-used screens. Tap More for the full menu: Sales, Services, Purchasing, Stock & delivery, Finance, Reports, Administration, Add new and Company & account.",
+            "On a phone, the bar at the bottom has your most-used screens. Tap More for the full menu: Me, Sell, Services, Buy, Stock, Deliver, Money, Reports, Team, Company and Help.",
             "On a laptop, the side menu lists every section. Managers also see Settings there; on a phone, managers tap the gear button at the top.",
             "With the Glass style, tap a heading in the side menu to fold its group away, or press Collapse menu at the top to keep only the icons. Press Expand menu to open it again.",
             "Use the search box at the top to find any screen, record or answer. On a laptop press / or Ctrl+K from any screen; on a phone tap the magnifying glass.",
@@ -2506,43 +2507,6 @@ export const SETUP: Playbook = {
           ],
           who: "Everyone",
           scales: "all",
-        },
-        {
-          id: "language",
-          title: "Language: English or Kiswahili",
-          body: "Each person chooses their own language for menus and screens. The screens switch at once.",
-          do: [
-            "Tap the company logo at the top, then Your account, and tap Language in the jump links.",
-            "Press English or Kiswahili.",
-            "Or tap EN·SW in the top bar at any time to switch.",
-          ],
-          where: ["Tap the company logo", "Your account"],
-          href: "/account#language",
-          who: "Everyone",
-          scales: "all",
-          example: {
-            kind: "Language",
-            title: "Kilimanjaro Supplies Ltd",
-            lines: [
-              ["Juma Mushi", "Kiswahili"],
-              ["Baraka Kimaro", "Kiswahili"],
-              ["Neema Mollel", "English"],
-            ],
-            stamp: "Saved",
-            tone: "ok",
-          },
-          scenarios: [
-            {
-              title: "The storekeeper prefers Kiswahili",
-              problem: "Baraka understands the warehouse screens better in Kiswahili, but Neema works in English.",
-              fix: [
-                "Baraka opens Your account → Language on his own phone and presses Kiswahili.",
-                "Neema's screens stay in English. Each person's choice is their own.",
-              ],
-              tone: "info",
-            },
-          ],
-          tip: "Train new staff in the language they read best. Button names in the playbooks match the app in both languages.",
         },
         {
           id: "appearance",
@@ -2647,7 +2611,7 @@ export const SETUP: Playbook = {
               problem: "Rehema in finance does not find the screen in her menu.",
               fix: [
                 "Integrations & API must be switched on in Features & business level.",
-                "Once it is on, management sees it in Settings. Finance finds it on a phone under More → Company & account, or by typing Integrations in the search box at the top.",
+                "Once it is on, management sees it in Settings. Finance finds it on a phone under More → Company, or by typing Integrations in the search box at the top.",
               ],
               tone: "info",
             },
@@ -2727,7 +2691,7 @@ export const SETUP: Playbook = {
           title: "Connect the Inbox for email and WhatsApp",
           body: "Client and supplier emails and WhatsApp messages can arrive in LeMoSp, with a notification, so the whole team sees the same conversation and replies are kept with the client.",
           do: [
-            "Open More → Sales → Inbox and press Setup.",
+            "Open More → Sell → Inbox and press Setup.",
             "Under Company mailbox, enter the company email and its app password, then press Check for new emails now. Or use the forwarding address shown.",
             "For WhatsApp, follow the WhatsApp Business steps on the same page with whoever manages your hosting.",
             "Send a test email to the company address and check that it appears in Inbox.",

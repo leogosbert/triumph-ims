@@ -7,6 +7,7 @@ import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { canInvoiceService, canPlanService, checklistFromText, fromLocalInput, JOB_KINDS, JOB_PRIORITIES, LINE_KINDS, parseChecklist } from "@/lib/services";
+import { hasRole } from "@/lib/roles";
 
 function fail(path: string, error: string): never {
   redirect(withNotice(path, { error: friendlyError(error) }));
@@ -48,8 +49,8 @@ function jobValues(form: FormData, path: string) {
 
 export async function createJob(form: FormData) {
   const path = "/jobs/new";
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "Only management, sales and warehouse can create jobs.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "Only management, sales and warehouse can create jobs.");
   const client = uuid(optional(form, "client_id"));
   if (!client) fail(path, "Choose the client.");
   const values = jobValues(form, path);
@@ -74,8 +75,8 @@ export async function createJob(form: FormData) {
 export async function saveJob(form: FormData) {
   const id = str(form, "id");
   const path = `/jobs/${id}#details`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "Only management, sales and warehouse can change jobs.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "Only management, sales and warehouse can change jobs.");
   const values = jobValues(form, path);
   const { data, error } = await supabase.from("service_jobs").update(values).eq("id", id).eq("company_id", company.id).select("id");
   if (error || !data?.length) fail(path, error?.message ?? "0 rows");
@@ -168,13 +169,13 @@ export async function removeJobLine(form: FormData) {
 export async function addJobHours(form: FormData) {
   const id = str(form, "job_id");
   const path = `/jobs/${id}#hours`;
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   const hours = toNumber(str(form, "hours"));
   if (hours === null || Number.isNaN(hours) || hours <= 0 || hours > 24) fail(path, "Hours must be between 0 and 24.");
   const person = uuid(optional(form, "user_id"));
   const { error } = await supabase.from("timesheets").insert({
     company_id: company.id,
-    user_id: role === "management" && person ? person : user.id,
+    user_id: hasRole(roles, "management") && person ? person : user.id,
     work_date: str(form, "work_date") || undefined,
     hours,
     job_id: id,
@@ -216,8 +217,8 @@ export async function completeJob(form: FormData) {
 export async function invoiceJob(form: FormData) {
   const id = str(form, "id");
   const path = `/jobs/${id}`;
-  const { supabase, role } = await getAppContext();
-  if (!canInvoiceService(role)) fail(path, "Only management and finance can invoice jobs.");
+  const { supabase, roles } = await getAppContext();
+  if (!canInvoiceService(roles)) fail(path, "Only management and finance can invoice jobs.");
   const { data, error } = await supabase.rpc("invoice_service_job", { p_job: id });
   if (error) fail(path, error.message);
   revalidatePath("/jobs");

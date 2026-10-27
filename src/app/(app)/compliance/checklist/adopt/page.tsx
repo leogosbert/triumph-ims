@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -10,6 +9,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { ACTIVITY_GUIDES, COMPLIANCE_CATALOGUE, COMPLIANCE_CATEGORIES } from "@/lib/compliance/catalogue";
 import { adoptRequirements } from "../../actions";
 import { Disclaimer } from "../../parts";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Add requirements" };
 
@@ -28,9 +28,7 @@ export default async function AdoptPage({ searchParams }: { searchParams: Search
 
   return (
     <>
-      <p className="small">
-        <Link href="/compliance/checklist">{tr("← Checklist")}</Link>
-      </p>
+      <BackLink href="/compliance/checklist" label="Checklist" />
       <h1>{first ? tr("Set up my checklist") : tr("Add requirements")}</h1>
       <p className="muted small">
         {guide

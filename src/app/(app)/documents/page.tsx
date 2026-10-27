@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { DOC_KINDS, daysUntil, docKindLabel, isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -31,8 +30,8 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeDocuments")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeDocuments")) noAccess();
   const view = sp.view === "expiring" || sp.view === "archive" ? sp.view : "all";
   const kind = typeof sp.kind === "string" ? sp.kind : "";
   const q = typeof sp.q === "string" ? sp.q.trim().toLowerCase() : "";

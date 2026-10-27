@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -15,6 +14,7 @@ import { branchList } from "@/lib/branches";
 import { saveExpense, voidExpense } from "../actions";
 import { ExpenseFields } from "../ExpenseFields";
 import { ReceiptPicker } from "../ReceiptPicker";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Expense" };
 
@@ -22,7 +22,7 @@ export default async function ExpensePage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
+  const { supabase, company, roles, features } = await getAppContext();
   const { data: e } = await supabase.from("expenses").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!e) notFound();
   const branches = features.on("branches") ? await branchList(supabase, company.id) : [];
@@ -37,15 +37,13 @@ export default async function ExpensePage({ params, searchParams }: { params: Pr
   if (e.receipt_path) receiptUrl = (await supabase.storage.from("receipts").createSignedUrl(e.receipt_path, 3600)).data?.signedUrl ?? null;
   const isPdf = typeof e.receipt_path === "string" && e.receipt_path.endsWith(".pdf");
 
-  const manage = can(role, "manageExpenses");
+  const manage = can(roles, "manageExpenses");
   const editable = !e.voided_at;
   const base = company.base_currency;
 
   return (
     <>
-      <p className="small">
-        <Link href="/expenses">{tr("← Expenses")}</Link>
-      </p>
+      <BackLink href="/expenses" label="Expenses" />
       <div className="page-head">
         <h1 style={{ margin: 0, ...(e.voided_at ? { textDecoration: "line-through" } : {}) }}>{e.description}</h1>
         <div className="head-amount num">{formatMoney(e.amount, e.currency)}</div>
@@ -72,7 +70,7 @@ export default async function ExpensePage({ params, searchParams }: { params: Pr
         )}
       </p>
       <Notice {...notice} />
-      <BranchField kind="expense" id={e.id} branchId={e.branch_id ?? null} branches={branches} canMove={can(role, "manageBranches")} />
+      <BranchField kind="expense" id={e.id} branchId={e.branch_id ?? null} branches={branches} canMove={can(roles, "manageBranches")} />
       {e.voided_at && (
         <div className="banner warn small">
           {tr("Voided:")} {e.void_reason} · {names.get(e.voided_by) ?? ""} · {formatDateTime(e.voided_at)}

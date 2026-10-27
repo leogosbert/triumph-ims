@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -9,6 +8,7 @@ import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { fmtQty, storeOptions } from "@/lib/stock";
 import { receiveGoods } from "../../../stock/actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Receive goods" };
 
@@ -18,8 +18,8 @@ export default async function ReceivePoPage({ params, searchParams }: { params: 
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "receiveGoods")) redirect(`/purchase-orders/${id}`);
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "receiveGoods")) redirect(`/purchase-orders/${id}`);
   const [{ data: po }, { data: lineData }, stores] = await Promise.all([
     supabase.from("purchase_orders").select("id, number, status, supplier:suppliers(name)").eq("id", id).eq("company_id", company.id).maybeSingle(),
     supabase.from("po_lines").select("id, line_no, description, quantity, received_qty, unit, product_id").eq("po_id", id).order("line_no"),
@@ -32,9 +32,7 @@ export default async function ReceivePoPage({ params, searchParams }: { params: 
 
   return (
     <>
-      <p className="small">
-        <Link href={`/purchase-orders/${id}`}>← {po.number}</Link>
-      </p>
+      <BackLink href={`/purchase-orders/${id}`} label={po.number} />
       <h1>{tr("Receive from")}{" "}{supplier?.name}</h1>
       <Notice {...notice} />
       {!open || lines.length === 0 ? (

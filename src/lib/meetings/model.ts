@@ -1,9 +1,10 @@
-import type { Role } from "@/lib/roles";
+import { hasRole, type Role, type RoleSet } from "@/lib/roles";
 export { MEETING_TOPICS, PROPOSAL_TARGETS, type ProposalTarget } from "./minutes-core";
 
 /** Everyone except drivers organises meetings (public.meeting_organiser_roles). */
 export const ORGANISER_ROLES: Role[] = ["management", "sales", "procurement", "finance", "warehouse"];
-export const canOrganise = (role: Role) => ORGANISER_ROLES.includes(role);
+/** Any of the person's roles (main or extra) may organise. */
+export const canOrganise = (roles: RoleSet) => hasRole(roles, ...ORGANISER_ROLES);
 
 export const MEETING_KINDS: Record<string, string> = {
   internal: "Team meeting",
@@ -121,7 +122,13 @@ export type Meeting = {
 };
 
 export type MinutesSummary = {
+  /** 2 = paragraph minutes (v1.25). */
+  format?: number;
   summary?: string;
+  sections?: { title: string; topic: string; discussion: string; decisions: string }[];
+  risks?: string[];
+  next_meeting?: string;
+  summary_sw?: string;
   topics?: { topic: string; points: string[] }[];
   suggestions?: string[];
   unclear?: string[];
@@ -129,6 +136,66 @@ export type MinutesSummary = {
   follow_up?: { point_id: string; status: string; note: string }[];
   proposals?: number;
 };
+
+/** A recording of a meeting (v1.25 SQL). */
+export type Recording = {
+  id: string;
+  meeting_id: string;
+  started_by: string | null;
+  started_at: string;
+  ended_at: string | null;
+  last_part_at: string | null;
+  status: string;
+  duration_seconds: number;
+  size_bytes: number;
+  parts: number;
+  mime: string;
+  storage_path: string;
+  language: string;
+  expires_at: string | null;
+  deleted_at: string | null;
+  delete_reason: string | null;
+  transcript: string;
+  transcript_status: string;
+  transcript_error: string | null;
+  transcript_requested_at: string | null;
+  summary: string;
+  summary_sw: string;
+  summary_status: string;
+  summary_error: string | null;
+};
+
+export const RECORDING_COLUMNS =
+  "id, meeting_id, started_by, started_at, ended_at, last_part_at, status, duration_seconds, size_bytes, parts, mime, storage_path, language, expires_at, deleted_at, delete_reason, transcript, transcript_status, transcript_error, transcript_requested_at, summary, summary_sw, summary_status, summary_error";
+
+/** "Delete meeting recordings after" (0 = keep). */
+export const RECORDING_DAYS: [number, string][] = [
+  [7, "7 days"],
+  [30, "30 days"],
+  [90, "90 days"],
+  [365, "1 year"],
+  [0, "Keep them"],
+];
+
+/** A recording is "on" (the red banner) while it records and a piece came in the last two minutes. */
+export function recordingActive(r: Pick<Recording, "status" | "deleted_at" | "last_part_at" | "started_at">, now = Date.now()): boolean {
+  return r.status === "recording" && !r.deleted_at && now - Date.parse(r.last_part_at ?? r.started_at) < 2 * 60_000;
+}
+
+/** "1 h 05 min", "12 min", "40 s". */
+export function durationLabel(sec: number): string {
+  const s = Math.max(0, Math.round(sec));
+  if (s < 60) return `${s} s`;
+  const m = Math.round(s / 60);
+  return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")} min`;
+}
+
+/** Where a meeting is in its life, for the stage bar: plan, meet, minutes, follow up. */
+export function meetingStage(m: Pick<Meeting, "status" | "minutes_status">): 0 | 1 | 2 | 3 {
+  if (m.status === "planned" || m.status === "cancelled") return 0;
+  if (m.status === "live") return 1;
+  return m.minutes_status === "approved" ? 3 : 2;
+}
 
 export type Attendee = {
   id: string;
@@ -248,13 +315,13 @@ export const MEETING_COLUMNS =
   "id, company_id, series_id, title, purpose, kind, starts_at, meeting_date, minutes, place, topics, chair_id, presenter_id, client_id, supplier_id, open_to_team, status, cancel_reason, record, language, video_provider, video_room, video_url, external_link, announced_at, started_at, ended_at, minutes_status, minutes_summary, minutes_by, minutes_error, minutes_requested_at, approved_at, approved_by, invitation_id, created_by";
 
 /** The person can manage this meeting (organiser, chair or management): mirrors public.meeting_can_manage. */
-export function canManage(m: Pick<Meeting, "created_by" | "chair_id">, userId: string, role: Role): boolean {
-  return role === "management" || (canOrganise(role) && (m.created_by === userId || m.chair_id === userId));
+export function canManage(m: Pick<Meeting, "created_by" | "chair_id">, userId: string, roles: RoleSet): boolean {
+  return hasRole(roles, "management") || (canOrganise(roles) && (m.created_by === userId || m.chair_id === userId));
 }
 
 /** Management or the chair approves the minutes (public.meeting_can_approve). */
-export function canApprove(m: Pick<Meeting, "chair_id">, userId: string, role: Role): boolean {
-  return role === "management" || (canOrganise(role) && m.chair_id === userId);
+export function canApprove(m: Pick<Meeting, "chair_id">, userId: string, roles: RoleSet): boolean {
+  return hasRole(roles, "management") || (canOrganise(roles) && m.chair_id === userId);
 }
 
 /** Can a guest or member join now (15 minutes before the start, while live)? */

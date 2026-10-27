@@ -130,12 +130,24 @@ export const PRODUCT_SECTIONS: Section[] = [
   { title: "Notes", fields: [{ key: "notes", label: "Notes", type: "textarea", wide: true }] },
 ];
 
-/** Turns text like "1,890,000" or "1 890 000.50" into a number. */
+/** The largest amount or quantity a form accepts (the database columns overflow above this). */
+export const MAX_AMOUNT = 1e15;
+
+/**
+ * Turns text like "1,890,000" or "1 890 000.50" into a number. Empty text is null; text that is not a
+ * number, or an absurd amount above MAX_AMOUNT (either sign), is NaN, so every form refuses it.
+ */
 export function toNumber(raw: string): number | null {
   const cleaned = raw.replace(/[,\s]/g, "").replace(/^TZS|^USD/i, "");
   if (cleaned === "") return null;
   const n = Number(cleaned);
-  return Number.isFinite(n) ? n : NaN;
+  return Number.isFinite(n) && Math.abs(n) <= MAX_AMOUNT ? n : NaN;
+}
+
+/** True when the text is a number, but one larger than any form accepts. */
+export function tooLarge(raw: string): boolean {
+  const n = Number(raw.replace(/[,\s]/g, "").replace(/^TZS|^USD/i, ""));
+  return raw.trim() !== "" && !Number.isNaN(n) && Math.abs(n) > MAX_AMOUNT;
 }
 
 /** Reads a submitted form using the field definitions. Empty fields become null. */
@@ -151,6 +163,7 @@ export function parseSections(form: FormData, sections: Section[]): { values: Re
         case "number":
         case "integer": {
           const n = toNumber(raw);
+          if (tooLarge(raw)) return { values, error: `${f.label} is too large.` };
           if (Number.isNaN(n)) return { values, error: `${f.label} must be a number.` };
           if (n !== null && n < 0) return { values, error: `${f.label} cannot be negative.` };
           if (f.type === "integer" && n !== null && !Number.isInteger(n))

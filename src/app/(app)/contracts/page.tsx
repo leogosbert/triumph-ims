@@ -1,14 +1,14 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { contractKindLabel, daysUntil, isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Contracts" };
 
@@ -31,8 +31,8 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeContracts")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeContracts")) noAccess();
   const view = sp.view === "ended" ? "ended" : "current";
   const { data, error } = await supabase
     .from("contracts")
@@ -51,14 +51,12 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      {can(role, "seeCrm") && (
-        <p className="small">
-          <Link href="/crm">{tr("← Pipeline")}</Link>
-        </p>
+      {can(roles, "seeCrm") && (
+        <BackLink href="/crm" label="Pipeline" />
       )}
       <div className="page-head">
         <h1>{tr("Contracts")}</h1>
-        {can(role, "seeCrm") && (
+        {can(roles, "seeCrm") && (
           <Link href="/contracts/new" className="btn btn-primary btn-small">
             {tr("+ Contract")}
           </Link>

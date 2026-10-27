@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -14,6 +14,7 @@ import { CONTRACT_STATUS, FREQUENCIES, JOB_STATUS, canSeeAllService, formatWhen,
 import { saveContract, setContractStatus } from "../actions";
 import { ContractFields, type EquipmentOption } from "../ContractFields";
 import { canKeepContracts, type Contract } from "../rules";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Maintenance contract" };
 
@@ -33,8 +34,8 @@ export default async function ContractPage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeAllService(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeAllService(roles)) noAccess();
   const { data: row, error } = await supabase
     .from("service_contracts")
     .select("*, client:clients(name)")
@@ -44,7 +45,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
   if (isMissingTable(error)) return <NotReady title="Maintenance contract" />;
   if (!row) notFound();
   const c = row as unknown as Contract & { client: { name: string } | null };
-  const editor = canKeepContracts(role);
+  const editor = canKeepContracts(roles);
 
   const [{ data: jobData }, { data: eqData }] = await Promise.all([
     supabase
@@ -70,9 +71,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/maintenance">{tr("← Maintenance contracts")}</Link>
-      </p>
+      <BackLink href="/maintenance" label="Maintenance contracts" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{c.title}</h1>
         <StatusBadge map={CONTRACT_STATUS} status={c.status} />

@@ -24,8 +24,8 @@ const NOT_READ = "The document could not be read. Fill in the form by hand.";
  * name and TIN. Nothing is saved: the form is filled in and the person checks and saves it.
  */
 export async function readDocument(form: FormData): Promise<ReadDocumentResult> {
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeDocuments")) return { ok: false, error: "Your role cannot use the documents library." };
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeDocuments")) return { ok: false, error: "Your role cannot use the documents library." };
   if (!aiReady()) return { ok: false, error: "Reading documents with AI is not switched on." };
 
   let bytes: Buffer;

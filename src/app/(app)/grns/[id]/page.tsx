@@ -1,13 +1,14 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { fmtQty } from "@/lib/stock";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Goods received" };
 
@@ -17,8 +18,8 @@ export default async function GrnPage({ params, searchParams }: { params: Promis
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "receiveGoods") && role !== "finance") redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "receiveGoods") && !hasRole(roles, "finance")) noAccess();
   const { data: g } = await supabase
     .from("goods_receipts")
     .select("*, po:purchase_orders(id, number, supplier:suppliers(name)), store:warehouses(name)")
@@ -32,9 +33,8 @@ export default async function GrnPage({ params, searchParams }: { params: Promis
 
   return (
     <>
-      <p className="small">
-        <Link href="/receiving">{tr("← Receive goods")}</Link> · <Link href={`/purchase-orders/${g.po?.id}`}>{g.po?.number}</Link>
-      </p>
+      <BackLink href="/receiving" label="Receive goods"> · <Link href={`/purchase-orders/${g.po?.id}`}>{g.po?.number}</Link>
+      </BackLink>
       <h1>{g.number}</h1>
       <p className="muted small">{tr("From")}{" "}{g.po?.supplier?.name}{" "}{tr("into")}{" "}{g.store?.name}{" "}{tr("on")}{" "}{formatDate(g.received_on)}
         {g.received_by && <>{" "}{tr("by")}{" "}{names.get(g.received_by)}</>}

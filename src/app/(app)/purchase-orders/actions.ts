@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
 import { kickOutbox } from "@/lib/outbox";
 import { toNumber } from "@/lib/fields";
-import { optional, str } from "@/lib/format";
+import { optional, str, choice, LOST_CHOICE } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 
 function done(id: string, msg: string, anchor = ""): never {
@@ -153,7 +153,8 @@ export async function reviewPo(form: FormData) {
   kickOutbox(); // send any alerts this creates right after the response
   const { supabase } = await getAppContext();
   const id = str(form, "id");
-  const approve = str(form, "decision") === "approve";
+  const approve = choice(form, "decision", "approve", "return");
+  if (approve === null) fail(id, LOST_CHOICE);
   const { error } = await supabase.rpc("review_purchase_order", { p_id: id, p_approve: approve, p_note: optional(form, "note") });
   if (error) fail(id, error.message);
   if (!approve) done(id, "Sent back with your note.");

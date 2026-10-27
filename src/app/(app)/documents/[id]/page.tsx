@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ScanDocument } from "@/components/ai/ScanDocument";
 import { aiReady } from "@/lib/ai/claude";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysUntil, docKindLabel } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -15,6 +15,7 @@ import { archiveDocument, saveDocument } from "../actions";
 import { DocumentFields } from "../DocumentFields";
 import { FilePicker } from "../FilePicker";
 import { loadLinkOptions } from "../links";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Document" };
 
@@ -28,8 +29,8 @@ export default async function DocumentPage({ params, searchParams }: { params: P
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!can(role, "seeDocuments")) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!can(roles, "seeDocuments")) noAccess();
   const { data: d } = await supabase.from("documents").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!d) notFound();
   const [links, names, signed] = await Promise.all([
@@ -55,9 +56,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/documents">{tr("← Documents")}</Link>
-      </p>
+      <BackLink href="/documents" label="Documents" />
       <h1 style={d.archived_at ? { textDecoration: "line-through" } : undefined}>{d.title}</h1>
       <p className="muted small">
         {tr(docKindLabel(d.kind))}

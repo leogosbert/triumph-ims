@@ -19,9 +19,9 @@ export type ReadReceiptResult = { ok: true; check: ReceiptCheck } | { ok: false;
  * purpose "bill": for the supplier-bill form (people who may record bills only).
  */
 export async function readReceipt(form: FormData): Promise<ReadReceiptResult> {
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const purpose = form.get("purpose") === "bill" ? "bill" : "expense";
-  if (purpose === "bill" && !can(role, "editBills")) return { ok: false, error: "Your role cannot record supplier bills." };
+  if (purpose === "bill" && !can(roles, "editBills")) return { ok: false, error: "Your role cannot record supplier bills." };
   if (!aiReady()) return { ok: false, error: "Reading receipts with AI is not switched on." };
 
   const file = form.get("file");

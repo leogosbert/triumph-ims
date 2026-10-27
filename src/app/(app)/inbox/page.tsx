@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { canUseInbox, type Conversation } from "@/lib/inbox/common";
@@ -19,10 +18,10 @@ export default async function InboxPage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!canUseInbox(role)) redirect("/");
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!canUseInbox(roles)) noAccess();
   const view = sp.view === "closed" ? "closed" : "open";
-  const channel = sp.channel === "email" || sp.channel === "whatsapp" ? sp.channel : "";
+  const channel = sp.channel === "email" || sp.channel === "whatsapp" || sp.channel === "portal" ? sp.channel : "";
   const unread = sp.unread === "1";
   const mine = sp.mine === "1";
   const q = typeof sp.q === "string" ? sp.q.trim().toLowerCase() : "";
@@ -92,9 +91,10 @@ export default async function InboxPage({ searchParams }: { searchParams: Search
         <input type="hidden" name="view" value={view} />
         <input type="search" name="q" defaultValue={q} placeholder={tr("Search name, email, phone, subject…")} aria-label={tr("Search")} />
         <select name="channel" defaultValue={channel} aria-label={tr("Channel")}>
-          <option value="">{tr("Email and WhatsApp")}</option>
+          <option value="">{tr("All channels")}</option>
           <option value="email">{tr("Email")}</option>
           <option value="whatsapp">{tr("WhatsApp")}</option>
+          <option value="portal">{tr("Portal")}</option>
         </select>
         <label className="small" style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>
           <input type="checkbox" name="unread" value="1" defaultChecked={unread} /> {tr("Unread")}
@@ -124,7 +124,7 @@ export default async function InboxPage({ searchParams }: { searchParams: Search
                 <Link href={`/inbox/${r.id}`}>
                   <div className="main" style={{ minWidth: 0 }}>
                     <div className="title" style={{ fontWeight: r.unread_count > 0 ? 700 : undefined, overflowWrap: "anywhere" }}>
-                      {r.channel === "whatsapp" ? "💬 " : "✉️ "}
+                      {r.channel === "whatsapp" ? "💬 " : r.channel === "portal" ? "🌐 " : "✉️ "}
                       {who}
                       {r.unread_count > 0 && (
                         <span className="badge tone-warn" style={{ marginLeft: 6 }}>

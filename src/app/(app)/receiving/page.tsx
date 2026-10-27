@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { PO_STATUS } from "@/lib/purchasing";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Receive goods" };
 
@@ -14,8 +14,8 @@ type Grn = { id: string; number: string; received_on: string; po: { number: stri
 
 export default async function ReceivingPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "receiveGoods")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "receiveGoods")) noAccess();
   const today = todayTz();
   const [{ data: poData }, { data: grnData }] = await Promise.all([
     supabase
@@ -37,9 +37,7 @@ export default async function ReceivingPage() {
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <h1>{tr("Receive goods")}</h1>
       <p className="muted small">{tr("Choose the purchase order the delivery belongs to. Check quantities against the supplier's delivery note.")}</p>
       {pos.length === 0 ? (

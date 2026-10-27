@@ -9,6 +9,7 @@ import { rankAgenda } from "@/lib/ai/meetings";
 import { canManage, MEETING_COLUMNS, type AgendaCandidate, type Meeting } from "@/lib/meetings/model";
 import { addSuggested } from "../../actions";
 import styles from "../../meetings.module.css";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Suggest topics" };
 export const maxDuration = 10;
@@ -22,11 +23,11 @@ export default async function SuggestPage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   const { data } = await supabase.from("meetings").select(MEETING_COLUMNS).eq("id", id).maybeSingle();
   if (!data) notFound();
   const m = data as unknown as Meeting;
-  if (!canManage(m, user.id, role) || !["planned", "live"].includes(m.status)) redirect(`/meetings/${id}`);
+  if (!canManage(m, user.id, roles) || !["planned", "live"].includes(m.status)) redirect(`/meetings/${id}`);
 
   const [{ data: cand, error }, { data: onAgenda }] = await Promise.all([
     supabase.rpc("meeting_agenda_candidates", { p_company: company.id }),
@@ -41,6 +42,7 @@ export default async function SuggestPage({ params, searchParams }: { params: Pr
 
   return (
     <>
+      <BackLink href={`/meetings/${id}`} label={m.title} />
       <div className="page-head">
         <h1>{tr("Suggest topics")}</h1>
       </div>

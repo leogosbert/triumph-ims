@@ -1,24 +1,15 @@
-import { cache } from "react";
-import { cookies } from "next/headers";
-import { SW } from "@/lib/sw";
-
+/**
+ * Screen text. The app is English only: tr() returns the English text it is given. It stays as the
+ * wrapper around every piece of screen text so wording can be changed in one place later.
+ */
 type Lang = "en" | "sw";
 
-// One box per request (React cache), filled by primeLang() at the top of each page.
-const box = cache(() => ({ lang: "en" as Lang }));
-
-/** Read the language cookie once for this request so tr() can be synchronous. */
+/** Kept for the pages that call it first; the language is always English. */
 export async function primeLang(): Promise<Lang> {
-  try {
-    const v = (await cookies()).get("lang")?.value;
-    box().lang = v === "sw" ? "sw" : "en";
-  } catch {
-    /* outside a request: stay English */
-  }
-  return box().lang;
+  return "en";
 }
 
-/** Translate a piece of screen text (English is the key). Unknown text is shown as is. */
+/** A piece of screen text (English is the key and the text). */
 export function tr(s: string): string {
-  return box().lang === "sw" ? (SW[s] ?? s) : s;
+  return s;
 }

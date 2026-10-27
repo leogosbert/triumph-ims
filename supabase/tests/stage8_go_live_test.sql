@@ -164,8 +164,8 @@ select tests.check((select count(*) from information_schema.role_table_grants wh
                    'anonymous role has no table privileges');
 select tests.check((select string_agg(proname, ',' order by proname) from pg_proc
                      where pronamespace = 'public'::regnamespace and has_function_privilege('anon', oid, 'execute'))
-                   = 'api_read,check_overdue_backups,claim_account_emails,claim_company_backup,claim_due_deletion,claim_outbox,claim_platform_outbox,drop_push_endpoints,finish_deletion,public_price_list,run_all_alerts,run_platform_daily_summary,take_claimed_backup,verify_next_backup',
-                   'anonymous role can only call the secret-protected scheduled-job functions , the key-protected data API and the public price list');
+                   = 'api_read,public_price_list',
+                   'anonymous role can only call the key-protected data API and the public price list (the scheduled jobs are for the server)');
 
 -- ---- 6. Opening stock import -----------------------------------------------------
 select tests.login('w8@g.test'); set role authenticated;

@@ -8,14 +8,15 @@ import { ACTION_STATUS, type CorrectiveAction, type SourceKind } from "@/lib/hse
 import { companyPeople, namesFor } from "@/lib/people";
 import { StatusBadge } from "@/lib/sales";
 import { daysFromToday, todayTz } from "@/lib/services";
+import { hasRole } from "@/lib/roles";
 
 /**
  * Corrective actions on one incident, inspection or NCR. Management adds, changes and cancels them;
  * the owner (or management) marks one done with a note. The database checks every step.
  */
 export async function CorrectiveActions({ sourceKind, sourceId, closed = false }: { sourceKind: SourceKind; sourceId: string; closed?: boolean }) {
-  const { supabase, company, role, user } = await getAppContext();
-  const manager = role === "management";
+  const { supabase, company, roles, user } = await getAppContext();
+  const manager = hasRole(roles, "management");
   const { data, error } = await supabase
     .from("corrective_actions")
     .select("id, source_kind, source_id, action, owner_id, due_on, status, done_note, done_by, done_at, created_at")

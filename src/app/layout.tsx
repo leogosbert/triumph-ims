@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { getLang } from "@/lib/lang";
 import { LangProvider } from "@/lib/tr-client";
 import { getThemePref, THEME_SCRIPT } from "@/lib/theme";
 import { LOOK_SCRIPT } from "@/lib/look";
 import { getLookPref } from "@/lib/look-server";
 import { Splash, SPLASH_SCRIPT } from "@/components/Splash";
+import { GlassSplash } from "@/components/GlassSplash";
 import { NavProgress } from "@/components/NavProgress";
+import { SubmitterValue } from "@/components/SubmitterValue";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { onAdminHost } from "@/lib/hosts-server";
@@ -18,6 +19,8 @@ import "./billing.css";
 import "./services.css";
 import "./polish.css";
 import "./glass.css";
+import "./my.css";
+import "./nav.css";
 
 // IBM Plex is bundled in src/app/fonts (SIL Open Font License), so builds never depend on downloading Google Fonts.
 const sans = localFont({
@@ -84,14 +87,16 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const lang = await getLang();
   const theme = await getThemePref();
   const adminHost = await onAdminHost();
   // Glass or Classic (Account → Appearance → Style). LeMoSp ADMIN keeps its own look.
   const look = adminHost ? "classic" : await getLookPref();
+  // A company brand remembered on this device opens with its own launch (the company app shell
+  // brings its own copy with the company logo, which then takes over: glass.css).
+  const brand = adminHost ? null : await getBrand();
   return (
     <html
-      lang={lang}
+      lang="en"
       data-app={adminHost ? "admin" : undefined}
       data-look={look}
       className={`${sans.variable} ${mono.variable}`}
@@ -104,13 +109,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <Splash />
+        {brand && (
+          <GlassSplash
+            brand={brand.key}
+            logo={`/brands/${brand.key}/mark.svg`}
+            name={brand.shortName}
+            tagline="Powered by LeMoSp · LeMo Tech Solutions"
+          />
+        )}
         <NavProgress />
-        <LangProvider lang={lang === "sw" ? "sw" : "en"}>
+        <SubmitterValue />
+        <LangProvider>
           <AdminHostProvider admin={adminHost}>
             {children}
             {/* On the admin address LeMoSp ADMIN is the only app, so its card shows on every page. */}
             <InstallPrompt variant={adminHost ? "admin" : "main"} />
-            <UpdatePrompt lang={lang === "sw" ? "sw" : "en"} />
+            <UpdatePrompt />
           </AdminHostProvider>
         </LangProvider>
       </body>

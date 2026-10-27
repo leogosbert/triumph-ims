@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import "../suggestions.css";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -10,6 +9,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { companyPeople, namesFor } from "@/lib/people";
 import { commentSuggestion, resubmitSuggestion, reviewSuggestion, updateMyAssignment } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Suggestion" };
 
@@ -63,9 +63,7 @@ const DECISIONS = [
 function NotFoundCard() {
   return (
     <>
-      <p className="small">
-        <Link href="/suggestions">{tr("← Suggestion Box")}</Link>
-      </p>
+      <BackLink href="/suggestions" label="Suggestion Box" />
       <div className="card sg-empty">
         <p>{tr("This suggestion was not found, or you do not have permission to see it.")}</p>
       </div>
@@ -89,9 +87,7 @@ export default async function SuggestionPage({ params, searchParams }: { params:
   if (error && isMissingSql(error)) {
     return (
       <>
-        <p className="small">
-          <Link href="/suggestions">{tr("← Suggestion Box")}</Link>
-        </p>
+        <BackLink href="/suggestions" label="Suggestion Box" />
         <div className="banner warn">{tr("The Suggestion Box needs the Stage 11 database update. Run it in Supabase, then refresh this page.")}</div>
       </>
     );
@@ -116,9 +112,7 @@ export default async function SuggestionPage({ params, searchParams }: { params:
 
   return (
     <>
-      <p className="small">
-        <Link href="/suggestions">{tr("← Suggestion Box")}</Link>
-      </p>
+      <BackLink href="/suggestions" label="Suggestion Box" />
       <div className="page-head">
         <h1>{s.title}</h1>
         <SuggestionBadge status={s.status} />

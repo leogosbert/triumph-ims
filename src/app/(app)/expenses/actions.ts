@@ -108,8 +108,8 @@ export async function voidExpense(form: FormData) {
 // ---- Categories (management and finance) ----
 
 export async function addCategory(form: FormData) {
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "manageExpenses")) redirect("/expenses");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "manageExpenses")) redirect("/expenses");
   const name = str(form, "name");
   if (name.length < 2) fail("/expenses/categories", "Enter a name of at least 2 letters.");
   const { error } = await supabase.from("expense_categories").insert({ company_id: company.id, name, sort: 1000 });
@@ -119,8 +119,8 @@ export async function addCategory(form: FormData) {
 }
 
 export async function updateCategory(form: FormData) {
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "manageExpenses")) redirect("/expenses");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "manageExpenses")) redirect("/expenses");
   const id = str(form, "id");
   const patch: Record<string, unknown> = {};
   if (form.has("name")) {

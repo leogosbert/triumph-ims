@@ -18,8 +18,8 @@ type Kind = (typeof KINDS)[number];
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const kind = (url.searchParams.get("kind") ?? "") as Kind;
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "seeFinance") || !features.on("integrations")) redirect("/integrations");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seeFinance") || !features.on("integrations")) redirect("/integrations");
   if (!KINDS.includes(kind)) return new Response("Unknown export", { status: 404 });
   const m = monthRange(url.searchParams.get("m"));
   const base = company.base_currency;

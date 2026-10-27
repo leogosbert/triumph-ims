@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { WEEK_STATUS } from "@/lib/hr";
@@ -14,6 +13,7 @@ import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { addDays, hoursText } from "../week";
 import { decideWeek, reopenWeek } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Approve timesheets" };
 
@@ -49,8 +49,8 @@ export default async function ApproveTimesheetsPage({ searchParams }: { searchPa
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "manageHr")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "manageHr")) noAccess();
   const tab = TABS.find((t) => t.key === pick(sp.tab)) ?? TABS[0];
   const back = tab.key === "waiting" ? "/timesheets/approve" : `/timesheets/approve?tab=${tab.key}`;
 
@@ -85,9 +85,7 @@ export default async function ApproveTimesheetsPage({ searchParams }: { searchPa
 
   return (
     <>
-      <p className="small">
-        <Link href="/timesheets">{tr("← Timesheets")}</Link>
-      </p>
+      <BackLink href="/timesheets" label="Timesheets" />
       <h1>{tr("Approve timesheets")}</h1>
       <p className="muted small">{tr("Check each week and approve it, or send it back with a note. Approved weeks are locked.")}</p>
       <Notice {...notice} />

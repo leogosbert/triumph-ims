@@ -30,7 +30,7 @@ export default async function EquipmentPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const client = pick(sp.client);
   const q = pick(sp.q).trim();
   const showAll = sp.view === "all";
@@ -75,7 +75,7 @@ export default async function EquipmentPage({ searchParams }: { searchParams: Se
     <>
       <div className="page-head">
         <h1>{tr("Equipment")}</h1>
-        {canPlanService(role) && (
+        {canPlanService(roles) && (
           <Link href={client ? `/equipment/new?client=${client}` : "/equipment/new"} className="btn btn-primary btn-small">
             {tr("+ Equipment")}
           </Link>

@@ -57,12 +57,12 @@ function BranchFields({ b, members, names }: { b?: Branch; members: Member[]; na
 export default async function BranchesPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const { data, error } = await supabase.from("branches").select("id, name, code, address, phone, manager_id, active").eq("company_id", company.id).order("name");
   if (isMissingTable(error)) return <NotReady title="Branches" />;
   if (error) throw new Error(error.message);
   const branches = (data ?? []) as Branch[];
-  const manage = can(role, "manageBranches");
+  const manage = can(roles, "manageBranches");
   const [{ data: memberData }, { data: storeData }] = await Promise.all([
     supabase.from("memberships").select("id, user_id, role, branch_id").eq("company_id", company.id).eq("active", true).order("created_at"),
     supabase.from("warehouses").select("id, code, name, active, branch_id").eq("company_id", company.id).order("name"),
@@ -91,7 +91,7 @@ export default async function BranchesPage({ searchParams }: { searchParams: Sea
     <>
       <div className="page-head">
         <h1>{tr("Branches")}</h1>
-        {can(role, "planFinance") && branches.length > 0 && (
+        {can(roles, "planFinance") && branches.length > 0 && (
           <Link href="/head-office" className="btn btn-small">
             {tr("Head-office figures")}
           </Link>

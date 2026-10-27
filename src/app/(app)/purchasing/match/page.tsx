@@ -1,12 +1,12 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { chunk, formatDate } from "@/lib/format";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import type { SearchParams } from "@/lib/messages";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Order, receipt and bill check" };
 
@@ -34,8 +34,8 @@ const MATCH: Record<string, { label: string; tone: string }> = {
 export default async function MatchPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeBills")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeBills")) noAccess();
   const view = sp.view === "all" ? "all" : "check";
   const { data: poData, error } = await supabase
     .from("purchase_orders")
@@ -71,9 +71,7 @@ export default async function MatchPage({ searchParams }: { searchParams: Search
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchasing">{tr("← Purchasing")}</Link>
-      </p>
+      <BackLink href="/purchasing" label="Purchasing" />
       <h1>{tr("Order, receipt and bill check")}</h1>
       <p className="muted small">
         {tr("For each purchase order: what was ordered, what arrived (goods received notes) and what the supplier billed. Pay only for what arrived.")}{" "}

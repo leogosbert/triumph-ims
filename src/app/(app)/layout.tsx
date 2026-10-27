@@ -24,9 +24,9 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { brandingUrl, getAppContext } from "@/lib/context";
 import type { Key } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
-import { defaultCategory, moreMenu } from "@/lib/menu";
-import { bottomNav, sideNav } from "@/lib/nav";
-import { setLanguage } from "../lang-actions";
+import { defaultCategory } from "@/lib/menu";
+import { bottomNav } from "@/lib/nav";
+import { moreMenuFor, sideNavFor } from "@/lib/roleNav";
 import { onAdminHost } from "@/lib/hosts-server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -42,9 +42,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
     );
   }
-  const { supabase, company, role, user, isManager, profile, memberships, features, isPlatformAdmin } = await getAppContext();
+  const { supabase, company, role, roles, user, isManager, profile, memberships, features, isPlatformAdmin } = await getAppContext();
   // Everything else the frame needs, at the same time.
-  const [{ lang, t }, { count: unread }, theme, background, look] = await Promise.all([
+  const [{ t }, { count: unread }, theme, background, look] = await Promise.all([
     getDict(),
     // Unread notifications (0 until the Stage 7 database update has been run).
     supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("read_at", null),
@@ -100,7 +100,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     others: memberships
       .filter((m) => m.company_id !== company.id)
       .map((m) => ({ id: m.company_id, name: m.company.name, role: t[`role.${m.role}` as Key] })),
-    lang: lang === "sw" ? "sw" : "en",
     theme,
   };
 
@@ -113,6 +112,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .map((w) => w[0]?.toUpperCase() ?? "")
       .join("") || "?";
 
+  const launchBrand = company.is_demo ? null : brandForCompany(company.id);
   const brandStyle = {
     "--brand": company.primary_color,
     "--brand-dark": company.accent_color,
@@ -121,13 +121,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="shell" style={brandStyle}>
       <AppBackground kind={background} />
-      {look === "glass" && (
-        <>
-          <SectionTracker />
-          <GlassSplash logo={logo} name={company.name} tagline={`${t["shell.poweredBy"]} LeMoSp`} />
-        </>
-      )}
-      <SideNav look={look} items={sideNav(role, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled), isManager)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
+      {look === "glass" && <SectionTracker />}
+      {/* The start animation, in either style (shown on the first screen of a session only). */}
+      <GlassSplash
+        brand={launchBrand?.key ?? null}
+        logo={logo}
+        name={launchBrand?.shortName ?? company.name}
+        tagline={`${t["shell.poweredBy"]} LeMoSp · LeMo Tech Solutions`}
+      />
+      <SideNav look={look} items={sideNavFor(roles, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled), isManager)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">
           <CompanyButton className="topbar-brand" title={company.name}>
@@ -142,12 +144,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link href="/search" className="icon-btn only-phone" aria-label={t["shell.search"]}>
               <Icon name="search" />
             </Link>
-            <form action={setLanguage}>
-              <input type="hidden" name="lang" value={lang === "en" ? "sw" : "en"} />
-              <button type="submit" className="lang-btn" aria-label={t["shell.language"]}>
-                <span aria-current={lang === "en" ? "true" : undefined}>{tr("EN")}</span>·<span aria-current={lang === "sw" ? "true" : undefined}>{tr("SW")}</span>
-              </button>
-            </form>
             {look === "glass" && <ThemeToggle />}
             {isManager && (
               <Link href="/settings" className="icon-btn only-phone" aria-label={t["nav.settings"]}>
@@ -179,7 +175,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       <CompanySheet card={card} />
       <BrandCookie brand={company.is_demo ? null : (brandForCompany(company.id)?.key ?? null)} />
-      <IdleGuard minutes={company.idle_timeout_minutes ?? 0} />
+      <IdleGuard minutes={company.idle_timeout_minutes ?? 0} lastSignIn={user.last_sign_in_at ?? null} />
       <PrivacyScreen />
       <AppLock
         email={profile.email ?? user.email ?? ""}
@@ -192,12 +188,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <NavPills />
       <BottomNav
         items={bottomNav(role, t, features.on)}
-        menu={moreMenu(role, isManager, { on: features.on, isPlatformAdmin, features: features.list })}
+        menu={moreMenuFor(roles, isManager, { on: features.on, isPlatformAdmin, features: features.list, menu: true })}
         menuStart={defaultCategory(role)}
       />
       <TourHost
         off={features.ready ? features.list.filter((f) => !features.on(f.key)).map((f) => f.key) : []}
-        role={role}
+        roles={roles}
         level={company.business_level ?? "medium"}
         company={company.id}
         demo={Boolean(company.is_demo)}

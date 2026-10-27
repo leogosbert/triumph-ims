@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { methodLabel, MOBILE_MONEY, monthRange, n, PAY_METHODS } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -11,6 +10,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { markChecked, matchStatement } from "./actions";
 import { StatementBox } from "./StatementBox";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Check payments" };
 
@@ -39,8 +39,8 @@ export default async function ReconcilePage({ searchParams }: { searchParams: Se
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const method = typeof sp.method === "string" && (sp.method === "all" || sp.method in PAY_METHODS) ? sp.method : "mobile_money";
   const show = sp.show === "all" ? "all" : "open";
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "reconcile")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "reconcile")) noAccess();
   const base = company.base_currency;
 
   if (!stage13Ready(company)) {
@@ -173,9 +173,7 @@ export default async function ReconcilePage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Check payments")}</h1>
       <p className="muted small">{tr("Compare what was recorded with the M-Pesa, Mixx, Airtel Money or bank statement. Tick what you find, or paste the statement and the matching transaction codes are ticked for you.")}</p>
       <Notice {...notice} />

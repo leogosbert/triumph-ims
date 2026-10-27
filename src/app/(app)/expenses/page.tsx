@@ -8,6 +8,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Expenses" };
 
@@ -36,8 +37,8 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
   const notice = await readNotice(searchParams);
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const cat = typeof sp.cat === "string" ? sp.cat : "";
-  const { supabase, company, role, user } = await getAppContext();
-  const manage = can(role, "manageExpenses");
+  const { supabase, company, roles, user } = await getAppContext();
+  const manage = can(roles, "manageExpenses");
   const base = company.base_currency;
 
   if (!stage13Ready(company)) {
@@ -82,10 +83,8 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      {can(role, "seeFinance") && (
-        <p className="small">
-          <Link href="/finance">{tr("← Finance")}</Link>
-        </p>
+      {can(roles, "seeFinance") && (
+        <BackLink href="/finance" label="Finance" />
       )}
       <div className="page-head">
         <h1>{manage ? tr("Expenses") : tr("My expenses")}</h1>

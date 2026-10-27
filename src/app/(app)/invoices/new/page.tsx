@@ -9,6 +9,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { clientOptions } from "@/lib/options";
 import { can } from "@/lib/roles";
 import { newInvoice } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New invoice" };
 
@@ -17,8 +18,8 @@ type Dn = { id: string; number: string; delivered_at: string | null; client: { n
 export default async function NewInvoicePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editInvoices")) redirect("/invoices");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editInvoices")) redirect("/invoices");
 
   const [clients, { data: dnData }, { data: invoiced }] = await Promise.all([
     clientOptions(supabase, company.id),
@@ -36,9 +37,7 @@ export default async function NewInvoicePage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/invoices">{tr("← Invoices")}</Link>
-      </p>
+      <BackLink href="/invoices" label="Invoices" />
       <h1>{tr("New invoice")}</h1>
       <Notice {...notice} />
 

@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -11,6 +10,7 @@ import { canSeeCompliance } from "@/lib/compliance/model";
 import { changedRules, legalRules, RULE_GROUPS, TZ_LEGAL, type RuleDef } from "@/lib/compliance/rules";
 import { resetRules, saveRules } from "../actions";
 import { ComplianceTabs, Disclaimer } from "../parts";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Tax & legal rules" };
 
@@ -24,13 +24,13 @@ function shown(def: RuleDef, v: unknown): string {
 export default async function RulesPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeCompliance(roles)) noAccess();
   const { data, error } = await supabase.from("compliance_settings").select("legal_rules").eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Tax & legal rules" />;
   const rules = legalRules(data?.legal_rules);
   const changed = new Set(changedRules(rules));
-  const edit = role === "management" || role === "finance";
+  const edit = hasRole(roles, "management") || hasRole(roles, "finance");
 
   return (
     <>

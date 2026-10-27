@@ -12,6 +12,7 @@ import { formatMoney, marginPercent } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
 import { saveProduct, saveProductCost, setProductActive } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Product" };
 
@@ -27,9 +28,9 @@ export default async function ProductPage({
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  const showCosts = can(role, "seeCosts");
-  const editCosts = can(role, "editCosts");
+  const { supabase, company, roles, features } = await getAppContext();
+  const showCosts = can(roles, "seeCosts");
+  const editCosts = can(roles, "editCosts");
 
   const [{ data: product }, { data: costRow }, { data: supplierData }] = await Promise.all([
     supabase.from("products").select("*").eq("id", id).eq("company_id", company.id).maybeSingle(),
@@ -47,14 +48,12 @@ export default async function ProductPage({
   if (!product) notFound();
   const cost = costRow as Cost | null;
   const suppliers = (supplierData ?? []) as { id: string; name: string; code: string }[];
-  const editable = can(role, "editProducts");
+  const editable = can(roles, "editProducts");
   const margin = marginPercent(product.selling_price, cost?.last_cost);
 
   return (
     <>
-      <p className="small">
-        <Link href="/products">{tr("← Products")}</Link>
-      </p>
+      <BackLink href="/products" label="Products" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{product.name}</h1>
         <span className="badge">{product.sku}</span>
@@ -129,7 +128,7 @@ export default async function ProductPage({
         </section>
       )}
 
-      {can(role, "seeDocuments") && features.on("documents") && (
+      {can(roles, "seeDocuments") && features.on("documents") && (
         <LinkedDocuments supabase={supabase} companyId={company.id} field="product_id" id={id} back={`/products/${id}#documents`} kind="sds" />
       )}
 

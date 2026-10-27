@@ -1,13 +1,14 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
 import { PayMethodFields } from "@/components/PayMethodFields";
 import { InvoiceReminderCard } from "@/components/FollowUpCards";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { InvoiceMoneyCards } from "@/components/getpaid/InvoiceMoneyCards";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { daysOverdue, INVOICE_STATUS, isOpen, methodLabel, n, shownStatus } from "@/lib/finance";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { CURRENCIES, PAYMENT_TERMS } from "@/lib/lists";
@@ -20,6 +21,7 @@ import { can } from "@/lib/roles";
 import { BranchField } from "@/components/BranchField";
 import { branchList } from "@/lib/branches";
 import { quoteNo, StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 import {
   addInvoiceLine,
   cancelInvoice,
@@ -64,9 +66,9 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, profile, features } = await getAppContext();
+  const { supabase, company, roles, profile, features } = await getAppContext();
   const lang = await primeLang();
-  if (!can(role, "seeInvoices")) redirect("/");
+  if (!can(roles, "seeInvoices")) noAccess();
 
   const { data: inv } = await supabase
     .from("invoices")
@@ -77,7 +79,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   if (!inv) notFound();
   const branches = features.on("branches") ? await branchList(supabase, company.id) : [];
 
-  const edit = can(role, "editInvoices");
+  const edit = can(roles, "editInvoices");
   const isDraft = inv.status === "draft";
   const editable = edit && isDraft;
   const open = isOpen(inv.status);
@@ -94,7 +96,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
       .order("received_on"),
     editable ? productOptions(supabase, company.id) : Promise.resolve([]),
     namesFor(supabase, [inv.created_by, inv.issued_by, inv.credit_override_by]),
-    can(role, "seeProfit") && !isDraft && inv.status !== "cancelled"
+    can(roles, "seeProfit") && !isDraft && inv.status !== "cancelled"
       ? supabase.from("invoice_profit").select("revenue_base, cost_base, lines_without_cost").eq("invoice_id", id).maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
@@ -116,9 +118,8 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      <p className="small">
-        <Link href="/invoices">{tr("← Invoices")}</Link>
-        {inv.quotation && can(role, "seeSales") && (
+      <BackLink href="/invoices" label="Invoices">
+        {inv.quotation && can(roles, "seeSales") && (
           <>
             {" · "}
             <Link href={`/quotations/${inv.quotation.id}`}>{quoteNo(inv.quotation)}</Link>
@@ -130,7 +131,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
             <Link href={`/deliveries/${inv.delivery.id}`}>{inv.delivery.number}</Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{inv.client?.name}</h1>
         <StatusBadge map={INVOICE_STATUS} status={shown} />
@@ -147,7 +148,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         {inv.created_by && <>{" "}{tr("· by")}{" "}{names.get(inv.created_by)}</>}
       </p>
       <Notice {...notice} />
-      <BranchField kind="invoice" id={inv.id} branchId={inv.branch_id ?? null} branches={branches} canMove={can(role, "manageBranches")} />
+      <BranchField kind="invoice" id={inv.id} branchId={inv.branch_id ?? null} branches={branches} canMove={can(roles, "manageBranches")} />
 
       {inv.status === "cancelled" && (
         <div className="banner bad">
@@ -218,7 +219,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                     )}
                   </div>
                   {p.voided_at && <div className="small text-warn">{tr("Voided:")}{" "}{p.void_reason}</div>}
-                  {!p.voided_at && can(role, "voidPayments") && (
+                  {!p.voided_at && can(roles, "voidPayments") && (
                     <details className="small">
                       <summary>{tr("Void this payment")}</summary>
                       <form action={voidPayment} className="inline-form" style={{ marginTop: 6 }}>
@@ -266,7 +267,9 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         </section>
       )}
 
-      {stage13Ready(company) && features.on("reminders") && can(role, "followUpInvoices") && open && !isDraft && (
+      <InvoiceMoneyCards supabase={supabase} company={company} role={roles} on={(k) => features.on(k)} inv={{ id: inv.id, number: inv.number, status: inv.status, currency: ccy, total: n(inv.total), amount_paid: n(inv.amount_paid), client_id: inv.client_id, client_name: inv.client?.name ?? "", contact_name: inv.contact_name }} />
+
+      {stage13Ready(company) && features.on("reminders") && can(roles, "followUpInvoices") && open && !isDraft && (
         <InvoiceReminderCard
           supabase={supabase}
           company={company}
@@ -507,7 +510,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         )}
       </section>
 
-      {((edit && isDraft) || (can(role, "voidPayments") && open && n(inv.amount_paid) === 0)) && (
+      {((edit && isDraft) || (can(roles, "voidPayments") && open && n(inv.amount_paid) === 0)) && (
         <details className="card">
           <summary>
             <strong>{tr("Cancel this invoice")}</strong>

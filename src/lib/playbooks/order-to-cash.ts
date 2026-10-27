@@ -4,7 +4,7 @@ import type { Playbook } from "./types";
  * Order to cash: one live order (Kilimanjaro Hotels Ltd buys paper, toner and cleaning supplies) followed
  * from the first call to the money in the bank and the profit on the order, with the problems that
  * happen on the way and how to handle each one in LeMoSp.
- * English is the key; Kiswahili is in ./sw/order-to-cash.ts.
+ * English is the key.
  */
 export const ORDER_TO_CASH: Playbook = {
   id: "order-to-cash",

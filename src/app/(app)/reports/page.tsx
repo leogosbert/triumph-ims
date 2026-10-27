@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { SavedReports } from "@/components/reports/SavedReports";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { GROUPS } from "@/lib/reports/defs";
 import { reportsFor } from "@/lib/reports/run";
 
@@ -11,9 +10,9 @@ export const metadata = { title: "Reports" };
 
 export default async function ReportsPage() {
   await primeLang();
-  const { role, features, company } = await getAppContext();
-  const mine = reportsFor(role, features);
-  if (mine.length === 0) redirect("/");
+  const { roles, features, company } = await getAppContext();
+  const mine = reportsFor(roles, features);
+  if (mine.length === 0) noAccess();
   return (
     <>
       <h1>{tr("Reports")}</h1>

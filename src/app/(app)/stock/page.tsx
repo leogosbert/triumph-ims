@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { Notice } from "@/components/Notice";
 import { StockGauge } from "@/components/StockGauge";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { cleanSearch } from "@/lib/records";
@@ -19,8 +18,8 @@ export default async function StockPage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "seeStock")) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seeStock")) noAccess();
   const store = typeof sp.store === "string" ? sp.store : "";
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "").toLowerCase();
   const view = sp.view === "all" ? "all" : "instock";
@@ -55,10 +54,10 @@ export default async function StockPage({ searchParams }: { searchParams: Search
       <div className="page-head">
         <h1>{tr("Stock")}</h1>
         <div className="actions" style={{ marginTop: 0 }}>
-          {can(role, "receiveGoods") && (
+          {can(roles, "receiveGoods") && (
             <Link href="/receiving" className="btn btn-primary btn-small">{tr("Receive goods")}</Link>
           )}
-          {can(role, "seeDeliveries") && (
+          {can(roles, "seeDeliveries") && (
             <Link href="/deliveries" className="btn btn-small">{tr("Deliveries")}</Link>
           )}
           {features.on("stock_transfers") && stores.length > 1 && (
@@ -84,7 +83,7 @@ export default async function StockPage({ searchParams }: { searchParams: Search
         <div className="stat">
           <div className="n">{stores.length}</div>
           <div className="l">{tr("Store")}{stores.length === 1 ? "" : "s"}
-            {can(role, "manageWarehouses") && (
+            {can(roles, "manageWarehouses") && (
               <>
                 {" · "}
                 <Link href="/warehouses">{tr("manage")}</Link>
@@ -110,7 +109,7 @@ export default async function StockPage({ searchParams }: { searchParams: Search
           </select>
           <label className="check">
             <input type="checkbox" name="view" value="all" defaultChecked={view === "all"} />{" "}{tr("Include products with no stock")}</label>
-          {can(role, "adjustStock") && (
+          {can(roles, "adjustStock") && (
             <>
               <Link href="/stock/adjust" className="btn btn-small" style={{ marginLeft: "auto" }}>{tr("Adjust stock")}</Link>
               <Link href="/stock/import" className="btn btn-small">{tr("Load opening stock")}</Link>
@@ -145,10 +144,10 @@ export default async function StockPage({ searchParams }: { searchParams: Search
         <section className="card" id="low" style={{ borderColor: "#f0d49a" }}>
           <div className="page-head" style={{ marginBottom: 4 }}>
             <h2 style={{ margin: 0 }}>{tr("Reorder")}</h2>
-            {can(role, "seeReorder") && features.on("reorder_levels") && (
+            {can(roles, "seeReorder") && features.on("reorder_levels") && (
               <Link href="/stock/reorder" className="btn btn-small btn-primary">{tr("What to reorder")}</Link>
             )}
-            {can(role, "planPurchases") && features.on("demand_forecast") && (
+            {can(roles, "planPurchases") && features.on("demand_forecast") && (
               <Link href="/planning" className="btn btn-small">{tr("Purchase planning")}</Link>
             )}
           </div>

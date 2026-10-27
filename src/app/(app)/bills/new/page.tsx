@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -12,6 +11,7 @@ import { todayTz } from "@/lib/sales";
 import { newBill } from "../actions";
 import { BillFields } from "../BillFields";
 import { BillScan } from "../BillScan";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New supplier bill" };
 
@@ -20,8 +20,8 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const poId = typeof sp.po === "string" ? sp.po : null;
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!can(role, "editBills")) redirect("/bills");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!can(roles, "editBills")) redirect("/bills");
 
   const [{ data: po }, { data: sups }] = await Promise.all([
     poId
@@ -38,9 +38,7 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href={po ? `/purchase-orders/${po.id}` : "/bills"}>← {po ? po.number : tr("Supplier bills")}</Link>
-      </p>
+      <BackLink href={po ? `/purchase-orders/${po.id}` : "/bills"} label={po ? po.number : "Supplier bills"} />
       <h1>{tr("Record a supplier bill")}</h1>
       <p className="muted small">{tr("Enter the supplier's invoice as you received it.")}{" "}{po && tr("The amounts are filled in from the purchase order — change them to match the invoice.")}
       </p>

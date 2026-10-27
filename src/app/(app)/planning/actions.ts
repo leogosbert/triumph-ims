@@ -16,8 +16,8 @@ export async function planningAction(form: FormData) {
   if (str(form, "mode") !== "levels") return reorderAction(form);
   const days = str(form, "days") || "90";
   const back = `/planning?days=${days}`;
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editProducts")) redirect(withNotice(back, { error: "You don't have permission to edit products." }));
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editProducts")) redirect(withNotice(back, { error: "You don't have permission to edit products." }));
   const picked = form.getAll("pick").map(String);
   if (picked.length === 0) redirect(withNotice(back, { error: "Tick at least one item with a quantity." }));
   const { data, error } = await supabase.rpc("demand_plan", { p_company: company.id, p_days: Number(days) });

@@ -21,6 +21,10 @@ import { SW_BRAND } from "./sw-more/brand";
 import { SW_COMPLIANCE } from "./sw-more/compliance";
 import { SW_MEETINGS } from "./sw-more/meetings";
 import { SW_GUIDE_UPDATE } from "./sw-more/guide-update";
+import { SW_MONEY } from "./sw-more/money";
+import { SW_GROWTH_TOOLS } from "./sw-more/growth-tools";
+import { SW_PORTAL } from "./sw-more/portal";
+import { SW_GUIDE_R2 } from "./sw-more/guide-r2";
 
 export const SW: Record<string, string> = {
   "Remove LeMoSp from this phone": "Ondoa LeMoSp kwenye simu hii",
@@ -4562,6 +4566,6 @@ export const SW: Record<string, string> = {
 };
 
 // Later screens keep their Kiswahili in src/lib/sw-more/; the texts above win if a key is in both.
-for (const extra of [SW_SETTINGS, SW_STAGE16, SW_SERVICES, SW_MAINTENANCE, SW_PROJECTS, SW_HIRE, SW_TAILORED, SW_BACKUPS, SW_ORDERS, SW_ERP, SW_HR, SW_HSE, SW_LEDGER, SW_PAYROLL, SW_LOOK, SW_AI, SW_INBOX, SW_BRAND, SW_COMPLIANCE, SW_MEETINGS, SW_GUIDE_UPDATE]) {
+for (const extra of [SW_SETTINGS, SW_STAGE16, SW_SERVICES, SW_MAINTENANCE, SW_PROJECTS, SW_HIRE, SW_TAILORED, SW_BACKUPS, SW_ORDERS, SW_ERP, SW_HR, SW_HSE, SW_LEDGER, SW_PAYROLL, SW_LOOK, SW_AI, SW_INBOX, SW_BRAND, SW_COMPLIANCE, SW_MEETINGS, SW_GUIDE_UPDATE, SW_MONEY, SW_GROWTH_TOOLS, SW_PORTAL, SW_GUIDE_R2]) {
   for (const [k, v] of Object.entries(extra)) if (!(k in SW)) SW[k] = v;
 }

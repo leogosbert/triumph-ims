@@ -19,8 +19,8 @@ export const metadata = { title: "Payroll" };
 export default async function PayrollPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "runPayroll")) redirect("/payroll/my");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "runPayroll")) redirect("/payroll/my");
   const [{ data, error }, { count: payCount, error: payError }] = await Promise.all([
     supabase
       .from("payroll_runs")

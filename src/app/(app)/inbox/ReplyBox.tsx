@@ -22,7 +22,7 @@ export function ReplyBox({
   closed,
 }: {
   conversationId: string;
-  channel: "email" | "whatsapp";
+  channel: "email" | "whatsapp" | "portal";
   to: string;
   subject: string;
   emailReady: boolean;
@@ -118,7 +118,11 @@ export function ReplyBox({
         {result.error && <p className="notice notice-error small">{tr(result.error)}</p>}
         {result.ok && <p className="notice small">{tr(result.ok)}</p>}
         <div className="actions">
-          {channel === "email" ? (
+          {channel === "portal" ? (
+            <button type="submit" className="btn btn-primary" disabled={pending}>
+              {pending ? tr("Sending…") : tr("Send to their portal")}
+            </button>
+          ) : channel === "email" ? (
             <>
               {emailReady && (
                 <button type="submit" className="btn btn-primary" disabled={pending}>

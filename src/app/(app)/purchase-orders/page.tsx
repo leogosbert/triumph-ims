@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -10,6 +9,7 @@ import { PO_STATUS } from "@/lib/purchasing";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Purchase orders" };
 
@@ -38,8 +38,8 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seePurchasing")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seePurchasing")) noAccess();
 
   let query = supabase
     .from("purchase_orders")
@@ -56,12 +56,10 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchasing">{tr("← Purchasing")}</Link>
-      </p>
+      <BackLink href="/purchasing" label="Purchasing" />
       <div className="page-head">
         <h1>{tr("Purchase orders")}</h1>
-        {can(role, "editPurchasing") && (
+        {can(roles, "editPurchasing") && (
           <Link href="/purchase-orders/new" className="btn btn-primary btn-small">{tr("+ New PO")}</Link>
         )}
       </div>

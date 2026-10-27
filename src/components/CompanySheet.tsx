@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut, switchCompany } from "@/app/actions";
-import { setLanguage } from "@/app/lang-actions";
 import { setTheme } from "@/app/theme-actions";
 import { Icon, type IconName } from "@/components/Icon";
 import { useTr } from "@/lib/tr-client";
@@ -18,7 +17,6 @@ export type CompanyCard = {
   person: { name: string; email: string };
   isManager: boolean;
   others: { id: string; name: string; role: string }[];
-  lang: "en" | "sw";
   theme: "auto" | "light" | "dark";
 };
 
@@ -167,17 +165,6 @@ export function CompanySheet({ card }: { card: CompanyCard }) {
                   {tr(v === "auto" ? "Auto" : v === "light" ? "Light" : "Dark")}
                 </button>
               ))}
-            </form>
-          </div>
-          <div className="csheet-row">
-            <span>{tr("Language")}</span>
-            <form action={setLanguage} className="seg seg-sm">
-              <button type="submit" name="lang" value="en" aria-pressed={card.lang === "en"}>
-                English
-              </button>
-              <button type="submit" name="lang" value="sw" aria-pressed={card.lang === "sw"}>
-                Kiswahili
-              </button>
             </form>
           </div>
 

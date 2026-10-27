@@ -16,6 +16,8 @@ import { StatusBadge } from "@/lib/sales";
 import { addContact, removeContact, saveClient, setClientActive } from "../actions";
 import { ClientCrm } from "../../crm/ClientCrm";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
+import { PortalAccess } from "@/components/PortalAccess";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Client" };
 
@@ -38,7 +40,7 @@ export default async function ClientPage({
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
+  const { supabase, company, roles, features } = await getAppContext();
 
   const [{ data: client }, { data: contactData }] = await Promise.all([
     supabase.from("clients").select("*").eq("id", id).eq("company_id", company.id).maybeSingle(),
@@ -51,10 +53,10 @@ export default async function ClientPage({
   ]);
   if (!client) notFound();
   const contacts = (contactData ?? []) as Contact[];
-  const editable = can(role, "editClients");
+  const editable = can(roles, "editClients");
   const kindLabel = (k: string) => CONTACT_KINDS.find((c) => c.value === k)?.label ?? k;
   type Inv = { id: string; number: string; status: string; issue_date: string | null; due_date: string | null; total: number; amount_paid: number; exchange_rate: number; currency: string };
-  const { data: invData } = can(role, "seeInvoices")
+  const { data: invData } = can(roles, "seeInvoices")
     ? await supabase
         .from("invoices")
         .select("id, number, status, issue_date, due_date, total, amount_paid, exchange_rate, currency")
@@ -72,9 +74,7 @@ export default async function ClientPage({
 
   return (
     <>
-      <p className="small">
-        <Link href="/clients">{tr("← Clients")}</Link>
-      </p>
+      <BackLink href="/clients" label="Clients" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{client.name}</h1>
         <span className="badge">{client.code}</span>
@@ -201,10 +201,11 @@ export default async function ClientPage({
         )}
       </section>
 
-      <ClientCrm supabase={supabase} companyId={company.id} clientId={client.id} role={role} features={features} />
-      {can(role, "seeDocuments") && features.on("documents") && (
+      <ClientCrm supabase={supabase} companyId={company.id} clientId={client.id} role={roles} features={features} />
+      {can(roles, "seeDocuments") && features.on("documents") && (
         <LinkedDocuments supabase={supabase} companyId={company.id} field="client_id" id={client.id} back={`/clients/${client.id}#documents`} />
       )}
+      <PortalAccess supabase={supabase} companyId={company.id} role={roles} features={features} party="client" partyId={client.id} contacts={contacts} />
 
       <form action={saveClient}>
         <input type="hidden" name="id" value={client.id} />
@@ -213,7 +214,7 @@ export default async function ClientPage({
             sections={CLIENT_SECTIONS}
             values={client}
             readOnly={!editable}
-            lockedKeys={can(role, "setCreditLimit") ? [] : ["credit_limit"]}
+            lockedKeys={can(roles, "setCreditLimit") ? [] : ["credit_limit"]}
           />
           {editable && <SubmitButton className="btn btn-primary btn-block">{tr("Save changes")}</SubmitButton>}
         </fieldset>

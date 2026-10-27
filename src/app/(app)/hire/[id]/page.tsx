@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -14,6 +14,7 @@ import { StatusBadge } from "@/lib/sales";
 import { HIRE_STATUS, RATE_PERIODS, canInvoiceService, canPlanService, canSeeAllService, todayTz } from "@/lib/services";
 import { addHireLine, cancelHire, invoiceHire, removeHireLine, returnHire, saveHire } from "../actions";
 import { chargeBetween, isOverdue, perPeriod, unbilledSpan, type Hire, type HireLine } from "../calc";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Hire" };
 
@@ -25,8 +26,8 @@ export default async function HireDetailPage({ params, searchParams }: { params:
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeAllService(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeAllService(roles)) noAccess();
   const { data, error } = await supabase
     .from("hire_agreements")
     .select("*, client:clients(name)")
@@ -38,7 +39,7 @@ export default async function HireDetailPage({ params, searchParams }: { params:
   if (!data) notFound();
   const h = data as unknown as Hire;
   const today = todayTz();
-  const planner = canPlanService(role);
+  const planner = canPlanService(roles);
   const out = h.status === "out";
   const editableLines = out && !h.invoiced_until && planner;
 
@@ -72,13 +73,11 @@ export default async function HireDetailPage({ params, searchParams }: { params:
   const span = unbilledSpan(h, today);
   const running = span.open && (h.status === "out" || h.status === "returned") ? chargeBetween(lines, span.from, span.to, h.rate_period) : null;
   const period = tr(RATE_PERIODS[h.rate_period]?.per ?? h.rate_period);
-  const canInvoice = canInvoiceService(role) && (h.status === "out" || h.status === "returned") && span.open;
+  const canInvoice = canInvoiceService(roles) && (h.status === "out" || h.status === "returned") && span.open;
 
   return (
     <>
-      <p className="small">
-        <Link href="/hire">{tr("← Equipment hire")}</Link>
-      </p>
+      <BackLink href="/hire" label="Equipment hire" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{h.number}</h1>
         <span>

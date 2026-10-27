@@ -28,7 +28,7 @@ export default async function DeleteAccountInfoPage() {
           <h2>{tr("How to delete your account")}</h2>
           <ol className="del-list">
             <li>{tr("Sign in to LeMoSp.")}</li>
-            <li>{tr("Open Your account: tap your company name at the top, or More → Company & account → Your account.")}</li>
+            <li>{tr("Open Your account: tap your company name at the top, or More → Me → Your account.")}</li>
             <li>{tr("Choose Delete my account, enter your password and type DELETE.")}</li>
           </ol>
           <p className="small muted" style={{ marginBottom: 0 }}>

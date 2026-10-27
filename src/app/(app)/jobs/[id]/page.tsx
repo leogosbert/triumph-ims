@@ -17,6 +17,8 @@ import { fmtQty, storeOptions } from "@/lib/stock";
 import { addJobHours, addJobLine, invoiceJob, jobStatus, removeJobHours, removeJobLine, saveJob, saveProgress } from "../actions";
 import { JobFields } from "../JobFields";
 import { SignOff } from "./SignOff";
+import { BackLink } from "@/components/BackLink";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Service job" };
 
@@ -37,7 +39,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   const { data: j, error } = await supabase
     .from("service_jobs")
     .select("*, client:clients(id, name), contract:service_contracts(id, number, title), equipment:client_equipment(id, name, serial_no), project:projects(id, number, name), quotation:quotations(id, number), invoice:invoices(id, number)")
@@ -47,7 +49,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
   if (isMissingTable(error)) return <NotReady title="Service job" />;
   if (!j) notFound();
 
-  const planner = canPlanService(role);
+  const planner = canPlanService(roles);
   const onJob = (j.assigned_to as string[]).includes(user.id);
   const worker = planner || onJob;
   const open = OPEN_JOB.includes(j.status);
@@ -81,9 +83,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
 
   return (
     <>
-      <p className="small">
-        <Link href="/jobs">{tr("← Service jobs")}</Link>
-      </p>
+      <BackLink href="/jobs" label="Service jobs" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{j.title}</h1>
         <span className="sj-actions">
@@ -342,7 +342,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
                   </div>
                   <strong>{fmtQty(h.hours)} h</strong>
                 </div>
-                {!h.invoice_id && (h.user_id === user.id || role === "management") && (
+                {!h.invoice_id && (h.user_id === user.id || hasRole(roles, "management")) && (
                   <form action={removeJobHours}>
                     <input type="hidden" name="job_id" value={j.id} />
                     <input type="hidden" name="entry_id" value={h.id} />
@@ -359,7 +359,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
           <form action={addJobHours} style={{ marginTop: 12 }}>
             <input type="hidden" name="job_id" value={j.id} />
             <div className="grid grid-2">
-              {role === "management" && people.length > 0 && (
+              {hasRole(roles, "management") && people.length > 0 && (
                 <div className="field">
                   <label htmlFor="h-user">{tr("Who")}</label>
                   <select id="h-user" name="user_id" defaultValue={user.id}>
@@ -396,7 +396,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
         )}
       </section>
 
-      {(planner || canInvoiceService(role)) && (
+      {(planner || canInvoiceService(roles)) && (
         <section className="card">
           <h2>{tr("To bill")}</h2>
           {j.price != null ? (
@@ -408,7 +408,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
             <span>{tr("Total before VAT")}</span>
             <span>{formatMoney(billValue, j.currency)}</span>
           </div>
-          {j.status === "completed" && canInvoiceService(role) && (
+          {j.status === "completed" && canInvoiceService(roles) && (
             <form action={invoiceJob} style={{ marginTop: 12 }}>
               <input type="hidden" name="id" value={j.id} />
               <SubmitButton className="btn btn-primary btn-block">{tr("Make invoice")}</SubmitButton>

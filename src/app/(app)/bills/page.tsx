@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { BILL_STATUS, daysOverdue, n, shownStatus } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -10,6 +9,7 @@ import { formatMoney } from "@/lib/money";
 import { LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier bills" };
 
@@ -38,8 +38,8 @@ export default async function BillsPage({ searchParams }: { searchParams: Search
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeBills")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeBills")) noAccess();
 
   let q = supabase
     .from("supplier_bills")
@@ -56,12 +56,10 @@ export default async function BillsPage({ searchParams }: { searchParams: Search
 
   return (
     <>
-      <p className="small">
-        <Link href={can(role, "seeFinance") ? "/finance" : "/purchasing"}>← {can(role, "seeFinance") ? tr("Finance") : tr("Purchasing")}</Link>
-      </p>
+      <BackLink href={can(roles, "seeFinance") ? "/finance" : "/purchasing"} label={can(roles, "seeFinance") ? "Finance" : "Purchasing"} />
       <div className="page-head">
         <h1>{tr("Supplier bills")}</h1>
-        {can(role, "editBills") && (
+        {can(roles, "editBills") && (
           <Link href="/bills/new" className="btn btn-primary btn-small">{tr("+ Bill")}</Link>
         )}
       </div>

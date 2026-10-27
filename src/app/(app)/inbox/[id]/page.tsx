@@ -1,22 +1,24 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { INBOX_ROLES, canUseInbox, type Conversation, type InboxMessage } from "@/lib/inbox/common";
 import { replySubject } from "@/lib/inbox/sanitize";
-import { inboxChannels } from "@/lib/inbox/server";
+import { inboxChannels, inboxOpensInline } from "@/lib/inbox/server";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { clientOptions } from "@/lib/options";
 import { companyPeople, namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { assignConversation, linkConversation, markUnread, setConversationStatus } from "../actions";
 import { HtmlFrame } from "../HtmlFrame";
 import { ReplyBox } from "../ReplyBox";
+import { noticeFromInbox } from "../../tenders/alerts/actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Conversation" };
 
@@ -39,8 +41,8 @@ export default async function ConversationPage({ params, searchParams }: { param
   const { id } = await params;
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canUseInbox(role)) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!canUseInbox(roles)) noAccess();
 
   const { data: conv, error } = await supabase
     .from("inbox_conversations")
@@ -65,23 +67,28 @@ export default async function ConversationPage({ params, searchParams }: { param
   // Opening the conversation marks it read.
   if (c.unread_count > 0) await supabase.rpc("inbox_mark_read", { p_conversation: c.id, p_read: true });
 
-  const paths = attachments.filter((a) => a.storage_path).map((a) => a.storage_path!);
-  const signed = paths.length ? (await supabase.storage.from("inbox").createSignedUrls(paths, 3600)).data ?? [] : [];
+  // Files from strangers: pictures and PDFs open in the browser, everything else downloads (never opens as a page).
+  const stored = attachments.filter((a) => a.storage_path);
+  const inline = stored.filter((a) => inboxOpensInline(a.content_type)).map((a) => a.storage_path!);
+  const download = stored.filter((a) => !inboxOpensInline(a.content_type)).map((a) => a.storage_path!);
+  const [signedInline, signedDownload] = await Promise.all([
+    inline.length ? supabase.storage.from("inbox").createSignedUrls(inline, 3600) : null,
+    download.length ? supabase.storage.from("inbox").createSignedUrls(download, 3600, { download: true }) : null,
+  ]);
+  const signed = [...(signedInline?.data ?? []), ...(signedDownload?.data ?? [])];
   const urlOf = new Map(signed.filter((s) => s.signedUrl && s.path).map((s) => [s.path!, s.signedUrl]));
   const names = await namesFor(supabase, messages.map((m) => m.sent_by));
   const ch = inboxChannels();
   const showHtml = typeof sp.html === "string" ? sp.html : "";
   const who = c.client?.name ?? c.supplier?.name ?? c.counterpart_name ?? c.counterpart_address;
   const lastIn = [...messages].reverse().find((m) => m.direction === "in");
-  const inboxPeople = people.filter((p) => (INBOX_ROLES as string[]).includes(p.role));
+  const inboxPeople = people.filter((p) => hasRole(p.roles, ...INBOX_ROLES));
 
   return (
     <>
-      <p className="small">
-        <Link href="/inbox">{tr("← Inbox")}</Link>
-      </p>
+      <BackLink href="/inbox" label="Inbox" />
       <h1 style={{ overflowWrap: "anywhere" }}>
-        {c.channel === "whatsapp" ? "💬 " : "✉️ "}
+        {c.channel === "whatsapp" ? "💬 " : c.channel === "portal" ? "🌐 " : "✉️ "}
         {who}
       </h1>
       <p className="muted small" style={{ overflowWrap: "anywhere" }}>
@@ -94,13 +101,22 @@ export default async function ConversationPage({ params, searchParams }: { param
       <p className="small" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
         {c.client && <Link href={`/clients/${c.client.id}`}>{tr("Client")}: {c.client.name}</Link>}
         {c.supplier && <Link href={`/suppliers/${c.supplier.id}`}>{tr("Supplier")}: {c.supplier.name}</Link>}
-        {c.client && can(role, "editSales") && <Link href={`/rfqs/new?client=${c.client.id}`}>{tr("+ RFQ from this request")}</Link>}
+        {c.client && can(roles, "editSales") && <Link href={`/rfqs/new?client=${c.client.id}`}>{tr("+ RFQ from this request")}</Link>}
         {c.channel === "email" && (
           <Link href={`/inbox/new?channel=whatsapp&link=${c.client ? `client:${c.client.id}` : c.supplier ? `supplier:${c.supplier.id}` : ""}&name=${encodeURIComponent(who)}`}>
             {tr("Message on WhatsApp instead")}
           </Link>
         )}
       </p>
+      {c.channel === "email" && lastIn && can(roles, "seeCrm") && features.ready && features.list.some((f) => f.key === "tender_alerts" && f.enabled) && (
+        <form action={noticeFromInbox} className="small" style={{ margin: "0 0 8px" }}>
+          <input type="hidden" name="message_id" value={lastIn.id} />
+          <input type="hidden" name="back" value={`/inbox/${c.id}`} />
+          <button type="submit" className="btn btn-small">
+            {tr("Read as a tender notice")}
+          </button>
+        </form>
+      )}
       <Notice {...notice} />
 
       <section aria-label={tr("Messages")} style={{ display: "grid", gap: 10, margin: "12px 0" }}>

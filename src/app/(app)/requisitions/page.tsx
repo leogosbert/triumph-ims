@@ -1,14 +1,13 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { REQUEST_STATUS } from "@/lib/stock";
 
@@ -36,9 +35,9 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!can(role, "requestPurchases")) redirect("/");
-  const tabs = ["open", ...(role === "management" ? ["approve"] : []), ...(can(role, "seeAllRequests") ? ["order"] : []), "done"];
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!can(roles, "requestPurchases")) noAccess();
+  const tabs = ["open", ...(hasRole(roles, "management") ? ["approve"] : []), ...(can(roles, "seeAllRequests") ? ["order"] : []), "done"];
   const view = typeof sp.view === "string" && tabs.includes(sp.view) ? sp.view : "open";
   const { data, error } = await supabase
     .from("requisitions")
@@ -61,7 +60,7 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
         </Link>
       </div>
       <p className="muted small">
-        {can(role, "seeAllRequests")
+        {can(roles, "seeAllRequests")
           ? tr("Requests from the team for goods to buy. Management approves; procurement turns them into purchase orders.")
           : tr("Ask for goods the business should buy. Management approves and procurement orders them.")}
       </p>

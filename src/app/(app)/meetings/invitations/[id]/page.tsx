@@ -10,6 +10,7 @@ import { formatWhen, toLocalInput } from "@/lib/services";
 import { INVITATION_STATUS, type Invitation } from "@/lib/meetings/model";
 import { decideInvitation } from "../../actions";
 import styles from "../../meetings.module.css";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Meeting request" };
 
@@ -28,6 +29,7 @@ export default async function InvitationPage({ params, searchParams }: { params:
   ]);
   return (
     <>
+      <BackLink href="/meetings/invitations" label="Invitations" />
       <div className="page-head">
         <h1>{r.topic}</h1>
         <span className={`badge tone-${INVITATION_STATUS[r.status]?.tone}`}>{tr(INVITATION_STATUS[r.status]?.label ?? r.status)}</span>

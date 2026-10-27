@@ -1,15 +1,15 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { TRANSFER_STATUS, storeOptions } from "@/lib/stock";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Stock transfers" };
 
@@ -30,8 +30,8 @@ export default async function TransfersPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeStock")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeStock")) noAccess();
   const view = sp.view === "done" ? "done" : "open";
   let q = supabase
     .from("stock_transfers")
@@ -48,12 +48,10 @@ export default async function TransfersPage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <div className="page-head">
         <h1>{tr("Stock transfers")}</h1>
-        {can(role, "moveStock") && (
+        {can(roles, "moveStock") && (
           <Link href="/transfers/new" className="btn btn-primary btn-small">
             {tr("+ Transfer")}
           </Link>

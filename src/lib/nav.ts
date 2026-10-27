@@ -12,17 +12,18 @@ const allOn: FeatureCheck = () => true;
 
 const M = {
   home: ["/"],
-  sales: ["/inbox", "/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
+  my: ["/my"],
+  sales: ["/inbox", "/portal-admin", "/catalogue", "/sales", "/rfqs", "/quotations", "/crm", "/tenders", "/contracts"],
   clients: ["/clients"],
   products: ["/products"],
   purchasing: ["/purchasing", "/supplier-rfqs", "/purchase-orders", "/suppliers", "/requisitions", "/approvals"],
   stock: ["/stock", "/warehouses", "/receiving", "/grns", "/transfers", "/planning"],
   deliveries: ["/deliveries", "/backorders", "/fleet"],
-  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow", "/accounts", "/payroll"],
+  finance: ["/finance", "/invoices", "/payments", "/receivables", "/bills", "/payables", "/profit", "/rates", "/expenses", "/profit-loss", "/statements", "/reconcile", "/budgets", "/cashflow", "/accounts", "/payroll", "/getting-paid", "/financing"],
   services: ["/jobs", "/maintenance", "/equipment", "/projects", "/timesheets", "/hire", "/service-reports"],
   reports: ["/reports", "/head-office", "/scheduled-reports"],
   admin: ["/hr", "/hse", "/quality", "/meetings", "/calendar"],
-  more: ["/more", "/hr", "/hse", "/quality", "/guide", "/documents", "/compliance", "/meetings", "/calendar", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
+  more: ["/more", "/my", "/assistant", "/integrations", "/services", "/hr", "/hse", "/quality", "/guide", "/documents", "/compliance", "/meetings", "/calendar", "/insights", "/reports", "/settings", "/account", "/import", "/activity", "/help", "/notifications", "/search", "/growth", "/suggestions", "/admin", "/branches", "/head-office", "/scheduled-reports"],
 };
 
 /** The screens behind each menu section (read by src/lib/scenes.ts to colour and picture each section). */
@@ -64,37 +65,47 @@ export function bottomNav(role: Role, t: Dict, on: FeatureCheck = allOn): NavIte
   return items;
 }
 
-/** Laptop sidebar: every section the role can open (and the company has switched on). */
+/**
+ * Laptop sidebar: every section the role can open (and the company has switched on), in the order of
+ * the headings in SIDE_GROUPS (src/components/BottomNav.tsx): My work, Sell & buy, Stock & delivery,
+ * Money & reports, Team & company.
+ */
 export function sideNav(role: Role, t: Dict, on: FeatureCheck = allOn, services = false, admin = false, settings = false): NavItem[] {
+  const mine: NavItem = { href: "/my", label: "My page", icon: "user", match: M.my };
   if (role === "driver") {
     return [
+      mine,
       { href: "/driver", label: t["nav.myDeliveries"], icon: "deliveries", match: ["/driver"], plain: true },
       ...(on("products") ? [{ href: "/products", label: t["nav.products"], icon: "products" as const, match: M.products }] : []),
       { href: "/help", label: t["nav.help"], icon: "help", match: ["/help"] },
-      { href: "/more", label: t["nav.more"], icon: "more", match: M.more.filter((p) => p !== "/help") },
+      { href: "/more", label: t["nav.more"], icon: "more", match: M.more.filter((p) => p !== "/help" && p !== "/my") },
     ];
   }
-  const out: NavItem[] = [{ href: "/", label: t["nav.home"], icon: "home", match: M.home }];
-  // Screens with their own sidebar link (Inbox, Meetings, Calendar, Legal & compliance) are not also lit under Sales, Administration or More.
-  const own = new Set(["/inbox", "/meetings", "/calendar", "/compliance"]);
+  // Screens with their own sidebar link (My page, Inbox, Meetings, Calendar, Legal & compliance) are not also lit under Sales, People or More.
+  const own = new Set(["/my", "/inbox", "/meetings", "/calendar", "/compliance"]);
   const rest = (paths: string[]) => paths.filter((p) => !own.has(p));
-  if (can(role, "seeSales")) out.push({ href: "/sales", label: t["nav.sales"], icon: "sales", match: rest(M.sales) });
+  // My work
+  const out: NavItem[] = [mine, { href: "/", label: t["nav.home"], icon: "home", match: M.home }];
   if (canUseInbox(role)) out.push({ href: "/inbox", label: t["nav.inbox"], icon: "inbox", match: ["/inbox"], feature: "inbox" });
+  out.push({ href: "/meetings", label: t["nav.meetings"], icon: "team", match: ["/meetings"], feature: "meetings" });
+  out.push({ href: "/calendar", label: t["nav.calendar"], icon: "clock", match: ["/calendar"], feature: "calendar" });
+  // Sell & buy
+  if (can(role, "seeSales")) out.push({ href: "/sales", label: t["nav.sales"], icon: "sales", match: rest(M.sales) });
   out.push({ href: "/clients", label: t["nav.clients"], icon: "clients", match: M.clients, feature: "customers" });
   if (can(role, "seePurchasing")) out.push({ href: "/purchasing", label: t["nav.purchasing"], icon: "purchasing", match: M.purchasing });
+  // Service jobs and the other service screens (only once the goods-and-services update is in and switched on).
+  if (services && role !== "procurement") out.push({ href: "/jobs", label: t["nav.services"], icon: "tools", match: M.services });
+  // Stock & delivery
   out.push({ href: "/products", label: t["nav.products"], icon: "products", match: M.products, feature: "products" });
   if (can(role, "seeStock")) out.push({ href: "/stock", label: t["nav.stock"], icon: "stock", match: M.stock, feature: "inventory" });
   if (can(role, "seeDeliveries")) out.push({ href: "/deliveries", label: t["nav.deliveries"], icon: "deliveries", match: M.deliveries, feature: "deliveries" });
-  // Service jobs and the other service screens (only once the goods-and-services update is in and switched on).
-  if (services && role !== "procurement") out.push({ href: "/jobs", label: t["nav.services"], icon: "tools", match: M.services });
-  // Administration: employees, leave, health & safety and quality (once that update is in and switched on).
-  if (admin) out.push({ href: "/hr", label: t["nav.admin"], icon: "team", match: rest(M.admin) });
-  out.push({ href: "/meetings", label: t["nav.meetings"], icon: "team", match: ["/meetings"], feature: "meetings" });
-  out.push({ href: "/calendar", label: t["nav.calendar"], icon: "clock", match: ["/calendar"], feature: "calendar" });
-  if (can(role, "seeDocuments")) out.push({ href: "/compliance", label: t["nav.compliance"], icon: "shield", match: ["/compliance"], feature: "compliance" });
+  // Money & reports
   if (can(role, "seeFinance")) out.push({ href: "/finance", label: t["nav.finance"], icon: "finance", match: M.finance });
   else if (can(role, "seeInvoices")) out.push({ href: "/invoices", label: t["nav.finance"], icon: "finance", match: M.finance, feature: "invoices" });
   out.push({ href: "/reports", label: t["nav.reports"], icon: "report", match: M.reports });
+  // Team & company: employees, leave, health & safety and quality (once that update is in and switched on).
+  if (admin) out.push({ href: "/hr", label: "People", icon: "team", match: rest(M.admin) });
+  if (can(role, "seeDocuments")) out.push({ href: "/compliance", label: t["nav.compliance"], icon: "shield", match: ["/compliance"], feature: "compliance" });
   // Settings for management (company details, team, security, features, backups...).
   if (settings) out.push({ href: "/settings", label: t["nav.settings"], icon: "settings", match: ["/settings"] });
   out.push({ href: "/help", label: t["nav.help"], icon: "help", match: ["/help", "/guide"] });

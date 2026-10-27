@@ -16,7 +16,7 @@ import { getAppContext } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { cancelRequest, requestService } from "./actions";
 
 export const metadata = { title: "Services & prices" };
@@ -75,9 +75,9 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role, user } = await getAppContext();
-  const canBuy = can(role, "seeFinance");
-  const isManager = role === "management";
+  const { supabase, company, roles, user } = await getAppContext();
+  const canBuy = can(roles, "seeFinance");
+  const isManager = hasRole(roles, "management");
 
   const [book, reqs, billing] = await Promise.all([
     loadPriceBook(supabase),

@@ -6,6 +6,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { saveCategory } from "../../actions";
 import { CATEGORIES_MISSING, categoryHref, groupByCategory, loadCategories } from "../../categories";
 import { platformAdmin } from "../../guard";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Feature categories" };
 
@@ -26,9 +27,7 @@ export default async function AdminCategoriesPage({ searchParams }: { searchPara
 
   return (
     <>
-      <p className="small">
-        <Link href="/admin/features">{tr("← Features")}</Link>
-      </p>
+      <BackLink href="/admin/features" label="Features" />
       <h2 className="adm-title">{tr("Feature categories")}</h2>
       <p className="muted small">
         {tr("Categories group the features the app can provide, in the admin catalogue and in each company's Features page. Open a category to rename it, change its order, or add and remove features.")}

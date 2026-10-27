@@ -5,14 +5,14 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { displayName, requireManager, type Profile } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
-import { ROLE_HINTS, ROLE_LABELS, ROLES, type Role } from "@/lib/roles";
+import { ROLE_HINTS, ROLE_LABELS, ROLES, rolesOf, type Role } from "@/lib/roles";
 import { inviteMember, revokeInvitation, updateMember } from "../actions";
 import { Hint, SettingsHead } from "../SettingsHead";
 
 export const metadata = { title: "Team & roles" };
 
-type MemberRow = { id: string; user_id: string; role: Role; active: boolean; created_at: string };
-type InviteRow = { id: string; email: string; role: Role; created_at: string };
+type MemberRow = { id: string; user_id: string; role: Role; extra_roles?: Role[] | null; active: boolean; created_at: string };
+type InviteRow = { id: string; email: string; role: Role; extra_roles?: Role[] | null; created_at: string };
 
 function RoleSelect({ name, value, id, describedBy }: { name: string; value?: Role; id?: string; describedBy?: string }) {
   return (
@@ -29,6 +29,26 @@ function RoleSelect({ name, value, id, describedBy }: { name: string; value?: Ro
   );
 }
 
+/** Extra roles on top of the main one: small teams often have one person doing two jobs. */
+function ExtraRoles({ value, idPrefix }: { value?: Role[] | null; idPrefix: string }) {
+  return (
+    <fieldset className="st-extra-roles">
+      <legend className="small">{tr("Also works as")}</legend>
+      {ROLES.map((r) => (
+        <label key={r} className="check" htmlFor={`${idPrefix}-${r}`}>
+          <input id={`${idPrefix}-${r}`} type="checkbox" name="extra" value={r} defaultChecked={value?.includes(r)} /> {tr(ROLE_LABELS[r])}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+function roleNames(m: { role: Role; extra_roles?: Role[] | null }) {
+  return rolesOf(m.role, m.extra_roles)
+    .map((r) => tr(ROLE_LABELS[r]))
+    .join(" + ");
+}
+
 export default async function TeamPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
@@ -37,13 +57,14 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
   const [{ data: memberData }, { data: inviteData }] = await Promise.all([
     supabase
       .from("memberships")
-      .select("id, user_id, role, active, created_at")
+      // "*": extra_roles once the multiple-roles SQL has been run.
+      .select("*")
       .eq("company_id", company.id)
       .order("active", { ascending: false })
       .order("created_at"),
     supabase
       .from("invitations")
-      .select("id, email, role, created_at")
+      .select("*")
       .eq("company_id", company.id)
       .is("accepted_at", null)
       .is("revoked_at", null)
@@ -51,6 +72,8 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
   ]);
   const members = (memberData ?? []) as MemberRow[];
   const invites = (inviteData ?? []) as InviteRow[];
+  // Multiple roles per person: available once the SQL has been run (the column then comes back).
+  const multi = members.some((m) => Array.isArray(m.extra_roles));
 
   const { data: profileData } = await supabase
     .from("profiles")
@@ -74,7 +97,7 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
       <SettingsHead
         title={tr("Team & roles")}
         icon="team"
-        lead={tr("Invite people, give each one a role, and switch access off when someone leaves. Nothing they recorded is lost.")}
+        lead={tr("Invite people, give each one a role (or several in a small team), and switch access off when someone leaves. Nothing they recorded is lost.")}
       />
       <Notice {...notice} />
 
@@ -93,6 +116,13 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
               <Hint id="role-hint">{tr("The role decides what they can see and change. You can change it later.")}</Hint>
             </div>
           </div>
+          {multi && (
+            <>
+              <input type="hidden" name="multi" value="1" />
+              <ExtraRoles idPrefix="invite-extra" />
+              <Hint>{tr("Small team? Tick the other jobs this person also does. They see and can do everything those roles can.")}</Hint>
+            </>
+          )}
           <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Inviting…")}>{tr("Invite")}</SubmitButton>
         </form>
         <details style={{ marginTop: 12 }}>
@@ -119,7 +149,7 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
                 <div>
                   <strong>{i.email}</strong>
                   <div className="muted small">
-                    {tr(ROLE_LABELS[i.role])}{" "}{tr("· invited")}{" "}{formatDate(i.created_at)}
+                    {roleNames(i)}{" "}{tr("· invited")}{" "}{formatDate(i.created_at)}
                   </div>
                 </div>
                 <form action={revokeInvitation}>
@@ -137,7 +167,11 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
           <h2>{tr("Team")}</h2>
           <span className="badge tone-ok">{tr("{n} active").replace("{n}", String(activeCount))}</span>
         </div>
-        <p className="st-card-lead">{tr("Change a role or switch access off, then press Update. You may be asked for your password.")}</p>
+        <p className="st-card-lead">
+          {multi
+            ? tr("Choose the main role, tick any other jobs the person also does, or switch access off, then press Update. You may be asked for your password.")
+            : tr("Change a role or switch access off, then press Update. You may be asked for your password.")}
+        </p>
         <ul className="list">
           {members.map((m) => {
             const p = profiles.get(m.user_id);
@@ -151,6 +185,7 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
                     <strong>{displayName(p)}</strong> {m.user_id === user.id && <span className="badge">{tr("You")}</span>}{" "}
                     {!m.active && <span className="badge off">{tr("Switched off")}</span>}
                     <div className="muted small">{p?.email}</div>
+                    {multi && (m.extra_roles?.length ?? 0) > 0 && <div className="small">{roleNames(m)}</div>}
                   </div>
                 </div>
                 <StepUpForm action={updateMember} className="st-member-form">
@@ -160,6 +195,12 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
                     <option value="true">{tr("Has access")}</option>
                     <option value="false">{tr("Switched off")}</option>
                   </select>
+                  {multi && (
+                    <>
+                      <input type="hidden" name="multi" value="1" />
+                      <ExtraRoles idPrefix={`extra-${m.id}`} value={m.extra_roles} />
+                    </>
+                  )}
                   <SubmitButton className="btn btn-small">{tr("Update")}</SubmitButton>
                 </StepUpForm>
               </li>

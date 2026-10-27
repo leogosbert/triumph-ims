@@ -4,7 +4,7 @@ import { aiReady } from "@/lib/ai/claude";
 import { askBusiness, type AskAnswer } from "@/lib/ai/ask";
 import type { FinderEntry } from "@/lib/ai/finder";
 import { findGuide, findPages, findRecords, guideHref, searchEntries, type Hit, type HitGroup } from "@/lib/ai/search";
-import { can } from "@/lib/roles";
+import { can, onlyRoles } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { detectTopic } from "@/lib/assistant";
 import { getAppContext } from "@/lib/context";
@@ -25,20 +25,20 @@ export type QuickResults = {
 
 async function ctx() {
   const lang = await primeLang();
-  const { supabase, company, role, isManager, isPlatformAdmin, features } = await getAppContext();
-  return { lang, c: { supabase, company, role, isManager, isPlatformAdmin, features: { on: features.on, list: features.list } } };
+  const { supabase, company, roles, isManager, isPlatformAdmin, features } = await getAppContext();
+  return { lang, c: { supabase, company, roles, isManager, isPlatformAdmin, features: { on: features.on, list: features.list } } };
 }
 
 /** Instant matches while typing: screens, guide topics and records (no AI). */
 export async function quickSearch(raw: string): Promise<QuickResults> {
   const q = String(raw ?? "").replace(/\s+/g, " ").trim().slice(0, 80);
   const { c } = await ctx();
-  const aiOn = aiReady() && c.features.on("ai_assistant") && c.role !== "driver";
+  const aiOn = aiReady() && c.features.on("ai_assistant") && !onlyRoles(c.roles, "driver");
   const canWish = c.features.on("suggestions");
   if (q.length < 2) return { q, pages: [], guide: [], records: [], figures: false, aiOn, canWish };
   const records = await findRecords(c, q, 4);
   const guide = findGuide(c, q, 3).map((g) => ({ href: g.topic.href ?? guideHref(g.topic), title: tr(g.topic.title), sub: tr(g.topic.summary), side: tr("Guide") }));
-  const figures = c.role !== "driver" && c.features.on("ai_assistant") && detectTopic(q) !== "help";
+  const figures = !onlyRoles(c.roles, "driver") && c.features.on("ai_assistant") && detectTopic(q) !== "help";
   return { q, pages: findPages(c, q, 5), guide, records: records.map((g) => ({ ...g, title: tr(g.title) })), figures, aiOn, canWish };
 }
 
@@ -80,7 +80,7 @@ function fingerprint(s: string): string {
 export async function searchIndex(known?: string): Promise<{ v: string; entries?: FinderEntry[] }> {
   const { lang, c } = await ctx();
   const entries = searchEntries(c, lang);
-  const v = fingerprint(`${lang}|${c.role}|${JSON.stringify(entries)}`);
+  const v = fingerprint(`${lang}|${[...c.roles].sort().join("+")}|${JSON.stringify(entries)}`);
   return known === v ? { v } : { v, entries };
 }
 
@@ -90,7 +90,7 @@ export type RuleStatus = { label: string; tone: "ok" | "warn" | "bad"; href: str
 export async function ruleStatus(code: string): Promise<RuleStatus | null> {
   if (!/^[A-Za-z0-9_.-]{1,60}$/.test(code)) return null;
   const { c } = await ctx();
-  if (!can(c.role, "seeDocuments") || !c.features.on("compliance")) return null;
+  if (!can(c.roles, "seeDocuments") || !c.features.on("compliance")) return null;
   const today = todayTz();
   try {
     const [lic, item] = await Promise.all([

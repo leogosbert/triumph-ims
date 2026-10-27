@@ -75,6 +75,8 @@ export function JourneyStory({ end, inApp }: { end: React.ReactNode; inApp: bool
   useEffect(() => {
     const m = /^#step-(\d+)$/.exec(window.location.hash);
     if (m) setIdx(Math.max(0, Math.min(total, Number(m[1]) - 1)));
+    // "Try the demo" (sign-in page) opens straight at the demos.
+    else if (window.location.hash === "#try-it") setIdx(total);
   }, [total]);
   useEffect(() => {
     const hash = idx < total ? `#step-${idx + 1}` : "#try-it";
@@ -204,7 +206,13 @@ export function JourneyStory({ end, inApp }: { end: React.ReactNode; inApp: bool
       </div>
 
       <nav className="j-nav" aria-label={tr("Steps")}>
-        <button type="button" className="btn j-back" onClick={() => go(idx - 1)} disabled={idx === 0}>
+        <button
+          type="button"
+          className="btn j-back"
+          onClick={() => go(idx - 1)}
+          disabled={idx === 0}
+          title={idx === 0 ? tr("This is the first step") : undefined}
+        >
           ‹ {tr("Back")}
         </button>
         {idx < total && (

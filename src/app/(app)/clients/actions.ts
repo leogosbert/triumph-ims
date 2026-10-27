@@ -10,14 +10,14 @@ import { saveRecord } from "@/lib/records";
 import { can } from "@/lib/roles";
 
 export async function saveClient(form: FormData) {
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const id = str(form, "id");
   const back = id ? `/clients/${id}` : "/clients/new";
-  if (!can(role, "editClients")) redirect(withNotice(back, { error: "You don't have permission to edit clients." }));
+  if (!can(roles, "editClients")) redirect(withNotice(back, { error: "You don't have permission to edit clients." }));
 
   const { values, error } = parseSections(form, CLIENT_SECTIONS);
   if (error) redirect(withNotice(back, { error }));
-  if (!can(role, "setCreditLimit")) delete values.credit_limit;
+  if (!can(roles, "setCreditLimit")) delete values.credit_limit;
 
   const res = await saveRecord(supabase, "clients", company.id, id, values);
   if (res.error) redirect(withNotice(back, { error: friendlyError(res.error) }));

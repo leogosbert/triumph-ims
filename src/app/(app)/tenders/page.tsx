@@ -1,15 +1,15 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { TENDER_BADGE, darDateTime, isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { closingIn } from "@/lib/crmText";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Tenders" };
 
@@ -31,8 +31,8 @@ export default async function TendersPage({ searchParams }: { searchParams: Sear
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seeCrm")) noAccess();
   const view = sp.view === "decided" ? "decided" : "open";
   const { data, error } = await supabase
     .from("tenders")
@@ -52,14 +52,19 @@ export default async function TendersPage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href="/crm">{tr("← Pipeline")}</Link>
-      </p>
+      <BackLink href="/crm" label="Pipeline" />
       <div className="page-head">
         <h1>{tr("Tenders")}</h1>
-        <Link href="/tenders/new" className="btn btn-primary btn-small">
-          {tr("+ Tender")}
-        </Link>
+        <span style={{ display: "flex", gap: 8 }}>
+          {features.ready && features.list.some((f) => f.key === "tender_alerts" && f.enabled) && (
+            <Link href="/tenders/alerts" className="btn btn-small">
+              {tr("Tender alerts")}
+            </Link>
+          )}
+          <Link href="/tenders/new" className="btn btn-primary btn-small">
+            {tr("+ Tender")}
+          </Link>
+        </span>
       </div>
       <Notice {...notice} />
       <nav className="tabs-row" aria-label={tr("Show")}>

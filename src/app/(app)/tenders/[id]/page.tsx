@@ -1,20 +1,21 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { OPEN_STAGES, TENDER_BADGE, darDateTime } from "@/lib/crm";
 import { closingIn } from "@/lib/crmText";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { companyPeople, namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { addTask, removeTask, saveTender, setTenderStatus, toggleTask } from "../actions";
 import { TenderFields } from "../TenderFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Tender" };
 
@@ -24,8 +25,8 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeCrm")) noAccess();
   const { data: t } = await supabase.from("tenders").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!t) notFound();
   const [{ data: taskData }, { data: clients }, people, { data: opps }, { data: contracts }] = await Promise.all([
@@ -45,9 +46,7 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
 
   return (
     <>
-      <p className="small">
-        <Link href="/tenders">{tr("← Tenders")}</Link>
-      </p>
+      <BackLink href="/tenders" label="Tenders" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{buyer}</h1>
         <StatusBadge map={TENDER_BADGE} status={t.status} />
@@ -262,7 +261,7 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
           <TenderFields
             v={t}
             clients={(clients ?? []) as { id: string; name: string }[]}
-            people={people.filter((p) => p.role === "sales" || p.role === "management" || p.id === t.owner_id)}
+            people={people.filter((p) => hasRole(p.roles, "sales", "management") || p.id === t.owner_id)}
             opportunities={oppChoices as { id: string; number: string; title: string }[]}
             base={company.base_currency}
           />

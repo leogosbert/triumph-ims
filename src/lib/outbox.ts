@@ -2,12 +2,13 @@ import { createClient } from "@supabase/supabase-js";
 import { after } from "next/server";
 import webpush from "web-push";
 import { adminUrl } from "@/lib/hosts";
-import { SUPABASE_ANON_KEY, SUPABASE_URL, siteUrl } from "@/lib/supabase/env";
+import { SUPABASE_URL, siteUrl } from "@/lib/supabase/env";
 
 /**
  * Sends pending alerts as phone push notifications and emails.
  * Needs these settings on the server (Netlify → Environment variables):
  *   OUTBOX_SECRET                      same text as set_outbox_secret() in the database
+ *   SUPABASE_SERVICE_ROLE_KEY          the job functions run only for the server role (never the browser key)
  *   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY phone push (generate in the app: Settings → Notifications)
  *   RESEND_API_KEY, EMAIL_FROM          email (resend.com), e.g. "TRIUMPH Alerts <alerts@yourdomain.co.tz>"
  * Anything missing is simply skipped.
@@ -18,7 +19,8 @@ export type OutboxStatus = { secret: boolean; push: boolean; email: boolean };
 
 export function outboxStatus(): OutboxStatus {
   return {
-    secret: Boolean(process.env.OUTBOX_SECRET),
+    // The job functions are callable only by the server role, so both are needed.
+    secret: Boolean(process.env.OUTBOX_SECRET && process.env.SUPABASE_SERVICE_ROLE_KEY),
     push: Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY),
     email: Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM),
   };
@@ -97,8 +99,11 @@ async function sendPushes(
   }
 }
 
+/** Server-role client: the job functions are not callable with the public browser key. Server-only file. */
 function db() {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set");
+  return createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -332,8 +337,13 @@ async function runAccountEmails(
   }
 }
 
-/** Collects pending alerts once and delivers them. Safe to call often. */
-export async function processOutbox(runAlerts = false) {
+/**
+ * Collects pending alerts once and delivers them. Safe to call often.
+ * With `company` (a manager's "Run the check and send now"), only that company's alert check runs and
+ * only its alerts are sent; the platform's jobs (backups, deletions, admin outbox) are left to the
+ * scheduled run. That needs 20261028000500_polish_fixes.sql; before it, the button says so.
+ */
+export async function processOutbox(runAlerts = false, company?: string) {
   const secret = process.env.OUTBOX_SECRET;
   const status = outboxStatus();
   const result = {
@@ -354,9 +364,22 @@ export async function processOutbox(runAlerts = false) {
     result.errors.push("OUTBOX_SECRET is not set");
     return result;
   }
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    result.errors.push("SUPABASE_SERVICE_ROLE_KEY is not set");
+    return result;
+  }
   const supabase = db();
   const runStarted = Date.now();
-  if (runAlerts) {
+  if (company) {
+    if (runAlerts) {
+      const { data, error } = await supabase.rpc("run_company_alerts_now", { p_secret: secret, p_company: company });
+      if (error) {
+        result.errors.push(error.code === "PGRST202" ? "This button needs the latest database update (20261028000500_polish_fixes.sql)." : `alerts: ${error.message}`);
+        return result;
+      }
+      result.alerts = Number(data ?? 0);
+    }
+  } else if (runAlerts) {
     const { data, error } = await supabase.rpc("run_all_alerts", { p_secret: secret });
     if (error) result.errors.push(`alerts: ${error.message}`);
     else result.alerts = Number(data ?? 0);
@@ -364,11 +387,16 @@ export async function processOutbox(runAlerts = false) {
     await runDeletions(supabase, secret, result, runStarted);
     await runPlatformDailySummary(supabase, secret, result);
   }
-  await runPlatformOutbox(supabase, secret, status, result);
-  await runAccountEmails(supabase, secret, status, result);
-  const { data, error } = await supabase.rpc("claim_outbox", { p_secret: secret, p_limit: 300 });
+  if (!company) {
+    await runPlatformOutbox(supabase, secret, status, result);
+    await runAccountEmails(supabase, secret, status, result);
+  }
+  const { data, error } = await supabase.rpc(
+    "claim_outbox",
+    company ? { p_secret: secret, p_limit: 300, p_company: company } : { p_secret: secret, p_limit: 300 },
+  );
   if (error) {
-    result.errors.push(`claim: ${error.message}`);
+    result.errors.push(company && error.code === "PGRST202" ? "This button needs the latest database update (20261028000500_polish_fixes.sql)." : `claim: ${error.message}`);
     return result;
   }
   const items = (data ?? []) as Claimed[];
@@ -413,7 +441,7 @@ export async function processOutbox(runAlerts = false) {
 
 /** Run the outbox after the response is sent, so new alerts go out within seconds. */
 export function kickOutbox() {
-  if (!process.env.OUTBOX_SECRET) return;
+  if (!process.env.OUTBOX_SECRET || !process.env.SUPABASE_SERVICE_ROLE_KEY) return;
   try {
     after(async () => {
       try {

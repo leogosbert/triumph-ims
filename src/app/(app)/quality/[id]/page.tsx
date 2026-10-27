@@ -1,24 +1,25 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { CorrectiveActions } from "@/components/CorrectiveActions";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { NCR_DISPOSITIONS, NCR_SOURCES, NCR_STATUS, withCurrent, type Ncr } from "@/lib/hse";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { formatWhen, todayTz } from "@/lib/services";
 import { setRecordStatus } from "../../hse/actions";
 import { saveNcr } from "../actions";
 import { NcrFields } from "../NcrFields";
 import { loadNcrOptions, ncrLinkedNames } from "../options";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "NCR" };
 
@@ -37,13 +38,13 @@ export default async function NcrPage({ params, searchParams }: { params: Promis
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!can(role, "seeQuality")) redirect("/");
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!can(roles, "seeQuality")) noAccess();
   const { data, error } = await supabase.from("quality_ncrs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="NCR" />;
   if (!data) notFound();
   const ncr = data as Ncr;
-  const manager = role === "management";
+  const manager = hasRole(roles, "management");
   const editor = manager || (ncr.raised_by === user.id && ncr.status !== "closed");
   const [linked, names, options] = await Promise.all([
     ncrLinkedNames(supabase, ncr),
@@ -61,9 +62,7 @@ export default async function NcrPage({ params, searchParams }: { params: Promis
 
   return (
     <>
-      <p className="small">
-        <Link href="/quality">{tr("← Quality")}</Link>
-      </p>
+      <BackLink href="/quality" label="Quality" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{ncr.title}</h1>
         <StatusBadge map={NCR_STATUS} status={ncr.status} />

@@ -8,6 +8,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { quoteNo } from "@/lib/sales";
 import { newPurchaseOrder } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New purchase order" };
 
@@ -15,8 +16,8 @@ export default async function NewPoPage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editPurchasing")) redirect("/purchase-orders");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editPurchasing")) redirect("/purchase-orders");
   const quotationId = typeof sp.quotation === "string" ? sp.quotation : "";
 
   const [{ data: suppliers }, { data: quote }] = await Promise.all([
@@ -29,9 +30,7 @@ export default async function NewPoPage({ searchParams }: { searchParams: Search
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchase-orders">{tr("← Purchase orders")}</Link>
-      </p>
+      <BackLink href="/purchase-orders" label="Purchase orders" />
       <h1>{tr("New purchase order")}</h1>
       {q && (
         <p className="banner ok small">{tr("For client quotation")}{" "}{quoteNo(q)} ({q.client?.name}{tr("). Its items are copied in at the last known cost.")}</p>

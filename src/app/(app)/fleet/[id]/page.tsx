@@ -1,21 +1,22 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { DRIVER_LOG_KINDS, LOG_KINDS, VEHICLE_KINDS, dueSoon, plateKey, type Vehicle } from "@/lib/fleet";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { companyPeople, namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
 import { DELIVERY_STATUS } from "@/lib/stock";
 import { addVehicleLog, removeVehicleLog, saveVehicle } from "../actions";
 import { VehicleFields } from "../VehicleFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Vehicle" };
 
@@ -26,13 +27,13 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!can(role, "seeFleet")) redirect("/");
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!can(roles, "seeFleet")) noAccess();
   const { data: v, error } = await supabase.from("vehicles").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Vehicle" />;
   if (!v) notFound();
   const vehicle = v as Vehicle & { capacity_kg: number | null; notes: string | null };
-  const editor = can(role, "editFleet");
+  const editor = can(roles, "editFleet");
   const [{ data: logData }, people, { data: tripData }] = await Promise.all([
     supabase.from("vehicle_logs").select("id, kind, happened_on, odometer_km, litres, amount, note, created_by").eq("vehicle_id", id).order("happened_on", { ascending: false }).order("created_at", { ascending: false }).limit(100),
     editor ? companyPeople(supabase, company.id) : Promise.resolve([]),
@@ -41,7 +42,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
   const logs = (logData ?? []) as Log[];
   const trips = ((tripData ?? []) as unknown as Trip[]).filter((t) => plateKey(t.vehicle) === plateKey(vehicle.plate)).slice(0, 15);
   const names = await namesFor(supabase, [vehicle.driver_id, ...logs.map((l) => l.created_by)]);
-  const drivers = [...people.filter((p) => p.role === "driver"), ...people.filter((p) => p.role !== "driver")];
+  const drivers = [...people.filter((p) => hasRole(p.roles, "driver")), ...people.filter((p) => !hasRole(p.roles, "driver"))];
   const due = vehicle.active ? dueSoon(vehicle) : [];
   const base = company.base_currency;
 
@@ -56,9 +57,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      <p className="small">
-        <Link href="/fleet">{tr("← Vehicles")}</Link>
-      </p>
+      <BackLink href="/fleet" label="Vehicles" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{vehicle.plate}</h1>
         {!vehicle.active && <span className="badge tone-off">{tr("Off the road")}</span>}
@@ -98,7 +97,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
         </div>
       </div>
 
-      {can(role, "logFleet") && (
+      {can(roles, "logFleet") && (
         <form action={addVehicleLog} className="card" id="log">
           <h2>{tr("Add to the log")}</h2>
           <input type="hidden" name="vehicle_id" value={vehicle.id} />
@@ -162,7 +161,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
                   </div>
                   <strong style={{ whiteSpace: "nowrap" }}>{l.amount != null ? formatMoney(l.amount, base) : ""}</strong>
                 </div>
-                {(l.created_by === user.id || role === "management") && (
+                {(l.created_by === user.id || hasRole(roles, "management")) && (
                   <form action={removeVehicleLog}>
                     <input type="hidden" name="vehicle_id" value={vehicle.id} />
                     <input type="hidden" name="log_id" value={l.id} />

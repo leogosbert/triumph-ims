@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { contractKindLabel, daysUntil } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -12,6 +12,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { endContract, removeContractPrice, saveContract, setContractPrice } from "../actions";
 import { ContractFields } from "../ContractFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Contract" };
 
@@ -21,11 +22,11 @@ export default async function ContractPage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeContracts")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeContracts")) noAccess();
   const { data: k } = await supabase.from("contracts").select("*, client:clients(id, name)").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!k) notFound();
-  const edit = can(role, "seeCrm") && !k.cancelled_at;
+  const edit = can(roles, "seeCrm") && !k.cancelled_at;
   const [{ data: priceData }, { data: products }, { data: tenders }] = await Promise.all([
     supabase.from("contract_prices").select("id, unit_price, notes, product:products(id, name, sku, unit, selling_price)").eq("contract_id", id).limit(2000),
     edit ? supabase.from("products").select("id, name, sku").eq("company_id", company.id).eq("active", true).order("name").limit(3000) : Promise.resolve({ data: [] }),
@@ -38,9 +39,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/contracts">{tr("← Contracts")}</Link>
-      </p>
+      <BackLink href="/contracts" label="Contracts" />
       <h1 style={{ marginBottom: 4 }}>{k.client?.name}</h1>
       <p style={{ margin: "4px 0" }}>{k.title}</p>
       <p className="muted small">

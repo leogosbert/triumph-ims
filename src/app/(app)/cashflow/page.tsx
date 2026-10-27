@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -12,6 +11,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { recordCash, removeCash } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Cash-flow forecast" };
 
@@ -22,8 +22,8 @@ export default async function CashflowPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "planFinance")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "planFinance")) noAccess();
   const weeks = sp.w === "26" ? 26 : 13;
   const base = company.base_currency;
   const [{ data: wData, error }, { data: posData }, { data: invData }, { data: billData }] = await Promise.all([
@@ -65,9 +65,7 @@ export default async function CashflowPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Cash-flow forecast")}</h1>
       <p className="muted small">
         {tr("Money expected in from unpaid invoices (by the promised or due date) and out to supplier bills, purchase orders not billed yet and your usual monthly expenses. Amounts in")} {base}.

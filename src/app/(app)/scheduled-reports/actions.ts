@@ -23,8 +23,8 @@ export async function scheduleReport(form: FormData) {
   const def = findReport(key);
   const back = `/reports/${key}`;
   if (!def) redirect("/reports");
-  const { supabase, company, role, features } = await getAppContext();
-  if (!mayOpen(def, role, features)) redirect("/reports");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!mayOpen(def, roles, features)) redirect("/reports");
   const { error } = await supabase.from("report_schedules").insert({
     company_id: company.id,
     name: str(form, "name") || def.title,

@@ -10,10 +10,10 @@ import { saveRecord } from "@/lib/records";
 import { can } from "@/lib/roles";
 
 export async function saveSupplier(form: FormData) {
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const id = str(form, "id");
   const back = id ? `/suppliers/${id}` : "/suppliers/new";
-  if (!can(role, "editSuppliers")) redirect(withNotice(back, { error: "You don't have permission to edit suppliers." }));
+  if (!can(roles, "editSuppliers")) redirect(withNotice(back, { error: "You don't have permission to edit suppliers." }));
 
   const { values, error } = parseSections(form, SUPPLIER_SECTIONS);
   if (error) redirect(withNotice(back, { error }));

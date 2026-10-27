@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysOverdue, openBase } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Statements" };
 
@@ -24,10 +24,10 @@ function group(rows: { pid: string; name: string; due_date: string | null; total
 
 export default async function StatementsPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
-  const seeClients = can(role, "seeInvoices");
-  const seeSuppliers = can(role, "seeBills");
-  if (!seeClients && !seeSuppliers) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  const seeClients = can(roles, "seeInvoices");
+  const seeSuppliers = can(roles, "seeBills");
+  if (!seeClients && !seeSuppliers) noAccess();
   const base = company.base_currency;
 
   const [{ data: inv }, { data: bills }, { data: cl }, { data: su }] = await Promise.all([
@@ -103,9 +103,7 @@ export default async function StatementsPage() {
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Statements")}</h1>
       <p className="muted small">{tr("A statement lists every invoice (or bill) and payment for a period with the running balance. Send it to a client to agree what they owe, or compare it with a supplier's statement.")}</p>
       {seeClients && <Block title={tr("Clients who owe us")} rows={clients} kind="clients" all={(cl ?? []) as { id: string; name: string }[]} />}

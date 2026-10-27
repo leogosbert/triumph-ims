@@ -13,6 +13,7 @@ import { canPlanService } from "@/lib/services";
 import { storeOptions } from "@/lib/stock";
 import { createJob } from "../actions";
 import { JobFields } from "../JobFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New service job" };
 
@@ -22,8 +23,8 @@ export default async function NewJobPage({ searchParams }: { searchParams: Searc
   await primeLang();
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) redirect("/jobs");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) redirect("/jobs");
   const probe = await supabase.from("service_jobs").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New service job" />;
 
@@ -54,9 +55,7 @@ export default async function NewJobPage({ searchParams }: { searchParams: Searc
 
   return (
     <>
-      <p className="small">
-        <Link href="/jobs">{tr("← Service jobs")}</Link>
-      </p>
+      <BackLink href="/jobs" label="Service jobs" />
       <h1>{tr("New service job")}</h1>
       <Notice {...notice} />
       {quote && (

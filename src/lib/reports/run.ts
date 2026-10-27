@@ -1,7 +1,7 @@
 import type { createClient } from "@/lib/supabase/server";
 import { stage13Ready, type Company } from "@/lib/context";
 import type { Features } from "@/lib/features";
-import { can, type Role } from "@/lib/roles";
+import { can, type RoleSet } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { isPreset, resolvePeriod, shortDate, type Period } from "@/lib/reports/dates";
 import { KIND_LABELS, MAX_ROWS, METHOD_LABELS, REPORTS, type Cell, type Col, type FilterKey, type ReportDef, type Row } from "@/lib/reports/defs";
@@ -22,12 +22,12 @@ const FILTER_KEYS: FilterKey[] = ["client", "supplier", "warehouse", "status", "
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Reports this person may open (their role and the company's switched-on features). */
-export function reportsFor(role: Role, features: Pick<Features, "on">) {
+export function reportsFor(role: RoleSet, features: Pick<Features, "on">) {
   return REPORTS.filter((r) => (!r.perm || can(role, r.perm)) && features.on(r.feature));
 }
 
 /** Can this person open this report? */
-export function mayOpen(def: ReportDef, role: Role, features: Pick<Features, "on">) {
+export function mayOpen(def: ReportDef, role: RoleSet, features: Pick<Features, "on">) {
   return (!def.perm || can(role, def.perm)) && features.on(def.feature);
 }
 

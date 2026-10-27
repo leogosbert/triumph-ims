@@ -15,6 +15,30 @@ const SPECKS = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const ROTATE_MS = 26000;
+
+/**
+ * Photos that will not load (the photo host is blocked on this network, or the phone is offline):
+ * remembered for the session, so the scene stops asking for more and shows its colour gradient.
+ */
+const BLOCKED_KEY = "lemo-photos-blocked";
+let photosBlocked = false;
+function readBlocked(): boolean {
+  if (photosBlocked) return true;
+  try {
+    photosBlocked = sessionStorage.getItem(BLOCKED_KEY) === "1";
+  } catch {
+    /* storage off: keep the in-memory flag only */
+  }
+  return photosBlocked;
+}
+function markBlocked() {
+  photosBlocked = true;
+  try {
+    sessionStorage.setItem(BLOCKED_KEY, "1");
+  } catch {
+    /* storage off: keep the in-memory flag only */
+  }
+}
 const FADE_MS = 2600;
 
 /**
@@ -35,6 +59,8 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
   useEffect(() => setPhone(window.matchMedia("(max-width: 720px)").matches), []);
   const [turn, setTurn] = useState(0);
   const [layers, setLayers] = useState<Layer[]>([]);
+  const [blocked, setBlocked] = useState(false);
+  useEffect(() => setBlocked(readBlocked()), []);
   const seq = useRef(0);
 
   useEffect(() => {
@@ -50,7 +76,7 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
 
   // Load the photo first, then fade it in over the old one; drop the old one once hidden.
   useEffect(() => {
-    if (!on || !src || !photo) return;
+    if (!on || !src || !photo || blocked || readBlocked()) return;
     let alive = true;
     const img = new Image();
     const show = () => {
@@ -58,13 +84,17 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
       setLayers((old) => (old[old.length - 1]?.src === src ? old : [...old.slice(-1), { key: ++seq.current, src, focus: photo.focus }]));
       setTimeout(() => setLayers((old) => old.slice(-1)), FADE_MS + 400);
       // Fetch the next photo of this section in the background so the next change is instant.
-      if (list.length > 1 && !phone) {
+      if (list.length > 1 && !phone && !photosBlocked) {
         const next = list[(turn + 1) % list.length];
         new Image().src = photoSrc(next.url, width());
       }
     };
     img.onload = show;
-    img.onerror = () => undefined;
+    img.onerror = () => {
+      // One failure is enough: no more requests this session, the gradient stands in.
+      markBlocked();
+      if (alive) setBlocked(true);
+    };
     img.src = src;
     if (img.complete && img.naturalWidth) show();
     // (A pending drop is left to run: it only removes photos that have already faded out.)
@@ -72,11 +102,11 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [on, src]);
+  }, [on, src, blocked]);
 
   // Slowly move through the section's photos (not for "reduce motion", not while the tab is hidden).
   useEffect(() => {
-    if (!on || phone || list.length < 2) return;
+    if (!on || phone || blocked || list.length < 2) return;
     let still = false;
     try {
       still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -88,7 +118,7 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
       if (document.visibilityState === "visible") setTurn((n) => n + 1);
     }, ROTATE_MS);
     return () => clearInterval(t);
-  }, [on, phone, list.length, section]);
+  }, [on, phone, blocked, list.length, section]);
 
   if (!on) return null;
   const blend = scenes?.blend;
@@ -102,6 +132,7 @@ export function PhotoScene({ section: fixed, scenes, onlyGlass = false }: { sect
         } as React.CSSProperties
       }
     >
+      {blocked && layers.length === 0 && <div className="scene-fallback" />}
       {layers.map((l, i) => (
         <div
           key={l.key}

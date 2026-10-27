@@ -1,17 +1,19 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { RecordFields } from "@/components/RecordFields";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { SUPPLIER_SECTIONS } from "@/lib/fields";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
+import { PortalAccess } from "@/components/PortalAccess";
 import { saveSupplier, setSupplierActive } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier" };
 
@@ -27,12 +29,12 @@ export default async function SupplierPage({
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "seeSuppliers")) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seeSuppliers")) noAccess();
 
   const [{ data: supplier }, { data: linkedData }] = await Promise.all([
     supabase.from("suppliers").select("*").eq("id", id).eq("company_id", company.id).maybeSingle(),
-    can(role, "seeCosts")
+    can(roles, "seeCosts")
       ? supabase
           .from("product_costs")
           .select("product_id, last_cost, product:products(name, sku)")
@@ -43,13 +45,11 @@ export default async function SupplierPage({
   ]);
   if (!supplier) notFound();
   const linked = (linkedData ?? []) as unknown as Linked[];
-  const editable = can(role, "editSuppliers");
+  const editable = can(roles, "editSuppliers");
 
   return (
     <>
-      <p className="small">
-        <Link href="/suppliers">{tr("← Suppliers")}</Link>
-      </p>
+      <BackLink href="/suppliers" label="Suppliers" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{supplier.name}</h1>
         <span className="badge">{supplier.code}</span>
@@ -63,7 +63,7 @@ export default async function SupplierPage({
         )}
       </p>
       <Notice {...notice} />
-      {can(role, "seeBills") && features.on("statements") && (
+      {can(roles, "seeBills") && features.on("statements") && (
         <p className="small">
           <Link href={`/suppliers/${supplier.id}/statement`}>{tr("Statement of account →")}</Link>
         </p>
@@ -85,9 +85,18 @@ export default async function SupplierPage({
         </section>
       )}
 
-      {can(role, "seeDocuments") && features.on("documents") && (
+      {can(roles, "seeDocuments") && features.on("documents") && (
         <LinkedDocuments supabase={supabase} companyId={company.id} field="supplier_id" id={id} back={`/suppliers/${id}#documents`} kind="certificate" />
       )}
+      <PortalAccess
+        supabase={supabase}
+        companyId={company.id}
+        role={roles}
+        features={features}
+        party="supplier"
+        partyId={supplier.id}
+        contacts={supplier.email ? [{ id: supplier.id, name: supplier.contact_person ?? supplier.name, email: supplier.email, position: null, phone: supplier.phone ?? null }] : []}
+      />
 
       <form action={saveSupplier}>
         <input type="hidden" name="id" value={supplier.id} />

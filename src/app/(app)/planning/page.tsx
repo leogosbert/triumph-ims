@@ -1,14 +1,14 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { fmtQty } from "@/lib/stock";
 import { planningAction } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Purchase planning" };
 
@@ -37,8 +37,8 @@ export default async function PlanningPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "planPurchases")) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "planPurchases")) noAccess();
   const days = PERIODS.includes(Number(sp.days)) ? Number(sp.days) : 90;
   const view = sp.view === "all" ? "all" : "order";
   const { data, error } = await supabase.rpc("demand_plan", { p_company: company.id, p_days: days });
@@ -54,16 +54,14 @@ export default async function PlanningPage({ searchParams }: { searchParams: Sea
     groups.set(key, g);
   }
   const ordered = [...groups.values()].sort((a, b) => (a.supplier ? 0 : 1) - (b.supplier ? 0 : 1) || a.name.localeCompare(b.name));
-  const canPo = can(role, "editPurchasing");
-  const canRequest = can(role, "requestPurchases") && features.on("requisitions");
-  const canLevels = can(role, "editProducts");
+  const canPo = can(roles, "editPurchasing");
+  const canRequest = can(roles, "requestPurchases") && features.on("requisitions");
+  const canLevels = can(roles, "editProducts");
   const qs = (d: number, v: string) => `/planning?days=${d}${v === "all" ? "&view=all" : ""}`;
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <h1>{tr("Purchase planning")}</h1>
       <p className="muted small">
         {tr("From what you dispatched: sales per day, how long the stock lasts, and when to order given the supplier's lead time (two weeks when not known) plus a week of safety stock. The quantity covers a month after the goods arrive.")}

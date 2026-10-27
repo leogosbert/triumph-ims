@@ -3,17 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
-import { optional, str } from "@/lib/format";
+import { optional, str, choice, LOST_CHOICE } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { siteUrl } from "@/lib/supabase/env";
 import { fromLocalInput } from "@/lib/services";
 import { sendEmailReply } from "@/lib/inbox/server";
 import { waLink } from "@/lib/inbox/whatsapp";
 import { aiReady } from "@/lib/ai/claude";
-import { INLINE_LIMIT_CHARS, minutesInline } from "@/lib/ai/meetings";
+import { minutesInline } from "@/lib/ai/meetings";
 import { buildMinutesBrief } from "@/lib/meetings/brief";
-import { MEETING_COLUMNS, MEETING_TOPICS, PROPOSAL_TARGETS, type Meeting } from "@/lib/meetings/model";
-import { plainMinutes, trimBrief } from "@/lib/meetings/minutes-core";
+import { MEETING_COLUMNS, MEETING_TOPICS, PROPOSAL_TARGETS, recordingActive, type Meeting, type Recording } from "@/lib/meetings/model";
+import { plainMinutes, trimBrief, type MinutesBrief } from "@/lib/meetings/minutes-core";
+import { transcriptionReady } from "@/lib/meetings/recording-core";
+import { dispatchBackground, transcribePromptFor } from "./background";
 
 const isId = (v: string | null | undefined): v is string => !!v && /^[0-9a-f-]{36}$/.test(v);
 const isDate = (v: string | null | undefined) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v);
@@ -46,7 +48,9 @@ function meetingError(message: string): string {
 /** The meeting fields of the new / edit form. */
 function meetingValues(form: FormData) {
   const startsAt = fromLocalInput(str(form, "starts_at"));
-  const kind = str(form, "kind") || "internal";
+  // Choosing a client or a supplier on a team meeting makes it a meeting with them.
+  const picked = str(form, "kind") || "internal";
+  const kind = picked === "internal" && isId(str(form, "client_id")) ? "client" : picked === "internal" && isId(str(form, "supplier_id")) ? "supplier" : picked;
   return {
     title: str(form, "title"),
     purpose: optional(form, "purpose"),
@@ -286,15 +290,24 @@ export async function addLine(meetingId: string, kind: "speech" | "typed", text:
 }
 
 /** The latest transcript and notes, for the room to show what others said and typed. */
-export async function roomTexts(meetingId: string): Promise<{ transcript: string; notes: string; status: string } | null> {
+export type RoomState = { transcript: string; notes: string; status: string; recording: { id: string; by: string | null; since: string } | null };
+
+export async function roomTexts(meetingId: string): Promise<RoomState | null> {
   if (!isId(meetingId)) return null;
   const { supabase } = await getAppContext();
-  const [{ data: t }, { data: m }] = await Promise.all([
+  const [{ data: t }, { data: m }, rec] = await Promise.all([
     supabase.from("meeting_texts").select("transcript, notes").eq("meeting_id", meetingId).maybeSingle(),
     supabase.from("meetings").select("status").eq("id", meetingId).maybeSingle(),
+    supabase.from("meeting_recordings").select("id, started_by, started_at, last_part_at, status, deleted_at").eq("meeting_id", meetingId).eq("status", "recording").maybeSingle(),
   ]);
   if (!m) return null;
-  return { transcript: String(t?.transcript ?? "").slice(-20000), notes: String(t?.notes ?? "").slice(-20000), status: String(m.status) };
+  const r = rec.error ? null : (rec.data as Pick<Recording, "id" | "started_by" | "started_at" | "last_part_at" | "status" | "deleted_at"> | null);
+  return {
+    transcript: String(t?.transcript ?? "").slice(-20000),
+    notes: String(t?.notes ?? "").slice(-20000),
+    status: String(m.status),
+    recording: r && recordingActive(r) ? { id: r.id, by: r.started_by, since: r.started_at } : null,
+  };
 }
 
 /** The person pressed Join (recorded once; who joined shows on the meeting page). */
@@ -329,7 +342,7 @@ export async function endMeeting(form: FormData) {
   let msg = "The meeting has ended.";
   if (str(form, "write") === "1") {
     try {
-      msg = `The meeting has ended. ${await writeMinutesFor(id)}`;
+      msg = `The meeting has ended. ${await writeMinutesFor(id, minutesOptions(form), true)}`;
     } catch (e) {
       fail(`/meetings/${id}/minutes`, `The meeting has ended, but the minutes could not be written: ${(e as Error).message}`);
     }
@@ -337,49 +350,74 @@ export async function endMeeting(form: FormData) {
   done(`/meetings/${id}/minutes`, msg);
 }
 
+/** The minutes options of the End / Write forms. */
+function minutesOptions(form: FormData): NonNullable<MinutesBrief["options"]> {
+  const cap = str(form, "capture_language");
+  return { swahili_summary: str(form, "swahili_summary") === "1", ...(["sw", "en", "mixed"].includes(cap) ? { capture_language: cap } : {}) };
+}
+
 // ------------------------------------------------------------------ minutes
 
 /**
- * Writes the minutes: with the AI in the background for long meetings (on Netlify), within this request for short
- * ones, and the app's plain minutes from the typed notes when AI is off or does not answer. Returns a message.
+ * Writes the minutes: with the AI in the background on Netlify (paragraph minutes take longer than one 10-second
+ * request), within this request elsewhere, and the app's plain minutes from the typed notes when AI is off or does
+ * not answer. When the meeting was recorded and the live speech capture caught little of it, the recording is first
+ * written down (server-side transcription, when set up) and the minutes use it. Returns a message.
  */
-async function writeMinutesFor(id: string): Promise<string> {
+async function writeMinutesFor(id: string, options: NonNullable<MinutesBrief["options"]>, autoTranscribe = false): Promise<string> {
   const { supabase, company } = await getAppContext();
   const { data: m } = await supabase.from("meetings").select(MEETING_COLUMNS).eq("id", id).maybeSingle();
   if (!m) throw new Error("Meeting not found.");
   const meeting = m as unknown as Meeting;
-  const brief = await buildMinutesBrief(supabase, meeting, company.name);
-  const size = brief.transcript.length + brief.notes.length;
+  const brief = await buildMinutesBrief(supabase, meeting, company.name, options);
 
-  if (!aiReady()) {
+  // Recordings to write down first: those with audio and no transcript, when the live capture caught little.
+  let toTranscribe: string[] = [];
+  if (autoTranscribe && transcriptionReady()) {
+    const { data: recs, error: recErr } = await supabase
+      .from("meeting_recordings")
+      .select("id, parts, duration_seconds, transcript_status")
+      .eq("meeting_id", id)
+      .is("deleted_at", null)
+      .gt("parts", 0)
+      .in("transcript_status", ["none", "failed"]);
+    const rows = recErr ? [] : ((recs ?? []) as Pick<Recording, "id" | "parts" | "duration_seconds" | "transcript_status">[]);
+    const minutesRecorded = rows.reduce((t, r) => t + r.duration_seconds, 0) / 60;
+    // About 700 characters are spoken a minute; less than a fifth of that caught live means the capture was weak.
+    if (rows.length && brief.transcript.length < minutesRecorded * 150) toTranscribe = rows.map((r) => r.id);
+  }
+
+  if (!aiReady() && !toTranscribe.length) {
     const { error } = await supabase.rpc("meeting_save_minutes", { p_meeting: id, p: plainMinutes(brief) });
     if (error) throw new Error(error.message);
     return "Minutes written from the typed notes (AI is not switched on). Check them and approve.";
   }
 
-  // Long meetings: the background function (it may take a minute or two).
-  const base = process.env.URL || process.env.DEPLOY_PRIME_URL;
-  if (size > INLINE_LIMIT_CHARS && base && process.env.NETLIFY) {
-    const { data: s } = await supabase.auth.getSession();
-    const token = s.session?.access_token;
-    if (token) {
-      const st = await supabase.rpc("meeting_minutes_state", { p_meeting: id, p_state: "writing", p_error: null });
-      if (st.error) throw new Error(st.error.message);
-      try {
-        const res = await fetch(`${base.replace(/\/$/, "")}/.netlify/functions/meeting-minutes-background`, {
-          method: "POST",
-          headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
-          body: JSON.stringify({ meeting_id: id, brief: trimBrief(brief) }),
-          signal: AbortSignal.timeout(5000),
-        });
-        if (res.status === 202 || res.ok) return "The AI is writing the minutes. This page updates when they are ready (usually within two minutes).";
-      } catch {
-        /* falls through to a shorter answer below */
-      }
-    }
+  // On Netlify: a background function (it may take a minute or two). Every AI run is counted by the database
+  // (5 per meeting, 30 per company a day) and the background function reads its brief from there, never from the
+  // request. Before the security SQL is run (PGRST202) only the in-request path below runs.
+  const run = aiReady() || toTranscribe.length ? await supabase.rpc("meeting_ai_run_start", { p_meeting: id, p_brief: trimBrief({ ...brief, recording_transcript: toTranscribe.length ? undefined : brief.recording_transcript }) }) : null;
+  if (run?.error && run.error.code !== "PGRST202") throw new Error(run.error.message);
+  const runId = (run?.data as string | null | undefined) ?? null;
+  const st = await supabase.rpc("meeting_minutes_state", { p_meeting: id, p_state: "writing", p_error: null });
+  if (st.error) throw new Error(st.error.message);
+  if (toTranscribe.length) {
+    for (const r of toTranscribe) await supabase.rpc("meeting_recording_state", { p_recording: r, p_what: "transcript", p_state: "writing", p_error: null });
+    const sent =
+      runId !== null &&
+      (await dispatchBackground(supabase, "meeting-recording-background", {
+        action: "transcribe",
+        recording_ids: toTranscribe,
+        prompt: transcribePromptFor(brief),
+        run_id: runId,
+      }));
+    if (sent) return "The recording is being written down, then the AI writes the minutes from it. This page updates when they are ready (usually within a few minutes).";
+    for (const r of toTranscribe) await supabase.rpc("meeting_recording_state", { p_recording: r, p_what: "transcript", p_state: "failed", p_error: "Writing down the recording runs on the live site only." });
+  } else if (aiReady() && runId !== null && (await dispatchBackground(supabase, "meeting-minutes-background", { meeting_id: id, run_id: runId }))) {
+    return "The AI is writing the minutes. This page updates when they are ready (usually within two minutes).";
   }
 
-  const ai = await minutesInline(trimBrief(brief, 40_000));
+  const ai = aiReady() ? await minutesInline(trimBrief(brief, 40_000)) : ({ ok: false, reason: "off" } as const);
   if (ai.ok) {
     const { error } = await supabase.rpc("meeting_save_minutes", { p_meeting: id, p: ai.minutes });
     if (!error) return "The AI wrote the minutes. Check every point and approve.";
@@ -389,7 +427,12 @@ async function writeMinutesFor(id: string): Promise<string> {
   await supabase.rpc("meeting_minutes_state", {
     p_meeting: id,
     p_state: "failed",
-    p_error: !ai.ok && ai.reason === "timeout" ? "The AI took too long. The app wrote plain minutes from the notes instead." : "The AI could not write the minutes. The app wrote plain minutes from the notes instead.",
+    p_error:
+      !ai.ok && ai.reason === "off"
+        ? "AI is not switched on. The app wrote plain minutes from the notes."
+        : !ai.ok && ai.reason === "timeout"
+          ? "The AI took too long. The app wrote plain minutes from the notes instead."
+          : "The AI could not write the minutes. The app wrote plain minutes from the notes instead.",
   });
   return "Minutes written from the typed notes. Check them and approve.";
 }
@@ -399,7 +442,7 @@ export async function writeMinutes(form: FormData) {
   const path = `/meetings/${id}/minutes`;
   let msg: string;
   try {
-    msg = await writeMinutesFor(id);
+    msg = await writeMinutesFor(id, minutesOptions(form), str(form, "transcribe") === "1");
   } catch (e) {
     fail(path, (e as Error).message);
   }
@@ -533,7 +576,8 @@ export async function editProposal(form: FormData) {
 export async function decideProposal(form: FormData) {
   const meeting = str(form, "meeting_id");
   const path = `/meetings/${meeting}/minutes#updates`;
-  const approve = str(form, "approve") === "1";
+  const approve = choice(form, "approve", "1", "0");
+  if (approve === null) fail(path, LOST_CHOICE);
   const { supabase } = await getAppContext();
   const { error } = await supabase.rpc("meeting_proposal_decide", { p_proposal: str(form, "proposal_id"), p_approve: approve, p_note: optional(form, "note") });
   if (error) fail(path, `Nothing was changed: ${error.message}`);

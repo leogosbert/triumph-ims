@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import { getLang } from "@/lib/lang";
-import { findPlaybook, scenarioCount, stepCount, translatePlaybook } from "@/lib/playbooks";
+import { findPlaybook, scenarioCount, stepCount } from "@/lib/playbooks";
 import { playbookPdf } from "@/lib/pdf/playbook";
-import { SW } from "@/lib/sw";
 import { playbookAccess } from "@/lib/playbooks/access";
 import { nameTheCompany, tailorPlaybook } from "@/lib/playbooks/personalize";
 import { playbookProfile } from "@/lib/playbooks/profile";
 
-/** A playbook as a PDF, in the reader's language. Only for companies LeMo Tech has given it to. */
+/** A playbook as a PDF. Only for companies LeMo Tech has given it to. */
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const raw = findPlaybook((await params).id);
   if (!raw) return new NextResponse("Not found", { status: 404 });
@@ -15,12 +13,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (access.state(raw.id) !== "granted") {
     return NextResponse.redirect(new URL(`/playbooks/${raw.id}`, req.url), 303);
   }
-  const sw = (await getLang()) === "sw";
-  const t = (s: string) => (sw ? (SW[s] ?? s) : s);
+  const t = (s: string) => s;
   // The company's own copy: its name, and only the steps that fit it (?full=1 for all of them).
   const profile = await playbookProfile(access.companyId);
   const fit = profile ? tailorPlaybook(raw, profile, { all: new URL(req.url).searchParams.get("full") === "1" }) : null;
-  let pb = translatePlaybook(fit?.pb ?? raw, sw ? "sw" : "en", t);
+  let pb = fit?.pb ?? raw;
   if (profile) pb = nameTheCompany(pb, profile.name);
   const bytes = await playbookPdf(
     pb,

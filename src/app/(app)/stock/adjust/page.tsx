@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -9,6 +8,7 @@ import { productOptions } from "@/lib/options";
 import { can } from "@/lib/roles";
 import { storeOptions } from "@/lib/stock";
 import { adjustStock } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Adjust stock" };
 
@@ -16,15 +16,13 @@ export default async function AdjustStockPage({ searchParams }: { searchParams: 
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "adjustStock")) redirect("/stock");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "adjustStock")) redirect("/stock");
   const [products, stores] = await Promise.all([productOptions(supabase, company.id), storeOptions(supabase, company.id)]);
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <h1>{tr("Adjust stock")}</h1>
       <p className="muted small">{tr("Use this for opening balances when you start, after a stock count, or to write off damaged or expired goods. Every adjustment is recorded with your name and reason.")}</p>
       <Notice {...notice} />

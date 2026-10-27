@@ -2,11 +2,11 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { ScanDocument } from "@/components/ai/ScanDocument";
 import { aiReady } from "@/lib/ai/claude";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysUntil, isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -18,6 +18,7 @@ import { deleteLicence, saveLicence, setLicenceStatus } from "../../actions";
 import { LicenceFields } from "../../LicenceFields";
 import { LinkedFiles } from "../../LinkedFiles";
 import { Disclaimer, RequirementFacts } from "../../parts";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Licence" };
 
@@ -25,8 +26,8 @@ export default async function LicencePage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) noAccess();
   const { data, error } = await supabase.from("licences").select(LICENCE_FIELDS).eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Licence" />;
   if (!data) notFound();
@@ -47,9 +48,7 @@ export default async function LicencePage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      <p className="small">
-        <Link href="/compliance/licences">{tr("← Licences")}</Link>
-      </p>
+      <BackLink href="/compliance/licences" label="Licences" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{l.name}</h1>
         <StatusBadge map={LICENCE_STATUS} status={l.status} />

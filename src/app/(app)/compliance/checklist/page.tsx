@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysUntil, isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -11,6 +10,7 @@ import { COMPLIANCE_CATEGORIES, requirement } from "@/lib/compliance/catalogue";
 import { canSeeCompliance, ITEM_FIELDS, ITEM_STATUS, type ComplianceItem } from "@/lib/compliance/model";
 import { StatusBadge } from "@/lib/sales";
 import { ComplianceTabs, Disclaimer } from "../parts";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Compliance checklist" };
 
@@ -20,8 +20,8 @@ export default async function ChecklistPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) noAccess();
   const show = pick(sp.show) ?? "all";
 
   const [{ data, error }, links] = await Promise.all([
@@ -62,7 +62,7 @@ export default async function ChecklistPage({ searchParams }: { searchParams: Se
             </Link>
           </div>
         )}
-        {!isManager && role === "finance" && (
+        {!isManager && hasRole(roles, "finance") && (
           <Link href="/compliance/checklist/new" className="btn btn-small">
             {tr("+ Tax item")}
           </Link>

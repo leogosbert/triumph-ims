@@ -1,14 +1,14 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { SRFQ_STATUS } from "@/lib/purchasing";
 import { LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier RFQs" };
 
@@ -25,8 +25,8 @@ export default async function SupplierRfqsPage({ searchParams }: { searchParams:
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editPurchasing")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editPurchasing")) noAccess();
 
   let query = supabase
     .from("supplier_rfqs")
@@ -42,9 +42,7 @@ export default async function SupplierRfqsPage({ searchParams }: { searchParams:
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchasing">{tr("← Purchasing")}</Link>
-      </p>
+      <BackLink href="/purchasing" label="Purchasing" />
       <div className="page-head">
         <h1>{tr("Supplier RFQs")}</h1>
         <Link href="/supplier-rfqs/new" className="btn btn-primary btn-small">{tr("+ New")}</Link>

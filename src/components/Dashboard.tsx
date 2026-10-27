@@ -109,10 +109,10 @@ export function SalesChart({ months, currency, t }: { months: MonthBar[]; curren
           const x = i * slot + slot / 2;
           return (
             <g key={m.month}>
-              <rect x={x - bw - 1} y={y(m.sales)} width={bw} height={H - 20 - y(m.sales)} fill="var(--brand)" rx="2">
+              <rect x={x - bw - 1} y={y(m.sales)} width={bw} height={H - 20 - y(m.sales)} fill="var(--chart-1)" rx="2">
                 <title>{`${m.label}: sales ${short(m.sales)}`}</title>
               </rect>
-              <rect x={x + 1} y={y(m.profit)} width={bw} height={H - 20 - y(m.profit)} fill="#14b8a6" rx="2">
+              <rect x={x + 1} y={y(m.profit)} width={bw} height={H - 20 - y(m.profit)} fill="var(--chart-2)" rx="2">
                 <title>{`${m.label}: gross profit ${short(m.profit)}`}</title>
               </rect>
               {m.sales > 0 && (
@@ -128,7 +128,7 @@ export function SalesChart({ months, currency, t }: { months: MonthBar[]; curren
         })}
       </svg>
       <p className="small legend">
-        <span className="key" style={{ background: "var(--brand)" }} /> {t["c.sales"]} <span className="key" style={{ background: "#14b8a6" }} /> {t["c.profit"]}
+        <span className="key" style={{ background: "var(--chart-1)" }} /> {t["c.sales"]} <span className="key" style={{ background: "var(--chart-2)" }} /> {t["c.profit"]}
       </p>
     </section>
   );

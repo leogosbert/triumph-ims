@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -29,8 +28,8 @@ export default async function HirePage({ searchParams }: { searchParams: SearchP
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeAllService(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeAllService(roles)) noAccess();
   const tab = TABS.find((t) => t.key === sp.tab)?.key ?? "out";
   const today = todayTz();
   const monthStart = today.slice(0, 8) + "01";
@@ -96,7 +95,7 @@ export default async function HirePage({ searchParams }: { searchParams: SearchP
       return { ...p, owned: Number(row?.owned ?? 0), onHire: Number(row?.on_hire ?? 0), tracked: Boolean(row?.tracked) };
     }),
   );
-  const planner = canPlanService(role);
+  const planner = canPlanService(roles);
 
   return (
     <>

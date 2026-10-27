@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { formatMoney } from "@/lib/money";
 import { PO_STATUS } from "@/lib/purchasing";
@@ -15,11 +14,11 @@ type Q = { id: string; number: string; revision: number; total: number; currency
 
 export default async function PurchasingPage() {
   await primeLang();
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "seePurchasing")) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seePurchasing")) noAccess();
   const today = todayTz();
   const cnt = { count: "exact" as const, head: true };
-  const edit = can(role, "editPurchasing");
+  const edit = can(roles, "editPurchasing");
 
   const [openSrfq, pending, awaiting, late, incoming, approvalList] = await Promise.all([
     edit ? supabase.from("supplier_rfqs").select("id", cnt).eq("company_id", company.id).eq("status", "open") : Promise.resolve({ count: 0 }),
@@ -83,10 +82,10 @@ export default async function PurchasingPage() {
       </div>
       <p className="small">
         {features.on("requisitions") && <Link href="/requisitions">{tr("Purchase requests")}</Link>}
-        {features.on("requisitions") && can(role, "seeBills") && " · "}
-        {can(role, "seeBills") && <Link href="/purchasing/match">{tr("Order, receipt and bill check")}</Link>}
-        {can(role, "seeReorder") && " · "}
-        {can(role, "seeReorder") && <Link href="/stock/reorder">{tr("What to reorder")}</Link>}
+        {features.on("requisitions") && can(roles, "seeBills") && " · "}
+        {can(roles, "seeBills") && <Link href="/purchasing/match">{tr("Order, receipt and bill check")}</Link>}
+        {can(roles, "seeReorder") && " · "}
+        {can(roles, "seeReorder") && <Link href="/stock/reorder">{tr("What to reorder")}</Link>}
       </p>
 
       <div className="stat-grid">
@@ -129,7 +128,7 @@ export default async function PurchasingPage() {
 
       {approvals.length > 0 && (
         <section className="card">
-          <h2>{can(role, "approvePOs") ? tr("POs waiting for your approval") : tr("POs waiting for approval")}</h2>
+          <h2>{can(roles, "approvePOs") ? tr("POs waiting for your approval") : tr("POs waiting for approval")}</h2>
           <ul className="list">
             {approvals.map((p) => (
               <li key={p.id} className="row">
@@ -172,7 +171,7 @@ export default async function PurchasingPage() {
           <div className="tile-title">{tr("All purchase orders")}</div>
           <div className="tile-sub">{tr("Drafts, approvals, confirmations")}</div>
         </Link>
-        {can(role, "seeSuppliers") && (
+        {can(roles, "seeSuppliers") && (
           <Link href="/suppliers" className="tile">
             <div className="tile-title">{tr("Suppliers")}</div>
             <div className="tile-sub">{tr("Contacts, terms and lead times")}</div>

@@ -31,12 +31,12 @@ export async function reorderAction(form: FormData) {
   const fail: (error: string) => never = (error) => redirect(withNotice(back, { error: friendlyError(error) }));
   const items = picked(form);
   if (items.length === 0) fail("Tick at least one item with a quantity.");
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const { data: prods } = await supabase.from("products").select("id, name, unit").in("id", items.map((i) => i.product));
   const byId = new Map((prods ?? []).map((p) => [p.id, p]));
 
   if (str(form, "mode") === "po") {
-    if (!can(role, "editPurchasing")) fail("Only management and procurement can create purchase orders.");
+    if (!can(roles, "editPurchasing")) fail("Only management and procurement can create purchase orders.");
     const supplier = str(form, "supplier_id");
     if (!supplier) fail("Choose the supplier.");
     const { data: po, error } = await supabase.rpc("create_purchase_order", { p_company: company.id, p_supplier: supplier, p_quotation: null });
@@ -61,7 +61,7 @@ export async function reorderAction(form: FormData) {
     redirect(withNotice(`/purchase-orders/${po as string}#lines`, { msg: "Draft purchase order made at last known cost. Check the prices, then submit it." }));
   }
 
-  if (!can(role, "requestPurchases")) fail("You cannot ask for purchases.");
+  if (!can(roles, "requestPurchases")) fail("You cannot ask for purchases.");
   const { data: req, error } = await supabase
     .from("requisitions")
     .insert({ company_id: company.id, reason: "Restock: at or below reorder level" })

@@ -1,13 +1,13 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { monthRange } from "@/lib/finance";
 import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Head-office figures" };
 
@@ -36,8 +36,8 @@ function dayBefore(iso: string) {
 export default async function HeadOfficePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "planFinance")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "planFinance")) noAccess();
   const year = sp.y === "1";
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const today = todayTz();
@@ -63,9 +63,7 @@ export default async function HeadOfficePage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/branches">{tr("← Branches")}</Link>
-      </p>
+      <BackLink href="/branches" label="Branches" />
       <h1>{tr("Head-office figures")}</h1>
       <p className="muted small">
         {tr("Every branch side by side. Sales and profit are before VAT; money owed and stock are as of today. Amounts in")} {base}.

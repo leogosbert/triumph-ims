@@ -5,7 +5,7 @@ import { isLegalQuestion, LEGAL_NOTE, searchKnowledge, type KnowledgeItem } from
 import { buildIndex, MISSING, rank, understand, type FinderIndex } from "@/lib/ai/finder";
 import { appSections, findGuide, findPages, findRecords, guideHref, searchEntries, type Hit, type HitGroup, type SearchCtx } from "@/lib/ai/search";
 import { builtInAnswer, detectTopic, type Answer } from "@/lib/assistant";
-import { can } from "@/lib/roles";
+import { can, onlyRoles } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { tr } from "@/lib/tr";
 
@@ -69,7 +69,7 @@ const LICENCE_STATUS: Record<string, string> = { planned: "Planned", applied: "A
  * only how many are recorded and how many lack an ID number or TIN.
  */
 async function companyStatus(ctx: SearchCtx, today: string): Promise<StatusRow[]> {
-  if (!can(ctx.role, "seeDocuments") || !ctx.features.on("compliance")) return [];
+  if (!can(ctx.roles, "seeDocuments") || !ctx.features.on("compliance")) return [];
   const q = async <T,>(p: PromiseLike<{ data: unknown; error: unknown }>): Promise<T[] | null> => {
     try {
       const { data, error } = await p;
@@ -87,7 +87,7 @@ async function companyStatus(ctx: SearchCtx, today: string): Promise<StatusRow[]
     q<Item>(ctx.supabase.from("compliance_items").select("id, name, status, due_on, frequency").eq("company_id", ctx.company.id).neq("status", "not_applicable").limit(300)),
     q<Lic>(ctx.supabase.from("licences").select("id, name, status, expires_on").eq("company_id", ctx.company.id).limit(200)),
     q<Dl>(ctx.supabase.from("compliance_deadlines").select("item_id, due_on, status").eq("company_id", ctx.company.id).eq("status", "open").lte("due_on", until).order("due_on").limit(40)),
-    can(ctx.role, "seeFinance") ? q<Dir>(ctx.supabase.from("company_directors").select("id_number, tin, resigned_on").eq("company_id", ctx.company.id).limit(100)) : Promise.resolve(null),
+    can(ctx.roles, "seeFinance") ? q<Dir>(ctx.supabase.from("company_directors").select("id_number, tin, resigned_on").eq("company_id", ctx.company.id).limit(100)) : Promise.resolve(null),
   ]);
   const rows: StatusRow[] = [];
   const names = new Map((items ?? []).map((i) => [i.id, i.name]));
@@ -136,7 +136,7 @@ const ruleView = (k: KnowledgeItem, complianceOn: boolean) => ({
 const indexes = new Map<string, FinderIndex>();
 /** The super search index for this person's role, features and language (kept between requests on this server). */
 function finderIndex(ctx: SearchCtx, lang: "en" | "sw"): FinderIndex {
-  const key = `${lang}|${ctx.role}|${ctx.isManager}|${ctx.isPlatformAdmin ? 1 : 0}|${ctx.features.list.map((f) => (ctx.features.on(f.key) ? f.key : "")).join(",")}`;
+  const key = `${lang}|${[...ctx.roles].sort().join("+")}|${ctx.isManager}|${ctx.isPlatformAdmin ? 1 : 0}|${ctx.features.list.map((f) => (ctx.features.on(f.key) ? f.key : "")).join(",")}`;
   let i = indexes.get(key);
   if (!i) {
     if (indexes.size > 50) indexes.clear();
@@ -156,13 +156,13 @@ export async function askBusiness(
   const today = todayTz();
   const legal = isLegalQuestion(question);
   const topic = detectTopic(question);
-  const figuresWanted = opts.allowFigures !== false && ctx.role !== "driver" && ctx.features.on("ai_assistant") && topic !== "help";
+  const figuresWanted = opts.allowFigures !== false && !onlyRoles(ctx.roles, "driver") && ctx.features.on("ai_assistant") && topic !== "help";
 
   // Legal questions first look at the compliance list; "how do I" questions at the guide.
   const rulesFound = searchKnowledge(question, legal ? 5 : 2);
   const complianceOn = ctx.features.on("compliance");
   const [figures, status, records] = await Promise.all([
-    figuresWanted ? builtInAnswer({ supabase: ctx.supabase, company: ctx.company, role: ctx.role }, question, topic) : Promise.resolve(undefined),
+    figuresWanted ? builtInAnswer({ supabase: ctx.supabase, company: ctx.company, roles: ctx.roles }, question, topic) : Promise.resolve(undefined),
     legal || rulesFound.length ? companyStatus(ctx, today) : Promise.resolve([] as StatusRow[]),
     question.length <= 60 ? findRecords(ctx, question, 4) : Promise.resolve([] as HitGroup[]),
   ]);
@@ -294,7 +294,7 @@ export async function askBusiness(
 
   // Worded by the AI service, when allowed. Like Cocozania, the AI also answers when nothing matched:
   // it gets the list of screens this person can open, so it can say plainly what the app does not do yet.
-  if (opts.allowAi !== false && aiReady() && ctx.features.on("ai_assistant") && ctx.role !== "driver" && question) {
+  if (opts.allowAi !== false && aiReady() && ctx.features.on("ai_assistant") && !onlyRoles(ctx.roles, "driver") && question) {
     const { data: allowed, error } = await ctx.supabase.rpc("use_assistant", { p_company: ctx.company.id });
     if (error || allowed !== true) {
       base.notice = tr("Today's AI questions are used up; this answer is from the built-in search.");

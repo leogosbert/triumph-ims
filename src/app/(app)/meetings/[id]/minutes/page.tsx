@@ -8,6 +8,8 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { companyPeople, namesFor } from "@/lib/people";
 import { aiReady } from "@/lib/ai/claude";
+import { buildMinutesDoc, minutesText } from "@/lib/meetings/minutes-format";
+import { transcriptionReady } from "@/lib/meetings/recording-core";
 import {
   canApprove,
   canManage,
@@ -20,15 +22,21 @@ import {
   PROPOSAL_STATUS,
   PROPOSAL_TARGETS,
   proposalLines,
+  RECORDING_COLUMNS,
   type Meeting,
+  type Recording,
   type Point,
   type Proposal,
 } from "@/lib/meetings/model";
 import { addProposal, approveMinutes, decideProposal, deletePoint, editProposal, savePoint, saveTexts, writeMinutes } from "../../actions";
-import { MeetingBadge, whenRange } from "../../parts";
+import { CopyMinutes } from "../../CopyMinutes";
+import { MinutesDocument } from "../../MinutesDocument";
+import { Recordings } from "../../Recordings";
+import { MeetingBadge, StageBar, whenRange } from "../../parts";
 import { ProposalFields } from "./ProposalFields";
 import { RefreshWhile } from "./RefreshWhile";
 import styles from "../../meetings.module.css";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Minutes" };
 export const maxDuration = 10;
@@ -61,18 +69,23 @@ export default async function MinutesPage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user, isManager } = await getAppContext();
+  const { supabase, company, roles, user, isManager } = await getAppContext();
   const { data } = await supabase.from("meetings").select(MEETING_COLUMNS).eq("id", id).maybeSingle();
   if (!data) notFound();
   const m = data as unknown as Meeting;
-  const manage = canManage(m, user.id, role);
-  const approve = canApprove(m, user.id, role);
-  const [pts, props, texts, people] = await Promise.all([
+  const manage = canManage(m, user.id, roles);
+  const approve = canApprove(m, user.id, roles);
+  const [pts, props, texts, people, recs, att] = await Promise.all([
     supabase.from("meeting_points").select("*").eq("meeting_id", id).order("sort"),
     supabase.from("meeting_proposals").select("*").eq("meeting_id", id).order("created_at"),
     manage ? supabase.from("meeting_texts").select("transcript, notes").eq("meeting_id", id).maybeSingle() : Promise.resolve({ data: null }),
     companyPeople(supabase, company.id),
+    // Missing before the v1.25 SQL is run: then there are no recordings.
+    supabase.from("meeting_recordings").select(RECORDING_COLUMNS).eq("meeting_id", id).order("started_at"),
+    supabase.from("meeting_attendees").select("user_id, guest_name, joined_at, present").eq("meeting_id", id),
   ]);
+  const recordings = (recs.error ? [] : (recs.data ?? [])) as unknown as Recording[];
+  const { data: keep } = recs.error ? { data: null } : await supabase.from("meeting_settings").select("recording_days").eq("company_id", company.id).maybeSingle();
   const points = (pts.data ?? []) as Point[];
   const proposals = (props.data ?? []) as Proposal[];
   const nameOf = new Map(people.map((p) => [p.id, p.name]));
@@ -84,6 +97,19 @@ export default async function MinutesPage({ params, searchParams }: { params: Pr
   const editable = manage && (!approved || isManager);
   const writing = m.minutes_status === "writing" && m.minutes_requested_at && Date.now() - Date.parse(m.minutes_requested_at) < 20 * 60_000;
   const kinds = ["decision", "action", "issue", "note"];
+  const doc = buildMinutesDoc(s, points, (uid) => nameOf.get(uid));
+  const present = ((att.data ?? []) as { user_id: string | null; guest_name: string | null; joined_at: string | null; present: boolean }[])
+    .filter((a) => a.joined_at || a.present)
+    .map((a) => (a.user_id ? nameOf.get(a.user_id) : a.guest_name))
+    .filter((x): x is string => !!x);
+  const plain = minutesText(doc, {
+    company: company.name,
+    title: m.title,
+    when: whenRange(m),
+    attendees: present,
+    approved: approved && m.approved_at ? `${nameOf.get(m.approved_by ?? "") ?? ""} ${formatDateTime(m.approved_at)}`.trim() : null,
+  });
+  const transcribing = recordings.some((r) => r.transcript_status === "writing");
   const pointTitle = new Map(points.map((p, i) => [p.id, `${i + 1}. ${p.body.slice(0, 60)}`]));
 
   // Last time's items that these minutes mention.
@@ -93,7 +119,8 @@ export default async function MinutesPage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      {writing && <RefreshWhile />}
+      <BackLink href={`/meetings/${id}`} label={m.title} />
+      {(writing || transcribing) && <RefreshWhile />}
       <div className="page-head">
         <h1>{tr("Minutes")}</h1>
         <span>
@@ -105,63 +132,80 @@ export default async function MinutesPage({ params, searchParams }: { params: Pr
       </p>
       <Notice {...notice} />
 
-      <section className="card">
-        <div className="line-head">
-          <h2 style={{ margin: 0 }}>{tr(MINUTES_STATUS[m.minutes_status]?.label ?? "Minutes")}</h2>
-          {m.minutes_by && <span className="badge tone-off">{m.minutes_by === "ai" ? tr("Written by AI") : m.minutes_by === "app" ? tr("From the typed notes") : tr("Written by hand")}</span>}
-        </div>
-        {m.minutes_error && <p className="small banner warn">{tr(m.minutes_error)}</p>}
-        {writing && <p className="muted">{tr("The AI is writing the minutes. This page updates by itself.")}</p>}
-        {approved && m.approved_at && (
+      <StageBar m={m} />
+
+      <section className={`card ${styles.nextStep}`}>
+        <div>
+          <h2>{tr(MINUTES_STATUS[m.minutes_status]?.label ?? "Minutes")}</h2>
           <p className="small muted">
-            {tr("Approved by")} {nameOf.get(m.approved_by ?? "") ?? ""} · {formatDateTime(m.approved_at)}
+            {m.status !== "held"
+              ? tr("The minutes are written after the meeting ends.")
+              : writing
+                ? transcribing
+                  ? tr("The recording is being written down, then the AI writes the minutes. This page updates by itself.")
+                  : tr("The AI is writing the minutes. This page updates by itself.")
+                : m.minutes_status === "none"
+                  ? aiReady()
+                    ? tr("The AI reads the transcript, the recording and the notes (Kiswahili, English or both) and writes the minutes in English.")
+                    : tr("AI is not switched on: the app writes the minutes from the typed notes.")
+                  : approved
+                    ? `${tr("Approved by")} ${nameOf.get(m.approved_by ?? "") ?? ""}${m.approved_at ? ` · ${formatDateTime(m.approved_at)}` : ""}`
+                    : approve
+                      ? tr("Read them, correct any point below, then approve: action owners are told and the dates go on the calendar.")
+                      : tr("Management or the chair approves the minutes.")}
           </p>
-        )}
-        {m.status !== "held" && <p className="muted">{tr("The minutes are written after the meeting ends.")}</p>}
-        {m.status === "held" && manage && !approved && (
-          <form action={writeMinutes} className="inline-form" style={{ marginTop: 8 }}>
-            <input type="hidden" name="id" value={id} />
-            <SubmitButton className={`btn ${m.minutes_status === "none" ? "btn-primary" : ""}`} pendingText={tr("Writing…")}>
-              {m.minutes_status === "none" ? tr("Write the minutes") : tr("Write them again")}
-            </SubmitButton>
-            <span className="small muted">
-              {aiReady() ? tr("The AI reads the transcript and notes. Points you added by hand are kept.") : tr("AI is not switched on: the app writes the minutes from the typed notes.")}
+          {m.minutes_by && (
+            <span className="badge tone-off" style={{ marginTop: 6 }}>
+              {m.minutes_by === "ai" ? tr("Written by AI") : m.minutes_by === "app" ? tr("From the typed notes") : tr("Written by hand")}
             </span>
-          </form>
-        )}
-        {s.summary && <p style={{ whiteSpace: "pre-wrap", marginTop: 10 }}>{s.summary}</p>}
-        {(s.topics ?? []).map((t) => (
-          <div key={t.topic}>
-            <h3 style={{ marginBottom: 4 }}>{tr(t.topic)}</h3>
-            <ul>
-              {t.points.map((p, i) => (
-                <li key={i}>{p}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-        {(s.suggestions ?? []).length > 0 && (
-          <>
-            <h3>{tr("Suggestions")}</h3>
-            <ul>
-              {s.suggestions!.map((x, i) => (
-                <li key={i}>{x}</li>
-              ))}
-            </ul>
-          </>
-        )}
-        {(s.unclear ?? []).length > 0 && (
-          <>
-            <h3>{tr("Not clear in the recording")}</h3>
-            <ul className="small">
-              {s.unclear!.map((x, i) => (
-                <li key={i}>{x}</li>
-              ))}
-            </ul>
-          </>
-        )}
-        {s.language_note && <p className="small muted">{s.language_note}</p>}
+          )}
+        </div>
+        <div className={styles.nextActions}>
+          {m.status === "held" && m.minutes_status === "ready" && approve && (
+            <form action={approveMinutes}>
+              <input type="hidden" name="id" value={id} />
+              <SubmitButton className="btn btn-primary" pendingText={tr("Approving…")}>
+                {tr("Approve the minutes")}
+              </SubmitButton>
+            </form>
+          )}
+          {m.status === "held" && manage && !approved && !writing && (
+            <form action={writeMinutes} className="inline-form" style={{ gap: 8 }}>
+              <input type="hidden" name="id" value={id} />
+              <input type="hidden" name="transcribe" value="1" />
+              <label className="small" style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                <input type="checkbox" name="swahili_summary" value="1" defaultChecked={!!s.summary_sw} /> {tr("Also write a Kiswahili summary")}
+              </label>
+              <SubmitButton className={`btn ${m.minutes_status === "none" || m.minutes_status === "failed" ? "btn-primary" : ""}`} pendingText={tr("Writing…")}>
+                {m.minutes_status === "none" ? tr("Write the minutes") : tr("Write them again")}
+              </SubmitButton>
+            </form>
+          )}
+          {!doc.empty && <CopyMinutes text={plain} />}
+        </div>
+        {m.minutes_error && <p className="small banner warn" style={{ width: "100%", margin: 0 }}>{tr(m.minutes_error)}</p>}
       </section>
+
+      {!doc.empty && (
+        <section className="card">
+          <h2>{tr("Minutes")}: {m.title}</h2>
+          <p className="small muted">
+            {whenRange(m)}
+            {present.length > 0 && ` · ${tr("Present")}: ${present.join(", ")}`}
+          </p>
+          <MinutesDocument doc={doc} approved={approved} />
+        </section>
+      )}
+
+      <Recordings
+        recordings={recordings}
+        names={nameOf}
+        manage={manage}
+        ai={aiReady()}
+        transcription={transcriptionReady()}
+        back={`/meetings/${id}/minutes#recordings`}
+        keepDays={Number(keep?.recording_days ?? 30)}
+      />
 
       {(s.follow_up ?? []).length > 0 && (
         <section className="card">
@@ -182,7 +226,8 @@ export default async function MinutesPage({ params, searchParams }: { params: Pr
       )}
 
       <section className="card" id="points">
-        <h2>{tr("Issues, decisions and actions")}</h2>
+        <h2>{approved ? tr("Issues, decisions and actions") : tr("Check the points")}</h2>
+        {!approved && points.length > 0 && editable && <p className="small muted">{tr("Each point becomes final when the minutes are approved. Set the owner and the date of every action.")}</p>}
         {points.length === 0 && <p className="muted small">{tr("No points yet.")}</p>}
         {kinds.map((k) => {
           const list = points.filter((p) => p.kind === k);
@@ -243,11 +288,12 @@ export default async function MinutesPage({ params, searchParams }: { params: Pr
         {m.status === "held" && m.minutes_status === "ready" && approve && (
           <form action={approveMinutes} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={id} />
-            <SubmitButton pendingText={tr("Approving…")}>{tr("Approve the minutes")}</SubmitButton>
+            <SubmitButton className="btn btn-primary" pendingText={tr("Approving…")}>
+              {tr("Approve the minutes")}
+            </SubmitButton>
             <p className="small muted">{tr("The points become final, each action owner is told and finds it under My actions, and action dates go on the calendar.")}</p>
           </form>
         )}
-        {m.status === "held" && m.minutes_status === "ready" && !approve && <p className="small muted">{tr("Management or the chair approves the minutes.")}</p>}
       </section>
 
       {(proposals.length > 0 || (manage && m.status === "held")) && (

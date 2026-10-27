@@ -1,11 +1,12 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
+import { sendRfqViaPortal } from "@/app/(app)/portal-admin/actions";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -13,6 +14,7 @@ import { productOptions } from "@/lib/options";
 import { INVITE_STATUS, SRFQ_STATUS } from "@/lib/purchasing";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 import {
   addSrfqLine,
   awardSupplier,
@@ -48,8 +50,8 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editPurchasing")) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "editPurchasing")) noAccess();
 
   const { data: r } = await supabase.from("supplier_rfqs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!r) notFound();
@@ -108,8 +110,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
 
   return (
     <>
-      <p className="small">
-        <Link href="/supplier-rfqs">{tr("← Supplier RFQs")}</Link>
+      <BackLink href="/supplier-rfqs" label="Supplier RFQs">
         {r.quotation_id && (
           <>
             {" · "}
@@ -122,7 +123,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
             <Link href={`/rfqs/${r.rfq_id}`}>{tr("Client RFQ")}</Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{r.title ?? r.number}</h1>
         <StatusBadge map={SRFQ_STATUS} status={r.status} />
@@ -193,6 +194,15 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
       <section className="card" id="suppliers">
         <h2>{tr("Suppliers asked (")}{invites.length})</h2>
         {invites.length === 0 && <p className="muted small">{tr("Add the suppliers you want prices from.")}</p>}
+        {open && features.on("supplier_portal") && lines.length > 0 && invites.some((i) => i.status === "invited") && (
+          <form action={sendRfqViaPortal} className="inline-form" style={{ margin: "4px 0 8px", flexWrap: "wrap" }}>
+            <input type="hidden" name="id" value={r.id} />
+            <SubmitButton className="btn btn-small" pendingText={tr("Sending…")}>
+              {tr("Send via portal")}
+            </SubmitButton>
+            <span className="small muted">{tr("Emails the suppliers' portal contacts a link to answer online. Their prices land here.")}</span>
+          </form>
+        )}
         <ul className="list">
           {invites.map((inv) => (
             <li key={inv.id}>

@@ -10,6 +10,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { fmtQty } from "@/lib/stock";
 import { reorderAction } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "What to reorder" };
 
@@ -32,8 +33,8 @@ type Suggestion = {
 export default async function ReorderPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "seeReorder")) redirect("/stock");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seeReorder")) redirect("/stock");
   const { data, error } = await supabase.rpc("reorder_suggestions", { p_company: company.id });
   if (error && /reorder_suggestions|max_level/.test(error.message)) return <NotReady title="What to reorder" />;
   if (error) throw new Error(error.message);
@@ -47,14 +48,12 @@ export default async function ReorderPage({ searchParams }: { searchParams: Sear
   }
   // Groups with a supplier first, then the rest.
   const ordered = [...groups.values()].sort((a, b) => (a.supplier ? 0 : 1) - (b.supplier ? 0 : 1) || a.name.localeCompare(b.name));
-  const canPo = can(role, "editPurchasing");
-  const canRequest = can(role, "requestPurchases") && features.on("requisitions");
+  const canPo = can(roles, "editPurchasing");
+  const canRequest = can(roles, "requestPurchases") && features.on("requisitions");
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <h1>{tr("What to reorder")}</h1>
       <p className="muted small">
         {tr("Products at or below their reorder level. The suggested quantity fills up to the maximum stock level (or twice the reorder level), less what is already ordered or requested.")}

@@ -1,15 +1,14 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { aiReady } from "@/lib/ai/claude";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { DOC_KINDS, isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { loadLinkOptions } from "../links";
 import { NewDocumentForm } from "../NewDocumentForm";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New document" };
 
@@ -17,8 +16,8 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!can(role, "seeDocuments")) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!can(roles, "seeDocuments")) noAccess();
   const probe = await supabase.from("documents").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New document" />;
   const links = await loadLinkOptions(supabase, company.id);
@@ -29,9 +28,7 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
 
   return (
     <>
-      <p className="small">
-        <Link href={back ?? "/documents"}>{back ? tr("← Back") : tr("← Documents")}</Link>
-      </p>
+      <BackLink href={back ?? "/documents"} label={back ? "Back" : "Documents"} />
       <h1>{tr("Add a document")}</h1>
       <p className="muted small">{tr("Certificates, licences, safety data sheets, CoAs, datasheets, contracts and tender papers. Add the expiry date to be reminded before it runs out.")}</p>
       <Notice {...notice} />

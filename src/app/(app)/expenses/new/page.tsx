@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { aiReady } from "@/lib/ai/claude";
 import { getAppContext, stage13Ready } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { todayTz } from "@/lib/sales";
 import { NewExpenseForm } from "../NewExpenseForm";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New expense" };
 
@@ -31,9 +31,7 @@ export default async function NewExpensePage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/expenses">{tr("← Expenses")}</Link>
-      </p>
+      <BackLink href="/expenses" label="Expenses" />
       <h1>{tr("Record an expense")}</h1>
       <p className="muted small">{tr("Money paid out that is not a supplier bill: rent, fuel, airtime, wages, bank charges and the like.")}</p>
       <Notice {...notice} />

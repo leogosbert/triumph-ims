@@ -23,7 +23,7 @@ function backPath(form: FormData, fallback: string): string {
 
 async function ledgerCtx(path: string) {
   const ctx = await getAppContext();
-  if (!can(ctx.role, "seeLedger")) fail(path, "Only management or finance can see the books.");
+  if (!can(ctx.roles, "seeLedger")) fail(path, "Only management or finance can see the books.");
   return ctx;
 }
 
@@ -47,8 +47,8 @@ type LineIn = { a: string; d: number; c: number; t: string };
 
 /** Called by the journal form; returns an error to show, or the new journal's id. */
 export async function createJournal(form: FormData): Promise<{ error?: string; id?: string }> {
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeLedger")) return { error: "Only management or finance can post journals." };
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeLedger")) return { error: "Only management or finance can post journals." };
   const date = str(form, "entry_date");
   if (!isIsoDate(date)) return { error: "Choose the date of the journal." };
   const memo = str(form, "memo");

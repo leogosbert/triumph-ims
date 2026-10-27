@@ -12,9 +12,9 @@ type Inv = { id: string; number: string; total: number; amount_paid: number; exc
 
 export default async function FinancePage() {
   await primeLang();
-  const { supabase, company, role, features } = await getAppContext();
+  const { supabase, company, roles, features } = await getAppContext();
   const ready13 = stage13Ready(company);
-  if (!can(role, "seeFinance")) redirect(can(role, "seeInvoices") ? "/invoices" : "/");
+  if (!can(roles, "seeFinance")) redirect(can(roles, "seeInvoices") ? "/invoices" : "/");
   const base = company.base_currency;
   const m = monthRange();
 
@@ -185,9 +185,9 @@ export default async function FinancePage() {
         <Tile href="/receivables" title={tr("Money owed to us")} sub={tr("By client and how late (aging)")} />
         <Tile href="/bills" title={tr("Supplier bills")} sub={tr("Record and pay suppliers' invoices")} />
         <Tile href="/payables" title={tr("Money we owe")} sub={tr("By supplier and currency")} />
-        {can(role, "seeProfit") && <Tile href="/profit" title={tr("Profit")} sub={tr("By order, client, industry, salesperson")} />}
+        {can(roles, "seeProfit") && <Tile href="/profit" title={tr("Profit")} sub={tr("By order, client, industry, salesperson")} />}
         {features.on("expenses") && <Tile href="/expenses" title={tr("Expenses")} sub={tr("Rent, fuel, wages and other spending, with receipt photos")} />}
-        {can(role, "seeProfit") && features.on("simple_pl") && (
+        {can(roles, "seeProfit") && features.on("simple_pl") && (
           <Tile href="/profit-loss" title={tr("Profit & loss")} sub={tr("Sales, costs, expenses and net profit by month")} />
         )}
         {features.on("statements") && <Tile href="/statements" title={tr("Statements")} sub={tr("Client and supplier statements of account")} />}

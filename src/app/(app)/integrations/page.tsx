@@ -1,15 +1,14 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ApiKeyCreator } from "@/components/assistant/ApiKeyCreator";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { monthRange } from "@/lib/finance";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { siteUrl } from "@/lib/supabase/env";
 import { createApiKey, revokeApiKey } from "./actions";
 
@@ -32,9 +31,9 @@ export default async function IntegrationsPage({ searchParams }: { searchParams:
   await primeLang();
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/");
-  const isManager = role === "management";
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seeFinance")) noAccess();
+  const isManager = hasRole(roles, "management");
   if (!features.on("integrations")) {
     return (
       <>

@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -34,8 +33,8 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeAllService(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeAllService(roles)) noAccess();
   const showAll = sp.view === "all";
   const { data, error } = await supabase
     .from("service_contracts")
@@ -69,7 +68,7 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
     <>
       <div className="page-head">
         <h1>{tr("Maintenance contracts")}</h1>
-        {canKeepContracts(role) && (
+        {canKeepContracts(roles) && (
           <Link href="/maintenance/new" className="btn btn-primary btn-small">
             {tr("+ Contract")}
           </Link>
@@ -102,7 +101,7 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
           <div className="l">{tr("Contract value per month")}</div>
         </div>
       </div>
-      {canPlanService(role) && (
+      {canPlanService(roles) && (
         <form action={planDueVisits} className="actions-bar">
           <SubmitButton className="btn btn-primary btn-small" pendingText={tr("Planning…")}>
             {tr("Plan due visits")}

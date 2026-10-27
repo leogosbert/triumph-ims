@@ -1,12 +1,12 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { StatementView } from "@/components/StatementView";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { methodLabel } from "@/lib/finance";
 import { type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { cleanDate, defaultPeriod, loadStatement } from "@/lib/statements";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Client statement" };
 
@@ -14,8 +14,8 @@ export default async function ClientStatementPage({ params, searchParams }: { pa
   await primeLang();
   const { id } = await params;
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeInvoices")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeInvoices")) noAccess();
   const { data: client } = await supabase.from("clients").select("id, name, code").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!client) notFound();
   const def = defaultPeriod();
@@ -31,9 +31,7 @@ export default async function ClientStatementPage({ params, searchParams }: { pa
   );
   return (
     <>
-      <p className="small">
-        <Link href={`/clients/${id}`}>← {client.name}</Link>
-      </p>
+      <BackLink href={`/clients/${id}`} label={client.name} />
       <h1>{tr("Statement of account")}</h1>
       <p className="muted small">
         {client.name} · {client.code}

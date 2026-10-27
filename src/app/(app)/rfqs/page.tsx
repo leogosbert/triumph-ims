@@ -1,13 +1,13 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { RFQ_STATUS, StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "RFQs" };
 
@@ -35,8 +35,8 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeSales")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeSales")) noAccess();
 
   let query = supabase
     .from("rfqs")
@@ -54,12 +54,10 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
 
   return (
     <>
-      <p className="small">
-        <Link href="/sales">{tr("← Sales")}</Link>
-      </p>
+      <BackLink href="/sales" label="Sales" />
       <div className="page-head">
         <h1>{tr("Client RFQs")}</h1>
-        {can(role, "editSales") && (
+        {can(roles, "editSales") && (
           <Link href="/rfqs/new" className="btn btn-primary btn-small">{tr("+ New RFQ")}</Link>
         )}
       </div>

@@ -64,25 +64,18 @@ export function BottomNav({ items, menu, menuStart }: { items: NavItem[]; menu: 
 }
 
 /**
- * Laptop sidebar headings. A section the list does not name (a new one) joins the heading above it,
- * so adding a link to sideNav() needs no change here.
+ * Laptop sidebar headings (both looks), in the order sideNav() lists the links. A section the list
+ * does not name (a new one) joins the heading above it, so adding a link to sideNav() needs no change here.
  */
 const SIDE_GROUPS: [string, string[]][] = [
-  ["Overview", ["/"]],
-  ["Operations", ["/sales", "/clients", "/purchasing", "/products", "/stock", "/deliveries", "/driver"]],
-  ["Finance & reports", ["/finance", "/invoices", "/reports"]],
-  ["Support", ["/help", "/more"]],
+  ["My work", ["/my", "/", "/driver", "/inbox", "/meetings", "/calendar"]],
+  ["Sell & buy", ["/sales", "/clients", "/purchasing", "/jobs"]],
+  ["Stock & delivery", ["/products", "/stock", "/deliveries"]],
+  ["Money & reports", ["/finance", "/invoices", "/reports"]],
+  ["Team & company", ["/hr", "/compliance", "/settings", "/help", "/more"]],
 ];
-/** The Glass sidebar groups the same links a little more finely. */
-const GLASS_GROUPS: [string, string[]][] = [
-  ["Overview", ["/", "/driver"]],
-  ["Operations", ["/sales", "/inbox", "/clients", "/purchasing", "/products", "/stock", "/deliveries", "/jobs"]],
-  ["People", ["/hr", "/meetings", "/calendar", "/compliance"]],
-  ["Finance", ["/finance", "/invoices", "/reports"]],
-  ["Company", ["/settings", "/help", "/more"]],
-];
-function sideGroup(href: string, groups = SIDE_GROUPS) {
-  return groups.find(([, hrefs]) => hrefs.includes(href))?.[0] ?? null;
+function sideGroup(href: string) {
+  return SIDE_GROUPS.find(([, hrefs]) => hrefs.includes(href))?.[0] ?? null;
 }
 
 /**
@@ -135,8 +128,8 @@ function RailToggle() {
       className="side-rail-btn"
       onClick={toggle}
       aria-pressed={rail}
-      aria-label={rail ? tr("Expand menu") : tr("Collapse menu")}
-      title={rail ? tr("Expand menu") : tr("Collapse menu")}
+      aria-label={rail ? tr("Show menu names") : tr("Show icons only")}
+      title={rail ? tr("Show menu names") : tr("Show icons only")}
     >
       <Icon name="chevron" size={15} strokeWidth={2.4} />
       <Icon name="chevron" size={15} strokeWidth={2.4} />
@@ -144,8 +137,8 @@ function RailToggle() {
   );
 }
 
-/** Glass: headings fold their group away (remembered on this device); the open screen's link stays. */
-const CLOSED_KEY = "lemosp-side-closed";
+/** Headings fold their group away (remembered on this device); the open screen's link stays. */
+const CLOSED_KEY = "lemosp-side-closed-v2";
 function useClosedGroups(): [string[], (g: string) => void] {
   const [closed, setClosed] = useState<string[]>([]);
   useEffect(() => {
@@ -190,15 +183,18 @@ export function SideNav({
   const tr = useTr();
   const pathname = usePathname();
   const glass = look === "glass";
-  const groups = glass ? GLASS_GROUPS : SIDE_GROUPS;
   const [closed, toggleGroup] = useClosedGroups();
+  // Each link's heading (a link the list does not name joins the heading above it).
+  const groupOf: (string | null)[] = [];
+  items.forEach((it, i) => groupOf.push(sideGroup(it.href) ?? (i > 0 ? groupOf[i - 1] : null)));
+  // The heading of the open screen is marked, so you can see where you are even with groups folded.
+  const here = groupOf[items.findIndex((it) => isActive(it, pathname))] ?? null;
   const brand = (
     <CompanyButton className="sidenav-brand" title={company}>
       {logo ? <img src={logo} alt="" /> : <span className="mark">{initials}</span>}
       <strong>{company}</strong>
     </CompanyButton>
   );
-  let group: string | null = null;
   return (
     <aside className="sidenav" aria-label={tr("Sections")}>
       {glass ? (
@@ -212,10 +208,9 @@ export function SideNav({
       <nav>
         {items.map((it, i) => {
           const active = isActive(it, pathname);
-          const g = sideGroup(it.href, groups);
-          const heading = g && g !== items.slice(0, i).map((x) => sideGroup(x.href, groups)).filter(Boolean).pop() ? g : null;
-          if (g) group = g;
-          const shut = glass && group !== null && closed.includes(group) && !active;
+          const group = groupOf[i];
+          const heading = group && group !== (i > 0 ? groupOf[i - 1] : null) ? group : null;
+          const shut = group !== null && closed.includes(group) && !active;
           const label = tr(String(it.label ?? ""));
           // Glass: the icon sits on a tile in its section's colour, and the words can fold away
           // (the title shows them on the rail).
@@ -232,7 +227,7 @@ export function SideNav({
               {label}
             </>
           );
-          const extra = glass ? { title: label, "data-section": sectionFor(it.href), hidden: shut || undefined } : {};
+          const extra = glass ? { title: label, "data-section": sectionFor(it.href), hidden: shut || undefined } : { hidden: shut || undefined };
           const link = it.plain ? (
             <a href={it.href} aria-current={active ? "page" : undefined} {...extra}>
               {body}
@@ -242,16 +237,22 @@ export function SideNav({
               {body}
             </Link>
           );
-          const head =
-            heading &&
-            (glass ? (
-              <button type="button" className="nav-group" aria-expanded={!closed.includes(heading)} onClick={() => toggleGroup(heading)}>
-                <span>{tr(heading)}</span>
-                <Icon name="chevron" size={13} strokeWidth={2.2} />
-              </button>
-            ) : (
-              <span className="nav-group">{tr(heading)}</span>
-            ));
+          const open = heading ? !closed.includes(heading) : true;
+          const head = heading && (
+            <button
+              type="button"
+              className="nav-group"
+              aria-expanded={open}
+              data-here={heading === here || undefined}
+              onClick={() => toggleGroup(heading)}
+              title={open ? tr("Fold this group") : tr("Open this group")}
+            >
+              <span className="nav-group-name">{tr(heading)}</span>
+              <span className="nav-group-state" aria-hidden="true">
+                <Icon name="chevron" size={14} strokeWidth={2.4} />
+              </span>
+            </button>
+          );
           return (
             <Fragment key={it.href}>
               {head}

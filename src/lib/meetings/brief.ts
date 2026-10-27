@@ -26,10 +26,15 @@ const label = (parts: (string | null | undefined)[]) => parts.filter(Boolean).jo
  * the meeting, who was there, the agenda, last time's open items, the transcript and notes, and the records the
  * meeting named (clients, suppliers, quotations, invoices, opportunities, compliance items, incidents, products).
  */
-export async function buildMinutesBrief(supabase: Supabase, m: Meeting, companyName: string): Promise<MinutesBrief> {
-  const [texts, att, agenda, last, members] = await Promise.all([
+export async function buildMinutesBrief(
+  supabase: Supabase,
+  m: Meeting,
+  companyName: string,
+  options: NonNullable<MinutesBrief["options"]> = {},
+): Promise<MinutesBrief> {
+  const [texts, att, agenda, last, members, recs] = await Promise.all([
     supabase.from("meeting_texts").select("transcript, notes").eq("meeting_id", m.id).maybeSingle(),
-    supabase.from("meeting_attendees").select("user_id, guest_name, guest_org").eq("meeting_id", m.id),
+    supabase.from("meeting_attendees").select("user_id, guest_name, guest_org, joined_at, present, response").eq("meeting_id", m.id),
     supabase.from("meeting_agenda_items").select("title, topic").eq("meeting_id", m.id).order("sort"),
     supabase
       .from("meeting_points")
@@ -42,10 +47,16 @@ export async function buildMinutesBrief(supabase: Supabase, m: Meeting, companyN
       .order("due_on", { ascending: true, nullsFirst: false })
       .limit(30),
     supabase.from("memberships").select("user_id, role").eq("company_id", m.company_id).eq("active", true),
+    // Recordings written down after the meeting (missing table before the v1.25 SQL: then none).
+    supabase.from("meeting_recordings").select("started_at, transcript").eq("meeting_id", m.id).eq("transcript_status", "ready").order("started_at"),
   ]);
   const transcript = String(texts.data?.transcript ?? "");
   const notes = String(texts.data?.notes ?? "");
-  const lower = `${m.title} ${m.purpose ?? ""} ${transcript} ${notes}`.toLowerCase();
+  const recordingTranscript = ((recs.error ? [] : (recs.data ?? [])) as { started_at: string; transcript: string }[])
+    .filter((r) => r.transcript?.trim())
+    .map((r, i) => `--- Recording ${i + 1} (started ${new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Dar_es_Salaam", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(r.started_at))}) ---\n${r.transcript}`)
+    .join("\n\n");
+  const lower = `${m.title} ${m.purpose ?? ""} ${transcript} ${notes} ${recordingTranscript}`.toLowerCase();
 
   const roleOf = new Map(((members.data ?? []) as { user_id: string; role: string }[]).map((x) => [x.user_id, x.role]));
   const { data: profiles } = roleOf.size
@@ -110,6 +121,13 @@ export async function buildMinutesBrief(supabase: Supabase, m: Meeting, companyN
       supplier: m.supplier_id ? (su.find((s) => s.id === m.supplier_id) ? ref(m.supplier_id, su.find((s) => s.id === m.supplier_id)!.name) : null) : null,
     },
     staff,
+    // Who attended: staff who joined or were marked present, or accepted when nobody's attendance was recorded.
+    attendees: (() => {
+      const rows = (att.data ?? []) as { user_id: string | null; joined_at: string | null; present: boolean; response: string }[];
+      const staffRows = rows.filter((a) => a.user_id);
+      const here = staffRows.filter((a) => a.joined_at || a.present);
+      return (here.length ? here : staffRows.filter((a) => a.response === "accepted")).map((a) => nameOf.get(a.user_id!)).filter((x): x is string => !!x);
+    })(),
     guests: ((att.data ?? []) as { user_id: string | null; guest_name: string | null; guest_org: string | null }[])
       .filter((a) => !a.user_id && a.guest_name)
       .map((a) => label([a.guest_name, a.guest_org])),
@@ -138,6 +156,8 @@ export async function buildMinutesBrief(supabase: Supabase, m: Meeting, companyN
     },
     transcript,
     notes,
+    ...(recordingTranscript ? { recording_transcript: recordingTranscript } : {}),
+    options,
   };
 }
 

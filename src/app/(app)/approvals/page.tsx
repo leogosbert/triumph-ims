@@ -1,18 +1,18 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
 import { STEP_ROLES } from "@/lib/branches";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
-import { can, ROLE_LABELS, type Role } from "@/lib/roles";
+import { ROLE_LABELS, can, hasRole, type Role } from "@/lib/roles";
 import { saveSteps } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Approval steps" };
 
@@ -31,8 +31,8 @@ type Waiting = {
 export default async function ApprovalsPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!can(role, "seePurchasing")) redirect("/");
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!can(roles, "seePurchasing")) noAccess();
   const [{ data: stepData, error }, { data: poData }] = await Promise.all([
     supabase.from("approval_steps").select("step, role, min_amount, label").eq("company_id", company.id).eq("doc_type", "purchase_order").order("step"),
     supabase
@@ -55,20 +55,18 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Se
     (p) =>
       p.submitted_by !== user.id &&
       (p.current
-        ? (role === p.current.role || role === "management") && !p.approvals.some((a) => a.approved_by === user.id)
-        : role === "management"),
+        ? (roles.includes(p.current.role) || hasRole(roles, "management")) && !p.approvals.some((a) => a.approved_by === user.id)
+        : hasRole(roles, "management")),
   );
   const names = await namesFor(supabase, all.map((p) => p.submitted_by));
   const base = company.base_currency;
-  const manage = can(role, "setApprovals");
+  const manage = can(roles, "setApprovals");
   const roleName = (r: string) => tr(ROLE_LABELS[r as Role] ?? r);
   const rows = Array.from({ length: 6 }, (_, i) => steps[i]);
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchase-orders">{tr("← Purchase orders")}</Link>
-      </p>
+      <BackLink href="/purchase-orders" label="Purchase orders" />
       <h1>{tr("Approval steps")}</h1>
       <p className="muted small">
         {tr("Purchase orders above an amount need approval in steps, for example finance first, then management. Nobody approves their own order, and one person cannot approve two steps of the same order.")}

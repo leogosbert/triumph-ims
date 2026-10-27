@@ -65,8 +65,8 @@ function rate(form: FormData, key: string): number | null | "bad" {
 export async function saveTeamRate(form: FormData) {
   const path = "/timesheets/rates";
   const userId = str(form, "user_id");
-  const { supabase, company, role } = await getAppContext();
-  if (!canInvoiceService(role)) fail(path, "Only management or finance can change rates.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canInvoiceService(roles)) fail(path, "Only management or finance can change rates.");
   const bill = rate(form, "bill_rate");
   const cost = rate(form, "cost_rate");
   if (bill === "bad" || cost === "bad") fail(path, "Rates must be numbers of zero or more.");

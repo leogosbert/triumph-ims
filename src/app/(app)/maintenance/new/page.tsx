@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -12,14 +11,15 @@ import { todayTz } from "@/lib/services";
 import { createContract } from "../actions";
 import { ContractFields, type EquipmentOption } from "../ContractFields";
 import { canKeepContracts } from "../rules";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New maintenance contract" };
 
 export default async function NewContractPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepContracts(role)) redirect("/maintenance");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepContracts(roles)) redirect("/maintenance");
   const { data: eqData, error } = await supabase
     .from("client_equipment")
     .select("id, name, serial_no, client_id, client:clients(name)")
@@ -35,9 +35,7 @@ export default async function NewContractPage({ searchParams }: { searchParams: 
 
   return (
     <>
-      <p className="small">
-        <Link href="/maintenance">{tr("← Maintenance contracts")}</Link>
-      </p>
+      <BackLink href="/maintenance" label="Maintenance contracts" />
       <h1>{tr("New maintenance contract")}</h1>
       <Notice {...notice} />
       <form action={createContract} className="card">

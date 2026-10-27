@@ -13,6 +13,7 @@ import { StatusBadge } from "@/lib/sales";
 import { todayTz } from "@/lib/services";
 import { addDays } from "../../timesheets/week";
 import { cancelLeave, decideLeave, requestLeave } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Leave" };
 
@@ -29,8 +30,8 @@ export default async function LeavePage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  const manager = can(role, "manageHr");
+  const { supabase, company, roles } = await getAppContext();
+  const manager = can(roles, "manageHr");
   const tab = TABS.find((t) => t.key === pick(sp.tab)) ?? TABS[0];
   const today = todayTz();
 
@@ -123,10 +124,8 @@ export default async function LeavePage({ searchParams }: { searchParams: Search
 
   return (
     <>
-      {can(role, "seeEmployees") && (
-        <p className="small">
-          <Link href="/hr">{tr("← Employees")}</Link>
-        </p>
+      {can(roles, "seeEmployees") && (
+        <BackLink href="/hr" label="Employees" />
       )}
       <div className="page-head">
         <h1>{tr("Leave")}</h1>

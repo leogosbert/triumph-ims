@@ -6,7 +6,6 @@ import type { Playbook } from "./types";
  * Both, one quotation for goods and services, delivery notes for goods only, installation jobs with
  * materials from stock, maintenance, equipment, consulting, withholding tax, other ways of supplying and a
  * monthly routine.
- * Kiswahili: src/lib/playbooks/sw/goods-and-services.ts.
  */
 export const GOODS_AND_SERVICES: Playbook = {
   id: "goods-and-services",
@@ -89,7 +88,7 @@ export const GOODS_AND_SERVICES: Playbook = {
             "Check product rules for what you sell, for example TBS standards for pipes and fittings.",
             "Scan each certificate into Documents with its expiry date. In Legal & compliance, press Set up my checklist and record each licence under Licences; Read with AI fills in the details from a photo.",
           ],
-          where: ["More", "Documents"],
+          where: ["More", "Company", "Documents"],
           href: "/documents",
           who: "Owner or Management",
           scales: "all",
@@ -103,7 +102,7 @@ export const GOODS_AND_SERVICES: Playbook = {
             "Register with NSSF and WCF and pay the contributions every month; deduct PAYE and, with ten or more employees, pay SDL.",
             "Give site staff safety equipment and keep a record of it.",
             "Open a business bank account and a mobile money lipa number, and put both in Company details & branding.",
-            "With staff on salary, add them in Administration \u2192 Employees and run Finance \u2192 Payroll in LeMoSp: PAYE, NSSF, SDL and WCF are worked out for you.",
+            "With staff on salary, add them in People \u2192 Employees and run Finance \u2192 Payroll in LeMoSp: PAYE, NSSF, SDL and WCF are worked out for you.",
           ],
           where: ["Settings", "Company details & branding"],
           href: "/settings/company",

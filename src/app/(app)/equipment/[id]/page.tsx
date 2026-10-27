@@ -15,6 +15,7 @@ import { CONTRACT_STATUS, FREQUENCIES, JOB_STATUS, canPlanService, canSeeAllServ
 import { saveEquipment, setEquipmentActive } from "../actions";
 import { equipmentBadges } from "../badges";
 import { EquipmentFields, type Equipment } from "../EquipmentFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Equipment" };
 
@@ -25,7 +26,7 @@ export default async function EquipmentDetailPage({ params, searchParams }: { pa
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const { data: row, error } = await supabase
     .from("client_equipment")
     .select("*, client:clients(name), product:products(name, sku)")
@@ -35,7 +36,7 @@ export default async function EquipmentDetailPage({ params, searchParams }: { pa
   if (isMissingTable(error)) return <NotReady title="Equipment" />;
   if (!row) notFound();
   const e = row as unknown as Equipment & { client: { name: string } | null; product: { name: string; sku: string } | null };
-  const editor = canPlanService(role);
+  const editor = canPlanService(roles);
 
   const [{ data: jobData }, { data: contractData }, clients, products] = await Promise.all([
     supabase
@@ -45,7 +46,7 @@ export default async function EquipmentDetailPage({ params, searchParams }: { pa
       .eq("equipment_id", id)
       .order("created_at", { ascending: false })
       .limit(100),
-    canSeeAllService(role)
+    canSeeAllService(roles)
       ? supabase
           .from("service_contracts")
           .select("id, number, title, frequency, next_visit_on, price, currency, status")
@@ -62,9 +63,7 @@ export default async function EquipmentDetailPage({ params, searchParams }: { pa
 
   return (
     <>
-      <p className="small">
-        <Link href={`/equipment?client=${e.client_id}`}>{tr("← Equipment")}</Link>
-      </p>
+      <BackLink href={`/equipment?client=${e.client_id}`} label="Equipment" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{e.name}</h1>
         {badges.map((b) => (
@@ -150,7 +149,7 @@ export default async function EquipmentDetailPage({ params, searchParams }: { pa
         )}
       </section>
 
-      {canSeeAllService(role) && (
+      {canSeeAllService(roles) && (
         <section className="card">
           <h2>{tr("Maintenance contracts")}</h2>
           {contracts.length === 0 ? (

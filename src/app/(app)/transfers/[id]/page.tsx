@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -14,6 +13,7 @@ import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { TRANSFER_STATUS, fmtQty, storeOptions } from "@/lib/stock";
 import { addTransferLine, removeTransferLine, transferAction } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Stock transfer" };
 
@@ -23,8 +23,8 @@ export default async function TransferPage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeStock")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeStock")) noAccess();
   const { data: t, error } = await supabase.from("stock_transfers").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Stock transfer" />;
   if (!t) notFound();
@@ -39,7 +39,7 @@ export default async function TransferPage({ params, searchParams }: { params: P
   const onHand = new Map<string, number>();
   for (const s of stockData ?? []) onHand.set(s.product_id, (onHand.get(s.product_id) ?? 0) + Number(s.quantity));
   const names = await namesFor(supabase, [t.created_by, t.sent_by, t.received_by]);
-  const mover = can(role, "moveStock");
+  const mover = can(roles, "moveStock");
   const draft = t.status === "draft";
   const short = draft ? lines.filter((l) => Number(l.quantity) > (onHand.get(l.product_id) ?? 0)) : [];
   // Products with stock in the source store first.
@@ -47,9 +47,7 @@ export default async function TransferPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/transfers">{tr("← Stock transfers")}</Link>
-      </p>
+      <BackLink href="/transfers" label="Stock transfers" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>
           {stores.get(t.from_warehouse_id)} → {stores.get(t.to_warehouse_id)}

@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
 import { PrintButton } from "@/components/reports/PrintButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -17,6 +17,7 @@ import { todayTz } from "@/lib/services";
 import { adoptPack, markNotNeeded } from "../../actions";
 import { Disclaimer } from "../../parts";
 import { loadPackData } from "../data";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Inspection pack" };
 
@@ -26,10 +27,10 @@ export default async function AuditPackPage({ params, searchParams }: { params: 
   const notice = await readNotice(searchParams);
   const pack = auditPack(key);
   if (!pack) notFound();
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) noAccess();
   const today = todayTz();
-  const d = await loadPackData(supabase, company.id, today, role);
+  const d = await loadPackData(supabase, company.id, today, roles);
   if ("missing" in d) {
     if (isMissingTable(d.error as { code?: string; message?: string })) return <NotReady title="Inspection pack" />;
     throw new Error(String((d.error as { message?: string })?.message ?? "error"));
@@ -42,9 +43,7 @@ export default async function AuditPackPage({ params, searchParams }: { params: 
 
   return (
     <>
-      <p className="small no-print">
-        <Link href="/compliance/audits">{tr("← Inspections & audits")}</Link>
-      </p>
+      <BackLink href="/compliance/audits" label="Inspections & audits" />
       <Notice {...notice} />
       <div className="report-print">
         <div className="page-head">

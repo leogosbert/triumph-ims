@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { formatMoney } from "@/lib/money";
 import { companyPeople } from "@/lib/people";
 import { canInvoiceService } from "@/lib/services";
 import { saveTeamRate } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Team rates" };
 
@@ -19,8 +19,8 @@ type Rate = { user_id: string; bill_rate: number | null; cost_rate: number | nul
 export default async function TeamRatesPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canInvoiceService(role)) redirect("/timesheets");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canInvoiceService(roles)) redirect("/timesheets");
   const { data, error } = await supabase.from("team_rates").select("user_id, bill_rate, cost_rate, title").eq("company_id", company.id);
   if (isMissingTable(error)) return <NotReady title="Team rates" />;
   if (error) throw new Error(error.message);
@@ -30,9 +30,7 @@ export default async function TeamRatesPage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      <p className="small">
-        <Link href="/timesheets">{tr("← Timesheets")}</Link>
-      </p>
+      <BackLink href="/timesheets" label="Timesheets" />
       <h1>{tr("Team rates")}</h1>
       <p className="muted small">
         {tr("The rate charged to clients for an hour of each person's work, and what that hour costs the company. A project's own hourly rate comes first. Hours already recorded keep the rate they were saved with.")}{" "}

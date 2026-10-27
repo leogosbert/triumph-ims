@@ -1,12 +1,13 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { daysUntil, fmtQty, storeOptions, type OnHand } from "@/lib/stock";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Stock card" };
 
@@ -28,8 +29,8 @@ export default async function StockCardPage({ params, searchParams }: { params: 
   await primeLang();
   const { productId } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeStock")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeStock")) noAccess();
 
   const [{ data: product }, { data: ohData }, { data: mvData }, stores] = await Promise.all([
     supabase.from("products").select("id, sku, name, unit, reorder_level").eq("id", productId).eq("company_id", company.id).maybeSingle(),
@@ -50,9 +51,8 @@ export default async function StockCardPage({ params, searchParams }: { params: 
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link> · <Link href={`/products/${product.id}`}>{tr("Product details")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock"> · <Link href={`/products/${product.id}`}>{tr("Product details")}</Link>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{product.name}</h1>
         <span className="badge">{product.sku}</span>
@@ -88,7 +88,7 @@ export default async function StockCardPage({ params, searchParams }: { params: 
             })}
           </ul>
         )}
-        {can(role, "adjustStock") && (
+        {can(roles, "adjustStock") && (
           <Link href={`/stock/adjust?product=${product.id}`} className="btn btn-small" style={{ marginTop: 12 }}>{tr("Adjust stock")}</Link>
         )}
       </section>
@@ -103,8 +103,8 @@ export default async function StockCardPage({ params, searchParams }: { params: 
               <li key={m.id} className="row">
                 <div>
                   <strong>{KIND[m.kind] ?? m.kind}</strong>{" "}
-                  {m.grn_id && can(role, "receiveGoods") && <Link href={`/grns/${m.grn_id}`} className="small">{tr("GRN")}</Link>}
-                  {m.delivery_id && can(role, "seeDeliveries") && <Link href={`/deliveries/${m.delivery_id}`} className="small">{tr("Delivery")}</Link>}
+                  {m.grn_id && can(roles, "receiveGoods") && <Link href={`/grns/${m.grn_id}`} className="small">{tr("GRN")}</Link>}
+                  {m.delivery_id && can(roles, "seeDeliveries") && <Link href={`/deliveries/${m.delivery_id}`} className="small">{tr("Delivery")}</Link>}
                   <div className="muted small">
                     {formatDateTime(m.created_at)} · {storeName.get(m.warehouse_id)}{" "}{tr("· batch")}{" "}{m.batch_no || "—"}
                     {m.note ? ` · ${m.note}` : ""}

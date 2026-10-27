@@ -8,14 +8,15 @@ import { companyPeople } from "@/lib/people";
 import { canOrganise } from "@/lib/meetings/model";
 import { addInvitation } from "../../actions";
 import styles from "../../meetings.module.css";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Add an invitation" };
 
 export default async function NewInvitationPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!canOrganise(role)) redirect("/meetings");
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!canOrganise(roles)) redirect("/meetings");
   const [people, clients, suppliers] = await Promise.all([
     companyPeople(supabase, company.id),
     supabase.from("clients").select("id, name").eq("company_id", company.id).order("name").limit(1000),
@@ -23,6 +24,7 @@ export default async function NewInvitationPage({ searchParams }: { searchParams
   ]);
   return (
     <>
+      <BackLink href="/meetings/invitations" label="Invitations" />
       <div className="page-head">
         <h1>{tr("Add an invitation we got")}</h1>
       </div>

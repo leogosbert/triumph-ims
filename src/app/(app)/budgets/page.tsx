@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { MONTHS_SHORT } from "@/lib/finance";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -13,6 +12,7 @@ import { loadPnlMonths, type Pnl } from "@/lib/pnl";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { saveBudget } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Budgets vs actual" };
 
@@ -30,8 +30,8 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Sear
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "planFinance")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "planFinance")) noAccess();
   const today = todayTz();
   const thisYear = Number(today.slice(0, 4));
   const year = typeof sp.y === "string" && /^\d{4}$/.test(sp.y) ? Number(sp.y) : thisYear;
@@ -72,9 +72,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Budgets vs actual")}</h1>
       <nav className="tabs-row" aria-label={tr("Year")}>
         <Link href={`/budgets?y=${year - 1}&line=${encodeURIComponent(selected.key)}`}>← {year - 1}</Link>

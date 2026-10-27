@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -8,6 +7,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { clientOptions } from "@/lib/options";
 import { can } from "@/lib/roles";
 import { newQuotation } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New quotation" };
 
@@ -15,15 +15,13 @@ export default async function NewQuotationPage({ searchParams }: { searchParams:
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editSales")) redirect("/quotations");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editSales")) redirect("/quotations");
   const clients = await clientOptions(supabase, company.id);
 
   return (
     <>
-      <p className="small">
-        <Link href="/quotations">{tr("← Quotations")}</Link>
-      </p>
+      <BackLink href="/quotations" label="Quotations" />
       <h1>{tr("New quotation")}</h1>
       <p className="muted small">{tr("For a quotation that answers a client RFQ, open the RFQ and use “Create quotation” instead, so the items are copied across.")}</p>
       <Notice {...notice} />

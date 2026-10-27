@@ -27,6 +27,44 @@ import { fetchWhatsAppMedia } from "./whatsapp";
 
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
+/**
+ * File types kept as they are (the same list as the "inbox" bucket's allowed types in the database).
+ * Anything else a stranger sends (HTML, SVG, scripts...) is stored as application/octet-stream, so it
+ * can only be downloaded, never opened as a page on the storage address.
+ */
+export const INBOX_FILE_TYPES = [
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+  "image/heic",
+  "text/plain",
+  "text/csv",
+  "message/rfc822",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.oasis.opendocument.text",
+  "application/vnd.oasis.opendocument.spreadsheet",
+  "application/zip",
+  "application/octet-stream",
+];
+
+/** The type a file is stored with: a known type, else application/octet-stream. */
+export function inboxStoredType(contentType: string | null | undefined): string {
+  const t = (contentType ?? "").split(";")[0].trim().toLowerCase();
+  return INBOX_FILE_TYPES.includes(t) ? t : "application/octet-stream";
+}
+
+/** Types that are safe to open in the browser; every other attachment link downloads the file. */
+export function inboxOpensInline(contentType: string | null | undefined): boolean {
+  return ["application/pdf", "image/png", "image/jpeg", "image/webp", "image/gif"].includes(inboxStoredType(contentType));
+}
+
 export type InboxChannels = {
   database: boolean;
   emailReceive: boolean;
@@ -80,7 +118,7 @@ export async function recordInbound(db: SupabaseClient, rec: InboundRecord): Pro
 
 export async function store(db: SupabaseClient, r: RecordResult, attachmentId: string, fileName: string, bytes: Buffer, contentType: string | null) {
   const path = `${r.company_id}/${r.conversation_id}/${attachmentId.slice(0, 8)}-${safeFileName(fileName)}`;
-  const up = await db.storage.from("inbox").upload(path, bytes, { contentType: contentType ?? "application/octet-stream", upsert: true });
+  const up = await db.storage.from("inbox").upload(path, bytes, { contentType: inboxStoredType(contentType), upsert: true });
   if (up.error) throw new Error(`upload: ${up.error.message}`);
   const { error } = await db.rpc("inbox_attachment_stored", { p_attachment: attachmentId, p_path: path });
   if (error) throw new Error(`inbox_attachment_stored: ${error.message}`);

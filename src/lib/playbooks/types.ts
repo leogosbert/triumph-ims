@@ -1,7 +1,7 @@
 /**
  * Playbooks (/playbooks): long, step-by-step guides with animated examples, real scenarios and a
  * downloadable PDF each. Content lives in one file per playbook next to this one; English is the key
- * and the pages translate it with tr()/useTr() (Kiswahili in src/lib/sw-playbooks.ts).
+ * and the pages show it through tr()/useTr().
  * Write in plain English for a Tanzanian business owner. Button and screen names must match the app
  * exactly (see src/lib/guide.ts). Amounts in TZS unless the example is about USD.
  */

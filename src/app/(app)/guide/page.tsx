@@ -3,16 +3,17 @@ import Link from "next/link";
 import { GuideView, type GuideViewSection } from "@/components/GuideView";
 import { getAppContext } from "@/lib/context";
 import { GUIDE } from "@/lib/guide";
-import { ROLE_LABELS, type Role } from "@/lib/roles";
+import { ROLE_LABELS, type Role, hasRole } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "App guide" };
 
 export default async function GuidePage() {
   await primeLang();
-  const { role, features, company } = await getAppContext();
+  const { role, roles, features, company } = await getAppContext();
   const who = (r: Role[] | "all" | "managers") =>
     r === "all" ? tr("Everyone") : r === "managers" ? tr(ROLE_LABELS.management) : r.map((x) => tr(ROLE_LABELS[x])).join(", ");
-  const mine = (r: Role[] | "all" | "managers") => r === "all" || (r === "managers" ? role === "management" : r.includes(role));
+  const mine = (r: Role[] | "all" | "managers") => r === "all" || (r === "managers" ? hasRole(roles, "management") : hasRole(roles, ...r));
   const sections: GuideViewSection[] = GUIDE.map((s) => ({
     id: s.id,
     title: tr(s.title),
@@ -33,9 +34,7 @@ export default async function GuidePage() {
   }));
   return (
     <>
-      <p className="small no-print">
-        <Link href="/help">{tr("← Help")}</Link>
-      </p>
+      <BackLink href="/help" label="Help" />
       <Link href="/how-it-works" className="tile guide-journey no-print">
         <span className="tile-title">{tr("How it works: one order, step by step")}</span>
         <span className="tile-sub">{tr("Follow an order from the first call with a customer to the agreed terms, delivery, payment and profit, with animations. Press Next to move on.")}</span>

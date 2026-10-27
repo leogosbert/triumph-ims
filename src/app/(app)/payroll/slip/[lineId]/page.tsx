@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NotReady } from "@/components/NotReady";
 import { PrintButton } from "@/components/reports/PrintButton";
@@ -10,6 +9,7 @@ import { formatMoney } from "@/lib/money";
 import { EMPLOYEE_PAY_METHODS, PAYROLL_STATUS, monthLabel, type PayrollLine } from "@/lib/payroll";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Payslip" };
 
@@ -27,12 +27,12 @@ function Row({ label, value, strong, minus }: { label: string; value: string; st
 export default async function PayslipPage({ params }: { params: Promise<{ lineId: string }> }) {
   await primeLang();
   const { lineId } = await params;
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const { data, error } = await supabase.from("payroll_lines").select("*").eq("id", lineId).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Payslip" />;
   if (!data) notFound();
   const l = data as PayrollLine;
-  const runner = can(role, "runPayroll");
+  const runner = can(roles, "runPayroll");
 
   // Management and finance read the run; an employee reads their own month through my_payslips.
   let run: RunInfo | null = null;
@@ -55,9 +55,7 @@ export default async function PayslipPage({ params }: { params: Promise<{ lineId
 
   return (
     <>
-      <p className="small no-print">
-        <Link href={runner ? `/payroll/${l.run_id}` : "/payroll/my"}>{runner ? tr("← Pay run") : tr("← My payslips")}</Link>
-      </p>
+      <BackLink href={runner ? `/payroll/${l.run_id}` : "/payroll/my"} label={runner ? "Pay run" : "My payslips"} />
       <div className="rep-actions no-print">
         <StatusBadge map={PAYROLL_STATUS} status={run.status} />
         <div className="rep-buttons">

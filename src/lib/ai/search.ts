@@ -2,10 +2,10 @@ import type { createClient } from "@/lib/supabase/server";
 import type { Company } from "@/lib/context";
 import type { FeatureRow } from "@/lib/features";
 import { GUIDE, type GuideTopic } from "@/lib/guide";
-import { moreMenu } from "@/lib/menu";
+import { moreMenuFor } from "@/lib/roleNav";
 import { formatMoney } from "@/lib/money";
 import { cleanSearch } from "@/lib/records";
-import { can, type Role } from "@/lib/roles";
+import { can, hasRole, type Role } from "@/lib/roles";
 import { tr } from "@/lib/tr";
 import { words } from "@/lib/ai/knowledge";
 import { MISSING, type FinderEntry } from "@/lib/ai/finder";
@@ -25,7 +25,15 @@ type Features = { on: (key?: string | null) => boolean; list: FeatureRow[] };
 export type Hit = { href: string; title: string; sub: string; side?: string };
 export type HitGroup = { key: string; title: string; hits: Hit[] };
 
-export type SearchCtx = { supabase: Supabase; company: Company; role: Role; isManager: boolean; isPlatformAdmin?: boolean; features: Features };
+export type SearchCtx = {
+  supabase: Supabase;
+  company: Company;
+  /** Every role the person has (main + extra): what they may see. */
+  roles: readonly Role[];
+  isManager: boolean;
+  isPlatformAdmin?: boolean;
+  features: Features;
+};
 
 // ---------------------------------------------------------------------------------------------
 // Screens and guide topics
@@ -44,12 +52,12 @@ const score = (ws: string[], title: string, body: string) => {
 };
 
 /** Screens this person can open, matching the words (in English or in the translated titles). */
-export function findPages(ctx: Pick<SearchCtx, "role" | "isManager" | "isPlatformAdmin" | "features">, q: string, limit = 6): Hit[] {
+export function findPages(ctx: Pick<SearchCtx, "roles" | "isManager" | "isPlatformAdmin" | "features">, q: string, limit = 6): Hit[] {
   const ws = words(q);
   if (!ws.length) return [];
   const seen = new Set<string>();
   const out: { hit: Hit; s: number }[] = [];
-  for (const cat of moreMenu(ctx.role, ctx.isManager, { on: ctx.features.on, isPlatformAdmin: ctx.isPlatformAdmin, features: ctx.features.list })) {
+  for (const cat of moreMenuFor(ctx.roles, ctx.isManager, { on: ctx.features.on, isPlatformAdmin: ctx.isPlatformAdmin, features: ctx.features.list })) {
     for (const i of cat.items) {
       if (i.soon || i.plain || seen.has(i.href)) continue;
       seen.add(i.href);
@@ -63,23 +71,23 @@ export function findPages(ctx: Pick<SearchCtx, "role" | "isManager" | "isPlatfor
     .map((x) => x.hit);
 }
 
-function guideAllowed(t: GuideTopic, role: Role, isManager: boolean, on: (k?: string | null) => boolean) {
+function guideAllowed(t: GuideTopic, roles: readonly Role[], isManager: boolean, on: (k?: string | null) => boolean) {
   if (t.feature && !on(t.feature)) return false;
   if (t.roles === "all") return true;
   if (t.roles === "managers") return isManager;
-  return t.roles.includes(role);
+  return hasRole(roles, ...t.roles);
 }
 
 export type GuideHit = { topic: GuideTopic; section: string; score: number };
 
 /** App guide topics for "how do I…" questions, only those for this person's role and features. */
-export function findGuide(ctx: Pick<SearchCtx, "role" | "isManager" | "features">, q: string, limit = 3): GuideHit[] {
+export function findGuide(ctx: Pick<SearchCtx, "roles" | "isManager" | "features">, q: string, limit = 3): GuideHit[] {
   const ws = words(q);
   if (!ws.length) return [];
   const out: GuideHit[] = [];
   for (const sec of GUIDE) {
     for (const t of sec.topics) {
-      if (!guideAllowed(t, ctx.role, ctx.isManager, ctx.features.on)) continue;
+      if (!guideAllowed(t, ctx.roles, ctx.isManager, ctx.features.on)) continue;
       const s = score(ws, `${t.title} ${tr(t.title)}`, `${t.summary} ${tr(t.summary)} ${t.steps.join(" ")} ${(t.tips ?? []).join(" ")}`);
       if (s >= 2) out.push({ topic: t, section: sec.title, score: s });
     }
@@ -94,15 +102,15 @@ export const guideHref = (t: GuideTopic) => `/guide#${t.id}`;
 // ---------------------------------------------------------------------------------------------
 
 /** The record search of /search: clients, suppliers, products, RFQs, quotations, POs, deliveries, invoices. */
-export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | "role">, raw: string, per = 6): Promise<HitGroup[]> {
+export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | "roles">, raw: string, per = 6): Promise<HitGroup[]> {
   const q = cleanSearch(raw);
   if (q.length < 2) return [];
-  const { supabase, company, role } = ctx;
+  const { supabase, company, roles } = ctx;
   const like = `%${q}%`;
   const none = Promise.resolve({ data: null });
   const [clients, suppliers, products, rfqs, quotes, pos, dns, invoices] = await Promise.all([
     supabase.from("clients").select("id, name, code, industry").eq("company_id", company.id).or(`name.ilike.${like},code.ilike.${like},tin.ilike.${like}`).limit(per + 2),
-    can(role, "seeSuppliers")
+    can(roles, "seeSuppliers")
       ? supabase.from("suppliers").select("id, name, code, country").eq("company_id", company.id).or(`name.ilike.${like},code.ilike.${like}`).limit(per + 2)
       : none,
     supabase
@@ -111,10 +119,10 @@ export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | 
       .eq("company_id", company.id)
       .or(`name.ilike.${like},sku.ilike.${like},mfr_part_no.ilike.${like},brand.ilike.${like}`)
       .limit(per + 4),
-    can(role, "seeSales")
+    can(roles, "seeSales")
       ? supabase.from("rfqs").select("id, number, title, status, client:clients(name)").eq("company_id", company.id).or(`number.ilike.${like},title.ilike.${like},client_ref.ilike.${like}`).limit(per)
       : none,
-    can(role, "seeSales")
+    can(roles, "seeSales")
       ? supabase
           .from("quotations")
           .select("id, number, revision, status, total, currency, client:clients(name)")
@@ -123,7 +131,7 @@ export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | 
           .order("created_at", { ascending: false })
           .limit(per)
       : none,
-    can(role, "seePurchasing")
+    can(roles, "seePurchasing")
       ? supabase
           .from("purchase_orders")
           .select("id, number, status, total, currency, supplier:suppliers(name)")
@@ -131,8 +139,8 @@ export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | 
           .or(`number.ilike.${like},supplier_ref.ilike.${like}`)
           .limit(per)
       : none,
-    can(role, "seeDeliveries") ? supabase.from("deliveries").select("id, number, status, client:clients(name)").eq("company_id", company.id).ilike("number", like).limit(per) : none,
-    can(role, "seeInvoices")
+    can(roles, "seeDeliveries") ? supabase.from("deliveries").select("id, number, status, client:clients(name)").eq("company_id", company.id).ilike("number", like).limit(per) : none,
+    can(roles, "seeInvoices")
       ? supabase
           .from("invoices")
           .select("id, number, status, total, currency, client:clients(name)")
@@ -171,10 +179,10 @@ export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | 
 }
 
 /** Every screen this person can open, for the AI to point to (and for checking the routes it gives). */
-export function appSections(ctx: Pick<SearchCtx, "role" | "isManager" | "isPlatformAdmin" | "features">): { href: string; path: string[] }[] {
+export function appSections(ctx: Pick<SearchCtx, "roles" | "isManager" | "isPlatformAdmin" | "features">): { href: string; path: string[] }[] {
   const seen = new Set<string>();
   const out: { href: string; path: string[] }[] = [];
-  for (const cat of moreMenu(ctx.role, ctx.isManager, { on: ctx.features.on, isPlatformAdmin: ctx.isPlatformAdmin, features: ctx.features.list })) {
+  for (const cat of moreMenuFor(ctx.roles, ctx.isManager, { on: ctx.features.on, isPlatformAdmin: ctx.isPlatformAdmin, features: ctx.features.list })) {
     for (const i of cat.items) {
       if (i.soon || i.plain || seen.has(i.href) || !i.href.startsWith("/")) continue;
       seen.add(i.href);
@@ -197,11 +205,11 @@ const cut = (t: string, n = 220) => (t.length > n ? `${t.slice(0, n - 1)}…` : 
  * role sees documents), the playbooks (titles only; their content stays behind their own access), and
  * what the app does not do yet. No company records here: those are searched on the server as you type.
  */
-export function searchEntries(ctx: Pick<SearchCtx, "role" | "isManager" | "isPlatformAdmin" | "features">, lang: "en" | "sw"): FinderEntry[] {
+export function searchEntries(ctx: Pick<SearchCtx, "roles" | "isManager" | "isPlatformAdmin" | "features">, lang: "en" | "sw"): FinderEntry[] {
   const alt = (en: string) => (lang === "sw" ? en : SW[en]);
   const out: FinderEntry[] = [];
   const seen = new Set<string>();
-  for (const cat of moreMenu(ctx.role, ctx.isManager, { on: ctx.features.on, isPlatformAdmin: ctx.isPlatformAdmin, features: ctx.features.list })) {
+  for (const cat of moreMenuFor(ctx.roles, ctx.isManager, { on: ctx.features.on, isPlatformAdmin: ctx.isPlatformAdmin, features: ctx.features.list })) {
     for (const i of cat.items) {
       if (i.soon || i.plain || seen.has(i.href) || !i.href.startsWith("/")) continue;
       seen.add(i.href);
@@ -220,7 +228,7 @@ export function searchEntries(ctx: Pick<SearchCtx, "role" | "isManager" | "isPla
   }
   for (const sec of GUIDE) {
     for (const t of sec.topics) {
-      if (!guideAllowed(t, ctx.role, ctx.isManager, ctx.features.on)) continue;
+      if (!guideAllowed(t, ctx.roles, ctx.isManager, ctx.features.on)) continue;
       out.push({
         id: `guide:${t.id}`,
         kind: "howto",
@@ -234,7 +242,7 @@ export function searchEntries(ctx: Pick<SearchCtx, "role" | "isManager" | "isPla
       });
     }
   }
-  if (can(ctx.role, "seeDocuments")) {
+  if (can(ctx.roles, "seeDocuments")) {
     const complianceOn = ctx.features.on("compliance");
     const where = complianceOn ? tr("Legal & compliance") : tr("Documents");
     for (const g of ACTIVITY_GUIDES) {

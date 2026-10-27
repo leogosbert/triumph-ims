@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ListToolbar } from "@/components/ListToolbar";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { CURRENCIES } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
@@ -30,8 +29,8 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const currency = typeof sp.currency === "string" ? sp.currency : "";
   const archived = sp.archived === "1";
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeSuppliers")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeSuppliers")) noAccess();
 
   let query = supabase
     .from("suppliers")
@@ -60,7 +59,7 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
         q={q}
         archived={archived}
         filter={{ name: "currency", label: "Currencies", value: currency, options: CURRENCIES }}
-        addHref={can(role, "editSuppliers") ? "/suppliers/new" : undefined}
+        addHref={can(roles, "editSuppliers") ? "/suppliers/new" : undefined}
         addLabel="New supplier"
       />
       {rows.length === 0 ? (

@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { RecordFields } from "@/components/RecordFields";
@@ -9,20 +8,19 @@ import { SUPPLIER_SECTIONS } from "@/lib/fields";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { saveSupplier } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New supplier" };
 
 export default async function NewSupplierPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { role, company } = await getAppContext();
-  if (!can(role, "editSuppliers")) redirect("/suppliers");
+  const { roles, company } = await getAppContext();
+  if (!can(roles, "editSuppliers")) redirect("/suppliers");
 
   return (
     <>
-      <p className="small">
-        <Link href="/suppliers">{tr("← Suppliers")}</Link>
-      </p>
+      <BackLink href="/suppliers" label="Suppliers" />
       <h1>{tr("New supplier")}</h1>
       <Notice {...notice} />
       <form action={saveSupplier}>

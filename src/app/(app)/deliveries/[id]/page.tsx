@@ -5,12 +5,12 @@ import { Notice } from "@/components/Notice";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { productOptions } from "@/lib/options";
 import { companyPeople, namesFor } from "@/lib/people";
-import { can, ROLE_LABELS, type Role } from "@/lib/roles";
+import { ROLE_LABELS, can, hasRole, onlyRoles, type Role } from "@/lib/roles";
 import { quoteNo, StatusBadge } from "@/lib/sales";
 import { DELIVERY_STATUS, fmtQty, storeOptions } from "@/lib/stock";
 import {
@@ -23,6 +23,7 @@ import {
   updateDeliveryLine,
 } from "../actions";
 import { newInvoice } from "../../invoices/actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Delivery" };
 
@@ -32,9 +33,9 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (role === "driver") redirect(`/driver`);
-  if (!can(role, "seeDeliveries")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (onlyRoles(roles, "driver")) redirect(`/driver`);
+  if (!can(roles, "seeDeliveries")) noAccess();
 
   const { data: d } = await supabase
     .from("deliveries")
@@ -44,7 +45,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
     .maybeSingle();
   if (!d) notFound();
 
-  const edit = can(role, "editDeliveries");
+  const edit = can(roles, "editDeliveries");
   const isDraft = d.status === "draft";
   const assignable = edit && ["draft", "dispatched"].includes(d.status);
   const [{ data: lineData }, people, stores, products, names, { data: moves }] = await Promise.all([
@@ -64,7 +65,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
     : { data: null };
   const plates = (fleet ?? []) as { plate: string; name: string | null }[];
   const { data: dnInvoice } =
-    d.status === "delivered" && can(role, "seeInvoices")
+    d.status === "delivered" && can(roles, "seeInvoices")
       ? await supabase.from("invoices").select("id, number").eq("delivery_id", id).neq("status", "cancelled").maybeSingle()
       : { data: null };
   const batches = new Map<string, string[]>();
@@ -78,19 +79,18 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
   if (d.signature_path) signatureUrl = (await supabase.storage.from("pod").createSignedUrl(d.signature_path, 3600)).data?.signedUrl ?? null;
   if (d.photo_path) photoUrl = (await supabase.storage.from("pod").createSignedUrl(d.photo_path, 3600)).data?.signedUrl ?? null;
   const pdfHref = `/deliveries/${d.id}/pdf`;
-  const drivers = people.filter((p) => ["driver", "warehouse", "management"].includes(p.role));
+  const drivers = people.filter((p) => hasRole(p.roles, "driver", "warehouse", "management"));
 
   return (
     <>
-      <p className="small">
-        <Link href="/deliveries">{tr("← Deliveries")}</Link>
-        {d.quotation && can(role, "seeSales") && (
+      <BackLink href="/deliveries" label="Deliveries">
+        {d.quotation && can(roles, "seeSales") && (
           <>
             {" · "}
             <Link href={`/quotations/${d.quotation.id}`}>{quoteNo(d.quotation)}</Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{d.client?.name}</h1>
         <StatusBadge map={DELIVERY_STATUS} status={d.status} />
@@ -103,12 +103,12 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
       </p>
       <Notice {...notice} />
 
-      {d.status === "delivered" && can(role, "seeInvoices") && (
+      {d.status === "delivered" && can(roles, "seeInvoices") && (
         <div className="banner ok small">
           {dnInvoice ? (
             <>{tr("Invoiced:")}{" "}<Link href={`/invoices/${dnInvoice.id}`}>{dnInvoice.number || tr("draft invoice")}</Link>
             </>
-          ) : can(role, "editInvoices") ? (
+          ) : can(roles, "editInvoices") ? (
             <form action={newInvoice} className="row">
               <input type="hidden" name="delivery_id" value={d.id} />
               <input type="hidden" name="back" value={`/deliveries/${d.id}`} />
@@ -184,7 +184,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
         )}
       </div>
 
-      {isDraft && can(role, "dispatch") && lines.length > 0 && (
+      {isDraft && can(roles, "dispatch") && lines.length > 0 && (
         <form action={dispatchDelivery} className="card">
           <input type="hidden" name="id" value={d.id} />
           <p className="small muted" style={{ marginTop: 0 }}>{tr("Dispatching takes the goods out of")}{" "}{d.store?.name}{" "}{tr("(oldest expiry first) and sends the delivery to the driver's phone.")}</p>
@@ -192,7 +192,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
         </form>
       )}
 
-      {d.status === "dispatched" && can(role, "dispatch") && (
+      {d.status === "dispatched" && can(roles, "dispatch") && (
         <section className="card">
           <h2>{tr("On the way")}</h2>
           <Link href={`/driver?d=${d.id}`} className="btn btn-primary btn-block">{tr("Record proof of delivery")}</Link>

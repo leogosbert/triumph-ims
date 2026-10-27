@@ -1,14 +1,14 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { CURRENCIES, INCOTERMS, PAYMENT_TERMS } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { saveSupplierQuote } from "../../../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier prices" };
 
@@ -25,8 +25,8 @@ export default async function SupplierQuotePage({
   await primeLang();
   const { id, sid } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editPurchasing")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editPurchasing")) noAccess();
 
   const [{ data: r }, { data: inv }, { data: lineData }, { data: qlData }] = await Promise.all([
     supabase.from("supplier_rfqs").select("id, number, title, status").eq("id", id).eq("company_id", company.id).maybeSingle(),
@@ -41,9 +41,7 @@ export default async function SupplierQuotePage({
 
   return (
     <>
-      <p className="small">
-        <Link href={`/supplier-rfqs/${id}`}>← {r.title ?? r.number}</Link>
-      </p>
+      <BackLink href={`/supplier-rfqs/${id}`} label={r.title ?? r.number} />
       <h1>{tr("Prices from")}{" "}{inv.supplier?.name}</h1>
       <p className="muted small">{tr("Type the prices exactly as the supplier quoted them, in their currency. Leave an item empty if they can't supply it.")}</p>
       <Notice {...notice} />

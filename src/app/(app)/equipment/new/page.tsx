@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { clientOptions, productOptions } from "@/lib/options";
 import { canPlanService } from "@/lib/services";
 import { createEquipment } from "../actions";
 import { EquipmentFields } from "../EquipmentFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New equipment" };
 
@@ -18,8 +18,8 @@ export default async function NewEquipmentPage({ searchParams }: { searchParams:
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) redirect("/equipment");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) redirect("/equipment");
   const probe = await supabase.from("client_equipment").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New equipment" />;
   const [clients, products] = await Promise.all([clientOptions(supabase, company.id), productOptions(supabase, company.id)]);
@@ -28,9 +28,7 @@ export default async function NewEquipmentPage({ searchParams }: { searchParams:
 
   return (
     <>
-      <p className="small">
-        <Link href={clientId ? `/equipment?client=${clientId}` : "/equipment"}>{tr("← Equipment")}</Link>
-      </p>
+      <BackLink href={clientId ? `/equipment?client=${clientId}` : "/equipment"} label="Equipment" />
       <h1>{tr("New equipment")}</h1>
       <Notice {...notice} />
       <form action={createEquipment} className="card">

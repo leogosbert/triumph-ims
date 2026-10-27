@@ -11,6 +11,7 @@ import { companyPeople } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { saveRfq } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New RFQ" };
 
@@ -18,15 +19,13 @@ export default async function NewRfqPage({ searchParams }: { searchParams: Searc
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editSales")) redirect("/rfqs");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editSales")) redirect("/rfqs");
   const [clients, people] = await Promise.all([clientOptions(supabase, company.id), companyPeople(supabase, company.id)]);
 
   return (
     <>
-      <p className="small">
-        <Link href="/rfqs">{tr("← RFQs")}</Link>
-      </p>
+      <BackLink href="/rfqs" label="RFQs" />
       <h1>{tr("New client RFQ")}</h1>
       <p className="muted small">{tr("Record a request for quotation from a client. You'll add the items next.")}</p>
       <Notice {...notice} />

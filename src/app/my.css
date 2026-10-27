@@ -1,0 +1,293 @@
+/* ---------- My page (/my): a person's own work, phone first, two columns on a laptop ---------- */
+.hero.my-hero {
+  margin-bottom: 14px;
+  padding-bottom: 22px;
+}
+.hero.my-hero h1 {
+  margin: 2px 0 8px;
+}
+.my-hero-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.my-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.my-chip-plain {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+.my-hero-sum {
+  margin: 12px 0 0;
+  font-size: 0.9rem;
+}
+.my-hero-sum a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.my-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 18px;
+  align-items: start;
+}
+.my-col {
+  min-width: 0;
+}
+@media (min-width: 1024px) {
+  .hero.my-hero {
+    margin-bottom: 18px;
+    padding-bottom: 26px;
+  }
+  .my-grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+}
+
+.my-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.my-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.my-card-head a {
+  white-space: nowrap;
+}
+.my-card > h2 {
+  margin-bottom: 8px;
+}
+.my-card-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--info-bg);
+  color: var(--brand);
+  flex: none;
+}
+.my-sub {
+  margin: 12px 0 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.my-lines a > span:first-child strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.my-lines a > span:first-child span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.my-lines .badge,
+.my-side {
+  flex: none;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+.my-side {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.my-needs {
+  border-left: 3px solid var(--brand);
+}
+
+.my-clear {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.my-clear h2 {
+  margin: 0 0 2px;
+}
+.my-clear p {
+  margin: 0;
+}
+.my-clear-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--ok-bg);
+  color: var(--ok);
+  flex: none;
+}
+
+.my-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--soft);
+}
+.my-next-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.my-next-text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.my-day {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.my-day li + li {
+  border-top: 1px solid var(--line);
+}
+.my-day a {
+  display: flex;
+  gap: 12px;
+  padding: 9px 0;
+  color: inherit;
+  text-decoration: none;
+}
+.my-day-time {
+  flex: none;
+  width: 54px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+}
+.my-day-what {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.my-day-what strong {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.my-day-action .my-day-time {
+  color: var(--warn);
+}
+.my-day-delivery .my-day-time {
+  color: var(--ok);
+}
+
+.my-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.my-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--soft);
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+.my-tile:hover {
+  background: var(--hover);
+}
+.my-tile .n {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.my-tile .l {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.my-tile .badge {
+  margin-top: 4px;
+}
+.my-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 10px 0 0;
+}
+
+.my-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.my-shortcuts a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+.my-shortcuts a:hover {
+  background: var(--hover);
+}
+.my-shortcut-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--info-bg);
+  color: var(--brand);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .my-tile,
+  .my-shortcuts a {
+    transition: background-color 0.15s var(--ease-out, ease);
+  }
+}
+[data-theme="dark"] .my-card-icon,
+[data-theme="dark"] .my-shortcut-icon,
+[data-theme="dark"] .my-day-time {
+  color: color-mix(in srgb, var(--brand) 45%, #fff);
+}
+[data-theme="dark"] .my-day-action .my-day-time {
+  color: var(--warn);
+}
+[data-theme="dark"] .my-day-delivery .my-day-time {
+  color: var(--ok);
+}
+[data-theme="dark"] .my-needs {
+  border-left-color: color-mix(in srgb, var(--brand) 55%, #fff);
+}

@@ -10,6 +10,7 @@ import { saveCompanyFeatures, setCompanyFeature, setCompanyLevel } from "../../a
 import { FeatureSwitches, type SwitchGroup } from "../FeatureSwitches";
 import { groupByCategory, loadCategories } from "../../categories";
 import { platformAdmin } from "../../guard";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Company" };
 
@@ -86,9 +87,7 @@ export default async function AdminCompanyPage({ params, searchParams }: { param
   if (!c) {
     return (
       <>
-        <p className="small">
-          <Link href="/admin/companies">{tr("← Companies")}</Link>
-        </p>
+        <BackLink href="/admin/companies" label="Companies" />
         <p className={error ? "notice notice-error" : "card muted"}>
           {error ? tr("Could not load companies. Check that the Stage 11 database update has been run.") : tr("Company not found.")}
         </p>
@@ -98,9 +97,7 @@ export default async function AdminCompanyPage({ params, searchParams }: { param
 
   return (
     <>
-      <p className="small">
-        <Link href="/admin/companies">{tr("← Companies")}</Link>
-      </p>
+      <BackLink href="/admin/companies" label="Companies" />
       <div className="page-head">
         <h2 className="adm-title">{c.name}</h2>
         <LevelBadge level={c.business_level} />

@@ -16,8 +16,8 @@ export const metadata = { title: "Meeting invitations" };
 export default async function InvitationsPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canOrganise(role)) redirect("/meetings");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canOrganise(roles)) redirect("/meetings");
   const { data, error } = await supabase
     .from("meeting_invitations")
     .select("*")

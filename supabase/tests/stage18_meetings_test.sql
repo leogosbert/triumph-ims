@@ -620,7 +620,7 @@ select public.meeting_summary(:'co') as summ \gset
 reset role;
 select tests.check((:'summ'::jsonb ->> 'is_manager')::boolean and (:'summ'::jsonb ->> 'proposals')::int = 1,
   'the summary counts what waits for management');
-select tests.check(has_function_privilege('anon', 'public.run_all_alerts(text)', 'EXECUTE')
+select tests.check(has_function_privilege('service_role', 'public.run_all_alerts(text)', 'EXECUTE')
                    and not has_function_privilege('anon', 'public.run_meeting_alerts(uuid)', 'EXECUTE')
                    and not has_function_privilege('authenticated', 'public.meeting_insert(uuid, jsonb, uuid, uuid)', 'EXECUTE')
                    and not has_function_privilege('authenticated', 'public.meeting_proposal_apply(public.meeting_proposals)', 'EXECUTE')

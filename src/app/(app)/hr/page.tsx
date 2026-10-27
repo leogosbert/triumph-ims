@@ -18,9 +18,9 @@ export default async function EmployeesPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
 
-  if (!can(role, "seeEmployees")) {
+  if (!can(roles, "seeEmployees")) {
     // Everyone else: their own file, when management has made one.
     const { data: mine, error } = await supabase.rpc("my_employee_id", { p_company: company.id });
     if (error) return <NotReady title="Employees" />;
@@ -73,7 +73,7 @@ export default async function EmployeesPage({ searchParams }: { searchParams: Se
   const onLeave = new Set(((leaveData ?? []) as { employee_id: string }[]).map((l) => l.employee_id));
   const certsOf = new Map<string, Certificate[]>();
   for (const c of certs) certsOf.set(c.employee_id, [...(certsOf.get(c.employee_id) ?? []), c]);
-  const manager = can(role, "manageHr");
+  const manager = can(roles, "manageHr");
 
   const tiles = s
     ? [

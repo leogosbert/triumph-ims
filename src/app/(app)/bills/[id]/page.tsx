@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { PayMethodFields } from "@/components/PayMethodFields";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { BILL_STATUS, daysOverdue, isOpen, methodLabel, n, shownStatus } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -13,6 +13,7 @@ import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
 import { cancelBill, payBill, saveBill, voidSupplierPayment } from "../actions";
 import { BillFields } from "../BillFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier bill" };
 
@@ -37,8 +38,8 @@ export default async function BillPage({ params, searchParams }: { params: Promi
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeBills")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeBills")) noAccess();
 
   const { data: b } = await supabase
     .from("supplier_bills")
@@ -54,7 +55,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
     .order("paid_on");
   const pays = (payData ?? []) as unknown as Pay[];
 
-  const edit = can(role, "editBills");
+  const edit = can(roles, "editBills");
   const open = isOpen(b.status);
   const editable = edit && b.status === "open" && n(b.amount_paid) === 0;
   const ccy = b.currency as string;
@@ -64,15 +65,14 @@ export default async function BillPage({ params, searchParams }: { params: Promi
 
   return (
     <>
-      <p className="small">
-        <Link href="/bills">{tr("← Supplier bills")}</Link>
+      <BackLink href="/bills" label="Supplier bills">
         {b.po && (
           <>
             {" · "}
             <Link href={`/purchase-orders/${b.po.id}`}>{b.po.number}</Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{b.supplier?.name}</h1>
         <StatusBadge map={BILL_STATUS} status={shown} />
@@ -131,7 +131,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                   </span>
                 </div>
                 {p.voided_at && <div className="small text-warn">{tr("Voided:")}{" "}{p.void_reason}</div>}
-                {!p.voided_at && can(role, "voidPayments") && (
+                {!p.voided_at && can(roles, "voidPayments") && (
                   <details className="small">
                     <summary>{tr("Void this payment")}</summary>
                     <form action={voidSupplierPayment} className="inline-form" style={{ marginTop: 6 }}>

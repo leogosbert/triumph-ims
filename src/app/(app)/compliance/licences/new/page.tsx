@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { ScanDocument } from "@/components/ai/ScanDocument";
 import { aiReady } from "@/lib/ai/claude";
 import { redirect } from "next/navigation";
@@ -14,6 +13,7 @@ import { legalRules } from "@/lib/compliance/rules";
 import { createLicence } from "../../actions";
 import { LicenceFields } from "../../LicenceFields";
 import { RequirementFacts } from "../../parts";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New licence" };
 
@@ -33,9 +33,7 @@ export default async function NewLicencePage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/compliance/licences">{tr("← Licences")}</Link>
-      </p>
+      <BackLink href="/compliance/licences" label="Licences" />
       <h1>{tr("New licence")}</h1>
       <p className="muted small">{tr("Record it as soon as you plan to apply: you can follow it from To apply for, to Applied, to Active.")}</p>
       <Notice {...notice} />

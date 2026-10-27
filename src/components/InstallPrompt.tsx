@@ -146,7 +146,7 @@ export function InstallPrompt({ variant = "main", ownAddressHint = false }: { va
   }
 
   // The company-app card stays out of the admin app (the admin layout shows its own card).
-  if (!mode || (variant === "main" && isAdminPath(pathname))) return null;
+  if (!mode || (variant === "main" && isAdminPath(pathname)) || /^\/portal(\/|$)/.test(pathname)) return null;
 
   const text = TEXT[variant];
   return (

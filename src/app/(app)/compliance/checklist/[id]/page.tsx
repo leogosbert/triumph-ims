@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -29,6 +29,7 @@ import { deleteItem, saveItem, setItemStatus } from "../../actions";
 import { ItemFields } from "../../ItemFields";
 import { LinkedFiles } from "../../LinkedFiles";
 import { Disclaimer, RequirementFacts } from "../../parts";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Compliance item" };
 
@@ -38,14 +39,14 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) noAccess();
   const { data, error } = await supabase.from("compliance_items").select(ITEM_FIELDS).eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Compliance item" />;
   if (!data) notFound();
   const item = data as ComplianceItem;
   const req = requirement(item.code);
-  const write = canWriteItem(role, item.finance_ok);
+  const write = canWriteItem(roles, item.finance_ok);
   const back = `/compliance/checklist/${item.id}`;
 
   const [deadlinesRes, licenceRes, licencesRes, people, names] = await Promise.all([
@@ -74,9 +75,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
 
   return (
     <>
-      <p className="small">
-        <Link href="/compliance/checklist">{tr("← Checklist")}</Link>
-      </p>
+      <BackLink href="/compliance/checklist" label="Checklist" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{tr(item.name)}</h1>
         <StatusBadge map={ITEM_STATUS} status={item.status} />

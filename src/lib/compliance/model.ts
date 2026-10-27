@@ -1,4 +1,4 @@
-import type { Role } from "@/lib/roles";
+import { hasRole, onlyRoles, type Role, type RoleSet } from "@/lib/roles";
 import { ACTIVITY_GUIDES, COMPLIANCE_CATALOGUE, requirement, type ActivityGuide, type Requirement } from "./catalogue";
 
 /**
@@ -177,13 +177,13 @@ export const ID_TYPES: Record<Director["id_type"], string> = { nida: "NIDA", pas
 export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /** Readers: everyone except drivers. */
-export function canSeeCompliance(role: Role): boolean {
-  return role !== "driver";
+export function canSeeCompliance(role: RoleSet): boolean {
+  return !onlyRoles(role, "driver");
 }
 
 /** Who may change an item (or mark its filings): management; finance for tax and social-security items. */
-export function canWriteItem(role: Role, financeOk: boolean): boolean {
-  return role === "management" || (financeOk && role === "finance");
+export function canWriteItem(role: RoleSet, financeOk: boolean): boolean {
+  return hasRole(role, "management") || (financeOk && hasRole(role, "finance"));
 }
 
 /** "Due on the 7th of the following month" from the calendar rule of an item. */

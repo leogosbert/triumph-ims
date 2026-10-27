@@ -3,7 +3,7 @@ import type { Playbook } from "./types";
 /**
  * Playbook: keeping the team and the company's data safe (roles, people, two-step verification,
  * confirming it is you, locks, devices, sign-in history, the activity log, API keys, backups,
- * exports and closing). Kiswahili: ./sw/security.ts.
+ * exports and closing).
  */
 export const SECURITY: Playbook = {
   id: "security",
@@ -428,9 +428,10 @@ export const SECURITY: Playbook = {
         {
           id: "app-lock",
           title: "App lock",
-          body: "When you come back to the app, it asks for your password (and code) before showing anything. It is on for everyone, on every device, and cannot be switched off.",
+          body: "When you come back to the app after being away for a while, it asks for your password (and code) before showing anything. Each person chooses how long on their own phone or computer: 15 minutes unless changed.",
           do: [
-            "Leave the app and come back: the lock screen shows Welcome back with your name.",
+            "Choose the time under Your account → Stay signed in → Ask for my password again.",
+            "Leave the app for longer and come back: the lock screen shows Welcome back with your name.",
             "Type your password (and the 6-digit code if two-step is on) and press Unlock. What you were doing is still there.",
             "After five wrong tries the app makes you wait. Not your account? Press Not you? Sign out.",
           ],
@@ -439,7 +440,7 @@ export const SECURITY: Playbook = {
           example: {
             kind: "App lock",
             title: "Juma's phone",
-            lines: [["Lock screen", "Every time you come back"]],
+            lines: [["Ask for my password again", "After 15 minutes away"]],
             stamp: "Locked",
             tone: "ok",
           },
@@ -533,7 +534,7 @@ export const SECURITY: Playbook = {
           body: "Many stores keep one phone or tablet for receiving goods. Sharing the phone is fine; sharing an account is not, because the activity log would show the wrong person.",
           do: [
             "Give every storekeeper their own account with the Warehouse role.",
-            "The app lock asks for the password every time someone comes back to the shared phone, so nobody works in another person's name.",
+            "On the shared phone set Your account → Stay signed in to Every time I come back, so nobody works in another person's name.",
             "Ask each person to sign out at the end of the shift, from Your account → Sign out.",
             "Set automatic sign-out for the company, so a forgotten session closes by itself.",
           ],
@@ -545,7 +546,7 @@ export const SECURITY: Playbook = {
             lines: [
               ["Morning shift", "Baraka Kimaro, own account"],
               ["Afternoon shift", "Salma Ally, own account"],
-              ["App lock", "Every time you come back"],
+              ["Ask for my password again", "Every time I come back"],
             ],
             stamp: "One person, one account",
             tone: "ok",
@@ -1181,7 +1182,7 @@ export const SECURITY: Playbook = {
           do: [
             "Use a screen lock on the phone: PIN, fingerprint or face.",
             "Keep the phone and the browser updated.",
-            "Turn on the app lock in Your account → Security.",
+            "Keep the app lock short: Your account → Stay signed in, for example After 15 minutes away.",
             "Do not install LeMoSp on a phone that many people use with one account.",
             "If the phone is lost, act the same hour: sign out on all other devices and tell a manager.",
           ],

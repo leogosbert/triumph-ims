@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { createContract } from "../actions";
 import { ContractFields } from "../ContractFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New contract" };
 
@@ -18,8 +18,8 @@ export default async function NewContractPage({ searchParams }: { searchParams: 
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/contracts");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/contracts");
   const [{ data: tenders, error }, { data: clients }] = await Promise.all([
     supabase.from("tenders").select("id, number, title, reference, our_price, currency").eq("company_id", company.id).eq("status", "won").order("decided_at", { ascending: false }).limit(100),
     supabase.from("clients").select("id, name").eq("company_id", company.id).order("name").limit(3000),
@@ -34,9 +34,7 @@ export default async function NewContractPage({ searchParams }: { searchParams: 
 
   return (
     <>
-      <p className="small">
-        <Link href="/contracts">{tr("← Contracts")}</Link>
-      </p>
+      <BackLink href="/contracts" label="Contracts" />
       <h1>{tr("New contract")}</h1>
       <Notice {...notice} />
       <form action={createContract} className="card">

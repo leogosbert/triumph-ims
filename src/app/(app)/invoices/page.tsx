@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysOverdue, INVOICE_STATUS, n, shownStatus } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -10,6 +9,7 @@ import { formatMoney } from "@/lib/money";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Invoices" };
 
@@ -40,8 +40,8 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const search = cleanSearch(typeof sp.q === "string" ? sp.q : "");
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeInvoices")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeInvoices")) noAccess();
 
   let q = supabase
     .from("invoices")
@@ -70,12 +70,10 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      <p className="small">
-        <Link href={can(role, "seeFinance") ? "/finance" : "/sales"}>← {can(role, "seeFinance") ? tr("Finance") : tr("Sales")}</Link>
-      </p>
+      <BackLink href={can(roles, "seeFinance") ? "/finance" : "/sales"} label={can(roles, "seeFinance") ? "Finance" : "Sales"} />
       <div className="page-head">
         <h1>{tr("Invoices")}</h1>
-        {can(role, "editInvoices") && (
+        {can(roles, "editInvoices") && (
           <Link href="/invoices/new" className="btn btn-primary btn-small">{tr("+ Invoice")}</Link>
         )}
       </div>

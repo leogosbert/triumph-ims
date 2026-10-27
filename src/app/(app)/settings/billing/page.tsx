@@ -21,7 +21,7 @@ import { getAppContext } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { SettingsHead } from "../SettingsHead";
 import { saveBillingDetails } from "./actions";
 
@@ -31,9 +31,9 @@ export const metadata = { title: "Plan & billing" };
 export default async function BillingPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/settings");
-  const isManager = role === "management";
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeFinance")) redirect("/settings");
+  const isManager = hasRole(roles, "management");
 
   const [book, settings, { data: billRow, error: billError }, { data: invRows }, { data: members }, { data: reqRows }] = await Promise.all([
     loadPriceBook(supabase),

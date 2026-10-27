@@ -10,29 +10,28 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { storeOptions } from "@/lib/stock";
 import { createTransfer } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New stock transfer" };
 
 export default async function NewTransferPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "moveStock")) redirect("/transfers");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "moveStock")) redirect("/transfers");
   const probe = await supabase.from("stock_transfers").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New stock transfer" />;
   const stores = await storeOptions(supabase, company.id);
 
   return (
     <>
-      <p className="small">
-        <Link href="/transfers">{tr("← Stock transfers")}</Link>
-      </p>
+      <BackLink href="/transfers" label="Stock transfers" />
       <h1>{tr("New stock transfer")}</h1>
       <Notice {...notice} />
       {stores.length < 2 ? (
         <p className="card muted">
           {tr("You need at least two stores to move stock between them.")}{" "}
-          {can(role, "manageWarehouses") && <Link href="/warehouses">{tr("Add a store")}</Link>}
+          {can(roles, "manageWarehouses") && <Link href="/warehouses">{tr("Add a store")}</Link>}
         </p>
       ) : (
         <form action={createTransfer} className="card">

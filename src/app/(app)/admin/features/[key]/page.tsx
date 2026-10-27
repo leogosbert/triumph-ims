@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { LEVEL_LABEL, LEVELS } from "@/components/suggestions/meta";
@@ -8,6 +7,7 @@ import { saveFeature } from "../../actions";
 import { platformAdmin } from "../../guard";
 import { loadCategories } from "../../categories";
 import { TutorialEditor } from "../TutorialEditor";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Feature" };
 
@@ -42,9 +42,7 @@ export default async function AdminFeaturePage({ params, searchParams }: { param
     if (!f) {
       return (
         <>
-          <p className="small">
-            <Link href="/admin/features">{tr("← Features")}</Link>
-          </p>
+          <BackLink href="/admin/features" label="Features" />
           <p className="card muted">{tr("Feature not found.")}</p>
         </>
       );
@@ -59,9 +57,7 @@ export default async function AdminFeaturePage({ params, searchParams }: { param
 
   return (
     <>
-      <p className="small">
-        <Link href="/admin/features">{tr("← Features")}</Link>
-      </p>
+      <BackLink href="/admin/features" label="Features" />
       <h2 className="adm-title">{isNew ? tr("New feature") : f!.name}</h2>
       <Notice {...notice} />
       <form action={saveFeature}>

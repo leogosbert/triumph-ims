@@ -1,12 +1,12 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { monthRange } from "@/lib/finance";
 import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { loadPnl, type Pnl } from "@/lib/pnl";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Profit & loss" };
 
@@ -15,8 +15,8 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: S
   const sp = (await searchParams) ?? {};
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const prev = monthRange(m.prev);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeProfit")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeProfit")) noAccess();
   const base = company.base_currency;
   const ready = stage13Ready(company);
   const yearStart = `${m.month.slice(0, 4)}-01-01`;
@@ -56,9 +56,7 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Profit & loss")}</h1>
       <nav className="tabs-row" aria-label={tr("Month")}>
         <Link href={`/profit-loss?m=${m.prev}`}>{tr("← Earlier")}</Link>

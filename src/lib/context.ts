@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/supabase/user";
-import type { Role } from "@/lib/roles";
+import { rolesOf, type Role } from "@/lib/roles";
 import { loadFeatures } from "@/lib/features";
 import type { Level } from "@/lib/levels";
 
@@ -63,7 +63,10 @@ export type Company = {
 
 export type Membership = {
   id: string;
+  /** The main role (shown as "their role"). */
   role: Role;
+  /** Roles on top of the main one (missing before the multiple-roles SQL is run). */
+  extra_roles?: Role[] | null;
   company_id: string;
   company: Company;
 };
@@ -98,7 +101,8 @@ export const getAppContext = cache(async () => {
   const [{ data, error }, { data: profileRow }, isPlatformAdmin] = await Promise.all([
     supabase
       .from("memberships")
-      .select("id, role, company_id, company:companies(*)")
+      // "*": extra_roles is included once the multiple-roles SQL has been run, and simply absent before.
+      .select("*, company:companies(*)")
       .eq("user_id", user.id)
       .eq("active", true)
       .order("created_at"),
@@ -152,6 +156,8 @@ export const getAppContext = cache(async () => {
     phone: null,
   };
 
+  const roles = rolesOf(membership.role, membership.extra_roles);
+
   return {
     supabase,
     user,
@@ -159,8 +165,11 @@ export const getAppContext = cache(async () => {
     memberships: visible,
     membership,
     company: membership.company,
+    /** The main role: what the person is shown as, their home screen and phone bottom bar. */
     role: membership.role,
-    isManager: membership.role === "management",
+    /** Main role plus extra roles: use these for what the person may see and do (`can(roles, …)`). */
+    roles,
+    isManager: roles.includes("management"),
     /** Which features are switched on (`features.on(key)`); `ready` is false before the Stage 11 SQL. */
     features,
     isPlatformAdmin,
@@ -182,11 +191,19 @@ export function stage13Ready(company: Pick<Company, "quote_followup_days">) {
   return company.quote_followup_days !== undefined;
 }
 
+/** The note shown on the dashboard when someone opens a screen their roles do not include. */
+export const NO_ACCESS_MESSAGE = "Your role can't open that screen. Ask management if you need it.";
+
+/** Sends the person to their home screen with a friendly note: their roles can't open this screen. */
+export function noAccess(message: string = NO_ACCESS_MESSAGE): never {
+  redirect(`/?error=${encodeURIComponent(message)}`);
+}
+
 /** Same as getAppContext, but only management may continue. */
 export async function requireManager() {
   const ctx = await getAppContext();
   if (!ctx.isManager) {
-    redirect(`/?error=${encodeURIComponent("Only management can open that page.")}`);
+    noAccess("Only management can open that screen.");
   }
   return ctx;
 }

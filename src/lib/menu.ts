@@ -1,5 +1,5 @@
 import type { IconName } from "@/components/Icon";
-import { featureForRoute, type FeatureRow } from "@/lib/features";
+import { featureForRoute, isGatedFeature, type FeatureRow } from "@/lib/features";
 import { can, type Role } from "@/lib/roles";
 import { adminUrl } from "@/lib/hosts";
 import { canPlanService, canSeeAllService } from "@/lib/services";
@@ -31,9 +31,6 @@ export type MenuOptions = {
   menu?: boolean;
 };
 
-const SERVICE_FEATURES = new Set(["service_jobs", "maintenance_contracts", "equipment_register", "projects", "timesheets", "hire_rentals", "service_reports"]);
-/** Administration, payroll and accounts screens: shown once their database update has been run. */
-const ERP_FEATURES = new Set(["hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets", "inbox", "compliance", "meetings", "calendar", "tender_alerts", "online_catalogue", "lpo_financing", "tra_fiscal", "pay_links", "auto_reminders", "client_portal"]);
 
 /**
  * The menu, one place for each job, grouped by what the business does, in order of daily use:
@@ -268,7 +265,7 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
   const visible = (i: MenuItem) => {
     if (role === "driver" && i.href === "/driver") return true;
     const key = i.feature ?? featureForRoute(i.href);
-    if (key && (SERVICE_FEATURES.has(key) || ERP_FEATURES.has(key)) && !known.has(key)) return false;
+    if (key && isGatedFeature(key) && !known.has(key)) return false;
     return on(key);
   };
   const cats: MenuCategory[] = drafts.map((cat) => ({

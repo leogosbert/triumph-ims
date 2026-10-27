@@ -34,7 +34,10 @@ export type Features = {
   list: FeatureRow[];
   enabled: Set<string>;
   ready: boolean;
-  /** True when the feature is on — or unknown, or the Stage 11 update has not been run yet. */
+  /**
+   * True when the feature is on — or, for long-standing features, unknown or before the Stage 11 update.
+   * A gated feature (GATED_FEATURES) the database does not know yet counts as off: its SQL has not been run.
+   */
   on: (key?: string | null) => boolean;
 };
 
@@ -132,13 +135,33 @@ export function featureForRoute(href: string): string | undefined {
   return best;
 }
 
-function makeOn(ready: boolean, known: Set<string>, enabled: Set<string>) {
-  return (key?: string | null) => !key || !ready || CORE_FEATURES.has(key) || !known.has(key) || enabled.has(key);
+/** Service-business screens: they exist once their database update has been run. */
+export const SERVICE_FEATURES = new Set(["service_jobs", "maintenance_contracts", "equipment_register", "projects", "timesheets", "hire_rentals", "service_reports"]);
+/** Administration, payroll, accounts, release-2 screens: shown once their database update has been run. */
+export const ERP_FEATURES = new Set([
+  "hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets", "inbox", "compliance", "meetings",
+  "calendar", "tender_alerts", "online_catalogue", "lpo_financing", "tra_fiscal", "pay_links", "auto_reminders",
+  "client_portal", "supplier_portal",
+]);
+/**
+ * Features whose tables and functions arrive with their own SQL (and its features row). Until the
+ * database knows the key, the feature counts as off, so screens never offer a button that fails.
+ */
+export function isGatedFeature(key: string): boolean {
+  return SERVICE_FEATURES.has(key) || ERP_FEATURES.has(key);
 }
 
-/** Everything stays visible: what screens use before the Stage 11 SQL has been run. */
+export function makeOn(ready: boolean, known: Set<string>, enabled: Set<string>) {
+  return (key?: string | null) => {
+    if (!key) return true;
+    if (isGatedFeature(key) && !known.has(key)) return false;
+    return !ready || CORE_FEATURES.has(key) || !known.has(key) || enabled.has(key);
+  };
+}
+
+/** Long-standing screens stay visible: what screens use before the Stage 11 SQL has been run. */
 export function fallbackFeatures(): Features {
-  return { list: [], enabled: new Set(), ready: false, on: () => true };
+  return { list: [], enabled: new Set(), ready: false, on: makeOn(false, new Set(), new Set()) };
 }
 
 function toSteps(v: unknown): TutorialStep[] {

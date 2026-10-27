@@ -75,6 +75,8 @@ export function JourneyStory({ end, inApp }: { end: React.ReactNode; inApp: bool
   useEffect(() => {
     const m = /^#step-(\d+)$/.exec(window.location.hash);
     if (m) setIdx(Math.max(0, Math.min(total, Number(m[1]) - 1)));
+    // "Try the demo" (sign-in page) opens straight at the demos.
+    else if (window.location.hash === "#try-it") setIdx(total);
   }, [total]);
   useEffect(() => {
     const hash = idx < total ? `#step-${idx + 1}` : "#try-it";

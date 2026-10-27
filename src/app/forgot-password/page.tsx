@@ -7,6 +7,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAdminHost } from "@/lib/host-client";
 import { mainUrl } from "@/lib/hosts";
+import { friendlyError, isNetworkError, NETWORK_MESSAGE } from "@/lib/messages";
 
 export default function ForgotPasswordPage() {
   const tr = useTr();
@@ -23,15 +24,19 @@ export default function ForgotPasswordPage() {
     setError(null);
     const email = String(new FormData(e.currentTarget).get("email") ?? "").trim().toLowerCase();
     setBusy(true);
-    const { error } = await createClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent("/account?reset=1#password")}`,
-    });
+    const { error } = await createClient()
+      .auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent("/account?reset=1#password")}`,
+      })
+      .catch((e: unknown) => ({ error: e as Error & { status?: number } }));
     setBusy(false);
     if (error)
       setError(
-        /rate limit/i.test(error.message)
-          ? "Too many emails have been sent in the last hour. Please wait a while and try again."
-          : error.message,
+        isNetworkError(error)
+          ? NETWORK_MESSAGE
+          : /rate limit/i.test(error.message)
+            ? "Too many emails have been sent in the last hour. Please wait a while and try again."
+            : friendlyError(error.message),
       );
     else setSent(true);
   }

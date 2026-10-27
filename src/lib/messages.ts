@@ -7,6 +7,20 @@ export function withNotice(path: string, notice: { msg?: string; error?: string 
   return q ? `${path}${path.includes("?") ? "&" : "?"}${q}` : path;
 }
 
+/** Shown when the browser could not reach the server at all. */
+export const NETWORK_MESSAGE = "Can't reach the server. Check your connection and try again.";
+
+/**
+ * Did a call fail because the server could not be reached (no connection, server down, blocked),
+ * rather than because the server said no? Supabase reports this as AuthRetryableFetchError / status 0.
+ */
+export function isNetworkError(error: { name?: string; message?: string; status?: number } | null | undefined): boolean {
+  if (!error) return false;
+  if (error.name === "AuthRetryableFetchError" || error.status === 0) return true;
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return true;
+  return /failed to fetch|fetch failed|networkerror|network request failed|load failed|ECONNREFUSED|ETIMEDOUT|ENOTFOUND/i.test(error.message ?? "");
+}
+
 /** Turns a database error into something a person can act on. */
 export function friendlyError(message: string | undefined | null): string {
   if (!message) return "Something went wrong. Please try again.";
@@ -55,7 +69,7 @@ function plainError(message: string): string {
       : "Something this refers to no longer exists. Please reload and try again.";
   if (/violates check constraint/i.test(message)) return "One of the values is not allowed. Please check the form and try again.";
   if (/Failed to fetch|fetch failed|NetworkError|ECONNREFUSED|ETIMEDOUT|ENOTFOUND/i.test(message))
-    return "Can't reach the server. Check your connection and try again.";
+    return NETWORK_MESSAGE;
   if (/deadlock|could not serialize|canceling statement|statement timeout/i.test(message)) return "The server was busy. Please try again.";
   if (TECHNICAL.test(message)) return "That didn't work. Please check the values and try again.";
   return message;

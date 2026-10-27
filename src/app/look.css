@@ -543,34 +543,6 @@
   }
 }
 
-/* ---------- Language switch outside the app (sign-in, welcome, How it works) ---------- */
-.lang-switch {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.06);
-}
-.lang-switch button {
-  border: 0;
-  border-radius: 999px;
-  padding: 6px 12px;
-  background: transparent;
-  color: #b9c7dc;
-  font: 600 0.8rem var(--sans);
-  cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
-}
-.lang-switch button[aria-pressed="true"] {
-  background: #14b8a6;
-  color: #0b1f3a;
-}
-.auth-lang {
-  position: absolute;
-  top: calc(14px + env(safe-area-inset-top));
-  right: 14px;
-  z-index: 2;
-}
 .auth-links {
   margin: 0;
   font-size: 0.9rem;

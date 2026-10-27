@@ -109,10 +109,6 @@
   gap: 6px;
   flex: none;
 }
-.portal-lang {
-  position: static;
-}
-
 .portal-tabs {
   display: flex;
   gap: 4px;
@@ -391,17 +387,6 @@ html:has(.portal-root) .splash {
 /* ...and no waiting for it: the app's first-open entrance delay does not apply here. */
 html:has(.portal-root):not(#no-splash) main.page.portal-page > * {
   animation-delay: 0s !important;
-}
-.portal-foot .portal-lang-foot {
-  display: none;
-}
-@media (max-width: 480px) {
-  .portal-top .portal-lang {
-    display: none;
-  }
-  .portal-foot .portal-lang-foot {
-    display: inline-flex;
-  }
 }
 
 /* Stat tiles: the number above its words. */

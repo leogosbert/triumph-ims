@@ -188,22 +188,6 @@ p {
   line-height: 18px;
   text-align: center;
 }
-.lang-btn {
-  height: 32px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: transparent;
-  color: #c9d6ec;
-  font: 600 12px var(--sans);
-  cursor: pointer;
-}
-.lang-btn span {
-  padding: 0 3px;
-}
-.lang-btn span[aria-current="true"] {
-  color: #fff;
-}
 
 main.page {
   max-width: 820px;
@@ -354,13 +338,6 @@ main.page {
   }
   .icon-btn:hover {
     background: var(--bg);
-  }
-  .lang-btn {
-    border-color: var(--line-strong);
-    color: var(--muted);
-  }
-  .lang-btn span[aria-current="true"] {
-    color: var(--text);
   }
   main.page {
     max-width: 1180px;
@@ -2298,7 +2275,6 @@ a {
   .waitlist a,
   .tabs-row a,
   .seg button,
-  .lang-btn,
   .icon-btn,
   .sidenav nav a,
   main.page > p.small:first-child a {
@@ -2312,7 +2288,6 @@ a {
   .btn:active,
   .tabs-row a:active,
   .seg button:active,
-  .lang-btn:active,
   .icon-btn:active,
   main.page > p.small:first-child a:active {
     transform: scale(0.95);

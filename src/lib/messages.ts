@@ -4,7 +4,13 @@ export function withNotice(path: string, notice: { msg?: string; error?: string 
   if (notice.msg) params.set("msg", notice.msg);
   if (notice.error) params.set("error", notice.error);
   const q = params.toString();
-  return q ? `${path}${path.includes("?") ? "&" : "?"}${q}` : path;
+  if (!q) return path;
+  // The notice goes before any "#section": after it, the browser takes it as part of the hash, so a
+  // form that comes back to its own screen never shows the note (and its button stays on "Saving…").
+  const hashAt = path.indexOf("#");
+  const base = hashAt === -1 ? path : path.slice(0, hashAt);
+  const hash = hashAt === -1 ? "" : path.slice(hashAt);
+  return `${base}${base.includes("?") ? "&" : "?"}${q}${hash}`;
 }
 
 /** Shown when the browser could not reach the server at all. */
@@ -30,6 +36,7 @@ export function friendlyError(message: string | undefined | null): string {
   if (/duplicate key.*clients_company_id_code_key/.test(message)) return "That client ID is already used by another client.";
   if (/duplicate key.*suppliers_company_id_code_key/.test(message)) return "That supplier ID is already used by another supplier.";
   if (/duplicate key.*products_company_id_sku_key/.test(message)) return "That SKU is already used by another product.";
+  if (/products_(shelf_life|warranty)_months_check/.test(message)) return "Shelf life and warranty are in months, from 0 to 600.";
   if (/products_max_level_check/.test(message)) return "The maximum stock level must be above the reorder level.";
   if (/payments_invoice_reference_key/.test(message)) return "This payment reference is already recorded on this invoice.";
   if (/po_lines_received_le_ordered/.test(message)) return "That is more than was ordered on this line.";

@@ -7,6 +7,7 @@ import { getLookPref } from "@/lib/look-server";
 import { Splash, SPLASH_SCRIPT } from "@/components/Splash";
 import { GlassSplash } from "@/components/GlassSplash";
 import { NavProgress } from "@/components/NavProgress";
+import { SubmitterValue } from "@/components/SubmitterValue";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { onAdminHost } from "@/lib/hosts-server";
@@ -117,6 +118,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
         )}
         <NavProgress />
+        <SubmitterValue />
         <LangProvider>
           <AdminHostProvider admin={adminHost}>
             {children}

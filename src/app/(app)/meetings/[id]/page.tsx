@@ -6,6 +6,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { getAppContext } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
+import { todayTz } from "@/lib/services";
 import { companyPeople } from "@/lib/people";
 import { aiReady } from "@/lib/ai/claude";
 import { canManage, joinOpen, MEETING_COLUMNS, MEETING_KINDS, MEETING_TOPICS, RECORDING_COLUMNS, type AgendaItem, type Attendee, type Meeting, type Point, type Recording } from "@/lib/meetings/model";
@@ -14,6 +15,7 @@ import { transcriptionReady } from "@/lib/meetings/recording-core";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
 import { addAgendaItem, addGuest, agendaItem, cancelMeeting, removeAttendee, respondMeeting } from "../actions";
 import { GuestLinkButtons } from "../GuestLinkButtons";
+import { LastTime, loadLastTime } from "../LastTime";
 import { MinutesDocument } from "../MinutesDocument";
 import { Recordings } from "../Recordings";
 import { MeetingBadge, MeetingTabs, StageBar, whenRange } from "../parts";
@@ -32,7 +34,7 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
   const m = data as unknown as Meeting;
   const manage = canManage(m, user.id, roles);
   const held = m.status === "held";
-  const [att, agenda, people, client, supplier, recs, pts] = await Promise.all([
+  const [att, agenda, people, client, supplier, recs, pts, last] = await Promise.all([
     supabase.from("meeting_attendees").select("*").eq("meeting_id", id).order("created_at"),
     supabase.from("meeting_agenda_items").select("*").eq("meeting_id", id).order("sort"),
     companyPeople(supabase, company.id),
@@ -41,6 +43,8 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
     // Recordings (missing before the v1.25 SQL is run) and the points, to catch up on a meeting that was held.
     supabase.from("meeting_recordings").select(RECORDING_COLUMNS).eq("meeting_id", id).order("started_at"),
     held ? supabase.from("meeting_points").select("*").eq("meeting_id", id).order("sort") : Promise.resolve({ data: [] }),
+    // A regular meeting still to come: what the one before it decided and gave out.
+    ["planned", "live"].includes(m.status) ? loadLastTime(supabase, m) : Promise.resolve(null),
   ]);
   const recordings = (recs.error ? [] : (recs.data ?? [])) as unknown as Recording[];
   const { data: keep } = recs.error ? { data: null } : await supabase.from("meeting_settings").select("recording_days").eq("company_id", company.id).maybeSingle();
@@ -221,6 +225,8 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
           </div>
         )}
       </section>
+
+      {last && <LastTime data={last} names={nameOf} today={todayTz()} />}
 
       <section className="card" id="agenda">
         <div className="line-head">

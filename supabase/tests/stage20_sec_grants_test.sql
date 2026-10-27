@@ -34,12 +34,13 @@ select tests.check(not exists (
      where n.nspname = 'public' and p.proname in ('take_claimed_backup', 'claim_company_backup', 'finish_deletion', 'claim_due_deletion')
        and has_function_privilege('authenticated', p.oid, 'execute')),
   'signed-in users cannot call the backup / deletion job functions either');
-select tests.check((select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+-- (Every form of each: claim_outbox also has a one-company form, 20261028000500_polish_fixes.sql.)
+select tests.check((select count(distinct p.proname) = 12 and bool_and(has_function_privilege('service_role', p.oid, 'execute'))
+                      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
                      where n.nspname = 'public'
                        and p.proname in ('run_all_alerts', 'claim_outbox', 'drop_push_endpoints', 'claim_company_backup', 'take_claimed_backup',
                                          'check_overdue_backups', 'claim_due_deletion', 'finish_deletion', 'claim_account_emails',
-                                         'run_platform_daily_summary', 'claim_platform_outbox', 'verify_next_backup')
-                       and has_function_privilege('service_role', p.oid, 'execute')) = 12,
+                                         'run_platform_daily_summary', 'claim_platform_outbox', 'verify_next_backup')),
   'the server (service role) can still run every scheduled job');
 select tests.check(not exists (
     select 1 from information_schema.role_table_grants

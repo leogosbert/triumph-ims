@@ -29,9 +29,9 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
   const q = cleanSearch(asked);
   // A question (not a name or number) is answered straight away; a plain search shows an "Ask AI" button.
   const auto = sp.ask === "1" || /\?$/.test(asked) || asked.split(" ").length >= 4;
-  const { supabase, company, role, isManager, isPlatformAdmin, features } = await getAppContext();
+  const { supabase, company, roles, isManager, isPlatformAdmin, features } = await getAppContext();
   const { t } = await getDict();
-  const ctx = { supabase, company, role, isManager, isPlatformAdmin, features: { on: features.on, list: features.list } };
+  const ctx = { supabase, company, roles, isManager, isPlatformAdmin, features: { on: features.on, list: features.list } };
 
   const groups: { title: string; hits: Hit[] }[] = [];
   if (q.length >= 2) {

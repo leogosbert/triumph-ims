@@ -1,6 +1,6 @@
 import { featureForRoute } from "@/lib/features";
 import { isLevel, type Level } from "@/lib/levels";
-import { can, type Permission, type Role } from "@/lib/roles";
+import { can, hasRole, onlyRoles, type Permission, type Role } from "@/lib/roles";
 
 /**
  * Guided tours (Stage 12): spotlight steps that run over the REAL screens.
@@ -434,7 +434,8 @@ export function isTourId(v: unknown): v is TourId {
 export type TourFilter = {
   /** Feature keys switched off for the company. */
   off: string[];
-  role: Role;
+  /** Every role the person has (main + extra). */
+  roles: readonly Role[];
 };
 
 /** May this person see this step? (feature switched on and their role can open the screen). */
@@ -443,9 +444,9 @@ export function stepAllowed(step: TourStep, filter: TourFilter): boolean {
   if (feature && filter.off.includes(feature)) return false;
   const p = step.perm;
   if (!p) return true;
-  if (p === "manager") return filter.role === "management";
-  if (p === "staff") return filter.role !== "driver";
-  return can(filter.role, p);
+  if (p === "manager") return hasRole(filter.roles, "management");
+  if (p === "staff") return !onlyRoles(filter.roles, "driver");
+  return can(filter.roles, p);
 }
 
 /**

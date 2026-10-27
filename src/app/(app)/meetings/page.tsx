@@ -16,7 +16,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Sea
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
   const tab = sp.tab === "held" ? "held" : "upcoming";
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
 
   // The regular meetings of the next two weeks are made first (harmless when nothing is due).
   const sched = await supabase.rpc("meeting_schedule_series", { p_company: company.id, p_days: 14 });
@@ -49,14 +49,14 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Sea
     <>
       <div className="page-head">
         <h1>{tr("Meetings")}</h1>
-        {canOrganise(role) && (
+        {canOrganise(roles) && (
           <Link href="/meetings/new" className="btn btn-small btn-primary">
             {tr("+ Meeting")}
           </Link>
         )}
       </div>
       <p className="muted small">{tr("Plan, meet in the room or by video, record, and let the AI write the minutes (it understands Kiswahili and English).")}</p>
-      <MeetingTabs current={tab === "held" ? "/meetings?tab=held" : "/meetings"} invitations={canOrganise(role)} />
+      <MeetingTabs current={tab === "held" ? "/meetings?tab=held" : "/meetings"} invitations={canOrganise(roles)} />
       <Notice {...notice} />
 
       {s.next?.status === "live" && (
@@ -85,7 +85,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Sea
         {meetings.length === 0 ? (
           <p className="muted">
             {tab === "held" ? tr("No meetings held yet.") : tr("No meetings planned.")}{" "}
-            {canOrganise(role) && tab !== "held" && <Link href="/meetings/new">{tr("Plan one →")}</Link>}
+            {canOrganise(roles) && tab !== "held" && <Link href="/meetings/new">{tr("Plan one →")}</Link>}
           </p>
         ) : (
           <ul className="rec-list">

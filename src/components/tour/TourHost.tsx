@@ -87,13 +87,14 @@ const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v
  */
 export function TourHost({
   off,
-  role,
+  roles,
   level,
   company,
   demo = false,
 }: {
   off: string[];
-  role: Role;
+  /** Every role the person has (main + extra). */
+  roles: readonly Role[];
   level: Level;
   company: string;
   /** A demo company: the end card offers the other scales. */
@@ -115,6 +116,7 @@ export function TourHost({
   const nextBtn = useRef<HTMLButtonElement>(null);
   const frame = useRef<number>(null);
   const offKey = off.join(",");
+  const rolesKey = roles.join(",");
 
   function stop() {
     writeTour(null);
@@ -148,7 +150,7 @@ export function TourHost({
       setToast(false);
       const custom = Boolean(state.steps && state.steps.length > 0);
       const full = !custom && state.full === true;
-      const steps = custom ? (state.steps as TourStep[]) : isTourId(state.id) ? tourSteps(state.id, { off, role }, full) : [];
+      const steps = custom ? (state.steps as TourStep[]) : isTourId(state.id) ? tourSteps(state.id, { off, roles }, full) : [];
       if (steps.length === 0) {
         stop();
         return;
@@ -219,7 +221,7 @@ export function TourHost({
     window.addEventListener(TOUR_EVENT, onStart);
     return () => window.removeEventListener(TOUR_EVENT, onStart);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [offKey, role]);
+  }, [offKey, rolesKey]);
 
   // Drive the current step: open its screen, then wait for its element.
   useEffect(() => {
@@ -434,7 +436,7 @@ export function TourHost({
   let fullCount = 0;
   if (step.kind === "intro" && !tour.custom && !tour.full && isTourId(tour.id)) {
     try {
-      fullCount = tourSteps(tour.id, { off, role }, true).length;
+      fullCount = tourSteps(tour.id, { off, roles }, true).length;
     } catch {
       fullCount = 0;
     }

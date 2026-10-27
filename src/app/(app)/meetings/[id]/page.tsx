@@ -26,11 +26,11 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, user, roles } = await getAppContext();
   const { data } = await supabase.from("meetings").select(MEETING_COLUMNS).eq("id", id).maybeSingle();
   if (!data) notFound();
   const m = data as unknown as Meeting;
-  const manage = canManage(m, user.id, role);
+  const manage = canManage(m, user.id, roles);
   const held = m.status === "held";
   const [att, agenda, people, client, supplier, recs, pts] = await Promise.all([
     supabase.from("meeting_attendees").select("*").eq("meeting_id", id).order("created_at"),

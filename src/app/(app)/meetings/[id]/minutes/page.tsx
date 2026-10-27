@@ -69,12 +69,12 @@ export default async function MinutesPage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user, isManager } = await getAppContext();
+  const { supabase, company, roles, user, isManager } = await getAppContext();
   const { data } = await supabase.from("meetings").select(MEETING_COLUMNS).eq("id", id).maybeSingle();
   if (!data) notFound();
   const m = data as unknown as Meeting;
-  const manage = canManage(m, user.id, role);
-  const approve = canApprove(m, user.id, role);
+  const manage = canManage(m, user.id, roles);
+  const approve = canApprove(m, user.id, roles);
   const [pts, props, texts, people, recs, att] = await Promise.all([
     supabase.from("meeting_points").select("*").eq("meeting_id", id).order("sort"),
     supabase.from("meeting_proposals").select("*").eq("meeting_id", id).order("created_at"),

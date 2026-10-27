@@ -14,8 +14,8 @@ export const metadata = { title: "New meeting" };
 export default async function NewMeetingPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!canOrganise(role)) redirect("/meetings");
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!canOrganise(roles)) redirect("/meetings");
   const [people, clients, suppliers] = await Promise.all([
     companyPeople(supabase, company.id),
     supabase.from("clients").select("id, name").eq("company_id", company.id).order("name").limit(1000),

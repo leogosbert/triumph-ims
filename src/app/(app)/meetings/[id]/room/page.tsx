@@ -44,11 +44,11 @@ export default async function RoomPage({ params, searchParams }: { params: Promi
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, role, user, profile, company } = await getAppContext();
+  const { supabase, roles, user, profile, company } = await getAppContext();
   const { data } = await supabase.from("meetings").select(MEETING_COLUMNS).eq("id", id).maybeSingle();
   if (!data) notFound();
   const m = data as unknown as Meeting;
-  const manage = canManage(m, user.id, role);
+  const manage = canManage(m, user.id, roles);
   const [{ data: texts }, { data: mine }, rec] = await Promise.all([
     supabase.from("meeting_texts").select("transcript, notes").eq("meeting_id", id).maybeSingle(),
     supabase.from("meeting_attendees").select("id").eq("meeting_id", id).eq("user_id", user.id).maybeSingle(),

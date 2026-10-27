@@ -193,7 +193,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       />
       <TourHost
         off={features.ready ? features.list.filter((f) => !features.on(f.key)).map((f) => f.key) : []}
-        role={role}
+        roles={roles}
         level={company.business_level ?? "medium"}
         company={company.id}
         demo={Boolean(company.is_demo)}

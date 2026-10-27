@@ -15,11 +15,11 @@ export default async function EditMeetingPage({ params, searchParams }: { params
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   const { data } = await supabase.from("meetings").select(MEETING_COLUMNS).eq("id", id).maybeSingle();
   if (!data) notFound();
   const m = data as unknown as Meeting;
-  if (!canManage(m, user.id, role) || !["planned", "live"].includes(m.status)) redirect(`/meetings/${id}`);
+  if (!canManage(m, user.id, roles) || !["planned", "live"].includes(m.status)) redirect(`/meetings/${id}`);
   const [people, clients, suppliers, att] = await Promise.all([
     companyPeople(supabase, company.id),
     supabase.from("clients").select("id, name").eq("company_id", company.id).order("name").limit(1000),

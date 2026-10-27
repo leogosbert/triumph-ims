@@ -1,9 +1,10 @@
-import type { Role } from "@/lib/roles";
+import { hasRole, type Role, type RoleSet } from "@/lib/roles";
 export { MEETING_TOPICS, PROPOSAL_TARGETS, type ProposalTarget } from "./minutes-core";
 
 /** Everyone except drivers organises meetings (public.meeting_organiser_roles). */
 export const ORGANISER_ROLES: Role[] = ["management", "sales", "procurement", "finance", "warehouse"];
-export const canOrganise = (role: Role) => ORGANISER_ROLES.includes(role);
+/** Any of the person's roles (main or extra) may organise. */
+export const canOrganise = (roles: RoleSet) => hasRole(roles, ...ORGANISER_ROLES);
 
 export const MEETING_KINDS: Record<string, string> = {
   internal: "Team meeting",
@@ -314,13 +315,13 @@ export const MEETING_COLUMNS =
   "id, company_id, series_id, title, purpose, kind, starts_at, meeting_date, minutes, place, topics, chair_id, presenter_id, client_id, supplier_id, open_to_team, status, cancel_reason, record, language, video_provider, video_room, video_url, external_link, announced_at, started_at, ended_at, minutes_status, minutes_summary, minutes_by, minutes_error, minutes_requested_at, approved_at, approved_by, invitation_id, created_by";
 
 /** The person can manage this meeting (organiser, chair or management): mirrors public.meeting_can_manage. */
-export function canManage(m: Pick<Meeting, "created_by" | "chair_id">, userId: string, role: Role): boolean {
-  return role === "management" || (canOrganise(role) && (m.created_by === userId || m.chair_id === userId));
+export function canManage(m: Pick<Meeting, "created_by" | "chair_id">, userId: string, roles: RoleSet): boolean {
+  return hasRole(roles, "management") || (canOrganise(roles) && (m.created_by === userId || m.chair_id === userId));
 }
 
 /** Management or the chair approves the minutes (public.meeting_can_approve). */
-export function canApprove(m: Pick<Meeting, "chair_id">, userId: string, role: Role): boolean {
-  return role === "management" || (canOrganise(role) && m.chair_id === userId);
+export function canApprove(m: Pick<Meeting, "chair_id">, userId: string, roles: RoleSet): boolean {
+  return hasRole(roles, "management") || (canOrganise(roles) && m.chair_id === userId);
 }
 
 /** Can a guest or member join now (15 minutes before the start, while live)? */

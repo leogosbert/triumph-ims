@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { primeLang, tr } from "@/lib/tr";
+import { BackLink } from "@/components/BackLink";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -29,6 +30,7 @@ export default async function MeetingSettingsPage({ searchParams }: { searchPara
   const stt = transcriptionReady();
   return (
     <>
+      <BackLink href="/meetings" label="Meetings" />
       <div className="page-head">
         <h1>{tr("Meeting settings")}</h1>
       </div>

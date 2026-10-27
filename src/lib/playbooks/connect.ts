@@ -539,7 +539,7 @@ export const CONNECT: Playbook = {
             "Press Read with AI. The details are filled in below.",
             "Check the expiry date above all, then save. For a document already saved, open it and press Read the file with AI.",
           ],
-          where: ["More", "Documents"],
+          where: ["More", "Company", "Documents"],
           href: "/documents",
           who: "Management and Finance",
           scales: "all",

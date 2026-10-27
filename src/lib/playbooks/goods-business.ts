@@ -103,7 +103,7 @@ export const GOODS_BUSINESS: Playbook = {
             "For imports, choose a licensed clearing agent and keep each import's customs papers with the purchase order.",
             "Scan each licence and permit into Documents with its expiry date, so the app reminds you before it ends. In Legal & compliance, press Set up my checklist and record each licence under Licences; Read with AI fills in the details from a photo.",
           ],
-          where: ["More", "Documents"],
+          where: ["More", "Company", "Documents"],
           href: "/documents",
           who: "Owner or Management",
           example: {
@@ -130,7 +130,7 @@ export const GOODS_BUSINESS: Playbook = {
             "Deduct PAYE from salaries and pay it to TRA every month. With ten or more employees, SDL is also due.",
             "Open a bank account in the business name, and a mobile money lipa number for clients who pay by phone.",
             "Put the bank details and the pay numbers in Company details & branding: they are printed on every invoice.",
-            "With staff on salary, add them in Administration \u2192 Employees and run Finance \u2192 Payroll in LeMoSp: PAYE, NSSF, SDL and WCF are worked out for you.",
+            "With staff on salary, add them in People \u2192 Employees and run Finance \u2192 Payroll in LeMoSp: PAYE, NSSF, SDL and WCF are worked out for you.",
           ],
           where: ["Settings", "Company details & branding"],
           href: "/settings/company",

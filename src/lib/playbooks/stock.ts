@@ -621,10 +621,10 @@ export const STOCK: Playbook = {
           body: "When goods arrive wrong, short or damaged, a non-conformance report (NCR) records the problem, what was done with the goods, the cost and the supplier. Over time it shows which suppliers cause the most trouble.",
           do: [
             "Receive only the quantity that is good; the rest stays open on the purchase order.",
-            "Open Administration → Quality and press + NCR. Choose the supplier, the product and the purchase order, and say what is wrong.",
+            "Open People → Quality and press + NCR. Choose the supplier, the product and the purchase order, and say what is wrong.",
             "Record what was done with the goods (returned, replaced, scrapped) and the cost, then add the corrective action agreed with the supplier.",
           ],
-          where: ["Administration", "Quality"],
+          where: ["People", "Quality"],
           href: "/quality",
           who: "Warehouse and procurement",
           scales: "medium+",

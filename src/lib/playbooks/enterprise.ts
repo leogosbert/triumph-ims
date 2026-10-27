@@ -198,12 +198,12 @@ export const ENTERPRISE: Playbook = {
           title: "Add each branch",
           body: "Each branch has a name, an optional short code, a branch manager, a phone and an address. The list then shows how many stores and people each branch has.",
           do: [
-            "Open More → Branches and press + Branch.",
+            "Open More → Company → Branches and press + Branch.",
             "Type the Name, for example Mwanza, and the Code, for example MWZ (up to 12 capital letters, numbers and dashes).",
             "Choose the Branch manager from the team, and add the Phone and Address.",
             "Press Add branch. Repeat for every branch.",
           ],
-          where: ["More", "Branches"],
+          where: ["More", "Company", "Branches"],
           href: "/branches",
           who: "Management",
           example: {
@@ -242,7 +242,7 @@ export const ENTERPRISE: Playbook = {
             "Press Save stores and people.",
             "Check the branch list: each branch now shows its number of stores and people.",
           ],
-          where: ["More", "Branches"],
+          where: ["More", "Company", "Branches"],
           href: "/branches",
           who: "Management",
           example: {
@@ -366,7 +366,7 @@ export const ENTERPRISE: Playbook = {
               problem: "Baraka, the Dar es Salaam manager, resigns. His access must stop, and someone must take over the branch.",
               fix: [
                 "Open Settings → Team & roles, switch Baraka's access off and press Update. Everything he recorded stays.",
-                "Open More → Branches, press Change on Dar es Salaam, choose the new Branch manager and press Save. The app will not save a manager who is no longer in the team.",
+                "Open More → Company → Branches, press Change on Dar es Salaam, choose the new Branch manager and press Save. The app will not save a manager who is no longer in the team.",
                 "Open Quotations and Money owed to us, and give Baraka's open quotations and clients to the new person.",
                 "If he approved purchase orders, open Purchasing → Approval steps and check that another person with that role can approve.",
               ],
@@ -376,7 +376,7 @@ export const ENTERPRISE: Playbook = {
               title: "A salesperson moves from Arusha to Dar",
               problem: "Halima moves to the Dar es Salaam branch on 1 November.",
               fix: [
-                "On 1 November, open More → Branches and, under People, change Halima's branch to Dar es Salaam.",
+                "On 1 November, open More → Company → Branches and, under People, change Halima's branch to Dar es Salaam.",
                 "Press Save stores and people. From now on her new documents go to Dar es Salaam.",
                 "Her past quotations and invoices stay in Arusha, which is correct: they were Arusha's work.",
               ],
@@ -423,7 +423,7 @@ export const ENTERPRISE: Playbook = {
             "On Branches, press Change on the branch, set Status to Closed and press Save.",
             "Its past figures stay on Head-office figures for the months it was open.",
           ],
-          where: ["More", "Branches"],
+          where: ["More", "Company", "Branches"],
           href: "/branches",
           who: "Management",
           example: {
@@ -1319,7 +1319,7 @@ export const ENTERPRISE: Playbook = {
             "In the first week of the month, open Head-office figures on last month.",
             "For each branch, go through Margin, Expenses, Clients owe and Stock value.",
             "Use ← Earlier to see if a problem is new or has lasted three months.",
-            "Agree one action per branch, with a date, and check it at the next meeting. Hold the review in Administration → Meetings, so the actions go to each branch manager's My actions.",
+            "Agree one action per branch, with a date, and check it at the next meeting. Hold the review in Meetings, so the actions go to each branch manager's My actions.",
           ],
           where: ["Reports", "Head-office figures"],
           href: "/head-office",
@@ -1538,12 +1538,12 @@ export const ENTERPRISE: Playbook = {
           title: "Add a document with its expiry date",
           body: "Each document has a type, a name, a number, the dates and the file. Add the expiry date and how many days before it you want to be reminded.",
           do: [
-            "Open More → Company & account → Documents and press + Document.",
+            "Open More → Company → Documents and press + Document.",
             "Choose the Type, such as Licence or permit, Tax (TIN, VAT, clearance) or Safety data sheet (SDS). Type the Document name and the Number.",
             "Enter Issued on and Expires on, and Remind me (days before), for example 60.",
             "Add the File (PDF, photo, Word or Excel, up to 20 MB) and press Save document. With a photo or PDF, press Read with AI first: the name, number and dates are filled in for you to check.",
           ],
-          where: ["More", "Documents"],
+          where: ["More", "Company", "Documents"],
           href: "/documents",
           who: "Management and Finance",
           example: {
@@ -1570,7 +1570,7 @@ export const ENTERPRISE: Playbook = {
             "Press Save document, or Save when you edit.",
             "Open the product or tender: the document is listed there too.",
           ],
-          where: ["More", "Documents"],
+          where: ["More", "Company", "Documents"],
           href: "/documents",
           who: "Everyone except drivers",
           example: {
@@ -1605,12 +1605,12 @@ export const ENTERPRISE: Playbook = {
           title: "Renew before anything expires",
           body: "The Expiring tab lists documents that run out soon, the earliest first. Reminders arrive before the date you chose.",
           do: [
-            "Open More → Company & account → Documents and press Expiring.",
+            "Open More → Company → Documents and press Expiring.",
             "Start the renewal for each one; government renewals can take weeks.",
             "When the new paper arrives, open the document, press Upload a new version and change Expires on under Edit details. Press Save.",
             "Move papers you no longer need to the archive with Move to the archive.",
           ],
-          where: ["More", "Documents"],
+          where: ["More", "Company", "Documents"],
           href: "/documents",
           who: "Management and Finance",
           example: {

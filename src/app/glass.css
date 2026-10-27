@@ -211,6 +211,16 @@
 .scene.wash-neutral .scene-wash {
   background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 55%, transparent), color-mix(in srgb, var(--bg) 90%, transparent) 88%);
 }
+/* The photos could not load (blocked host, offline): a soft gradient of the section colours instead. */
+.scene-fallback {
+  position: absolute;
+  inset: 0;
+  opacity: calc(var(--photo-strength, 0.2) * 1.4);
+  background:
+    radial-gradient(70% 60% at 85% 10%, color-mix(in srgb, var(--acc1) 70%, transparent), transparent 70%),
+    radial-gradient(60% 60% at 10% 95%, color-mix(in srgb, var(--acc2) 60%, transparent), transparent 70%),
+    linear-gradient(160deg, var(--acc3), var(--bg));
+}
 .scene.wash-none .scene-wash {
   display: none;
 }

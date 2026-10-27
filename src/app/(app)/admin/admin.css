@@ -483,13 +483,15 @@ body:has(.adm-shell) main.page {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* First open: the admin bars rise into place as the launch screen lifts (like the company app's). */
+/* First open: the admin bars rise into place as the launch screen lifts ("splash-done", or at once
+   when it is skipped with a tap); with no launch ("splash-seen") they are simply there. The rise
+   ends before "splash-on" is removed (0.7 s after "splash-done", src/components/Splash.tsx). */
 @media (prefers-reduced-motion: no-preference) {
-  html:not(.splash-seen):not(.splash-done) .adm-bar {
-    animation: slide-down 0.55s var(--ease-out) 1.85s backwards;
+  html.splash-on.splash-done .adm-bar {
+    animation: slide-down 0.55s var(--ease-out) 0.02s backwards;
   }
-  html:not(.splash-seen):not(.splash-done) .adm-bottomnav {
-    animation: slide-up 0.6s var(--ease-out) 1.95s backwards;
+  html.splash-on.splash-done .adm-bottomnav {
+    animation: slide-up 0.55s var(--ease-out) 0.08s backwards;
   }
 }
 

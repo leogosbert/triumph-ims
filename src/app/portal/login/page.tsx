@@ -26,7 +26,7 @@ export default async function PortalLogin({ searchParams }: { searchParams: Prom
   const error = !portalReady() ? ERRORS.setup : one("expired") ? "Your session has ended. Please sign in again." : ERRORS[one("error")];
   return (
     <AuthCard brandKey={one("b")} title="Sign in to the portal">
-      <LoginForm initialEmail={/^[^\s<>"]+@[^\s<>"]+$/.test(email) ? email : ""} notice={{ error, info: INFOS[one("msg")] }} />
+      <LoginForm initialEmail={/^[^\s<>"]+@[^\s<>"]+$/.test(email) ? email : ""} notice={{ error, info: INFOS[one("msg")] }} disabled={!portalReady()} />
     </AuthCard>
   );
 }

@@ -617,7 +617,9 @@ select tests.check(not exists (
                        'apply_company_feature', 'apply_business_level', 'company_metrics_raw', 'fmt_count', 'growth_check',
                        'run_all_growth_checks', 'suggestion_check_input', 'suggestion_status_label', 'suggestion_key')
      and has_function_privilege('authenticated', p.oid, 'EXECUTE')), 'internal Stage 11 functions are not callable by users');
-select tests.check(has_function_privilege('anon', 'public.run_all_alerts(text)', 'EXECUTE'), 'the scheduled job is still callable with the secret');
+select tests.check(has_function_privilege('service_role', 'public.run_all_alerts(text)', 'EXECUTE')
+                   and not has_function_privilege('anon', 'public.run_all_alerts(text)', 'EXECUTE'),
+  'the scheduled job is callable by the server (with the secret), not by the browser key');
 set role anon;
 select tests.blocked(format('select * from public.company_feature_map(%L)', :'co'), 'anon cannot read the feature map');
 select tests.blocked(format('select public.submit_suggestion(%L, %L, %L, %L)', :'co', 'sales', 'Anon idea', 'x'), 'anon cannot submit suggestions');

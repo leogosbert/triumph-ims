@@ -393,20 +393,27 @@ async function writeMinutesFor(id: string, options: NonNullable<MinutesBrief["op
     return "Minutes written from the typed notes (AI is not switched on). Check them and approve.";
   }
 
-  // On Netlify: a background function (it may take a minute or two).
+  // On Netlify: a background function (it may take a minute or two). Every AI run is counted by the database
+  // (5 per meeting, 30 per company a day) and the background function reads its brief from there, never from the
+  // request. Before the security SQL is run (PGRST202) only the in-request path below runs.
+  const run = aiReady() || toTranscribe.length ? await supabase.rpc("meeting_ai_run_start", { p_meeting: id, p_brief: trimBrief({ ...brief, recording_transcript: toTranscribe.length ? undefined : brief.recording_transcript }) }) : null;
+  if (run?.error && run.error.code !== "PGRST202") throw new Error(run.error.message);
+  const runId = (run?.data as string | null | undefined) ?? null;
   const st = await supabase.rpc("meeting_minutes_state", { p_meeting: id, p_state: "writing", p_error: null });
   if (st.error) throw new Error(st.error.message);
   if (toTranscribe.length) {
     for (const r of toTranscribe) await supabase.rpc("meeting_recording_state", { p_recording: r, p_what: "transcript", p_state: "writing", p_error: null });
-    const sent = await dispatchBackground(supabase, "meeting-recording-background", {
-      action: "transcribe",
-      recording_ids: toTranscribe,
-      prompt: transcribePromptFor(brief),
-      brief: trimBrief({ ...brief, recording_transcript: undefined }),
-    });
+    const sent =
+      runId !== null &&
+      (await dispatchBackground(supabase, "meeting-recording-background", {
+        action: "transcribe",
+        recording_ids: toTranscribe,
+        prompt: transcribePromptFor(brief),
+        run_id: runId,
+      }));
     if (sent) return "The recording is being written down, then the AI writes the minutes from it. This page updates when they are ready (usually within a few minutes).";
     for (const r of toTranscribe) await supabase.rpc("meeting_recording_state", { p_recording: r, p_what: "transcript", p_state: "failed", p_error: "Writing down the recording runs on the live site only." });
-  } else if (aiReady() && (await dispatchBackground(supabase, "meeting-minutes-background", { meeting_id: id, brief: trimBrief(brief) }))) {
+  } else if (aiReady() && runId !== null && (await dispatchBackground(supabase, "meeting-minutes-background", { meeting_id: id, run_id: runId }))) {
     return "The AI is writing the minutes. This page updates when they are ready (usually within two minutes).";
   }
 

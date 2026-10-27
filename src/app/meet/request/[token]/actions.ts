@@ -26,7 +26,12 @@ export async function submitRequest(_prev: RequestState, form: FormData): Promis
 
   const h = await headers();
   const ip = (h.get("x-nf-client-connection-ip") ?? h.get("x-forwarded-for")?.split(",")[0] ?? h.get("x-real-ip") ?? "").trim();
-  const salt = process.env.MEETING_REQUEST_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY || "lemosp";
+  // No built-in salt: without a server secret the page is off (and says so in the server log).
+  const salt = process.env.MEETING_REQUEST_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!salt) {
+    console.error("meet/request: MEETING_REQUEST_SALT (or SUPABASE_SERVICE_ROLE_KEY) is not set; requests are off");
+    return { error: "Requests are not available right now. Please email us instead." };
+  }
   const sender = createHash("sha256").update(`${salt}|${ip || get("email").toLowerCase()}`).digest("hex");
 
   const proposed = fromLocalInput(get("proposed_at"));

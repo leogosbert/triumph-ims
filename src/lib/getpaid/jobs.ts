@@ -32,12 +32,15 @@ async function tokenFor(db: SupabaseClient, v: VfdEnv, companyId: string): Promi
   return { ok: true, token: t.token, cfg };
 }
 
-/** Sends queued receipts and Z reports to TRA. Does nothing until TRA_VFD_* are set. */
-export async function runFiscalQueue(limit = 20): Promise<{ status: string; posted: number; failed: number }> {
+/**
+ * Sends queued receipts and Z reports to TRA. Does nothing until TRA_VFD_* are set.
+ * companyId: only that company's queue (when a person presses a button); the scheduled job sends all.
+ */
+export async function runFiscalQueue(limit = 20, companyId?: string): Promise<{ status: string; posted: number; failed: number }> {
   const v = vfdEnv();
   const db = inboxAdmin();
   if (!v || !db) return { status: "not_configured", posted: 0, failed: 0 };
-  const { data, error } = await db.rpc("fiscal_claim", { p_limit: limit });
+  const { data, error } = await db.rpc("fiscal_claim", companyId ? { p_limit: limit, p_company: companyId } : { p_limit: limit });
   if (error) return { status: `error: ${error.message}`, posted: 0, failed: 0 };
   const jobs = (data ?? []) as ({ job: "receipt"; settings: VfdConfig["settings"] } & ReceiptJob | { job: "zreport"; settings: VfdConfig["settings"] & ZJob["settings"] } & ZJob)[];
   let posted = 0;
@@ -239,11 +242,17 @@ async function sendOne(j: ReminderJob): Promise<{ ok: boolean | null; id: string
  * Sends the reminders that are due now. REMINDERS_DRY_RUN=1 writes them to the log as "Not sent"
  * without sending anything (to try the schedule first).
  */
-export async function runReminders(limit = 50, budgetMs = 20_000): Promise<{ status: string; sent: number; failed: number; skipped: number }> {
+export async function runReminders(
+  limit = 50,
+  budgetMs = 20_000,
+  companyId?: string,
+): Promise<{ status: string; sent: number; failed: number; skipped: number }> {
   const db = inboxAdmin();
   if (!db) return { status: "not_configured", sent: 0, failed: 0, skipped: 0 };
   const started = Date.now();
-  const { data, error } = await db.rpc("reminder_claim", { p_limit: limit, p_at: new Date().toISOString() });
+  const at = new Date().toISOString();
+  // companyId: only that company's reminders (the "Send now" button); the scheduled job sends all.
+  const { data, error } = await db.rpc("reminder_claim", companyId ? { p_limit: limit, p_at: at, p_company: companyId } : { p_limit: limit, p_at: at });
   if (error) return { status: `error: ${error.message}`, sent: 0, failed: 0, skipped: 0 };
   const jobs = (data ?? []) as ReminderJob[];
   const dry = process.env.REMINDERS_DRY_RUN === "1";

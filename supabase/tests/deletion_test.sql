@@ -4,7 +4,7 @@
 set client_min_messages = notice;
 
 create schema if not exists tests;
-grant usage on schema tests to authenticated, anon;
+grant usage on schema tests to authenticated, anon, service_role;
 create or replace function tests.login(p_email text) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims',
@@ -89,7 +89,7 @@ begin
   v := v || jsonb_build_object('companies', (select count(*) from public.companies where id = p_company));
   return v;
 end $$;
-grant execute on all functions in schema tests to authenticated, anon;
+grant execute on all functions in schema tests to authenticated, anon, service_role;
 
 -- ---------------------------------------------------------------------
 -- People and companies
@@ -490,7 +490,8 @@ select tests.blocked('select public.claim_due_deletion(''wrong'')', 'job: wrong 
 select tests.blocked('select public.claim_due_deletion(null)', 'job: no secret refused (claim)');
 select tests.blocked(format('select public.finish_deletion(%L, %L, %L)', 'wrong', 'account', gen_random_uuid()), 'job: wrong secret refused (finish)');
 select public.set_outbox_secret('a-test-secret-that-is-long-enough') as msg \gset
-set role anon;
+-- The scheduled job runs as the server (service role); the browser key (anon) cannot call it.
+set role service_role;
 select tests.check(public.claim_due_deletion('a-test-secret-that-is-long-enough') is null, 'job: with the secret, nothing is due yet');
 select count(*) as sent_n from public.claim_account_emails('a-test-secret-that-is-long-enough') e where e.email = 'owner.del@d.test' \gset
 reset role;
@@ -786,7 +787,8 @@ select tests.check(not has_function_privilege('authenticated', 'public.delete_ac
                    and not has_function_privilege('anon', 'public.request_account_deletion(text, boolean)', 'EXECUTE')
                    and not has_function_privilege('anon', 'public.platform_deletions(integer)', 'EXECUTE')
                    and has_function_privilege('authenticated', 'public.request_account_deletion(text, boolean)', 'EXECUTE')
-                   and has_function_privilege('anon', 'public.claim_due_deletion(text)', 'EXECUTE'),
+                   and not has_function_privilege('anon', 'public.claim_due_deletion(text)', 'EXECUTE')
+                   and has_function_privilege('service_role', 'public.claim_due_deletion(text)', 'EXECUTE'),
   'grants: users can ask, only the database runs the deletions, the job needs the secret');
 select tests.check((select skipped = 'excluded' from public.backup_table_plan() where table_name = 'company_closures'),
   'backups never include the closure bookkeeping');

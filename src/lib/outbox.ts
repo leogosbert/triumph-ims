@@ -2,12 +2,13 @@ import { createClient } from "@supabase/supabase-js";
 import { after } from "next/server";
 import webpush from "web-push";
 import { adminUrl } from "@/lib/hosts";
-import { SUPABASE_ANON_KEY, SUPABASE_URL, siteUrl } from "@/lib/supabase/env";
+import { SUPABASE_URL, siteUrl } from "@/lib/supabase/env";
 
 /**
  * Sends pending alerts as phone push notifications and emails.
  * Needs these settings on the server (Netlify → Environment variables):
  *   OUTBOX_SECRET                      same text as set_outbox_secret() in the database
+ *   SUPABASE_SERVICE_ROLE_KEY          the job functions run only for the server role (never the browser key)
  *   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY phone push (generate in the app: Settings → Notifications)
  *   RESEND_API_KEY, EMAIL_FROM          email (resend.com), e.g. "TRIUMPH Alerts <alerts@yourdomain.co.tz>"
  * Anything missing is simply skipped.
@@ -18,7 +19,8 @@ export type OutboxStatus = { secret: boolean; push: boolean; email: boolean };
 
 export function outboxStatus(): OutboxStatus {
   return {
-    secret: Boolean(process.env.OUTBOX_SECRET),
+    // The job functions are callable only by the server role, so both are needed.
+    secret: Boolean(process.env.OUTBOX_SECRET && process.env.SUPABASE_SERVICE_ROLE_KEY),
     push: Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY),
     email: Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM),
   };
@@ -97,8 +99,11 @@ async function sendPushes(
   }
 }
 
+/** Server-role client: the job functions are not callable with the public browser key. Server-only file. */
 function db() {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set");
+  return createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -354,6 +359,10 @@ export async function processOutbox(runAlerts = false) {
     result.errors.push("OUTBOX_SECRET is not set");
     return result;
   }
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    result.errors.push("SUPABASE_SERVICE_ROLE_KEY is not set");
+    return result;
+  }
   const supabase = db();
   const runStarted = Date.now();
   if (runAlerts) {
@@ -413,7 +422,7 @@ export async function processOutbox(runAlerts = false) {
 
 /** Run the outbox after the response is sent, so new alerts go out within seconds. */
 export function kickOutbox() {
-  if (!process.env.OUTBOX_SECRET) return;
+  if (!process.env.OUTBOX_SECRET || !process.env.SUPABASE_SERVICE_ROLE_KEY) return;
   try {
     after(async () => {
       try {

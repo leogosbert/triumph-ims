@@ -418,7 +418,7 @@ select tests.check(not has_function_privilege('authenticated', 'public.run_compl
                    and not has_function_privilege('anon', 'public.compliance_mark_filed(uuid, date, text, text, numeric, text, date)', 'EXECUTE')
                    and not has_function_privilege('anon', 'public.compliance_summary(uuid)', 'EXECUTE')
                    and has_function_privilege('authenticated', 'public.compliance_summary(uuid)', 'EXECUTE')
-                   and has_function_privilege('anon', 'public.run_all_alerts(text)', 'EXECUTE'),
+                   and has_function_privilege('service_role', 'public.run_all_alerts(text)', 'EXECUTE'),
   'grants: alerts and the calendar builder are internal; the scheduler entry point stays reachable');
 select tests.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

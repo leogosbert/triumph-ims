@@ -31,11 +31,16 @@ export function emailShare(subject: string, body: string): string {
 
 /**
  * Who sent it, without keeping the address: an HMAC of the network address and the browser, with a
- * server secret (CATALOGUE_HASH_SECRET, else OUTBOX_SECRET), so the rate limit works and nothing
- * personal is stored.
+ * server secret (CATALOGUE_HASH_SECRET, else the server key SUPABASE_SERVICE_ROLE_KEY), so the rate
+ * limit works and nothing personal is stored. Null when neither is set: the form is then off (no
+ * guessable built-in key; the job secret OUTBOX_SECRET is never reused here).
  */
-export function senderHash(ip: string, userAgent: string): string {
-  const secret = process.env.CATALOGUE_HASH_SECRET || process.env.OUTBOX_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "lemosp-catalogue";
+export function senderHash(ip: string, userAgent: string): string | null {
+  const secret = process.env.CATALOGUE_HASH_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) {
+    console.error("catalogue: CATALOGUE_HASH_SECRET (or SUPABASE_SERVICE_ROLE_KEY) is not set; enquiries are off");
+    return null;
+  }
   return createHmac("sha256", secret).update(`${ip}\n${userAgent.slice(0, 200)}`).digest("hex").slice(0, 48);
 }
 

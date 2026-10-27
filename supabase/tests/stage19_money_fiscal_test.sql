@@ -252,7 +252,7 @@ select tests.check(not exists (select 1 from public.notifications where company_
 select tests.check((select status = 'pending' and kind = 'credit_note' and total_incl = -118000 and vat_amount = -18000
                       from public.fiscal_receipts where credit_note_id = :'cn1'), 'the credit note waits for its fiscal receipt (negative totals)');
 select tests.login('fin.fx@g.test'); set role authenticated;
-select public.fiscal_record_manual(:'inv1', :'cn1', '1544', 'CN77AB12', now(), null);
+select public.fiscal_record_manual(:'inv1', :'cn1', '1544', 'CN77AB12', '2026-10-25 11:00:00+03', null);  -- same day as the invoice's receipt (the daily totals below)
 select tests.check((select status from public.fiscal_receipts where credit_note_id = :'cn1') = 'recorded', 'credit note receipt typed');
 select public.issue_credit_note(:'inv1', 59000, 'Price corrected', null) as cn2 \gset
 select tests.blocked(format('select public.cancel_credit_note(%L, %L)', :'cn2', 'Mistake'), 'finance cannot cancel a credit note');

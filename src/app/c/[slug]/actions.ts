@@ -22,6 +22,7 @@ export async function sendEnquiry(_prev: EnquiryState, form: FormData): Promise<
   if (!admin) return { status: "error", message: "Requests cannot be received right now. Please call or email us." };
   const h = await headers();
   const hash = senderHash(clientIp(h), h.get("user-agent") ?? "");
+  if (!hash) return { status: "error", message: "Requests cannot be received right now. Please call or email us." };
   const v = check.value;
   const { data, error } = await admin.rpc("catalogue_enquiry", {
     p_slug: slug,

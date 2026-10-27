@@ -259,8 +259,10 @@ select tests.check(not has_function_privilege('authenticated', 'public.platform_
                    and not has_function_privilege('authenticated', 'public.platform_daily_summary_at(timestamptz)', 'EXECUTE')
                    and not has_function_privilege('anon', 'public.platform_notification_feed(integer)', 'EXECUTE')
                    and has_function_privilege('authenticated', 'public.platform_notification_feed(integer)', 'EXECUTE')
-                   and has_function_privilege('anon', 'public.claim_platform_outbox(text, integer)', 'EXECUTE')
-                   and has_function_privilege('anon', 'public.run_platform_daily_summary(text)', 'EXECUTE'),
+                   and not has_function_privilege('anon', 'public.claim_platform_outbox(text, integer)', 'EXECUTE')
+                   and not has_function_privilege('anon', 'public.run_platform_daily_summary(text)', 'EXECUTE')
+                   and has_function_privilege('service_role', 'public.claim_platform_outbox(text, integer)', 'EXECUTE')
+                   and has_function_privilege('service_role', 'public.run_platform_daily_summary(text)', 'EXECUTE'),
   'grants: only the database creates notices, admins read, the job needs the secret');
 select tests.check((select relrowsecurity from pg_class where oid = 'public.platform_notifications'::regclass)
                    and (select relrowsecurity from pg_class where oid = 'public.platform_notification_reads'::regclass),

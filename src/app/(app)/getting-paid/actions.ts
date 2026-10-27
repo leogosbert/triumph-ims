@@ -6,7 +6,6 @@ import { getAppContext } from "@/lib/context";
 import { toNumber } from "@/lib/fields";
 import { str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
-import { can } from "@/lib/roles";
 import { parseSchedule } from "@/lib/getpaid/common";
 import { runFiscalQueue, runReminders, vfdRegisterCompany } from "@/lib/getpaid/jobs";
 import { parseStatement } from "@/lib/getpaid/statement-parse";
@@ -93,10 +92,10 @@ export async function startFiscal(form: FormData) {
   const invoice = str(form, "invoice_id");
   const path = backTo(form, `/invoices/${invoice}`);
   if (!isId(invoice)) fail(path, "Invoice not found.");
-  const { supabase } = await getAppContext();
+  const { supabase, company } = await getAppContext();
   const { error } = await supabase.rpc("fiscal_start", { p_invoice: invoice });
   if (error) fail(path, error.message);
-  await runFiscalQueue(5);
+  await runFiscalQueue(5, company.id);
   done(path, "Done.");
 }
 
@@ -104,18 +103,20 @@ export async function retryFiscal(form: FormData) {
   const id = str(form, "id");
   const path = backTo(form, "/getting-paid/tra");
   if (!isId(id)) fail(path, "Receipt not found.");
-  const { supabase } = await getAppContext();
+  const { supabase, company } = await getAppContext();
   const { error } = await supabase.rpc("fiscal_retry", { p_id: id });
   if (error) fail(path, error.message);
-  const r = await runFiscalQueue(10);
+  const r = await runFiscalQueue(10, company.id);
   done(path, r.status === "not_configured" ? "Queued. VFD is not set up on the server yet." : r.posted ? "Sent to TRA." : "Tried again: see the error below.");
 }
 
 export async function sendFiscalQueue(form: FormData) {
   const path = backTo(form, "/getting-paid/tra");
-  const { roles } = await getAppContext();
-  if (!can(roles, "editInvoices")) fail(path, "You don't have permission to do that.");
-  const r = await runFiscalQueue(20);
+  const { supabase, company } = await getAppContext();
+  // Checked by the database (has_role knows the two-step rule) before the server key is used.
+  const { data: allowed } = await supabase.rpc("has_role", { p_company: company.id, p_roles: ["management", "finance"] });
+  if (allowed !== true) fail(path, "You don't have permission to do that.");
+  const r = await runFiscalQueue(20, company.id);
   if (r.status === "not_configured") fail(path, "VFD is not set up on the server (TRA_VFD_PRIVATE_KEY and TRA_VFD_TIN).");
   done(path, `${r.posted} sent to TRA, ${r.failed} not accepted.`);
 }
@@ -258,9 +259,11 @@ export async function setClientReminders(form: FormData) {
 /** Sends the reminders that are due now (the same as the 15-minute job does). */
 export async function sendRemindersNow() {
   const path = "/getting-paid/reminders";
-  const { isManager } = await getAppContext();
-  if (!isManager) fail(path, "Only management can do this.");
-  const r = await runReminders(50);
+  const { supabase, company } = await getAppContext();
+  // Checked by the database (has_role knows the two-step rule) before the server key is used.
+  const { data: allowed } = await supabase.rpc("has_role", { p_company: company.id, p_roles: ["management"] });
+  if (allowed !== true) fail(path, "Only management can do this.");
+  const r = await runReminders(50, 20_000, company.id);
   if (r.status === "not_configured") fail(path, "The server is missing SUPABASE_SERVICE_ROLE_KEY.");
   if (r.status !== "ok") fail(path, r.status);
   done(path, r.skipped ? `${r.skipped} written to the log only (trial run).` : `${r.sent} sent, ${r.failed} failed.`);

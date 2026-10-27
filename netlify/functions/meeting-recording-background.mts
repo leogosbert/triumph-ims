@@ -31,8 +31,7 @@ type Body = {
   recording_ids?: string[];
   recording_id?: string;
   prompt?: { company: string; title: string; names: string[]; words?: string[] };
-  brief?: MinutesBrief;
-  summary?: RecordingBrief;
+  run_id?: string;
 };
 
 export default async (req: Request) => {
@@ -53,13 +52,18 @@ export default async (req: Request) => {
     return r.ok ? ((await r.json()) as T[]) : [];
   };
   const recent = (at: string | null) => !!at && Date.now() - Date.parse(at) < 30 * 60_000;
+  // The AI run the app counted (public.meeting_ai_run_start): its brief is read once from the database, never from the request.
+  const runId = String(body.run_id ?? "");
+  const taken = ID.test(runId) ? await rpc("meeting_ai_run_take", { p_run: runId }) : null;
+  const run = taken?.ok ? ((await taken.json()) as { meeting_id?: string; brief?: unknown } | null) : null;
 
   if (body.action === "summarize") {
     const id = String(body.recording_id ?? "");
-    if (!ID.test(id) || !body.summary) return;
+    const summary = run?.brief as RecordingBrief | undefined;
+    if (!ID.test(id) || !summary) return;
     const [r] = await get<{ summary_status: string }>(`meeting_recordings?id=eq.${id}&select=summary_status`);
     if (!r || r.summary_status !== "writing") return;
-    const res = await callRecordingSummary(body.summary, process.env, 10 * 60_000);
+    const res = await callRecordingSummary(summary, process.env, 10 * 60_000);
     if (res.ok) await rpc("meeting_recording_save_summary", { p_recording: id, p_summary: res.summary, p_summary_sw: res.summary_sw });
     else await rpc("meeting_recording_state", { p_recording: id, p_what: "summary", p_state: "failed", p_error: res.error });
     return;
@@ -115,8 +119,8 @@ export default async (req: Request) => {
   }
 
   // Then the minutes, with what the recordings said (only while the meeting waits for them).
-  const brief = body.brief;
-  if (brief && ID.test(brief.meeting?.id ?? "")) {
+  const brief = run?.brief as MinutesBrief | undefined;
+  if (brief && ID.test(brief.meeting?.id ?? "") && run?.meeting_id === brief.meeting.id) {
     const [m] = await get<{ minutes_status: string; minutes_requested_at: string | null }>(`meetings?id=eq.${brief.meeting.id}&select=minutes_status,minutes_requested_at`);
     if (!m || m.minutes_status !== "writing" || !recent(m.minutes_requested_at)) return;
     // (texts holds every recording of the meeting that has a transcript, the ones written earlier too)

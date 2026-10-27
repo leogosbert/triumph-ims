@@ -132,9 +132,18 @@ export async function summarizeRecording(form: FormData) {
   const st = await supabase.rpc("meeting_recording_state", { p_recording: id, p_what: "summary", p_state: "writing", p_error: null });
   if (st.error) finish(path, st.error.message, true);
 
+  // Every AI run is counted by the database (5 per meeting, 30 per company a day); the background function reads
+  // the brief from there. Before the security SQL is run (PGRST202) only the in-request path runs.
+  const run = await supabase.rpc("meeting_ai_run_start", { p_meeting: r.meeting_id, p_brief: brief, p_kind: "summary" });
+  if (run.error && run.error.code !== "PGRST202") {
+    await supabase.rpc("meeting_recording_state", { p_recording: id, p_what: "summary", p_state: "failed", p_error: run.error.message });
+    finish(path, run.error.message, true);
+  }
+  const runId = (run.data as string | null) ?? null;
+  const bg = { action: "summarize", recording_id: id, run_id: runId };
   // Short recordings fit in this request; longer ones go to the background function on Netlify.
   const short = r.transcript.length < 6000;
-  if (!short && (await dispatchBackground(supabase, "meeting-recording-background", { action: "summarize", recording_id: id, summary: brief }))) {
+  if (!short && runId && (await dispatchBackground(supabase, "meeting-recording-background", bg))) {
     finish(path, "The AI is summarising the recording. This page updates when it is ready.");
   }
   const res = short || !backgroundReady() ? await (short ? recordingSummaryInline(brief) : callRecordingSummary(brief, process.env, 9 * 60_000)) : null;
@@ -143,7 +152,7 @@ export async function summarizeRecording(form: FormData) {
     if (!saved.error) finish(path, "Summary written.");
   }
   // A short one that timed out gets a second chance in the background.
-  if (short && (await dispatchBackground(supabase, "meeting-recording-background", { action: "summarize", recording_id: id, summary: brief }))) {
+  if (short && runId && (await dispatchBackground(supabase, "meeting-recording-background", bg))) {
     finish(path, "The AI is summarising the recording. This page updates when it is ready.");
   }
   const why = res && !res.ok ? ("error" in res ? res.error : res.reason === "timeout" ? "The AI took too long. Try again." : "The AI could not write the summary. Try again later.") : "The summary could not be written. Try again.";

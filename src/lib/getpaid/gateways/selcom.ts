@@ -207,7 +207,7 @@ export const selcom: PaymentGateway = {
       const json = (await res.json().catch(() => ({}))) as { resultcode?: string; data?: { payment_status?: string; amount?: string | number }[] };
       if (!res.ok || !json.data?.[0]) return null;
       const amount = Number(json.data[0].amount);
-      return { status: statusOf(json.data[0].payment_status, json.resultcode), amount: Number.isFinite(amount) ? amount : null };
+      return { status: statusOf(json.data[0].payment_status, json.resultcode), amount: Number.isFinite(amount) && amount > 0 ? amount : null };
     } catch {
       return null;
     }

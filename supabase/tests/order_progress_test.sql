@@ -114,7 +114,7 @@ select public.order_progress_of(:'q', true) as p \gset
 select tests.check((:'p'::jsonb ->> 'done')::int = 7 and (:'p'::jsonb #>> '{next,key}') = 'paid'
                    and (:'p'::jsonb #>> '{current,key}') = 'invoiced',
   'invoiced: next Paid');
-update public.invoices set status = 'paid', amount_paid = 100 where id = :'inv';
+update public.invoices set status = 'paid', amount_paid = total where id = :'inv';  -- (never above the total: invoices_paid_le_total)
 select public.order_progress_of(:'q', true) as p \gset
 select tests.check((:'p'::jsonb ->> 'status') = 'completed' and (:'p'::jsonb ->> 'percent')::int = 100
                    and (:'p'::jsonb -> 'next') = 'null'::jsonb,

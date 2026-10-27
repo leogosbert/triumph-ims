@@ -9,7 +9,7 @@ import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { INBOX_ROLES, canUseInbox, type Conversation, type InboxMessage } from "@/lib/inbox/common";
 import { replySubject } from "@/lib/inbox/sanitize";
-import { inboxChannels } from "@/lib/inbox/server";
+import { inboxChannels, inboxOpensInline } from "@/lib/inbox/server";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { clientOptions } from "@/lib/options";
 import { companyPeople, namesFor } from "@/lib/people";
@@ -67,8 +67,15 @@ export default async function ConversationPage({ params, searchParams }: { param
   // Opening the conversation marks it read.
   if (c.unread_count > 0) await supabase.rpc("inbox_mark_read", { p_conversation: c.id, p_read: true });
 
-  const paths = attachments.filter((a) => a.storage_path).map((a) => a.storage_path!);
-  const signed = paths.length ? (await supabase.storage.from("inbox").createSignedUrls(paths, 3600)).data ?? [] : [];
+  // Files from strangers: pictures and PDFs open in the browser, everything else downloads (never opens as a page).
+  const stored = attachments.filter((a) => a.storage_path);
+  const inline = stored.filter((a) => inboxOpensInline(a.content_type)).map((a) => a.storage_path!);
+  const download = stored.filter((a) => !inboxOpensInline(a.content_type)).map((a) => a.storage_path!);
+  const [signedInline, signedDownload] = await Promise.all([
+    inline.length ? supabase.storage.from("inbox").createSignedUrls(inline, 3600) : null,
+    download.length ? supabase.storage.from("inbox").createSignedUrls(download, 3600, { download: true }) : null,
+  ]);
+  const signed = [...(signedInline?.data ?? []), ...(signedDownload?.data ?? [])];
   const urlOf = new Map(signed.filter((s) => s.signedUrl && s.path).map((s) => [s.path!, s.signedUrl]));
   const names = await namesFor(supabase, messages.map((m) => m.sent_by));
   const ch = inboxChannels();

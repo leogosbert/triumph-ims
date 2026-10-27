@@ -29,7 +29,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ provider: stri
   }
   const ev = check.event;
   let status = ev.status;
-  let amount = ev.amount;
+  // The amount in the webhook body is not always a signed field: never record it. A success takes the
+  // amount from the gateway's own order-status answer; without one, the database uses the order's amount.
+  let amount: number | null = null;
   if (status === "success") {
     const confirmed = await gw.confirm(ev.orderId);
     if (!confirmed) {
@@ -38,7 +40,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ provider: stri
       return Response.json({ error: "Could not confirm" }, { status: 503 });
     }
     if (confirmed.status !== "success") status = confirmed.status;
-    if (confirmed.amount !== null) amount = confirmed.amount;
+    amount = confirmed.amount;
   }
   const { data, error } = await db.rpc("pay_gateway_result", {
     p_provider: gw.id,
@@ -51,7 +53,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ provider: stri
     p_method: ev.method,
     p_mm_provider: ev.mmProvider,
     p_phone: ev.phone,
-    p_detail: { status: ev.status, confirmed: status, message: ev.message, channel: ev.channel },
+    p_detail: { status: ev.status, confirmed: status, message: ev.message, channel: ev.channel, webhook_amount: ev.amount },
   });
   if (error) {
     console.warn(`payments/${gw.id}: ${error.message}`);

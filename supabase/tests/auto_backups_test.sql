@@ -4,7 +4,7 @@
 set client_min_messages = notice;
 
 create schema if not exists tests;
-grant usage on schema tests to authenticated, anon;
+grant usage on schema tests to authenticated, anon, service_role;
 create or replace function tests.login(p_email text) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims',
@@ -25,7 +25,7 @@ exception when others then
   if sqlerrm like 'FAILED%' then raise; end if;
   raise notice 'pass: % (blocked: %)', p_label, sqlerrm;
 end $$;
-grant execute on all functions in schema tests to authenticated, anon;
+grant execute on all functions in schema tests to authenticated, anon, service_role;
 
 insert into auth.users (email) values ('boss.bk@g.test'), ('sales.bk@g.test'), ('other.bk@g.test'), ('fin.bk@g.test');
 select id as boss from auth.users where email = 'boss.bk@g.test' \gset
@@ -208,13 +208,18 @@ select tests.blocked('select public.claim_company_backup(null)', 'scheduled run:
 select tests.blocked(format('select public.take_claimed_backup(%L, %L)', 'wrong', :'co'), 'scheduled run: wrong secret refused (take)');
 select tests.blocked('select public.check_overdue_backups(''wrong'')', 'scheduled run: wrong secret refused (overdue check)');
 select public.set_outbox_secret('a-test-secret-that-is-long-enough') as msg \gset
-set role anon;
+-- The scheduled job runs as the server (service role); the browser key (anon) cannot call it.
+set role service_role;
 -- \gset unsets a null (nothing due, e.g. just after midnight), so keep it a string.
 select coalesce(public.claim_company_backup('a-test-secret-that-is-long-enough')::text, '') as claimed \gset
 select tests.check(nullif(:'claimed', '') is null
                    or public.take_claimed_backup('a-test-secret-that-is-long-enough', nullif(:'claimed', '')::uuid) is not null,
   'scheduled run: claim and take work with the secret (as the server)');
 select tests.check(public.check_overdue_backups('a-test-secret-that-is-long-enough') >= 0, 'scheduled run: overdue check works with the secret');
+reset role;
+set role anon;
+select tests.blocked('select public.claim_company_backup(''a-test-secret-that-is-long-enough'')',
+  'scheduled run: the browser key cannot take backups, even with the secret');
 select tests.blocked('select public.run_company_backups(''a-test-secret-that-is-long-enough'')',
   'scheduled run: the all-in-one call is not open to the web server (it could time out and undo itself)');
 select tests.blocked(format('select public.take_claimed_backup_at(%L, now())', :'co'), 'scheduled run: the internal steps are not callable');

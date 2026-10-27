@@ -17,6 +17,10 @@ export function friendlyError(message: string | undefined | null): string {
   if (/duplicate key.*suppliers_company_id_code_key/.test(message)) return "That supplier ID is already used by another supplier.";
   if (/duplicate key.*products_company_id_sku_key/.test(message)) return "That SKU is already used by another product.";
   if (/products_max_level_check/.test(message)) return "The maximum stock level must be above the reorder level.";
+  if (/payments_invoice_reference_key/.test(message)) return "This payment reference is already recorded on this invoice.";
+  if (/po_lines_received_le_ordered/.test(message)) return "That is more than was ordered on this line.";
+  if (/invoices_paid_le_total/.test(message)) return "That is more than is still owed on this invoice.";
+  if (/duplicate key.*_company_number_key/.test(message)) return "That number is already used. Please try again.";
   if (/client_contacts_check/.test(message)) return "Enter at least a name, email or phone for the contact.";
   if (/multiple \(or no\) rows|0 rows/i.test(message)) return "That record wasn't found, or you don't have permission to change it.";
   if (/permission denied|row-level security/i.test(message)) return "You don't have permission to do that.";

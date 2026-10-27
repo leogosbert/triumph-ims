@@ -29,11 +29,20 @@ test("enquiry form: honeypot, timing and fields", () => {
 });
 
 test("sender hash is stable and hides the address", () => {
-  const a = senderHash("41.59.1.1", "Mozilla");
+  const saved = process.env.CATALOGUE_HASH_SECRET;
+  const savedKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  delete process.env.CATALOGUE_HASH_SECRET;
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  assert.equal(senderHash("41.59.1.1", "Mozilla"), null, "no secret: off, never a built-in key");
+  process.env.CATALOGUE_HASH_SECRET = "test-secret-for-the-hash";
+  const a = senderHash("41.59.1.1", "Mozilla")!;
   assert.equal(a, senderHash("41.59.1.1", "Mozilla"));
   assert.notEqual(a, senderHash("41.59.1.2", "Mozilla"));
   assert.ok(!a.includes("41.59"));
   assert.equal(a.length, 48);
+  if (saved === undefined) delete process.env.CATALOGUE_HASH_SECRET;
+  else process.env.CATALOGUE_HASH_SECRET = saved;
+  if (savedKey !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = savedKey;
 });
 
 test("financing steps and interest", () => {

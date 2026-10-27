@@ -4,7 +4,7 @@
 set client_min_messages = notice;
 
 create schema if not exists tests;
-grant usage on schema tests to authenticated, anon;
+grant usage on schema tests to authenticated, anon, service_role;
 create or replace function tests.login(p_email text) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims',
@@ -24,7 +24,7 @@ exception when others then
   if sqlerrm like 'FAILED%' then raise; end if;
   raise notice 'pass: % (blocked: %)', p_label, sqlerrm;
 end $$;
-grant execute on all functions in schema tests to authenticated, anon;
+grant execute on all functions in schema tests to authenticated, anon, service_role;
 
 insert into auth.users (email) values ('m7@n.test'), ('s7@n.test'), ('p7@n.test'), ('w7@n.test'), ('d7@n.test'), ('f7@n.test'), ('x7@o.test');
 
@@ -189,7 +189,8 @@ select tests.check((select count(*) from public.notifications where kind = 'test
 select tests.blocked(format('select public.send_test_notification(%L)', (select id from public.companies where name = 'Other Co')), 'no test notifications into other companies');
 reset role;
 
-set role anon;
+-- The scheduled job runs as the server (service role); the browser key (anon) cannot call it.
+set role service_role;
 create temp table claimed as select * from public.claim_outbox('correct horse battery staple 42', 1000);
 reset role;
 select tests.check((select count(*) from claimed) > 0, 'server collects pending alerts');
@@ -197,6 +198,9 @@ select tests.check((select bool_and(severity <> 'info') from claimed), 'info not
 select tests.check((select jsonb_array_length(subscriptions) from claimed where user_id = :'driver_id' and title like 'Delivery for you%') = 1, 'push address included for the driver');
 select tests.check((select bool_and(not want_email) from claimed where user_id = :'sales_id'), 'email preference respected');
 set role anon;
+select tests.blocked('select * from public.claim_outbox(''correct horse battery staple 42'', 10)', 'the browser key cannot collect alerts, even with the secret');
+reset role;
+set role service_role;
 select tests.check((select count(*) from public.claim_outbox('correct horse battery staple 42', 1000)) = 0, 'each alert is sent only once');
 select tests.check(public.drop_push_endpoints('correct horse battery staple 42', array['https://fcm.googleapis.com/fcm/send/abc']) = 1, 'dead push addresses are removed');
 select tests.check(public.run_all_alerts('correct horse battery staple 42') >= 0, 'scheduled job runs all companies');

@@ -13,7 +13,7 @@ export default async function GuidePage() {
   const { role, roles, features, company } = await getAppContext();
   const who = (r: Role[] | "all" | "managers") =>
     r === "all" ? tr("Everyone") : r === "managers" ? tr(ROLE_LABELS.management) : r.map((x) => tr(ROLE_LABELS[x])).join(", ");
-  const mine = (r: Role[] | "all" | "managers") => r === "all" || (r === "managers" ? hasRole(roles, "management") : r.includes(role));
+  const mine = (r: Role[] | "all" | "managers") => r === "all" || (r === "managers" ? hasRole(roles, "management") : hasRole(roles, ...r));
   const sections: GuideViewSection[] = GUIDE.map((s) => ({
     id: s.id,
     title: tr(s.title),

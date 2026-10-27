@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
 import { kickOutbox } from "@/lib/outbox";
-import { toNumber } from "@/lib/fields";
+import { toNumber, tooLarge } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 
@@ -183,6 +183,7 @@ export async function recordPayment(form: FormData) {
   const id = str(form, "invoice_id");
   const amount = toNumber(str(form, "amount"));
   const rate = toNumber(str(form, "exchange_rate"));
+  if (tooLarge(str(form, "amount"))) fail(id, "That amount or number is too large.", "#payments");
   if (amount === null || Number.isNaN(amount) || amount <= 0) fail(id, "Enter the amount received.", "#payments");
   if (rate !== null && (Number.isNaN(rate) || rate <= 0)) fail(id, "Exchange rate must be more than zero.", "#payments");
   const { error } = await supabase.rpc("record_payment", {

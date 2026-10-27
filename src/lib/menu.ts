@@ -105,7 +105,8 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       items: [
         all && c("seePurchasing") && { href: "/purchasing", title: "Purchasing overview", sub: "Supplier RFQs and purchase orders", icon: "purchasing" },
         c("requestPurchases") && { href: "/requisitions", title: "Purchase requests", sub: "Ask for goods to buy; approve and turn into orders", icon: "inbox" },
-        c("seePurchasing") && { href: "/supplier-rfqs", title: "Supplier RFQs", sub: "Ask suppliers for prices and compare", icon: "inbox" },
+        // the screen is for buying roles only (warehouse and finance see orders, not price requests)
+        c("editPurchasing") && { href: "/supplier-rfqs", title: "Supplier RFQs", sub: "Ask suppliers for prices and compare", icon: "inbox" },
         c("seePurchasing") && { href: "/purchase-orders", title: "Purchase orders", sub: "Orders to suppliers, approvals", icon: "doc" },
         c("seeSuppliers") && { href: "/suppliers", title: "Suppliers", sub: "Search, view and edit suppliers", icon: "truck" },
         c("receiveGoods") && { href: "/receiving", title: "Receive goods", sub: "Record goods arriving against purchase orders", icon: "inbox" },

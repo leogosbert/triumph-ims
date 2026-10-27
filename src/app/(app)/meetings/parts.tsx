@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { tr } from "@/lib/tr";
 import { formatWhen, toLocalInput } from "@/lib/services";
-import { LANGUAGES, MEETING_KINDS, MEETING_STATUS, MEETING_TOPICS, MINUTES_STATUS, type Meeting } from "@/lib/meetings/model";
+import { LANGUAGES, MEETING_KINDS, MEETING_STATUS, MEETING_TOPICS, meetingStage, MINUTES_STATUS, type Meeting } from "@/lib/meetings/model";
 import { SubmitButton } from "@/components/SubmitButton";
 import styles from "./meetings.module.css";
 
@@ -73,7 +73,9 @@ export function MeetingRow({ m, names }: { m: Meeting; names: Map<string, string
 type Person = { id: string; name: string; role: string };
 type Named = { id: string; name: string };
 
-/** The new / edit meeting form. */
+const DURATIONS = [15, 30, 45, 60, 90, 120, 180];
+
+/** The new / edit meeting form: the essentials first, everything else under "More options". */
 export function MeetingForm({
   action,
   people,
@@ -92,144 +94,176 @@ export function MeetingForm({
   me: string;
 }) {
   const chosen = new Set(attendees ?? []);
+  const durations = m && !DURATIONS.includes(m.minutes) ? [...DURATIONS, m.minutes].sort((a, b) => a - b) : DURATIONS;
+  const others = people.filter((p) => p.id !== me);
   return (
     <form action={action} className="card">
       {m && <input type="hidden" name="id" value={m.id} />}
       <label className="field">
-        <span>{tr("Title")}</span>
+        <span>{tr("What is the meeting about?")}</span>
         <input name="title" required minLength={2} maxLength={160} defaultValue={m?.title ?? ""} placeholder={tr("e.g. Weekly sales meeting")} />
       </label>
-      <label className="field">
-        <span>{tr("Kind")}</span>
-        <select name="kind" defaultValue={m?.kind ?? "internal"}>
-          {Object.entries(MEETING_KINDS).map(([k, l]) => (
-            <option key={k} value={k}>
-              {tr(l)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <div className="inline-form">
-        <label className="field">
-          <span>{tr("Client (for a client meeting)")}</span>
-          <select name="client_id" defaultValue={m?.client_id ?? ""}>
-            <option value="">{tr("None")}</option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{tr("Supplier (for a supplier meeting)")}</span>
-          <select name="supplier_id" defaultValue={m?.supplier_id ?? ""}>
-            <option value="">{tr("None")}</option>
-            {suppliers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="inline-form">
+      <div className={styles.formRow}>
         <label className="field">
           <span>{tr("Date and time")}</span>
           <input type="datetime-local" name="starts_at" required defaultValue={m ? toLocalInput(m.starts_at) : ""} />
         </label>
         <label className="field">
-          <span>{tr("Minutes")}</span>
-          <input type="number" name="minutes" min={5} max={600} step={5} defaultValue={m?.minutes ?? 30} />
-        </label>
-      </div>
-      <label className="field">
-        <span>{tr("Place")}</span>
-        <input name="place" maxLength={200} defaultValue={m?.place ?? ""} placeholder={tr("Office, site, or online")} />
-      </label>
-      <label className="field">
-        <span>{tr("Purpose")}</span>
-        <textarea name="purpose" rows={2} maxLength={2000} defaultValue={m?.purpose ?? ""} />
-      </label>
-      <fieldset className="field">
-        <legend>{tr("Topics")}</legend>
-        <div className={styles.chips}>
-          {MEETING_TOPICS.map((t) => (
-            <label key={t} className={styles.chip}>
-              <input type="checkbox" name="topics" value={t} defaultChecked={m?.topics?.includes(t)} /> {tr(t)}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-      <div className="inline-form">
-        <label className="field">
-          <span>{tr("Chair")}</span>
-          <select name="chair_id" defaultValue={m?.chair_id ?? ""}>
-            <option value="">{tr("Not set")}</option>
-            {people.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{tr("Presenter")}</span>
-          <select name="presenter_id" defaultValue={m?.presenter_id ?? ""}>
-            <option value="">{tr("Not set")}</option>
-            {people.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
+          <span>{tr("How long")}</span>
+          <select name="minutes" defaultValue={String(m?.minutes ?? 30)}>
+            {durations.map((d) => (
+              <option key={d} value={d}>
+                {d < 60 ? `${d} ${tr("min")}` : d % 60 ? `${Math.floor(d / 60)} h ${d % 60} ${tr("min")}` : `${d / 60} h`}
               </option>
             ))}
           </select>
         </label>
       </div>
-      <fieldset className="field">
-        <legend>{tr("Who attends")}</legend>
-        <div className={styles.chips}>
-          {people
-            .filter((p) => p.id !== me)
-            .map((p) => (
+      <label className="field">
+        <span>{tr("Where")}</span>
+        <input name="place" maxLength={200} defaultValue={m?.place ?? ""} placeholder={tr("Office, site, or leave empty for a video call in the app")} />
+      </label>
+      {others.length > 0 && (
+        <fieldset className="field">
+          <legend>{tr("Who attends")}</legend>
+          <div className={styles.chips}>
+            {others.map((p) => (
               <label key={p.id} className={styles.chip}>
                 <input type="checkbox" name="attendees" value={p.id} defaultChecked={chosen.has(p.id)} /> {p.name}
               </label>
             ))}
+          </div>
+          <p className="small muted">{tr("You attend the meetings you organise. Add client or supplier guests on the meeting page.")}</p>
+        </fieldset>
+      )}
+
+      <details className={styles.more} open={!!m && (m.kind !== "internal" || !!m.external_link)}>
+        <summary>{tr("More options: client or supplier, their video link, topics, chair, language")}</summary>
+        <div className={styles.formRow}>
+          <label className="field">
+            <span>{tr("Kind")}</span>
+            <select name="kind" defaultValue={m?.kind ?? "internal"}>
+              {Object.entries(MEETING_KINDS).map(([k, l]) => (
+                <option key={k} value={k}>
+                  {tr(l)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>{tr("Client")}</span>
+            <select name="client_id" defaultValue={m?.client_id ?? ""}>
+              <option value="">{tr("None")}</option>
+              {clients.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>{tr("Supplier")}</span>
+            <select name="supplier_id" defaultValue={m?.supplier_id ?? ""}>
+              <option value="">{tr("None")}</option>
+              {suppliers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
-        <p className="small muted">{tr("You attend the meetings you organise. Add client or supplier guests on the meeting page.")}</p>
-      </fieldset>
-      <label className="field">
-        <span>{tr("Their meeting link (Zoom, Teams, Google Meet), if they host it")}</span>
-        <input type="url" name="external_link" maxLength={500} defaultValue={m?.external_link ?? ""} placeholder="https://" />
-      </label>
-      <div className="inline-form">
         <label className="field">
-          <span>{tr("Language")}</span>
-          <select name="language" defaultValue={m?.language ?? "both"}>
-            {Object.entries(LANGUAGES).map(([k, l]) => (
-              <option key={k} value={k}>
-                {tr(l)}
-              </option>
+          <span>{tr("Their meeting link (Zoom, Teams, Google Meet), if they host it")}</span>
+          <input type="url" name="external_link" maxLength={500} defaultValue={m?.external_link ?? ""} placeholder="https://" />
+        </label>
+        <label className="field">
+          <span>{tr("Purpose")}</span>
+          <textarea name="purpose" rows={2} maxLength={2000} defaultValue={m?.purpose ?? ""} />
+        </label>
+        <fieldset className="field">
+          <legend>{tr("Topics")}</legend>
+          <div className={styles.chips}>
+            {MEETING_TOPICS.map((t) => (
+              <label key={t} className={styles.chip}>
+                <input type="checkbox" name="topics" value={t} defaultChecked={m?.topics?.includes(t)} /> {tr(t)}
+              </label>
             ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{tr("Open to the whole team")}</span>
-          <select name="open_to_team" defaultValue={m ? (m.open_to_team ? "1" : "0") : "1"}>
-            <option value="1">{tr("Yes: everyone can see and join")}</option>
-            <option value="0">{tr("No: only the people invited")}</option>
-          </select>
-        </label>
-        <label className="field">
-          <span>{tr("Write down what is said")}</span>
-          <select name="record" defaultValue={m ? (m.record ? "1" : "0") : "1"}>
-            <option value="1">{tr("Yes (everyone is told first)")}</option>
-            <option value="0">{tr("No, typed notes only")}</option>
-          </select>
-        </label>
-      </div>
-      <SubmitButton>{m ? tr("Save") : tr("Plan the meeting")}</SubmitButton>
+          </div>
+        </fieldset>
+        <div className={styles.formRow}>
+          <label className="field">
+            <span>{tr("Chair")}</span>
+            <select name="chair_id" defaultValue={m?.chair_id ?? ""}>
+              <option value="">{tr("Not set")}</option>
+              {people.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>{tr("Presenter")}</span>
+            <select name="presenter_id" defaultValue={m?.presenter_id ?? ""}>
+              <option value="">{tr("Not set")}</option>
+              {people.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className={styles.formRow}>
+          <label className="field">
+            <span>{tr("Language spoken")}</span>
+            <select name="language" defaultValue={m?.language ?? "both"}>
+              {Object.entries(LANGUAGES).map(([k, l]) => (
+                <option key={k} value={k}>
+                  {tr(l)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>{tr("Who can see it")}</span>
+            <select name="open_to_team" defaultValue={m ? (m.open_to_team ? "1" : "0") : "1"}>
+              <option value="1">{tr("The whole team")}</option>
+              <option value="0">{tr("Only the people invited")}</option>
+            </select>
+          </label>
+          <label className="field">
+            <span>{tr("Write down what is said")}</span>
+            <select name="record" defaultValue={m ? (m.record ? "1" : "0") : "1"}>
+              <option value="1">{tr("Yes (everyone is told first)")}</option>
+              <option value="0">{tr("No, typed notes only")}</option>
+            </select>
+          </label>
+        </div>
+      </details>
+      <SubmitButton className="btn btn-primary">{m ? tr("Save") : tr("Plan the meeting")}</SubmitButton>
     </form>
+  );
+}
+
+const STAGES = ["Plan", "Meet", "Minutes", "Follow up"] as const;
+
+/** Where the meeting is: plan, meet, minutes, follow up (the current stage is marked). */
+export function StageBar({ m }: { m: Pick<Meeting, "status" | "minutes_status"> }) {
+  if (m.status === "cancelled") return null;
+  const at = meetingStage(m);
+  return (
+    <ol className={styles.stages} aria-label={tr("Meeting progress")}>
+      {STAGES.map((s, i) => (
+        <li key={s} className={i < at ? styles.stageDone : i === at ? styles.stageNow : ""} aria-current={i === at ? "step" : undefined}>
+          <span className={styles.stageNum} aria-hidden="true">
+            {i < at ? "✓" : i + 1}
+          </span>
+          {tr(s)}
+        </li>
+      ))}
+    </ol>
   );
 }
 

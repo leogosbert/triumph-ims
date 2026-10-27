@@ -249,3 +249,419 @@
   height: 1px;
   overflow: hidden;
 }
+
+/* ---------------------------------------------------------------- v1.25: the meeting flow */
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 0 12px;
+}
+
+.more {
+  margin: 6px 0 14px;
+  border-top: 1px solid var(--line, rgba(127, 127, 127, 0.2));
+  padding-top: 10px;
+}
+
+.more > summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--brand, #1c4c9b);
+  margin-bottom: 8px;
+}
+
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 0.92rem;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* Plan -> Meet -> Minutes -> Follow up */
+.stages {
+  list-style: none;
+  display: flex;
+  gap: 4px;
+  padding: 0;
+  margin: 6px 0 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.stages::-webkit-scrollbar {
+  display: none;
+}
+
+.stages li {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  color: var(--muted, #8a93a3);
+  background: color-mix(in srgb, currentColor 7%, transparent);
+}
+
+.stageNum {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex: none;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.stageDone {
+  color: var(--ok, #1f8a4c) !important;
+}
+
+.stageNow {
+  color: #fff !important;
+  background: var(--brand, #1c4c9b) !important;
+  font-weight: 600;
+}
+
+.stageNow .stageNum {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* The one thing to do now */
+.nextStep {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  border-left: 4px solid var(--brand, #1c4c9b);
+}
+
+.nextStep h2 {
+  margin: 0 0 2px;
+  font-size: 1.05rem;
+}
+
+.nextStep p {
+  margin: 0;
+}
+
+.nextActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.startCard h2 {
+  margin-top: 0;
+}
+
+/* The room */
+.liveBar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 12px;
+  padding: 6px 0;
+  background: transparent;
+}
+
+.liveChip,
+.recBanner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.liveChip {
+  background: var(--ok-bg, rgba(31, 138, 76, 0.12));
+  color: var(--ok, #1f8a4c);
+}
+
+.recBanner {
+  background: #d93a30;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(217, 58, 48, 0.35);
+}
+
+.recBanner .recDot {
+  background: #fff;
+}
+
+.recDot,
+.recDotIdle {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d93a30;
+  flex: none;
+}
+
+.recDot {
+  animation: recBlink 1.2s ease-in-out infinite;
+}
+
+.recDotIdle {
+  margin-right: 6px;
+}
+
+@keyframes recBlink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recDot {
+    animation: none;
+  }
+}
+
+.recorder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.recTime {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #d93a30;
+  font-variant-numeric: tabular-nums;
+}
+
+.recConfirm {
+  border: 1px solid color-mix(in srgb, #d93a30 40%, transparent);
+  background: color-mix(in srgb, #d93a30 8%, transparent);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+.recConfirm p {
+  margin: 0 0 8px;
+}
+
+.captureRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.segmented button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  min-height: 34px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.segmented button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.segmented .segOn {
+  background: var(--card, #fff);
+  color: var(--brand, #1c4c9b);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.noteForm {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.noteInput {
+  display: flex;
+  gap: 8px;
+}
+
+.noteInput input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Catching up: player next to the minutes */
+.catchup {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .catchup {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: start;
+  }
+}
+
+.recItem {
+  border: 1px solid var(--line, rgba(127, 127, 127, 0.2));
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 10px 0;
+}
+
+.recItem audio {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.recMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 0.82rem;
+  color: var(--muted, #8a93a3);
+}
+
+/* The minutes document */
+.doc {
+  line-height: 1.6;
+}
+
+.doc h3 {
+  margin: 18px 0 6px;
+  font-size: 1rem;
+}
+
+.doc p {
+  margin: 0 0 10px;
+}
+
+.docDecided {
+  border-left: 3px solid var(--ok, #1f8a4c);
+  padding: 2px 0 2px 10px;
+  margin: 4px 0 12px;
+}
+
+.docSw {
+  border-left: 3px solid var(--brand, #1c4c9b);
+  padding: 2px 0 2px 10px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin: 6px 0 12px;
+}
+
+.actionTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.actionTable th,
+.actionTable td {
+  text-align: left;
+  vertical-align: top;
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--line, rgba(127, 127, 127, 0.2));
+}
+
+.actionTable th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted, #8a93a3);
+}
+
+.actionTable td:first-child {
+  width: 2em;
+  color: var(--muted, #8a93a3);
+}
+
+@media (max-width: 560px) {
+  .actionTable thead {
+    display: none;
+  }
+  .actionTable tr {
+    display: grid;
+    grid-template-columns: 2em 1fr;
+    border-bottom: 1px solid var(--line, rgba(127, 127, 127, 0.2));
+    padding: 6px 0;
+  }
+  .actionTable td {
+    border: 0;
+    padding: 2px 4px;
+  }
+  .actionTable td:nth-child(n + 3) {
+    grid-column: 2;
+    font-size: 0.82rem;
+    color: var(--muted, #8a93a3);
+  }
+}
+
+@media print {
+  .noPrint {
+    display: none !important;
+  }
+}
+
+/* The guest page */
+.guestNotice {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 12px 0;
+  font-size: 0.88rem;
+  background: color-mix(in srgb, #d93a30 8%, transparent);
+  border: 1px solid color-mix(in srgb, #d93a30 30%, transparent);
+}
+
+.guestNotice .recDotIdle {
+  margin: 5px 0 0;
+}
+
+/* The card widens once the call opens inside it. */
+.guestCard:has(.guestRoomInline) {
+  max-width: min(1000px, 100%);
+  width: 100%;
+}
+
+.guestRoomInline {
+  margin-top: 8px;
+}

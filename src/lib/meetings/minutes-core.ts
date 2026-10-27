@@ -29,6 +29,8 @@ export type MinutesBrief = {
     supplier: RecordRef | null;
   };
   staff: { id: string; name: string; role: string }[];
+  /** Staff who joined or were marked present (names as in staff). Only these and the guests attended. */
+  attendees?: string[];
   guests: string[];
   agenda: { title: string; topic: string | null }[];
   /** Open actions and issues from earlier meetings, to say what happened to them. */
@@ -47,6 +49,14 @@ export type MinutesBrief = {
   };
   transcript: string;
   notes: string;
+  /** Written down from the audio recording after the meeting (server-side speech to text), when there is one. */
+  recording_transcript?: string;
+  options?: {
+    /** "Also write a Kiswahili summary". */
+    swahili_summary?: boolean;
+    /** What the note-taker chose for live capture: sw (Kiswahili), en (English) or mixed. */
+    capture_language?: string;
+  };
 };
 
 export const POINT_KINDS = ["issue", "decision", "action", "note"] as const;
@@ -79,7 +89,20 @@ const STAGES = ["lead", "qualified", "quoted", "negotiation", "won", "lost"];
 /** Keeps the brief under the size a background function accepts (about 200 KB): the middle of a long transcript goes. */
 export function trimBrief(b: MinutesBrief, maxChars = 150_000): MinutesBrief {
   const cut = (s: string, n: number) => (s.length <= n ? s : `${s.slice(0, Math.floor(n * 0.6))}\n[... part of the recording left out ...]\n${s.slice(-Math.floor(n * 0.4))}`);
-  return { ...b, notes: cut(b.notes, 40_000), transcript: cut(b.transcript, Math.max(maxChars - Math.min(b.notes.length, 40_000), 20_000)) };
+  const notes = cut(b.notes, 40_000);
+  const room = Math.max(maxChars - notes.length, 20_000);
+  const rec = b.recording_transcript ?? "";
+  // The live transcript and the recording's transcript share the room: half each, or the rest for the longer one.
+  const live = b.transcript.length;
+  const half = Math.floor(room / 2);
+  let liveShare = room;
+  let recShare = 0;
+  if (rec) {
+    if (live <= half) [liveShare, recShare] = [live, room - live];
+    else if (rec.length <= half) [liveShare, recShare] = [room - rec.length, rec.length];
+    else [liveShare, recShare] = [half, half];
+  }
+  return { ...b, notes, transcript: cut(b.transcript, liveShare), ...(rec ? { recording_transcript: cut(rec, recShare) } : {}) };
 }
 
 // ------------------------------------------------------------------ what the AI must answer
@@ -90,7 +113,7 @@ const obj = (properties: Record<string, object>) => ({ type: "object", propertie
 
 export const MINUTES_SCHEMA = obj({
   summary: s,
-  topics: arr(obj({ topic: s, points: arr(s) })),
+  sections: arr(obj({ title: s, topic: s, discussion: s, decisions: s })),
   points: arr(
     obj({
       kind: { type: "string", enum: [...POINT_KINDS] },
@@ -102,8 +125,12 @@ export const MINUTES_SCHEMA = obj({
       severity: { type: "string", enum: ["low", "medium", "high", ""] },
       topic: s,
       status: { type: "string", enum: ["open", "done"] },
+      uncertain: { type: "boolean" },
     }),
   ),
+  risks: arr(s),
+  next_meeting: s,
+  summary_sw: s,
   follow_up: arr(obj({ point_id: s, status: { type: "string", enum: ["done", "in_progress", "open"] }, note: s })),
   proposals: arr(
     obj({
@@ -145,21 +172,45 @@ export const MINUTES_SCHEMA = obj({
   language_note: s,
 });
 
-export const MINUTES_SYSTEM = `You are the meeting assistant inside LeMoSp, the business app of a general supply company in Tanzania (oils, lubricants, chemicals, spare parts, safety gear and other supplies for mines, factories and contractors).
-Meetings are held in Kiswahili, English or a mix, and not everyone is fluent. Write in simple English that a worker with basic English understands.
-Use only the facts you are given; never invent figures, names, dates or records. Be fair and respectful to everyone.
+/**
+ * How every meeting prompt reads Kiswahili. Meetings at TRIUMPH and similar Tanzanian companies are mostly held in
+ * Kiswahili, mixed with English inside the same sentence, sometimes with Sheng. Shared by the minutes, the recording
+ * summary and the agenda prompts.
+ */
+export const SWAHILI_GUIDE = `Language. Most meetings are held in Kiswahili, often mixed with English inside one sentence (code-switching), sometimes with Sheng and regional Kiswahili. You understand all of these fluently, as a Tanzanian professional would. Read for meaning, not word for word.
+- Decisions: "tumekubaliana", "tumeamua", "imeamuliwa", "imepitishwa", "sawa, tufanye hivyo", "basi iwe hivyo", "tume-agree". Actions (who does what by when): "atafanya", "atafuatilia", "ahakikishe", "nitashughulikia", "ni jukumu la Juma", "Juma ata-follow up", "kabla ya Ijumaa". Issues and risks: "tatizo", "changamoto", "hatari", "tunaweza kupoteza", "kuna risk", "imechelewa", "hawajalipa", "mzigo haujafika", "deal imekufa" (the deal is lost). Updates for departments: mauzo (sales), manunuzi (procurement), fedha / hesabu (finance), stoo / ghala (stores), usafirishaji / delivery (deliveries), HSE / usalama (safety), utawala / HR (admin and HR).
+- Speech recognition of Kiswahili makes mistakes: words split or joined ("ata fanya"), English words spelled the Swahili way ("dilivari" delivery, "invoisi" invoice, "oda" order, "kotesheni" quotation, "LPO", "TRA", "EFD"), numbers said as words ("elfu hamsini" 50,000; "laki tano" 500,000; "milioni moja na nusu" 1,500,000; "bilioni" 1,000,000,000). Rebuild the meaning; where you are not sure, say so (mark it uncertain) instead of guessing.
+- Swahili time starts at 6 in the morning: "saa moja asubuhi" 07:00, "saa nne asubuhi" 10:00, "saa sita mchana" 12:00, "saa tisa alasiri" 15:00, "saa kumi na mbili jioni" 18:00, "saa mbili usiku" 20:00. Days: Jumatatu Monday, Jumanne Tuesday, Jumatano Wednesday, Alhamisi Thursday, Ijumaa Friday, Jumamosi Saturday, Jumapili Sunday; "leo" today, "kesho" tomorrow, "kesho kutwa" the day after tomorrow, "wiki ijayo" next week, "mwisho wa mwezi" end of the month, "tarehe 5" the 5th.
+- Money is Tanzanian shillings unless another currency is said: write "TZS 1,500,000". Keep every person's name, company, amount, quantity, date, product name and document number (quotation, invoice, LPO) exactly as said. Never round, convert, translate or invent them.
+- People: only name people who are in the staff list, the guest list, or who clearly name themselves in the transcript. Never add attendees and never guess who said something.`;
+
+export const MINUTES_SYSTEM = `You are the meeting secretary inside LeMoSp, the business app of a general supply company in Tanzania (oils, lubricants, chemicals, spare parts, safety gear and other supplies for mines, factories and contractors).
+${SWAHILI_GUIDE}
+You write the official minutes in clear, formal but simple English (the language of the app), as well-documented paragraphs that someone who missed the meeting can read and fully understand.
+Use only the facts you are given; never invent figures, names, dates, decisions or records. Be fair and respectful to everyone.
 Nothing you write changes anything by itself: a manager checks every point and every proposed change before it is made.`;
 
 export function minutesInstructions(b: MinutesBrief): string {
-  return `Write the minutes of the meeting below from the live transcript and the typed notes.
-The transcript comes from speech recognition: expect mistakes, Kiswahili and English mixed, and unclear words. Lines look like "[time] Name: text". Where you cannot tell what someone meant, do not guess: put it under "unclear".
-Today is ${b.today} (Dar es Salaam). Work out dates said as words ("Friday", "kesho", "tarehe 3", "next week") from the meeting date ${b.meeting.date}. Swahili time: "saa 4 asubuhi" is 10:00, "saa 9 mchana" is 15:00.
+  const sw = !!b.options?.swahili_summary;
+  const cap = b.options?.capture_language;
+  const capNote = cap === "en" ? "The note-taker captured the speech as English." : cap === "mixed" ? "The note-taker said the meeting mixes Kiswahili and English." : "The note-taker captured the speech as Kiswahili.";
+  return `Write the minutes of the meeting below from the live transcript, the recording's transcript (when there is one) and the typed notes.
+The transcripts come from speech recognition: expect mistakes, Kiswahili and English mixed, and unclear words. ${capNote} Lines look like "[time] Name: text"; a name there is the person who held the phone, not always the speaker. The typed notes are the most reliable source; lines starting Action, Decision or Issue (or Hatua, Uamuzi, Tatizo) were marked so by the note-taker.
+Today is ${b.today} (Dar es Salaam). Work out dates said as words ("Friday", "kesho", "tarehe 3", "next week") from the meeting date ${b.meeting.date}.
+
+How to write:
+- Every text field is written in English, in full sentences. Paragraph fields are real paragraphs (3 to 7 sentences), never lists of fragments. Separate paragraphs inside one field with a blank line.
+- Say who said or agreed what when the transcript makes it clear; otherwise write "the meeting" or "the team".
+- When something is uncertain (unclear audio, a name or number you could not hear well), say so in the text ("(to confirm)") and put it under "unclear".
 
 Give:
-- summary: 4 to 8 sentences on what was discussed and agreed.
-- topics: the points under each topic discussed (topic names from: ${MEETING_TOPICS.join(", ")}).
-- points: every issue raised, decision made, action agreed (who does what by when) and useful note. owner_id must be one of the staff ids given (or "" with the name in owner_name). due_on as YYYY-MM-DD or "". severity low/medium/high for issues, "" otherwise. status "done" only for an issue solved in the meeting.
-- follow_up: for each item in last_time that was discussed, its id, the new status (done, in_progress or open) and what was said.
+- summary: the opening paragraph: what the meeting was for, who attended (only from the attendees and guests given), the main outcomes and the most important decisions and deadlines.
+- sections: one section per agenda item, in agenda order (use the agenda titles given), then one for any other matter that was discussed ("Any other business"). For each: title, topic (one of: ${MEETING_TOPICS.join(", ")}, or ""), discussion (a paragraph on what was discussed, the facts and figures given, and the different views), decisions (a paragraph on what was decided and why; "No decision was taken." when none). Leave out agenda items that were not discussed, and say in the summary which ones were not reached.
+- points: every issue raised, decision made, action agreed (who does what by when) and useful note, each as one clear English sentence. owner_id must be one of the staff ids given (or "" with the name said in owner_name). due_on as YYYY-MM-DD or "". severity low/medium/high for issues, "" otherwise. status "done" only for an issue solved in the meeting. uncertain true when you are not sure you understood it.
+- risks: risks or concerns raised (money, safety, late deliveries, compliance, clients), one sentence each, or [].
+- next_meeting: a short paragraph of suggestions for the next meeting: what to follow up first, what to prepare, and when it was agreed to meet (if it was).
+- summary_sw: ${sw ? "one paragraph (5 to 8 sentences) in natural, correct Kiswahili summarising the meeting, its decisions and its actions with owners and dates." : '"" (not asked for).'}
+- follow_up: for each item in last_time that was discussed, its id, the new status (done, in_progress or open) and what was said, in English.
 - proposals: concrete updates for other departments that the meeting agreed, for a manager to approve. Only use ids from "records" and "staff"; leave a field "" when it does not apply. point is the index (from 0) of the point it comes from, or -1. Targets:
   * crm_note: a note on a client (client_id) or opportunity (opportunity_id): summary, next_action, next_on.
   * followup: a follow-up on a quotation (quotation_id) or an invoice (invoice_id) waiting for the client: note, next_on.
@@ -170,9 +221,9 @@ Give:
   * calendar_entry: a date someone named that is not an action already ("deliver on Friday", "the supplier arrives tarehe 30"): title, kind (${CAL_KINDS.join(", ")}), starts_on, ends_on, at_time (HH:MM), owner_id, phrase (the words said).
   * next_meeting: when the next meeting was agreed: starts_at as YYYY-MM-DDTHH:MM:00+03:00, title.
   * task: work for someone that fits no other target: text, owner_id, due_on.
-- suggestions: your advice on how to move forward (patterns, risks, quick wins, anything for management).
-- unclear: parts you could not understand well.
-- language_note: one line on the languages used and how well the recording could be understood.
+- suggestions: your advice on how to move forward (patterns, risks, quick wins, anything for management), one sentence each.
+- unclear: the parts you could not understand well, quoting the words heard.
+- language_note: one line on the languages used (for example "Mostly Kiswahili with some English") and how well the recording could be understood.
 Fill every field; use empty arrays and empty strings where something does not apply.`;
 }
 
@@ -198,10 +249,20 @@ export type SavePoint = {
 };
 export type SaveProposal = { target: ProposalTarget; title: string; point?: number; payload: Record<string, unknown> };
 /** What public.meeting_save_minutes takes. */
+export type MinutesSection = { title: string; topic: string; discussion: string; decisions: string };
 export type MinutesPayload = {
   by: "ai" | "app" | "manual";
+  /** The opening paragraph(s). */
   summary: string;
+  /** One per agenda item: what was discussed, what was decided and why. */
+  sections: MinutesSection[];
+  /** Older minutes (v1.23): points under each topic. Still read, no longer written by the AI. */
   topics: { topic: string; points: string[] }[];
+  risks: string[];
+  /** Suggestions for the next meeting (a paragraph). */
+  next_meeting: string;
+  /** "Also write a Kiswahili summary": one paragraph, or "". */
+  summary_sw: string;
   points: SavePoint[];
   follow_up: { point_id: string; status: string; note: string }[];
   proposals: SaveProposal[];
@@ -215,6 +276,18 @@ const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 function text(v: unknown, max: number): string {
   return typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "";
+}
+/** Like text(), but keeps paragraph breaks (a blank line between paragraphs). */
+export function paragraphs(v: unknown, max: number): string {
+  if (typeof v !== "string") return "";
+  return v
+    .replace(/\r/g, "")
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .join("\n\n")
+    .slice(0, max)
+    .trim();
 }
 function list(v: unknown): unknown[] {
   return Array.isArray(v) ? v : [];
@@ -288,9 +361,10 @@ export function validateMinutes(raw: unknown, b: MinutesBrief): MinutesPayload |
     const body = text(q.body, 1000);
     if (!(POINT_KINDS as readonly string[]).includes(kind) || body.length < 2) continue;
     const owner = pick(staff, q.owner_id);
+    const unsure = q.uncertain === true && !/\(to confirm\)/i.test(body);
     points.push({
       kind,
-      body,
+      body: unsure ? `${body.slice(0, 985)} (to confirm)` : body,
       raised_by: text(q.raised_by, 120) || undefined,
       owner_id: owner,
       owner_name: owner ? undefined : text(q.owner_name, 120) || undefined,
@@ -320,11 +394,25 @@ export function validateMinutes(raw: unknown, b: MinutesBrief): MinutesPayload |
     proposals.push({ target, title: text(q.title, 300) || defaultTitle(target, payload), point, payload });
   }
 
-  const summary = text(r.summary, 6000);
-  if (!summary && points.length === 0) return null;
+  const summary = paragraphs(r.summary, 6000);
+  const sections = list(r.sections)
+    .slice(0, 30)
+    .map((x) => (x && typeof x === "object" ? (x as Record<string, unknown>) : {}))
+    .map((x) => ({
+      title: text(x.title, 200),
+      topic: topics.has(text(x.topic, 40)) ? text(x.topic, 40) : "",
+      discussion: paragraphs(x.discussion, 6000),
+      decisions: paragraphs(x.decisions, 4000),
+    }))
+    .filter((x) => x.title.length >= 2 && (x.discussion || x.decisions));
+  if (!summary && points.length === 0 && sections.length === 0) return null;
   return {
     by: "ai",
     summary,
+    sections,
+    risks: strings(r.risks, 15, 500),
+    next_meeting: paragraphs(r.next_meeting, 3000),
+    summary_sw: b.options?.swahili_summary ? paragraphs(r.summary_sw, 6000) : "",
     topics: list(r.topics)
       .slice(0, 20)
       .map((t) => (t && typeof t === "object" ? (t as Record<string, unknown>) : {}))
@@ -467,7 +555,7 @@ function ownerIn(t: string, b: MinutesBrief): { id?: string; name?: string } {
     const first = p.name.split(/\s+/)[0]?.toLowerCase();
     if (!first || first.length < 3) continue;
     if (new RegExp(`(@|\\(|owner:?\\s*|by\\s+|na\\s+|kwa\\s+)${first.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(lower)) return { id: p.id };
-    if (new RegExp(`\\b${first.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+(will|to|ata|atahakikisha|atafanya)\\b`, "i").test(lower)) return { id: p.id };
+    if (new RegExp(`\\b${first.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+(will|to|ata\\w*)\\b`, "i").test(lower)) return { id: p.id };
   }
   const m = t.match(/@([A-Za-z][\w'-]{1,40})/);
   return m ? { name: m[1] } : {};
@@ -483,7 +571,7 @@ export function plainMinutes(b: MinutesBrief): MinutesPayload {
   const today = b.today || todayEat();
   const ref = b.meeting.date > today ? b.meeting.date : today;
   const typed = b.notes.split(/\r?\n/).map(splitLine).filter((l) => l.text.length >= 2);
-  const spoken = b.transcript
+  const spoken = `${b.transcript}\n${b.recording_transcript ?? ""}`
     .split(/\r?\n/)
     .map(splitLine)
     .filter((l) => MARKERS.some((m) => m.re.test(l.text)) || isNextMeeting(l.text));
@@ -542,6 +630,10 @@ export function plainMinutes(b: MinutesBrief): MinutesPayload {
   return {
     by: "app",
     summary,
+    sections: [],
+    risks: [],
+    next_meeting: "",
+    summary_sw: "",
     topics: [],
     points,
     follow_up: [],
@@ -620,4 +712,45 @@ export function failReason(r: LongResult | { ok: false; reason: string }): strin
     default:
       return "The AI could not be reached. The app wrote plain minutes from the notes instead.";
   }
+}
+
+// ------------------------------------------------------------------ the background minutes job
+
+type Rpc = (fn: string, args: Record<string, unknown>) => Promise<Response>;
+
+/**
+ * Writes and saves the minutes from a brief, in a background function (up to 15 minutes): the AI's minutes when it
+ * answers and they check out, otherwise the app's plain minutes with the reason kept for the organiser.
+ * `rpc` calls the database as the signed-in person, so the database rules apply.
+ */
+export async function minutesJob(brief: MinutesBrief, rpc: Rpc, env: Record<string, string | undefined>): Promise<void> {
+  const key = env.ANTHROPIC_API_KEY;
+  let reason = "AI is not switched on. The app wrote plain minutes from the notes.";
+  if (key) {
+    const res = await callClaudeLong({
+      apiKey: key,
+      model: env.ANTHROPIC_MODEL || "claude-opus-5-5",
+      system: MINUTES_SYSTEM,
+      user: minutesUserText(brief),
+      schema: MINUTES_SCHEMA,
+      maxTokens: 16000,
+      timeoutMs: 12 * 60_000,
+    });
+    if (res.ok) {
+      const minutes = validateMinutes(parseJsonReply(res.text), brief);
+      if (minutes) {
+        const saved = await rpc("meeting_save_minutes", { p_meeting: brief.meeting.id, p: minutes });
+        if (saved.ok) return;
+        reason = "The AI's minutes could not be saved. The app wrote plain minutes from the notes instead.";
+      } else {
+        reason = "The AI's answer did not check out. The app wrote plain minutes from the notes instead.";
+      }
+    } else {
+      reason = failReason(res);
+    }
+  }
+  // After saving, state 'failed' keeps the minutes ready and only records why the AI was not used; if even the plain
+  // minutes could not be saved, the meeting shows "failed".
+  await rpc("meeting_save_minutes", { p_meeting: brief.meeting.id, p: plainMinutes(brief) });
+  await rpc("meeting_minutes_state", { p_meeting: brief.meeting.id, p_state: "failed", p_error: reason });
 }

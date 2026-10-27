@@ -164,13 +164,20 @@ reset role;
 select tests.login('sales.rec@m.test'); set role authenticated;
 select public.meeting_recording_stop(:'rec');
 select tests.check((select status = 'done' and ended_at is not null from public.meeting_recordings where id = :'rec'), 'the recording stops');
+-- The last piece may still come in just after stopping.
+insert into storage.objects (bucket_id, name) values ('meeting-recordings', :'co' || '/' || :'mt' || '/' || :'rec' || '/0002.webm');
+select public.meeting_recording_add_part(:'rec', 2, :'co' || '/' || :'mt' || '/' || :'rec' || '/0002.webm', 10000, 5000);
+select tests.check((select parts = 3 from public.meeting_recordings where id = :'rec'), 'the last piece is taken just after stopping');
+reset role;
+update public.meeting_recordings set ended_at = now() - interval '6 minutes' where id = :'rec';
+select tests.login('sales.rec@m.test'); set role authenticated;
 select tests.blocked(format('select public.meeting_recording_add_part(%L, 5, %L, 1000, 1000)', :'rec',
   :'co' || '/' || :'mt' || '/' || :'rec' || '/0001.webm'), 'nothing is added after it stopped');
 select public.meeting_recording_start(:'mt', 'audio/mp4', 'sw') as rec2 \gset
 insert into storage.objects (bucket_id, name) values ('meeting-recordings', :'co' || '/' || :'mt' || '/' || :'rec2' || '/0000.mp4');
 select public.meeting_recording_add_part(:'rec2', 0, :'co' || '/' || :'mt' || '/' || :'rec2' || '/0000.mp4', 50000, 20000);
 select tests.blocked(format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'meeting-recordings',
-  :'co' || '/' || :'mt' || '/' || :'rec' || '/0002.webm'), 'a stopped recording takes no more files');
+  :'co' || '/' || :'mt' || '/' || :'rec' || '/0003.webm'), 'a stopped recording takes no more files');
 reset role;
 select tests.login('boss.rec@m.test'); set role authenticated;
 select tests.blocked(format('select public.meeting_recording_start(%L, %L)', :'mt', 'audio/webm'), 'only one recording at a time');
@@ -183,7 +190,7 @@ update public.meeting_recordings set transcript = '[00:00:01] Juma: Tutapeleka m
 set role service_role;
 create temp table expired_out as select * from public.meeting_recordings_expire(100);
 reset role;
-select tests.check((select count(*) from expired_out) = 2 and (select bool_and(recording_id = :'rec') from expired_out)
+select tests.check((select count(*) from expired_out) = 3 and (select bool_and(recording_id = :'rec') from expired_out)
                    and (select deleted_at is not null and delete_reason = 'expired' and purged_at is null
                                and transcript <> '' from public.meeting_recordings where id = :'rec')
                    and (select deleted_at is null and status = 'recording' from public.meeting_recordings where id = :'rec2'),

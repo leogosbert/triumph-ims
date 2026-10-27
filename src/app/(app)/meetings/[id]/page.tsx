@@ -7,11 +7,16 @@ import { getAppContext } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { companyPeople } from "@/lib/people";
-import { canManage, joinOpen, MEETING_COLUMNS, MEETING_KINDS, MEETING_TOPICS, type AgendaItem, type Attendee, type Meeting } from "@/lib/meetings/model";
+import { aiReady } from "@/lib/ai/claude";
+import { canManage, joinOpen, MEETING_COLUMNS, MEETING_KINDS, MEETING_TOPICS, RECORDING_COLUMNS, type AgendaItem, type Attendee, type Meeting, type Point, type Recording } from "@/lib/meetings/model";
+import { buildMinutesDoc } from "@/lib/meetings/minutes-format";
+import { transcriptionReady } from "@/lib/meetings/recording-core";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
 import { addAgendaItem, addGuest, agendaItem, cancelMeeting, removeAttendee, respondMeeting } from "../actions";
 import { GuestLinkButtons } from "../GuestLinkButtons";
-import { MeetingBadge, MeetingTabs, whenRange } from "../parts";
+import { MinutesDocument } from "../MinutesDocument";
+import { Recordings } from "../Recordings";
+import { MeetingBadge, MeetingTabs, StageBar, whenRange } from "../parts";
 import styles from "../meetings.module.css";
 import { BackLink } from "@/components/BackLink";
 
@@ -26,13 +31,19 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
   if (!data) notFound();
   const m = data as unknown as Meeting;
   const manage = canManage(m, user.id, role);
-  const [att, agenda, people, client, supplier] = await Promise.all([
+  const held = m.status === "held";
+  const [att, agenda, people, client, supplier, recs, pts] = await Promise.all([
     supabase.from("meeting_attendees").select("*").eq("meeting_id", id).order("created_at"),
     supabase.from("meeting_agenda_items").select("*").eq("meeting_id", id).order("sort"),
     companyPeople(supabase, company.id),
     m.client_id ? supabase.from("clients").select("id, name").eq("id", m.client_id).maybeSingle() : Promise.resolve({ data: null }),
     m.supplier_id ? supabase.from("suppliers").select("id, name").eq("id", m.supplier_id).maybeSingle() : Promise.resolve({ data: null }),
+    // Recordings (missing before the v1.25 SQL is run) and the points, to catch up on a meeting that was held.
+    supabase.from("meeting_recordings").select(RECORDING_COLUMNS).eq("meeting_id", id).order("started_at"),
+    held ? supabase.from("meeting_points").select("*").eq("meeting_id", id).order("sort") : Promise.resolve({ data: [] }),
   ]);
+  const recordings = (recs.error ? [] : (recs.data ?? [])) as unknown as Recording[];
+  const { data: keep } = recs.error ? { data: null } : await supabase.from("meeting_settings").select("recording_days").eq("company_id", company.id).maybeSingle();
   const attendees = (att.data ?? []) as Attendee[];
   const items = (agenda.data ?? []) as AgendaItem[];
   const nameOf = new Map(people.map((p) => [p.id, p.name]));
@@ -41,6 +52,31 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
   const mine = staff.find((a) => a.user_id === user.id);
   const open = ["planned", "live"].includes(m.status);
   const back = `/meetings/${id}`;
+  const doc = held ? buildMinutesDoc(m.minutes_summary, (pts.data ?? []) as Point[], (uid) => nameOf.get(uid)) : null;
+  const approved = m.minutes_status === "approved";
+
+  // The one thing to do now, for this person.
+  const next: { title: string; text: string; href?: string; label?: string } | null =
+    m.status === "cancelled"
+      ? null
+      : m.status === "live"
+        ? { title: tr("The meeting is live"), text: tr("Join to see the video, take notes and follow what is said."), href: `/meetings/${id}/room`, label: tr("Join now") }
+        : m.status === "planned"
+          ? manage
+            ? {
+                title: items.length ? tr("Ready when you are") : tr("Plan the agenda"),
+                text: items.length ? tr("Open the room a few minutes early and press Start meeting.") : tr("Press Suggest topics to see what your business data says needs attention, or add items below."),
+                href: items.length || joinOpen(m) ? `/meetings/${id}/room` : `/meetings/${id}/suggest`,
+                label: items.length || joinOpen(m) ? tr("Open the room") : tr("Suggest topics"),
+              }
+            : { title: tr("Coming up"), text: joinOpen(m) ? tr("The room is open.") : tr("The room opens 15 minutes before the start. You get a notification when it starts."), href: joinOpen(m) ? `/meetings/${id}/room` : undefined, label: tr("Open the room") }
+          : approved
+            ? { title: tr("Minutes approved"), text: tr("Action owners were told; their actions are under My actions and on the calendar."), href: `/meetings/${id}/minutes`, label: tr("Read the minutes") }
+            : m.minutes_status === "ready"
+              ? { title: tr("Minutes ready to check"), text: manage ? tr("Read the minutes, correct any point and approve.") : tr("The minutes wait for approval."), href: `/meetings/${id}/minutes`, label: manage ? tr("Check and approve") : tr("Read the minutes") }
+              : m.minutes_status === "writing"
+                ? { title: tr("The minutes are being written"), text: tr("This usually takes a minute or two."), href: `/meetings/${id}/minutes`, label: tr("Open the minutes") }
+                : { title: tr("Write the minutes"), text: tr("The AI writes them from what was said, the recording and the notes."), href: `/meetings/${id}/minutes`, label: manage ? tr("Write the minutes") : tr("Open the minutes") };
 
   return (
     <>
@@ -52,7 +88,61 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
         </span>
       </div>
       <MeetingTabs current="" />
+      <StageBar m={m} />
       <Notice {...notice} />
+
+      {next && (
+        <section className={`card ${styles.nextStep}`}>
+          <div>
+            <h2>{next.title}</h2>
+            <p className="small muted">{next.text}</p>
+          </div>
+          <div className={styles.nextActions}>
+            {next.href && next.label && (
+              <Link href={next.href} className="btn btn-primary">
+                {next.label}
+              </Link>
+            )}
+            {mine && mine.response === "pending" && open && (
+              <form action={respondMeeting} className="inline-form" style={{ gap: 6 }}>
+                <input type="hidden" name="id" value={id} />
+                <span className="small">{tr("Will you attend?")}</span>
+                <SubmitButton className="btn btn-small" name="accept" value="1">
+                  {tr("Yes")}
+                </SubmitButton>
+                <SubmitButton className="btn btn-small" name="accept" value="0">
+                  {tr("No")}
+                </SubmitButton>
+              </form>
+            )}
+          </div>
+        </section>
+      )}
+
+      {held && (recordings.length > 0 || (doc && !doc.empty)) && (
+        <div className={styles.catchup}>
+          <Recordings
+            recordings={recordings}
+            names={nameOf}
+            manage={manage}
+            ai={aiReady()}
+            transcription={transcriptionReady()}
+            back={`/meetings/${id}#recordings`}
+            keepDays={Number(keep?.recording_days ?? 30)}
+          />
+          {doc && !doc.empty && (
+            <section className="card">
+              <div className="line-head">
+                <h2 style={{ margin: 0 }}>{approved ? tr("Minutes") : tr("Draft minutes")}</h2>
+                <Link href={`/meetings/${id}/minutes`} className="small">
+                  {tr("Full minutes →")}
+                </Link>
+              </div>
+              <MinutesDocument doc={doc} approved={approved} compact />
+            </section>
+          )}
+        </div>
+      )}
 
       <section className="card">
         <dl className="kv">
@@ -123,34 +213,12 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
             </>
           )}
         </dl>
-        <div className="inline-form" style={{ marginTop: 10 }}>
-          {open && (
-            <Link href={`/meetings/${id}/room`} className={`btn ${joinOpen(m) ? "btn-primary" : ""}`}>
-              {m.status === "live" ? tr("Join now") : manage ? tr("Open the room") : tr("Room (opens 15 minutes before)")}
+        {manage && open && (
+          <div className="inline-form" style={{ marginTop: 10 }}>
+            <Link href={`/meetings/${id}/edit`} className="btn btn-small">
+              {tr("Change details")}
             </Link>
-          )}
-          {(m.status === "held" || m.status === "live") && (
-            <Link href={`/meetings/${id}/minutes`} className="btn">
-              {tr("Minutes")}
-            </Link>
-          )}
-          {manage && open && (
-            <Link href={`/meetings/${id}/edit`} className="btn">
-              {tr("Change")}
-            </Link>
-          )}
-        </div>
-        {mine && mine.response === "pending" && open && (
-          <form action={respondMeeting} className="inline-form" style={{ marginTop: 10 }}>
-            <input type="hidden" name="id" value={id} />
-            <span className="small">{tr("Will you attend?")}</span>
-            <SubmitButton className="btn btn-small btn-primary" name="accept" value="1">
-              {tr("Yes")}
-            </SubmitButton>
-            <SubmitButton className="btn btn-small" name="accept" value="0">
-              {tr("No")}
-            </SubmitButton>
-          </form>
+          </div>
         )}
       </section>
 
@@ -158,7 +226,7 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
         <div className="line-head">
           <h2 style={{ margin: 0 }}>{tr("Agenda")}</h2>
           {manage && open && (
-            <Link href={`/meetings/${id}/suggest`} className="btn btn-small btn-primary">
+            <Link href={`/meetings/${id}/suggest`} className="btn btn-small">
               {tr("Suggest topics")}
             </Link>
           )}
@@ -339,9 +407,6 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
           </form>
         </details>
       )}
-      <p className="small muted">
-        <span className={styles.when}>{tr("Video room")}: {m.video_provider === "daily" ? "Daily" : m.video_provider === "jitsi" ? "Jitsi" : m.video_provider === "external" ? tr("their link") : tr("none")}</span>
-      </p>
     </>
   );
 }

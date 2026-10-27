@@ -5,10 +5,11 @@ import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { displayName, getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
-import { ANNOUNCE, canManage, endsAt, joinOpen, MEETING_COLUMNS, type Meeting } from "@/lib/meetings/model";
+import { ANNOUNCE, canManage, endsAt, joinOpen, MEETING_COLUMNS, recordingActive, type Meeting, type Recording } from "@/lib/meetings/model";
+import { transcriptionReady } from "@/lib/meetings/recording-core";
 import { dailyReady, dailyToken, ensureDailyRoom, jitsiUrl, withToken, type VideoJoin } from "@/lib/meetings/video";
-import { endMeeting, startMeeting } from "../../actions";
-import { MeetingBadge, whenRange } from "../../parts";
+import { startMeeting } from "../../actions";
+import { MeetingBadge, StageBar, whenRange } from "../../parts";
 import { LiveRoom } from "./LiveRoom";
 import styles from "../../meetings.module.css";
 import { BackLink } from "@/components/BackLink";
@@ -43,21 +44,23 @@ export default async function RoomPage({ params, searchParams }: { params: Promi
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, role, user, profile } = await getAppContext();
+  const { supabase, role, user, profile, company } = await getAppContext();
   const { data } = await supabase.from("meetings").select(MEETING_COLUMNS).eq("id", id).maybeSingle();
   if (!data) notFound();
   const m = data as unknown as Meeting;
   const manage = canManage(m, user.id, role);
-  const [{ data: texts }, { data: mine }] = await Promise.all([
+  const [{ data: texts }, { data: mine }, rec] = await Promise.all([
     supabase.from("meeting_texts").select("transcript, notes").eq("meeting_id", id).maybeSingle(),
     supabase.from("meeting_attendees").select("id").eq("meeting_id", id).eq("user_id", user.id).maybeSingle(),
+    // Missing before the v1.25 SQL is run: then there is no Record button.
+    supabase.from("meeting_recordings").select("id, started_by, started_at, last_part_at, status, deleted_at").eq("meeting_id", id).eq("status", "recording").maybeSingle(),
   ]);
+  const recordingsReady = !rec.error;
+  const recNow = recordingsReady && rec.data && recordingActive(rec.data as Pick<Recording, "status" | "deleted_at" | "last_part_at" | "started_at">) ? (rec.data as Recording) : null;
   const live = m.status === "live";
   const canNote = manage || !!mine;
   const name = displayName(profile);
   const video = m.status === "cancelled" || m.status === "held" ? ({ kind: "none" } as const) : await videoFor(supabase, m, { id: user.id, name, owner: manage });
-  const sw = m.language !== "en";
-  const en = m.language !== "sw";
 
   return (
     <>
@@ -71,36 +74,42 @@ export default async function RoomPage({ params, searchParams }: { params: Promi
       <p className="small muted">
         {whenRange(m)} · <Link href={`/meetings/${id}`}>{tr("Agenda and people")}</Link>
       </p>
+      <StageBar m={m} />
       <Notice {...notice} />
 
       {m.status === "planned" && (
-        <section className="card">
-          {m.record && (
-            <>
-              <h2>{tr("Read this out before starting")}</h2>
-              {sw && <p className={styles.announce} lang="sw">{ANNOUNCE.sw}</p>}
-              {en && <p className={styles.announce} lang="en">{ANNOUNCE.en}</p>}
-            </>
-          )}
+        <section className={`card ${styles.startCard}`}>
           {manage ? (
             <form action={startMeeting}>
               <input type="hidden" name="id" value={id} />
+              <h2>{tr("Ready to start?")}</h2>
               {m.record && (
-                <label className="small" style={{ display: "flex", gap: 8, alignItems: "center", margin: "8px 0" }}>
-                  <input type="checkbox" name="announced" value="1" required /> {tr("I read the notice to everyone")}
-                </label>
+                <>
+                  <p className="small muted">{tr("Read this out first, so everyone knows what is written down:")}</p>
+                  <p className={styles.announce} lang="sw">
+                    {ANNOUNCE.sw}
+                  </p>
+                  <p className={styles.announce} lang="en">
+                    {ANNOUNCE.en}
+                  </p>
+                  <label className={styles.check}>
+                    <input type="checkbox" name="announced" value="1" required /> {tr("I told everyone")}
+                  </label>
+                </>
               )}
-              <SubmitButton pendingText={tr("Starting…")}>{tr("Start the meeting")}</SubmitButton>
+              <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Starting…")}>
+                {tr("Start meeting")}
+              </SubmitButton>
               <p className="small muted">{tr("Everyone invited gets a notification with a Join button.")}</p>
             </form>
           ) : (
-            <p className="muted">{tr("The meeting has not started yet. You will get a notification when it does.")}</p>
+            <p className="muted">{tr("The meeting has not started yet. You get a notification when it does.")}</p>
           )}
         </section>
       )}
 
       {m.status === "held" && (
-        <p className="banner">
+        <p className="banner ok">
           {tr("This meeting has ended.")} <Link href={`/meetings/${id}/minutes`}>{tr("Open the minutes →")}</Link>
         </p>
       )}
@@ -109,28 +118,23 @@ export default async function RoomPage({ params, searchParams }: { params: Promi
       {(m.status === "planned" || live) && (
         <LiveRoom
           meetingId={id}
+          companyId={company.id}
           live={live}
+          startedAt={m.started_at}
           canNote={canNote}
-          record={m.record}
+          canManage={manage}
+          canRecord={recordingsReady}
           language={m.language}
           video={video.kind === "daily" ? video : video.kind === "none" ? video : { kind: video.kind, url: video.url, embed: false }}
           myName={name}
-          initialTranscript={String(texts?.transcript ?? "").slice(-20000)}
-          initialNotes={String(texts?.notes ?? "").slice(-20000)}
+          transcription={transcriptionReady()}
+          initial={{
+            transcript: String(texts?.transcript ?? "").slice(-20000),
+            notes: String(texts?.notes ?? "").slice(-20000),
+            status: m.status,
+            recording: recNow ? { id: recNow.id, by: recNow.started_by, since: recNow.started_at } : null,
+          }}
         />
-      )}
-
-      {live && manage && (
-        <section className="card">
-          <h2>{tr("End the meeting")}</h2>
-          <form action={endMeeting}>
-            <input type="hidden" name="id" value={id} />
-            <label className="small" style={{ display: "flex", gap: 8, alignItems: "center", margin: "8px 0" }}>
-              <input type="checkbox" name="write" value="1" defaultChecked /> {tr("Write the minutes now (issues, decisions and actions)")}
-            </label>
-            <SubmitButton pendingText={tr("Ending…")}>{tr("End the meeting")}</SubmitButton>
-          </form>
-        </section>
       )}
     </>
   );

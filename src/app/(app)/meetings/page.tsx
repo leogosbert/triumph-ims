@@ -55,9 +55,15 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Sea
           </Link>
         )}
       </div>
-      <p className="muted small">{tr("Team meetings and meetings with clients and suppliers: agenda, video in the app, live notes, minutes and follow-up.")}</p>
+      <p className="muted small">{tr("Plan, meet in the room or by video, record, and let the AI write the minutes (it understands Kiswahili and English).")}</p>
       <MeetingTabs current={tab === "held" ? "/meetings?tab=held" : "/meetings"} invitations={canOrganise(role)} />
       <Notice {...notice} />
+
+      {s.next?.status === "live" && (
+        <p className="banner ok">
+          <strong>{tr("Live now")}:</strong> {s.next.title} <Link href={`/meetings/${s.next.id}/room`}>{tr("Join now →")}</Link>
+        </p>
+      )}
 
       <div className="stat-grid">
         {tiles.map((t) => (
@@ -92,7 +98,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Sea
 
       {s.is_manager && (
         <p className="small">
-          <Link href="/meetings/portal">{tr("Client request page: let clients ask for a meeting →")}</Link>
+          <Link href="/meetings/settings">{tr("Meeting settings: recordings, AI, client request page →")}</Link>
         </p>
       )}
     </>

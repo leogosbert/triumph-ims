@@ -148,7 +148,7 @@ end;
 $$;
 
 -- p_action: 'read' (members who see the meeting, until the recording is deleted), 'write' (the person recording,
--- while it records), 'delete' (whoever manages the meeting, once the recording is marked deleted).
+-- while it records and for 5 minutes after it stopped, for the last pieces still uploading), 'delete' (whoever manages the meeting, once the recording is marked deleted).
 create or replace function public.meeting_recording_file_ok(p_name text, p_action text)
 returns boolean language sql stable security definer set search_path = ''
 as $$
@@ -162,7 +162,8 @@ as $$
                 -- (a deleted recording's files stay visible to whoever manages the meeting, so they can be removed)
                 when 'read' then (r.deleted_at is null and public.meeting_visible(r.company_id, r.meeting_id))
                               or (r.deleted_at is not null and public.meeting_can_manage(r.meeting_id))
-                when 'write' then r.deleted_at is null and r.status = 'recording' and r.started_by = auth.uid()
+                when 'write' then r.deleted_at is null and r.started_by = auth.uid()
+                                  and (r.status = 'recording' or r.ended_at > now() - interval '5 minutes')
                                   and public.meeting_can_manage(r.meeting_id)
                 when 'delete' then r.deleted_at is not null and public.meeting_can_manage(r.meeting_id)
                 else false
@@ -282,7 +283,8 @@ begin
 end;
 $$;
 
--- A piece was uploaded (the file must be in the recording's folder already).
+-- A piece was uploaded (the file must be in the recording's folder already). The last pieces may arrive up to five
+-- minutes after the recording stopped (slow connection, or the next file already started).
 create or replace function public.meeting_recording_add_part(p_recording uuid, p_seq integer, p_path text, p_bytes integer, p_ms integer)
 returns void language plpgsql security definer set search_path = ''
 as $$
@@ -293,7 +295,7 @@ begin
   if r.id is null or r.started_by is distinct from auth.uid() or not public.meeting_can_manage(r.meeting_id) then
     raise exception 'Recording not found.' using errcode = '42501';
   end if;
-  if r.status <> 'recording' or r.deleted_at is not null then
+  if r.deleted_at is not null or (r.status <> 'recording' and coalesce(r.ended_at, now()) < now() - interval '5 minutes') then
     raise exception 'This recording has stopped.' using errcode = '22023';
   end if;
   if p_seq is null or p_seq not between 0 and 100000 or p_bytes is null or p_bytes not between 1 and 26214400 then
@@ -308,7 +310,7 @@ begin
   on conflict (recording_id, seq) do nothing;
   if found then
     update public.meeting_recordings
-       set parts = parts + 1, size_bytes = size_bytes + p_bytes, last_part_at = now(),
+       set parts = parts + 1, size_bytes = size_bytes + p_bytes, last_part_at = case when status = 'recording' then now() else last_part_at end,
            duration_seconds = duration_seconds + least(greatest(coalesce(p_ms, 0), 0), 3600000) / 1000
      where id = r.id;
   end if;

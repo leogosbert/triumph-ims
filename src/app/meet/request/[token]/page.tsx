@@ -1,6 +1,5 @@
 import { primeLang, tr } from "@/lib/tr";
 import { AppBackground } from "@/components/AppBackground";
-import { LangSwitch } from "@/components/LangSwitch";
 import { inboxAdmin } from "@/lib/inbox/server";
 import { RequestForm } from "./RequestForm";
 
@@ -23,9 +22,6 @@ export default async function RequestMeetingPage({ params }: { params: Promise<{
   return (
     <div className="auth-wrap">
       <AppBackground kind="architecture" />
-      <div style={{ position: "absolute", top: 12, right: 12 }}>
-        <LangSwitch />
-      </div>
       <div className="auth-card">
         {!info ? (
           <>

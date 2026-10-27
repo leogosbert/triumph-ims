@@ -121,7 +121,13 @@ export type Meeting = {
 };
 
 export type MinutesSummary = {
+  /** 2 = paragraph minutes (v1.25). */
+  format?: number;
   summary?: string;
+  sections?: { title: string; topic: string; discussion: string; decisions: string }[];
+  risks?: string[];
+  next_meeting?: string;
+  summary_sw?: string;
   topics?: { topic: string; points: string[] }[];
   suggestions?: string[];
   unclear?: string[];
@@ -129,6 +135,66 @@ export type MinutesSummary = {
   follow_up?: { point_id: string; status: string; note: string }[];
   proposals?: number;
 };
+
+/** A recording of a meeting (v1.25 SQL). */
+export type Recording = {
+  id: string;
+  meeting_id: string;
+  started_by: string | null;
+  started_at: string;
+  ended_at: string | null;
+  last_part_at: string | null;
+  status: string;
+  duration_seconds: number;
+  size_bytes: number;
+  parts: number;
+  mime: string;
+  storage_path: string;
+  language: string;
+  expires_at: string | null;
+  deleted_at: string | null;
+  delete_reason: string | null;
+  transcript: string;
+  transcript_status: string;
+  transcript_error: string | null;
+  transcript_requested_at: string | null;
+  summary: string;
+  summary_sw: string;
+  summary_status: string;
+  summary_error: string | null;
+};
+
+export const RECORDING_COLUMNS =
+  "id, meeting_id, started_by, started_at, ended_at, last_part_at, status, duration_seconds, size_bytes, parts, mime, storage_path, language, expires_at, deleted_at, delete_reason, transcript, transcript_status, transcript_error, transcript_requested_at, summary, summary_sw, summary_status, summary_error";
+
+/** "Delete meeting recordings after" (0 = keep). */
+export const RECORDING_DAYS: [number, string][] = [
+  [7, "7 days"],
+  [30, "30 days"],
+  [90, "90 days"],
+  [365, "1 year"],
+  [0, "Keep them"],
+];
+
+/** A recording is "on" (the red banner) while it records and a piece came in the last two minutes. */
+export function recordingActive(r: Pick<Recording, "status" | "deleted_at" | "last_part_at" | "started_at">, now = Date.now()): boolean {
+  return r.status === "recording" && !r.deleted_at && now - Date.parse(r.last_part_at ?? r.started_at) < 2 * 60_000;
+}
+
+/** "1 h 05 min", "12 min", "40 s". */
+export function durationLabel(sec: number): string {
+  const s = Math.max(0, Math.round(sec));
+  if (s < 60) return `${s} s`;
+  const m = Math.round(s / 60);
+  return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")} min`;
+}
+
+/** Where a meeting is in its life, for the stage bar: plan, meet, minutes, follow up. */
+export function meetingStage(m: Pick<Meeting, "status" | "minutes_status">): 0 | 1 | 2 | 3 {
+  if (m.status === "planned" || m.status === "cancelled") return 0;
+  if (m.status === "live") return 1;
+  return m.minutes_status === "approved" ? 3 : 2;
+}
 
 export type Attendee = {
   id: string;

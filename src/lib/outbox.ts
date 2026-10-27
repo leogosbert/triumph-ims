@@ -337,8 +337,13 @@ async function runAccountEmails(
   }
 }
 
-/** Collects pending alerts once and delivers them. Safe to call often. */
-export async function processOutbox(runAlerts = false) {
+/**
+ * Collects pending alerts once and delivers them. Safe to call often.
+ * With `company` (a manager's "Run the check and send now"), only that company's alert check runs and
+ * only its alerts are sent; the platform's jobs (backups, deletions, admin outbox) are left to the
+ * scheduled run. That needs 20261028000500_polish_fixes.sql; before it, the button says so.
+ */
+export async function processOutbox(runAlerts = false, company?: string) {
   const secret = process.env.OUTBOX_SECRET;
   const status = outboxStatus();
   const result = {
@@ -365,7 +370,16 @@ export async function processOutbox(runAlerts = false) {
   }
   const supabase = db();
   const runStarted = Date.now();
-  if (runAlerts) {
+  if (company) {
+    if (runAlerts) {
+      const { data, error } = await supabase.rpc("run_company_alerts_now", { p_secret: secret, p_company: company });
+      if (error) {
+        result.errors.push(error.code === "PGRST202" ? "This button needs the latest database update (20261028000500_polish_fixes.sql)." : `alerts: ${error.message}`);
+        return result;
+      }
+      result.alerts = Number(data ?? 0);
+    }
+  } else if (runAlerts) {
     const { data, error } = await supabase.rpc("run_all_alerts", { p_secret: secret });
     if (error) result.errors.push(`alerts: ${error.message}`);
     else result.alerts = Number(data ?? 0);
@@ -373,11 +387,16 @@ export async function processOutbox(runAlerts = false) {
     await runDeletions(supabase, secret, result, runStarted);
     await runPlatformDailySummary(supabase, secret, result);
   }
-  await runPlatformOutbox(supabase, secret, status, result);
-  await runAccountEmails(supabase, secret, status, result);
-  const { data, error } = await supabase.rpc("claim_outbox", { p_secret: secret, p_limit: 300 });
+  if (!company) {
+    await runPlatformOutbox(supabase, secret, status, result);
+    await runAccountEmails(supabase, secret, status, result);
+  }
+  const { data, error } = await supabase.rpc(
+    "claim_outbox",
+    company ? { p_secret: secret, p_limit: 300, p_company: company } : { p_secret: secret, p_limit: 300 },
+  );
   if (error) {
-    result.errors.push(`claim: ${error.message}`);
+    result.errors.push(company && error.code === "PGRST202" ? "This button needs the latest database update (20261028000500_polish_fixes.sql)." : `claim: ${error.message}`);
     return result;
   }
   const items = (data ?? []) as Claimed[];

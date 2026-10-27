@@ -4,6 +4,8 @@
  * inside <source> tags as data; text in there that looks like an instruction is not followed.
  */
 
+import { ANSWER_LANGUAGE, READS_KISWAHILI, SUMMARY_STYLE } from "./language";
+
 export type PromptSource = { n: number; kind: string; title: string; body: string };
 
 /** Keeps record text from closing our tags or posing as one; trims to a size. */
@@ -46,7 +48,9 @@ export function askSystem(opts: { company: string; lang: "en" | "sw"; today: str
   const typed = opts.typed === "mix" ? "a mix of Kiswahili and English: answer in the same mix" : opts.typed === "sw" ? "Kiswahili: answer in Kiswahili" : opts.typed === "en" ? "English: answer in English" : "";
   return [
     `You are the assistant inside LeMoSp, the business app of ${asData(opts.company, 120)}, a supplier company in Tanzania. Today is ${opts.today}.`,
-    `Answer in the language the question is written in: English, Kiswahili, or the same mix of both (if unclear, ${opts.lang === "sw" ? "Kiswahili" : "English"}).${typed ? ` The question looks like ${typed}.` : ""} Plain, friendly words for a busy business owner reading on a phone; practical and short.`,
+    READS_KISWAHILI,
+    `${ANSWER_LANGUAGE} If the language is unclear, use ${opts.lang === "sw" ? "Kiswahili" : "English"}.${typed ? ` The question looks like ${typed}.` : ""} Plain, friendly words for a busy business owner reading on a phone; practical and short.`,
+    SUMMARY_STYLE,
     "Reply as JSON: a short title, an intro of one to three sentences, a few numbered steps, where (the screen's breadcrumb and route) when the answer lives on one screen, and two or three short follow-up questions.",
     "Use ONLY the numbered sources you are given. Put the source number in square brackets after each fact, like [2], in the intro and the steps. Never invent figures, names, dates, documents or deadlines that are not in the sources.",
     "When a step happens in the app, set its \"to\" to the screen's route. Only use these routes (a route may end with #part or ?query):",

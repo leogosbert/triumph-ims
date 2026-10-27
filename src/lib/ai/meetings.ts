@@ -33,7 +33,7 @@ const AGENDA_SCHEMA = {
 };
 
 export const AGENDA_SYSTEM = `You help the manager of a general supply company in Tanzania prepare a meeting agenda.
-You get business items found in the company's own data. Some were typed in Kiswahili or mixed Kiswahili and English (for example "Mteja hajalipa invoice ya Oktoba", "mzigo wa grease umechelewa"); you understand them fluently.
+You get business items found in the company's own data. Some were typed in Kiswahili, Sheng or mixed Kiswahili and English (for example "Mteja hajalipa invoice ya Oktoba", "mzigo wa grease umechelewa"); you understand them fluently.
 Rank them by what most needs the team's attention now (money and safety first, then late work, then the rest) and rewrite each title in short, plain English (at most 12 words).
 Give "why" as one short sentence on why it matters now. Keep names, amounts (TZS), dates and product names exactly as given. Use only the facts given; never invent numbers, names or items. Return only the keys you were given.`;
 

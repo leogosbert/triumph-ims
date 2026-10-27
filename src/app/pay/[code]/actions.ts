@@ -3,6 +3,8 @@
 import { gatewayFor } from "@/lib/getpaid/gateways";
 import { inboxAdmin } from "@/lib/inbox/server";
 import { waDigits } from "@/lib/inbox/whatsapp";
+import { MAX_AMOUNT } from "@/lib/fields";
+import { friendlyError } from "@/lib/messages";
 import { siteUrl } from "@/lib/supabase/env";
 
 export type StartResult = { ok: true; url: string } | { ok: false; error: string };
@@ -19,8 +21,8 @@ export async function startPayment(code: string, phone: string, amount: string):
   const db = inboxAdmin();
   if (!db) return { ok: false, error: "Online payment is not available right now. Please pay by bank transfer." };
   const n = Number(String(amount ?? "").replace(/[,\s]/g, ""));
-  const { data, error } = await db.rpc("pay_order_start", { p_code: code, p_amount: Number.isFinite(n) && n > 0 ? n : null });
-  if (error || !data) return { ok: false, error: (error?.message ?? "This pay link is no longer valid.").slice(0, 200) };
+  const { data, error } = await db.rpc("pay_order_start", { p_code: code, p_amount: Number.isFinite(n) && n > 0 && n <= MAX_AMOUNT ? n : null });
+  if (error || !data) return { ok: false, error: error ? friendlyError(error.message).slice(0, 200) : "This pay link is no longer valid." };
   const o = data as {
     order_id: string;
     provider: string;

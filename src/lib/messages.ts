@@ -25,6 +25,39 @@ export function friendlyError(message: string | undefined | null): string {
   if (/multiple \(or no\) rows|0 rows/i.test(message)) return "That record wasn't found, or you don't have permission to change it.";
   if (/permission denied|row-level security/i.test(message)) return "You don't have permission to do that.";
   if (/JWT|session/i.test(message)) return "Your session has expired. Please sign in again.";
+  return plainError(message);
+}
+
+/** Text that comes from the database or the API layer, not from one of our own checks. */
+const TECHNICAL =
+  /schema cache|PGRST\d|violates|syntax|overflow|out of range for type|invalid input|does not exist|null value in column|value too long for type|operator does not exist|could not (find|choose|determine|serialize)|deadlock|canceling statement|statement timeout|duplicate key|relation "|column "|function public\.|\bSQLSTATE\b|unexpected end|Failed to fetch|fetch failed|NetworkError|ECONNREFUSED|ETIMEDOUT|ENOTFOUND/i;
+
+/**
+ * The general cases behind friendlyError. Our own database checks raise plain sentences, and those pass
+ * through; anything that looks like developer text is turned into a plain message and never shown raw.
+ */
+function plainError(message: string): string {
+  // Keep the real text in the server log, where it helps; the person sees a plain sentence.
+  if (TECHNICAL.test(message) && typeof window === "undefined") console.warn("[friendlyError]", message.slice(0, 500));
+  if (/schema cache|function .* does not exist|relation .* does not exist|column .* does not exist|PGRST20[0-9]/i.test(message))
+    return "This part needs the latest database update. Ask your LeMo Tech contact to run it.";
+  if (/invalid input syntax for type (date|timestamp)|date\/time field value out of range|invalid value for date/i.test(message))
+    return "One of the dates is not a real date. Please check it.";
+  if (/numeric field overflow|out of range for type|value out of range/i.test(message)) return "That amount or number is too large.";
+  if (/invalid input syntax for type (numeric|integer|bigint|double)/i.test(message)) return "One of the numbers is not valid. Please check it.";
+  if (/invalid input syntax for type uuid/i.test(message)) return "That record wasn't found.";
+  if (/value too long for type/i.test(message)) return "One of the fields is too long. Please shorten it.";
+  if (/null value in column/i.test(message)) return "A required field is empty. Please fill it in.";
+  if (/duplicate key|violates unique constraint/i.test(message)) return "That is already recorded. Please check for a duplicate.";
+  if (/violates foreign key constraint/i.test(message))
+    return /delete|update or delete/i.test(message)
+      ? "This record is still used elsewhere, so it can't be removed."
+      : "Something this refers to no longer exists. Please reload and try again.";
+  if (/violates check constraint/i.test(message)) return "One of the values is not allowed. Please check the form and try again.";
+  if (/Failed to fetch|fetch failed|NetworkError|ECONNREFUSED|ETIMEDOUT|ENOTFOUND/i.test(message))
+    return "Can't reach the server. Check your connection and try again.";
+  if (/deadlock|could not serialize|canceling statement|statement timeout/i.test(message)) return "The server was busy. Please try again.";
+  if (TECHNICAL.test(message)) return "That didn't work. Please check the values and try again.";
   return message;
 }
 

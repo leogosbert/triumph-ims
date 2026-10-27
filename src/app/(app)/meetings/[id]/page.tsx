@@ -13,6 +13,7 @@ import { addAgendaItem, addGuest, agendaItem, cancelMeeting, removeAttendee, res
 import { GuestLinkButtons } from "../GuestLinkButtons";
 import { MeetingBadge, MeetingTabs, whenRange } from "../parts";
 import styles from "../meetings.module.css";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Meeting" };
 
@@ -43,6 +44,7 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
 
   return (
     <>
+      <BackLink href="/meetings" label="Meetings" />
       <div className="page-head">
         <h1>{m.title}</h1>
         <span>

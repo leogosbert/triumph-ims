@@ -10,6 +10,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { closingIn } from "@/lib/crmText";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Tenders" };
 
@@ -52,9 +53,7 @@ export default async function TendersPage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href="/crm">{tr("← Pipeline")}</Link>
-      </p>
+      <BackLink href="/crm" label="Pipeline" />
       <div className="page-head">
         <h1>{tr("Tenders")}</h1>
         <span style={{ display: "flex", gap: 8 }}>

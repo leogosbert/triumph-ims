@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { can } from "@/lib/roles";
 import { storeOptions } from "@/lib/stock";
 import { createRequisition } from "../actions";
 import { RequisitionFields } from "../RequisitionFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New purchase request" };
 
@@ -25,9 +25,7 @@ export default async function NewRequisitionPage({ searchParams }: { searchParam
 
   return (
     <>
-      <p className="small">
-        <Link href="/requisitions">{tr("← Purchase requests")}</Link>
-      </p>
+      <BackLink href="/requisitions" label="Purchase requests" />
       <h1>{tr("New purchase request")}</h1>
       <Notice {...notice} />
       <form action={createRequisition} className="card">

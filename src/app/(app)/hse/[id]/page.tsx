@@ -15,6 +15,7 @@ import { formatWhen } from "@/lib/services";
 import { saveIncident, setRecordStatus } from "../actions";
 import { IncidentFields } from "../IncidentFields";
 import { linkedNames, loadLinkOptions } from "../options";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Incident" };
 
@@ -54,9 +55,7 @@ export default async function IncidentPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/hse">{tr("← Health & safety")}</Link>
-      </p>
+      <BackLink href="/hse" label="Health & safety" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{inc.title}</h1>
         <StatusBadge map={INCIDENT_STATUS} status={inc.status} />

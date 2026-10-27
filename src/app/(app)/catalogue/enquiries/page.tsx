@@ -11,6 +11,7 @@ import { ENQUIRY_STATUS } from "@/lib/growth-tools/catalogue";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Catalogue requests" };
 
@@ -32,9 +33,7 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Se
   const rows = (data ?? []) as Row[];
   return (
     <>
-      <p className="small">
-        <Link href="/catalogue">{tr("← Online catalogue")}</Link>
-      </p>
+      <BackLink href="/catalogue" label="Online catalogue" />
       <h1>{tr("Catalogue requests")}</h1>
       <Notice {...notice} />
       <nav className="tabs-row" aria-label={tr("Show")}>

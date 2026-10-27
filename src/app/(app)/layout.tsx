@@ -192,7 +192,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <NavPills />
       <BottomNav
         items={bottomNav(role, t, features.on)}
-        menu={moreMenu(role, isManager, { on: features.on, isPlatformAdmin, features: features.list })}
+        menu={moreMenu(role, isManager, { on: features.on, isPlatformAdmin, features: features.list, menu: true })}
         menuStart={defaultCategory(role)}
       />
       <TourHost

@@ -41,6 +41,7 @@ import { applyContractPrices } from "../../contracts/actions";
 import { OrderProgress } from "@/components/OrderProgress";
 import { loadOrderJourney } from "@/lib/orders";
 import { setStageOwner } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Quotation" };
 
@@ -201,15 +202,14 @@ export default async function QuotationPage({
 
   return (
     <>
-      <p className="small">
-        <Link href="/quotations">{tr("← Quotations")}</Link>
+      <BackLink href="/quotations" label="Quotations">
         {q.rfq_id && (
           <>
             {" · "}
             <Link href={`/rfqs/${q.rfq_id}`}>{tr("RFQ")}</Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{q.client?.name}</h1>
         <StatusBadge map={QUOTE_STATUS} status={q.status} />

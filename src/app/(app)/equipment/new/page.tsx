@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { clientOptions, productOptions } from "@/lib/options";
 import { canPlanService } from "@/lib/services";
 import { createEquipment } from "../actions";
 import { EquipmentFields } from "../EquipmentFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New equipment" };
 
@@ -28,9 +28,7 @@ export default async function NewEquipmentPage({ searchParams }: { searchParams:
 
   return (
     <>
-      <p className="small">
-        <Link href={clientId ? `/equipment?client=${clientId}` : "/equipment"}>{tr("← Equipment")}</Link>
-      </p>
+      <BackLink href={clientId ? `/equipment?client=${clientId}` : "/equipment"} label="Equipment" />
       <h1>{tr("New equipment")}</h1>
       <Notice {...notice} />
       <form action={createEquipment} className="card">

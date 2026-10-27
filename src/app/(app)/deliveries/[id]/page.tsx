@@ -23,6 +23,7 @@ import {
   updateDeliveryLine,
 } from "../actions";
 import { newInvoice } from "../../invoices/actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Delivery" };
 
@@ -82,15 +83,14 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/deliveries">{tr("← Deliveries")}</Link>
+      <BackLink href="/deliveries" label="Deliveries">
         {d.quotation && can(role, "seeSales") && (
           <>
             {" · "}
             <Link href={`/quotations/${d.quotation.id}`}>{quoteNo(d.quotation)}</Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{d.client?.name}</h1>
         <StatusBadge map={DELIVERY_STATUS} status={d.status} />

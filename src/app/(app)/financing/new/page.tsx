@@ -12,6 +12,7 @@ import { can } from "@/lib/roles";
 import { quoteNo } from "@/lib/sales";
 import { createRequest } from "../actions";
 import { RequestFields } from "../RequestFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New financing request" };
 
@@ -35,9 +36,7 @@ export default async function NewFinancingPage({ searchParams }: { searchParams:
     type O = { id: string; number: string; revision: number; total: number; currency: string; client_ref: string | null; decided_at: string | null; issue_date: string; client: { name: string } | null };
     return (
       <>
-        <p className="small">
-          <Link href="/financing">{tr("← LPO financing")}</Link>
-        </p>
+        <BackLink href="/financing" label="LPO financing" />
         <h1>{tr("Which order?")}</h1>
         <p className="muted small">{tr("Choose the client's order (an accepted quotation) to finance.")}</p>
         <Notice {...notice} />
@@ -85,9 +84,7 @@ export default async function NewFinancingPage({ searchParams }: { searchParams:
 
   return (
     <>
-      <p className="small">
-        <Link href="/financing">{tr("← LPO financing")}</Link>
-      </p>
+      <BackLink href="/financing" label="LPO financing" />
       <h1>{tr("New financing request")}</h1>
       <p className="muted small">
         {client} · {quoteNo(q)}

@@ -12,6 +12,7 @@ import { companyPeople } from "@/lib/people";
 import { createProject } from "../actions";
 import { canKeepProjects } from "../projectData";
 import { ProjectFields } from "../ProjectFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New project" };
 
@@ -26,9 +27,7 @@ export default async function NewProjectPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/projects">{tr("← Projects")}</Link>
-      </p>
+      <BackLink href="/projects" label="Projects" />
       <h1>{tr("New project")}</h1>
       <Notice {...notice} />
       {clients.length === 0 ? (

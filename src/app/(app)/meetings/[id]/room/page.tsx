@@ -11,6 +11,7 @@ import { endMeeting, startMeeting } from "../../actions";
 import { MeetingBadge, whenRange } from "../../parts";
 import { LiveRoom } from "./LiveRoom";
 import styles from "../../meetings.module.css";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Meeting room" };
 export const dynamic = "force-dynamic";
@@ -60,6 +61,7 @@ export default async function RoomPage({ params, searchParams }: { params: Promi
 
   return (
     <>
+      <BackLink href={`/meetings/${id}`} label="Meeting" />
       <div className="page-head">
         <h1>{m.title}</h1>
         <span>

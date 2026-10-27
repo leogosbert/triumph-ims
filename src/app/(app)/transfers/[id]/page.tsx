@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -14,6 +13,7 @@ import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { TRANSFER_STATUS, fmtQty, storeOptions } from "@/lib/stock";
 import { addTransferLine, removeTransferLine, transferAction } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Stock transfer" };
 
@@ -47,9 +47,7 @@ export default async function TransferPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/transfers">{tr("← Stock transfers")}</Link>
-      </p>
+      <BackLink href="/transfers" label="Stock transfers" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>
           {stores.get(t.from_warehouse_id)} → {stores.get(t.to_warehouse_id)}

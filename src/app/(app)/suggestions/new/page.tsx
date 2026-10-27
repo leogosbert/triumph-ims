@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import "../suggestions.css";
 import { Notice } from "@/components/Notice";
 import { NewSuggestionForm } from "@/components/suggestions/NewSuggestionForm";
@@ -7,6 +6,7 @@ import { getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { companyPeople } from "@/lib/people";
 import { submitSuggestion } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New suggestion" };
 
@@ -18,9 +18,7 @@ export default async function NewSuggestionPage({ searchParams }: { searchParams
 
   return (
     <>
-      <p className="small">
-        <Link href="/suggestions">{tr("← Suggestion Box")}</Link>
-      </p>
+      <BackLink href="/suggestions" label="Suggestion Box" />
       <h1>{tr("New suggestion")}</h1>
       <Notice {...notice} />
       <div className="sg-hero">

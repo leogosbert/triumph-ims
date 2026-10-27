@@ -12,6 +12,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { recordCash, removeCash } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Cash-flow forecast" };
 
@@ -65,9 +66,7 @@ export default async function CashflowPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Cash-flow forecast")}</h1>
       <p className="muted small">
         {tr("Money expected in from unpaid invoices (by the promised or due date) and out to supplier bills, purchase orders not billed yet and your usual monthly expenses. Amounts in")} {base}.

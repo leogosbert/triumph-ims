@@ -7,6 +7,7 @@ import { companyPeople } from "@/lib/people";
 import { canManage, MEETING_COLUMNS, type Meeting } from "@/lib/meetings/model";
 import { updateMeeting } from "../../actions";
 import { MeetingForm } from "../../parts";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Change meeting" };
 
@@ -27,6 +28,7 @@ export default async function EditMeetingPage({ params, searchParams }: { params
   ]);
   return (
     <>
+      <BackLink href={`/meetings/${id}`} label={m.title} />
       <div className="page-head">
         <h1>{tr("Change meeting")}</h1>
       </div>

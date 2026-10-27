@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { RecordFields } from "@/components/RecordFields";
@@ -10,6 +9,7 @@ import { ITEM_TYPE_LABELS } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { saveProduct } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New product" };
 
@@ -25,9 +25,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/products">{tr("← Products")}</Link>
-      </p>
+      <BackLink href="/products" label="Products" />
       <h1>{tr("New product")}</h1>
       <Notice {...notice} />
       <form action={saveProduct}>

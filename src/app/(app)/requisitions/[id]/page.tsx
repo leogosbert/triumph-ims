@@ -16,6 +16,7 @@ import { StatusBadge } from "@/lib/sales";
 import { REQUEST_STATUS, fmtQty, storeOptions } from "@/lib/stock";
 import { addRequisitionLine, cancelRequisition, decideRequisition, orderRequisition, removeRequisitionLine, saveRequisition, submitRequisition } from "../actions";
 import { RequisitionFields } from "../RequisitionFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Purchase request" };
 
@@ -68,9 +69,7 @@ export default async function RequisitionPage({ params, searchParams }: { params
 
   return (
     <>
-      <p className="small">
-        <Link href="/requisitions">{tr("← Purchase requests")}</Link>
-      </p>
+      <BackLink href="/requisitions" label="Purchase requests" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{r.reason ?? r.number}</h1>
         <StatusBadge map={REQUEST_STATUS} status={r.status} />

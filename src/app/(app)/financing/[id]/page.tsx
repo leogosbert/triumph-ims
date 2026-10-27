@@ -14,6 +14,7 @@ import { can } from "@/lib/roles";
 import { quoteNo, StatusBadge, todayTz } from "@/lib/sales";
 import { deleteRequest, saveRequest, setRequestStatus } from "../actions";
 import { RequestFields } from "../RequestFields";
+import { BackLink } from "@/components/BackLink";
 import "../../../growth-tools.css";
 
 export const metadata = { title: "Financing request" };
@@ -55,9 +56,7 @@ export default async function FinancingRequestPage({ params, searchParams }: { p
 
   return (
     <>
-      <p className="small">
-        <Link href="/financing">{tr("← LPO financing")}</Link>
-      </p>
+      <BackLink href="/financing" label="LPO financing" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{client}</h1>
         <StatusBadge map={FIN_STATUS} status={f.status} />

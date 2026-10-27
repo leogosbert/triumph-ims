@@ -1,10 +1,10 @@
-import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { Icon, type IconName } from "@/components/Icon";
 import { tr } from "@/lib/tr";
 
 /**
- * Same top for every settings screen: the back pill (it must stay the first element on the page
- * so the shared "← Back" style applies), the title with its icon and one line saying what the page is for.
+ * Same top for every settings screen: the shared back link (BackLink), the title with its icon and
+ * one line saying what the page is for.
  */
 export function SettingsHead({
   title,
@@ -21,11 +21,7 @@ export function SettingsHead({
 }) {
   return (
     <>
-      {back && (
-        <p className="small">
-          <Link href={back.href}>{back.label}</Link>
-        </p>
-      )}
+      {back && <BackLink href={back.href} label={back.label} />}
       <div className="st-head">
         {icon && (
           <span className="st-head-ico" aria-hidden>

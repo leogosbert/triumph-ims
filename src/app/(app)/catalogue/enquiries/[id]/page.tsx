@@ -11,6 +11,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { closeEnquiry, convertEnquiry } from "../../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Catalogue request" };
 
@@ -32,9 +33,7 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      <p className="small">
-        <Link href="/catalogue/enquiries">{tr("← Catalogue requests")}</Link>
-      </p>
+      <BackLink href="/catalogue/enquiries" label="Catalogue requests" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{e.name}</h1>
         <StatusBadge map={ENQUIRY_STATUS} status={e.status} />

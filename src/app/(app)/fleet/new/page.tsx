@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { companyPeople } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { createVehicle } from "../actions";
 import { VehicleFields } from "../VehicleFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New vehicle" };
 
@@ -26,9 +26,7 @@ export default async function NewVehiclePage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/fleet">{tr("← Vehicles")}</Link>
-      </p>
+      <BackLink href="/fleet" label="Vehicles" />
       <h1>{tr("New vehicle")}</h1>
       <Notice {...notice} />
       <form action={createVehicle} className="card">

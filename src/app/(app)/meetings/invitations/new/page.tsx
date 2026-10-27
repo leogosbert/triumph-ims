@@ -8,6 +8,7 @@ import { companyPeople } from "@/lib/people";
 import { canOrganise } from "@/lib/meetings/model";
 import { addInvitation } from "../../actions";
 import styles from "../../meetings.module.css";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Add an invitation" };
 
@@ -23,6 +24,7 @@ export default async function NewInvitationPage({ searchParams }: { searchParams
   ]);
   return (
     <>
+      <BackLink href="/meetings/invitations" label="Invitations" />
       <div className="page-head">
         <h1>{tr("Add an invitation we got")}</h1>
       </div>

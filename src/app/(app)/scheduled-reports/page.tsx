@@ -11,6 +11,7 @@ import { findReport } from "@/lib/reports/defs";
 import { TimingFields } from "@/components/reports/TimingFields";
 import { WEEKDAYS } from "@/lib/schedules";
 import { updateSchedule } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Scheduled reports" };
 
@@ -34,9 +35,7 @@ export default async function ScheduledReportsPage({ searchParams }: { searchPar
 
   return (
     <>
-      <p className="small">
-        <Link href="/reports">{tr("← Reports")}</Link>
-      </p>
+      <BackLink href="/reports" label="Reports" />
       <h1>{tr("Scheduled reports")}</h1>
       <p className="muted small">
         {tr("Reports sent to you by themselves: an alert in the app and an email (if you have emails on), from 7 in the morning, with a link to the report for the period just ended.")}

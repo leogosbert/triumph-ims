@@ -8,6 +8,7 @@ import { canUseInbox } from "@/lib/inbox/common";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { clientOptions } from "@/lib/options";
 import { startConversation } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New message" };
 
@@ -43,9 +44,7 @@ export default async function NewConversationPage({ searchParams }: { searchPara
 
   return (
     <>
-      <p className="small">
-        <Link href="/inbox">{tr("← Inbox")}</Link>
-      </p>
+      <BackLink href="/inbox" label="Inbox" />
       <h1>{tr("New message")}</h1>
       <p className="muted small">{tr("Start a conversation with a client or supplier. You write the message on the next screen.")}</p>
       <Notice {...notice} />

@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -10,6 +9,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { loadLinkOptions } from "../links";
 import { NewDocumentForm } from "../NewDocumentForm";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New document" };
 
@@ -29,9 +29,7 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
 
   return (
     <>
-      <p className="small">
-        <Link href={back ?? "/documents"}>{back ? tr("← Back") : tr("← Documents")}</Link>
-      </p>
+      <BackLink href={back ?? "/documents"} label={back ? "Back" : "Documents"} />
       <h1>{tr("Add a document")}</h1>
       <p className="muted small">{tr("Certificates, licences, safety data sheets, CoAs, datasheets, contracts and tender papers. Add the expiry date to be reminded before it runs out.")}</p>
       <Notice {...notice} />

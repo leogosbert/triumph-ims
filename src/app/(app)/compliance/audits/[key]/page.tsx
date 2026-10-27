@@ -17,6 +17,7 @@ import { todayTz } from "@/lib/services";
 import { adoptPack, markNotNeeded } from "../../actions";
 import { Disclaimer } from "../../parts";
 import { loadPackData } from "../data";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Inspection pack" };
 
@@ -42,9 +43,7 @@ export default async function AuditPackPage({ params, searchParams }: { params: 
 
   return (
     <>
-      <p className="small no-print">
-        <Link href="/compliance/audits">{tr("← Inspections & audits")}</Link>
-      </p>
+      <BackLink href="/compliance/audits" label="Inspections & audits" />
       <Notice {...notice} />
       <div className="report-print">
         <div className="page-head">

@@ -15,6 +15,7 @@ import { CONTRACT_STATUS, FREQUENCIES, JOB_STATUS, canPlanService, canSeeAllServ
 import { saveEquipment, setEquipmentActive } from "../actions";
 import { equipmentBadges } from "../badges";
 import { EquipmentFields, type Equipment } from "../EquipmentFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Equipment" };
 
@@ -62,9 +63,7 @@ export default async function EquipmentDetailPage({ params, searchParams }: { pa
 
   return (
     <>
-      <p className="small">
-        <Link href={`/equipment?client=${e.client_id}`}>{tr("← Equipment")}</Link>
-      </p>
+      <BackLink href={`/equipment?client=${e.client_id}`} label="Equipment" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{e.name}</h1>
         {badges.map((b) => (

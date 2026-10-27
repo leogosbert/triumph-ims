@@ -9,6 +9,7 @@ import { SRFQ_STATUS } from "@/lib/purchasing";
 import { LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier RFQs" };
 
@@ -42,9 +43,7 @@ export default async function SupplierRfqsPage({ searchParams }: { searchParams:
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchasing">{tr("← Purchasing")}</Link>
-      </p>
+      <BackLink href="/purchasing" label="Purchasing" />
       <div className="page-head">
         <h1>{tr("Supplier RFQs")}</h1>
         <Link href="/supplier-rfqs/new" className="btn btn-primary btn-small">{tr("+ New")}</Link>

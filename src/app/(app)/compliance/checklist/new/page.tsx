@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -10,6 +9,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { companyPeople } from "@/lib/people";
 import { createItem } from "../../actions";
 import { ItemFields } from "../../ItemFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New compliance item" };
 
@@ -24,9 +24,7 @@ export default async function NewItemPage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href="/compliance/checklist">{tr("← Checklist")}</Link>
-      </p>
+      <BackLink href="/compliance/checklist" label="Checklist" />
       <h1>{tr("Add your own item")}</h1>
       <p className="muted small">
         {tr("For anything not in the catalogue: a client's vendor renewal, a permit from your council, a board decision to follow up.")}

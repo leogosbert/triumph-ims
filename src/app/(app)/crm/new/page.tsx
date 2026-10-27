@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { companyPeople } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { createOpportunity } from "../actions";
 import { OpportunityFields } from "../OpportunityFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New opportunity" };
 
@@ -30,9 +30,7 @@ export default async function NewOpportunityPage({ searchParams }: { searchParam
 
   return (
     <>
-      <p className="small">
-        <Link href="/crm">{tr("← Pipeline")}</Link>
-      </p>
+      <BackLink href="/crm" label="Pipeline" />
       <h1>{tr("New opportunity")}</h1>
       <p className="muted small">{tr("A possible order: from the first call to the purchase order. Record it early so nothing is forgotten.")}</p>
       <Notice {...notice} />

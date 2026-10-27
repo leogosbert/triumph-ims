@@ -14,6 +14,7 @@ import { StatusBadge } from "@/lib/sales";
 import { HIRE_STATUS, RATE_PERIODS, canInvoiceService, canPlanService, canSeeAllService, todayTz } from "@/lib/services";
 import { addHireLine, cancelHire, invoiceHire, removeHireLine, returnHire, saveHire } from "../actions";
 import { chargeBetween, isOverdue, perPeriod, unbilledSpan, type Hire, type HireLine } from "../calc";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Hire" };
 
@@ -76,9 +77,7 @@ export default async function HireDetailPage({ params, searchParams }: { params:
 
   return (
     <>
-      <p className="small">
-        <Link href="/hire">{tr("← Equipment hire")}</Link>
-      </p>
+      <BackLink href="/hire" label="Equipment hire" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{h.number}</h1>
         <span>

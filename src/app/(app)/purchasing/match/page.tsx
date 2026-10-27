@@ -7,6 +7,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import type { SearchParams } from "@/lib/messages";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Order, receipt and bill check" };
 
@@ -71,9 +72,7 @@ export default async function MatchPage({ searchParams }: { searchParams: Search
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchasing">{tr("← Purchasing")}</Link>
-      </p>
+      <BackLink href="/purchasing" label="Purchasing" />
       <h1>{tr("Order, receipt and bill check")}</h1>
       <p className="muted small">
         {tr("For each purchase order: what was ordered, what arrived (goods received notes) and what the supplier billed. Pay only for what arrived.")}{" "}

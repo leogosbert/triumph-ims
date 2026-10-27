@@ -8,6 +8,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { reviewSubmission } from "../../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier document" };
 
@@ -71,9 +72,7 @@ export default async function PortalSubmission({ params, searchParams }: { param
 
   return (
     <>
-      <p className="small">
-        <Link href="/portal-admin">{tr("← Portals")}</Link>
-      </p>
+      <BackLink href="/portal-admin" label="Portals" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>
           {s.kind === "invoice" ? `${tr("Invoice")} ${s.supplier_invoice_no ?? ""}` : `${tr("Delivery note")} ${s.reference ?? ""}`}

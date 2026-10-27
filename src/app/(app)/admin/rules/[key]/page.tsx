@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { LEVEL_LABEL, LEVELS } from "@/components/suggestions/meta";
@@ -8,6 +7,7 @@ import { deleteRule, saveRule } from "../../actions";
 import { platformAdmin } from "../../guard";
 import { METRICS, OP_LABEL, OPS } from "../meta";
 import { RuleSentence, type Rule } from "../RuleSentence";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Growth rule" };
 
@@ -31,9 +31,7 @@ export default async function AdminRulePage({ params, searchParams }: { params: 
   if (!isNew && !r) {
     return (
       <>
-        <p className="small">
-          <Link href="/admin/rules">{tr("← Growth rules")}</Link>
-        </p>
+        <BackLink href="/admin/rules" label="Growth rules" />
         <p className="card muted">{tr("Rule not found.")}</p>
       </>
     );
@@ -44,9 +42,7 @@ export default async function AdminRulePage({ params, searchParams }: { params: 
 
   return (
     <>
-      <p className="small">
-        <Link href="/admin/rules">{tr("← Growth rules")}</Link>
-      </p>
+      <BackLink href="/admin/rules" label="Growth rules" />
       <h2 className="adm-title">{isNew ? tr("New growth rule") : r!.title}</h2>
       <Notice {...notice} />
       {r && (

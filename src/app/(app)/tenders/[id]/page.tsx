@@ -15,6 +15,7 @@ import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { addTask, removeTask, saveTender, setTenderStatus, toggleTask } from "../actions";
 import { TenderFields } from "../TenderFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Tender" };
 
@@ -45,9 +46,7 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
 
   return (
     <>
-      <p className="small">
-        <Link href="/tenders">{tr("← Tenders")}</Link>
-      </p>
+      <BackLink href="/tenders" label="Tenders" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{buyer}</h1>
         <StatusBadge map={TENDER_BADGE} status={t.status} />

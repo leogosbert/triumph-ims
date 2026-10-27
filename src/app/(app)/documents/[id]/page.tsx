@@ -15,6 +15,7 @@ import { archiveDocument, saveDocument } from "../actions";
 import { DocumentFields } from "../DocumentFields";
 import { FilePicker } from "../FilePicker";
 import { loadLinkOptions } from "../links";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Document" };
 
@@ -55,9 +56,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/documents">{tr("← Documents")}</Link>
-      </p>
+      <BackLink href="/documents" label="Documents" />
       <h1 style={d.archived_at ? { textDecoration: "line-through" } : undefined}>{d.title}</h1>
       <p className="muted small">
         {tr(docKindLabel(d.kind))}

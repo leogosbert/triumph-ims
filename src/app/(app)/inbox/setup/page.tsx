@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -12,6 +11,7 @@ import { inboxChannels } from "@/lib/inbox/server";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { siteUrl } from "@/lib/supabase/env";
 import { checkMailboxNow, saveInboxSettings } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Inbox setup" };
 
@@ -42,9 +42,7 @@ export default async function InboxSetupPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/inbox">{tr("← Inbox")}</Link>
-      </p>
+      <BackLink href="/inbox" label="Inbox" />
       <h1>{tr("Inbox setup")}</h1>
       <p className="muted small">
         {tr("When a client or supplier emails your company address or sends a WhatsApp to your business number, the message appears in the Inbox and management and sales get a notification on their phones. You reply from the app.")}

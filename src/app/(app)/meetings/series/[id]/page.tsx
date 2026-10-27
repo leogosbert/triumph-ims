@@ -5,6 +5,7 @@ import { requireManager } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { companyPeople } from "@/lib/people";
 import { SeriesForm, type Series } from "../SeriesForm";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Regular meeting" };
 
@@ -18,6 +19,7 @@ export default async function EditSeriesPage({ params, searchParams }: { params:
   const people = await companyPeople(supabase, company.id);
   return (
     <>
+      <BackLink href="/meetings/series" label="Regular meetings" />
       <div className="page-head">
         <h1>{(data as Series).title}</h1>
       </div>

@@ -17,6 +17,7 @@ import { addContact, removeContact, saveClient, setClientActive } from "../actio
 import { ClientCrm } from "../../crm/ClientCrm";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
 import { PortalAccess } from "@/components/PortalAccess";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Client" };
 
@@ -73,9 +74,7 @@ export default async function ClientPage({
 
   return (
     <>
-      <p className="small">
-        <Link href="/clients">{tr("← Clients")}</Link>
-      </p>
+      <BackLink href="/clients" label="Clients" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{client.name}</h1>
         <span className="badge">{client.code}</span>

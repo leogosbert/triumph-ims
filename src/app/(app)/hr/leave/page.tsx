@@ -13,6 +13,7 @@ import { StatusBadge } from "@/lib/sales";
 import { todayTz } from "@/lib/services";
 import { addDays } from "../../timesheets/week";
 import { cancelLeave, decideLeave, requestLeave } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Leave" };
 
@@ -124,9 +125,7 @@ export default async function LeavePage({ searchParams }: { searchParams: Search
   return (
     <>
       {can(role, "seeEmployees") && (
-        <p className="small">
-          <Link href="/hr">{tr("← Employees")}</Link>
-        </p>
+        <BackLink href="/hr" label="Employees" />
       )}
       <div className="page-head">
         <h1>{tr("Leave")}</h1>

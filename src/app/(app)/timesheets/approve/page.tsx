@@ -14,6 +14,7 @@ import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { addDays, hoursText } from "../week";
 import { decideWeek, reopenWeek } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Approve timesheets" };
 
@@ -85,9 +86,7 @@ export default async function ApproveTimesheetsPage({ searchParams }: { searchPa
 
   return (
     <>
-      <p className="small">
-        <Link href="/timesheets">{tr("← Timesheets")}</Link>
-      </p>
+      <BackLink href="/timesheets" label="Timesheets" />
       <h1>{tr("Approve timesheets")}</h1>
       <p className="muted small">{tr("Check each week and approve it, or send it back with a note. Approved weeks are locked.")}</p>
       <Notice {...notice} />

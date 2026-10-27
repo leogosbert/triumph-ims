@@ -5,6 +5,7 @@ import { getAppContext } from "@/lib/context";
 import { daysOverdue, openBase } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Statements" };
 
@@ -103,9 +104,7 @@ export default async function StatementsPage() {
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Statements")}</h1>
       <p className="muted small">{tr("A statement lists every invoice (or bill) and payment for a period with the running balance. Send it to a client to agree what they owe, or compare it with a supplier's statement.")}</p>
       {seeClients && <Block title={tr("Clients who owe us")} rows={clients} kind="clients" all={(cl ?? []) as { id: string; name: string }[]} />}

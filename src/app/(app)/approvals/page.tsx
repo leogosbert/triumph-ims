@@ -13,6 +13,7 @@ import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
 import { can, ROLE_LABELS, type Role } from "@/lib/roles";
 import { saveSteps } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Approval steps" };
 
@@ -66,9 +67,7 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchase-orders">{tr("← Purchase orders")}</Link>
-      </p>
+      <BackLink href="/purchase-orders" label="Purchase orders" />
       <h1>{tr("Approval steps")}</h1>
       <p className="muted small">
         {tr("Purchase orders above an amount need approval in steps, for example finance first, then management. Nobody approves their own order, and one person cannot approve two steps of the same order.")}

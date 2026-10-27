@@ -23,6 +23,7 @@ import { PLAYBOOKS } from "@/lib/playbooks";
 import { platformAdmin } from "../../guard";
 import { createInvoice, grantItem, issueInvoice, recordPayment, saveCompanyBilling, voidInvoice } from "../actions";
 import { RequestCard, type AdminRequest } from "../RequestCard";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Company billing" };
 
@@ -94,9 +95,8 @@ export default async function AdminCompanyBillingPage({ params, searchParams }: 
 
   return (
     <>
-      <p className="small">
-        <Link href="/admin/billing">{tr("← Billing & services")}</Link> · <Link href={`/admin/companies/${id}`}>{tr("Company and features")}</Link>
-      </p>
+      <BackLink href="/admin/billing" label="Billing & services"> · <Link href={`/admin/companies/${id}`}>{tr("Company and features")}</Link>
+      </BackLink>
       <div className="page-head">
         <h2 className="adm-title">{c.name}</h2>
         <LevelBadge level={c.business_level} /> <span className={`badge tone-${st.tone}`}>{tr(st.label)}</span>

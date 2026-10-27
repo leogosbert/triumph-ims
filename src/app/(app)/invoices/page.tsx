@@ -10,6 +10,7 @@ import { formatMoney } from "@/lib/money";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Invoices" };
 
@@ -70,9 +71,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      <p className="small">
-        <Link href={can(role, "seeFinance") ? "/finance" : "/sales"}>← {can(role, "seeFinance") ? tr("Finance") : tr("Sales")}</Link>
-      </p>
+      <BackLink href={can(role, "seeFinance") ? "/finance" : "/sales"} label={can(role, "seeFinance") ? "Finance" : "Sales"} />
       <div className="page-head">
         <h1>{tr("Invoices")}</h1>
         {can(role, "editInvoices") && (

@@ -9,6 +9,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { EMPLOYEE_PAY_METHODS } from "@/lib/payroll";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Pay details" };
 
@@ -33,9 +34,7 @@ export default async function PayDetailsPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/payroll">{tr("← Payroll")}</Link>
-      </p>
+      <BackLink href="/payroll" label="Payroll" />
       <div className="page-head">
         <h1>{tr("Pay details")}</h1>
       </div>

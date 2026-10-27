@@ -23,33 +23,68 @@ export type MenuOptions = {
   isPlatformAdmin?: boolean;
   /** The company's feature list (empty before the Stage 11 SQL): fills the "Grow" category. */
   features?: FeatureRow[];
+  /**
+   * true: only what the menus show, each job once (the phone menu and the More page). Left out, the
+   * list also holds the shortcuts the menus leave out (the "+ New" forms, the screens inside
+   * Settings, the overviews behind the bottom bar), so search and the AI still find them.
+   */
+  menu?: boolean;
 };
 
 const SERVICE_FEATURES = new Set(["service_jobs", "maintenance_contracts", "equipment_register", "projects", "timesheets", "hire_rentals", "service_reports"]);
 /** Administration, payroll and accounts screens: shown once their database update has been run. */
 const ERP_FEATURES = new Set(["hr_people", "timesheet_approval", "hse", "quality", "payroll", "ledger", "fixed_assets", "inbox", "compliance", "meetings", "calendar", "tender_alerts", "online_catalogue", "lpo_financing", "tra_fiscal", "pay_links", "auto_reminders", "client_portal"]);
 
+/**
+ * The menu, one place for each job, grouped by what the business does, in order of daily use:
+ * Me, Sell, Services, Buy, Stock, Deliver, Money, Reports, Team, Company, Help (and Grow).
+ */
 export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {}): MenuCategory[] {
   const on = opts.on ?? (() => true);
   const c = (perm: Parameters<typeof can>[1]) => can(role, perm);
+  // Shortcuts the menus leave out because the same job is one tap away elsewhere (the "+ New" button
+  // on each list, the bell, the Settings page, the bottom bar). Search and the AI still know them.
+  const all = opts.menu !== true;
   type Draft = { key: string; label: string; icon: IconName; items: (MenuItem | false)[] };
   const drafts: Draft[] = [
     {
+      // Your own things first, for every role.
+      key: "me",
+      label: "Me",
+      icon: "user",
+      items: [
+        { href: "/my", title: "My page", sub: "Your tasks, approvals and reminders for today", icon: "user" },
+        !c("seeEmployees") && { href: "/hr", title: "My employee file", sub: "Your details, certificates and leave balance", icon: "team" },
+        !c("manageHr") && { href: "/hr/leave", title: "My leave", sub: "Ask for leave and see your balance", icon: "clock" },
+        { href: "/payroll/my", title: "My payslips", sub: "Your monthly payslips", icon: "receipt", feature: "payroll" },
+        !c("manageExpenses") && { href: "/expenses", title: "My expenses", sub: "Money you spent for the business, with receipt photos", icon: "cash" },
+        all && { href: "/notifications", title: "Notifications", sub: "Your alerts, phone notifications and emails", icon: "bell" },
+        { href: "/account", title: "Your account", sub: "Your details, password, appearance, sign out", icon: "lock" },
+        all && { href: "/account#password", title: "Change password", sub: "Put a new password for signing in", icon: "lock" },
+      ],
+    },
+    {
       key: "sales",
-      label: "Sales",
+      label: "Sell",
       icon: "sales",
       items: [
-        canUseInbox(role) && { href: "/inbox", title: "Inbox", sub: "Client and supplier emails and WhatsApp in one place", icon: "inbox", feature: "inbox" },
-        ["management", "sales", "procurement", "finance", "warehouse"].includes(role) && { href: "/portal-admin", title: "Portals", sub: "Client and supplier portals: access, documents to check, bank changes", icon: "team", feature: "client_portal" },
+        all && c("seeSales") && { href: "/sales", title: "Sales overview", sub: "Client RFQs, quotations, approvals", icon: "sales" },
+        { href: "/clients", title: "Clients", sub: "Search, view and edit clients and their contacts", icon: "clients" },
         c("seeCrm") && { href: "/crm", title: "Pipeline", sub: "Opportunities from first call to order, follow-ups", icon: "activity" },
         c("seeSales") && { href: "/rfqs", title: "Client RFQs", sub: "Requests for quotation from clients", icon: "inbox" },
         c("seeSales") && { href: "/quotations", title: "Quotations", sub: "Prices sent to clients, approvals", icon: "doc" },
-        { href: "/clients", title: "Clients", sub: "Search, view and edit clients and their contacts", icon: "clients" },
+        c("seeContracts") && { href: "/contracts", title: "Contracts", sub: "Framework agreements and agreed prices", icon: "doc" },
         c("seeCrm") && { href: "/tenders", title: "Tenders", sub: "Bids with closing dates, checklist of papers, results", icon: "doc" },
         c("seeCrm") && { href: "/tenders/alerts", title: "Tender alerts", sub: "Tender notices read and scored for you, bid or no bid", icon: "bell", feature: "tender_alerts" },
         c("seeSales") && { href: "/catalogue", title: "Online catalogue", sub: "Public product page, PDF and QR code, enquiries from buyers", icon: "products", feature: "online_catalogue" },
-        c("seeContracts") && { href: "/contracts", title: "Contracts", sub: "Framework agreements and agreed prices", icon: "doc" },
-        c("seeSales") && { href: "/sales", title: "Sales overview", sub: "Client RFQs, quotations, approvals", icon: "sales" },
+        canUseInbox(role) && { href: "/inbox", title: "Inbox", sub: "Client and supplier emails and WhatsApp in one place", icon: "inbox", feature: "inbox" },
+        ["management", "sales", "procurement", "finance", "warehouse"].includes(role) && {
+          href: "/portal-admin",
+          title: "Portals",
+          sub: "Client and supplier portals: access, documents to check, bank changes",
+          icon: "team",
+          feature: "client_portal",
+        },
       ],
     },
     {
@@ -68,57 +103,61 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
     },
     {
       key: "purchasing",
-      label: "Purchasing",
+      label: "Buy",
       icon: "purchasing",
       items: [
+        all && c("seePurchasing") && { href: "/purchasing", title: "Purchasing overview", sub: "Supplier RFQs and purchase orders", icon: "purchasing" },
         c("requestPurchases") && { href: "/requisitions", title: "Purchase requests", sub: "Ask for goods to buy; approve and turn into orders", icon: "inbox" },
         c("seePurchasing") && { href: "/supplier-rfqs", title: "Supplier RFQs", sub: "Ask suppliers for prices and compare", icon: "inbox" },
         c("seePurchasing") && { href: "/purchase-orders", title: "Purchase orders", sub: "Orders to suppliers, approvals", icon: "doc" },
-        c("seePurchasing") && { href: "/approvals", title: "Approval steps", sub: "Who approves purchase orders, in which order; what waits for you", icon: "check" },
         c("seeSuppliers") && { href: "/suppliers", title: "Suppliers", sub: "Search, view and edit suppliers", icon: "truck" },
         c("receiveGoods") && { href: "/receiving", title: "Receive goods", sub: "Record goods arriving against purchase orders", icon: "inbox" },
         c("seeBills") && { href: "/purchasing/match", title: "Order, receipt and bill check", sub: "Compare what was ordered, received and billed", icon: "check" },
-        c("seePurchasing") && { href: "/purchasing", title: "Purchasing overview", sub: "Supplier RFQs and purchase orders", icon: "purchasing" },
+        c("planPurchases") && { href: "/planning", title: "Purchase planning", sub: "Sales per day, days of stock left, when and how much to order", icon: "activity" },
+        c("seePurchasing") && { href: "/approvals", title: "Approval steps", sub: "Who approves purchase orders, in which order; what waits for you", icon: "check" },
       ],
     },
     {
       key: "stock",
-      label: "Stock & delivery",
+      label: "Stock",
       icon: "stock",
       items: [
-        role === "driver" && { href: "/driver", title: "My deliveries", sub: "Deliveries assigned to you, record proof of delivery", icon: "deliveries", plain: true },
         { href: "/products", title: "Products", sub: "Search, view and edit the catalogue", icon: "products" },
         c("seeStock") && { href: "/stock", title: "Stock", sub: "Stock on hand, batches, expiry, adjustments", icon: "stock" },
         c("seeReorder") && { href: "/stock/reorder", title: "What to reorder", sub: "Low stock with suggested quantities, order in one tap", icon: "purchasing" },
         c("seeStock") && { href: "/transfers", title: "Stock transfers", sub: "Move stock between stores", icon: "warehouse" },
-        c("seeDeliveries") && { href: "/deliveries", title: "Deliveries", sub: "Delivery notes and proof of delivery", icon: "deliveries" },
-        c("planPurchases") && { href: "/planning", title: "Purchase planning", sub: "Sales per day, days of stock left, when and how much to order", icon: "activity" },
-        c("seeFleet") && { href: "/fleet", title: "Vehicles", sub: "Insurance, inspection and service dates, fuel and repairs", icon: "deliveries" },
-        c("seeDeliveries") && { href: "/backorders", title: "Still to deliver", sub: "Accepted orders not fully delivered, with stock on hand", icon: "deliveries" },
         c("manageWarehouses") && { href: "/warehouses", title: "Stores", sub: "Warehouses and store locations", icon: "warehouse" },
       ],
     },
     {
+      key: "deliver",
+      label: "Deliver",
+      icon: "deliveries",
+      items: [
+        role === "driver" && { href: "/driver", title: "My deliveries", sub: "Deliveries assigned to you, record proof of delivery", icon: "deliveries", plain: true },
+        c("seeDeliveries") && { href: "/deliveries", title: "Deliveries", sub: "Delivery notes and proof of delivery", icon: "deliveries" },
+        c("seeDeliveries") && { href: "/backorders", title: "Still to deliver", sub: "Accepted orders not fully delivered, with stock on hand", icon: "deliveries" },
+        c("seeFleet") && { href: "/fleet", title: "Vehicles", sub: "Insurance, inspection and service dates, fuel and repairs", icon: "truck" },
+      ],
+    },
+    {
       key: "finance",
-      label: "Finance",
+      label: "Money",
       icon: "finance",
       items: [
+        all && c("seeFinance") && { href: "/finance", title: "Finance overview", sub: "Invoices, payments, money owed, profit", icon: "finance" },
         c("seeInvoices") && { href: "/invoices", title: "Invoices", sub: "Invoices and what clients owe", icon: "receipt" },
         c("seeFinance") && { href: "/payments", title: "Payments received", sub: "Money received from clients", icon: "cash" },
         c("seeFinance") && { href: "/receivables", title: "Money owed to us", sub: "Who owes what, and for how long", icon: "finance" },
-        c("seeFinance") && { href: "/getting-paid/tra", title: "TRA receipts", sub: "EFD / VFD fiscal receipts, daily totals and credit notes", icon: "receipt", feature: "tra_fiscal" },
+        c("seeFinance") && { href: "/getting-paid/reminders", title: "Automatic reminders", sub: "Payment reminders to clients by email, SMS and WhatsApp, with a log", icon: "bell", feature: "auto_reminders" },
         c("seeFinance") && { href: "/getting-paid/links", title: "Pay links", sub: "Mobile money and card payments, match references", icon: "cash", feature: "pay_links" },
-        c("seeFinance") && { href: "/getting-paid/reminders", title: "Automatic reminders", sub: "Email, SMS and WhatsApp reminders with a log", icon: "bell", feature: "auto_reminders" },
-        c("seeBills") && { href: "/bills", title: "Supplier bills", sub: "Suppliers' invoices and payments", icon: "receipt" },
-        c("seeFinance") && { href: "/payables", title: "Money we owe", sub: "What we owe suppliers, and when", icon: "finance" },
-        c("seeFinance") && { href: "/financing", title: "LPO financing", sub: "Bank-ready pack for a client order, request status and reminders", icon: "finance", feature: "lpo_financing" },
-        c("seeProfit") && { href: "/profit", title: "Profit", sub: "Profit by order, client and month", icon: "activity" },
-        c("manageExpenses") && { href: "/expenses", title: "Expenses", sub: "Day-to-day spending, with receipt photos", icon: "cash" },
-        c("seeProfit") && { href: "/profit-loss", title: "Profit & loss", sub: "Sales, cost of goods, expenses and profit by month", icon: "report" },
+        c("seeFinance") && { href: "/getting-paid/tra", title: "TRA receipts", sub: "EFD / VFD fiscal receipts, daily totals and credit notes", icon: "receipt", feature: "tra_fiscal" },
         c("seeFinance") && { href: "/statements", title: "Statements", sub: "Statements of account for clients and suppliers", icon: "doc" },
         c("reconcile") && { href: "/reconcile", title: "Check payments", sub: "Tick payments against the mobile-money or bank statement", icon: "check" },
-        c("planFinance") && { href: "/budgets", title: "Budgets vs actual", sub: "Monthly budgets for sales, profit and expenses against the real figures", icon: "report" },
-        c("planFinance") && { href: "/cashflow", title: "Cash-flow forecast", sub: "Money expected in and out, week by week", icon: "cash" },
+        c("seeBills") && { href: "/bills", title: "Supplier bills", sub: "Suppliers' invoices and payments", icon: "receipt" },
+        c("seeFinance") && { href: "/payables", title: "Money we owe", sub: "What we owe suppliers, and when", icon: "finance" },
+        c("manageExpenses") && { href: "/expenses", title: "Expenses", sub: "Day-to-day spending, with receipt photos", icon: "cash" },
+        c("seeFinance") && { href: "/financing", title: "LPO financing", sub: "Bank-ready pack for a client order, request status and reminders", icon: "finance", feature: "lpo_financing" },
         c("seeFinance") && { href: "/rates", title: "Exchange rates", sub: "Rates used for foreign-currency documents", icon: "cash" },
         c("seeLedger") && { href: "/accounts", title: "Accounts", sub: "Trial balance, profit & loss, balance sheet, VAT, journals and closing", icon: "report" },
         c("seeLedger") && { href: "/accounts/assets", title: "Fixed assets", sub: "Vehicles, machines and equipment with monthly depreciation", icon: "building" },
@@ -129,86 +168,99 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
       label: "Reports",
       icon: "report",
       items: [
-        role !== "driver" && { href: "/assistant", title: "Business assistant", sub: "Ask about your business in plain words and get answers with the records behind them", icon: "help" },
-        c("seeInsights") && { href: "/insights", title: "Business insights", sub: "Win rates, supplier punctuality, slow stock, items bought together", icon: "activity" },
         role !== "driver" && { href: "/reports", title: "Reports", sub: "Choose a report and dates, then print or download PDF or Excel", icon: "report" },
+        c("seeProfit") && { href: "/profit", title: "Profit", sub: "Profit by order, client and month", icon: "activity" },
+        c("seeProfit") && { href: "/profit-loss", title: "Profit & loss", sub: "Sales, cost of goods, expenses and profit by month", icon: "report" },
+        c("planFinance") && { href: "/budgets", title: "Budgets vs actual", sub: "Monthly budgets for sales, profit and expenses against the real figures", icon: "report" },
+        c("planFinance") && { href: "/cashflow", title: "Cash-flow forecast", sub: "Money expected in and out, week by week", icon: "cash" },
+        c("seeInsights") && { href: "/insights", title: "Business insights", sub: "Win rates, supplier punctuality, slow stock, items bought together", icon: "activity" },
         c("planFinance") && { href: "/head-office", title: "Head-office figures", sub: "Sales, profit, expenses, money owed and stock of every branch side by side", icon: "building" },
         role !== "driver" && { href: "/scheduled-reports", title: "Scheduled reports", sub: "Reports emailed to you every day, week or month", icon: "report" },
+        // The Ask box at the top of every screen answers the same questions (Ask AI).
+        all && role !== "driver" && { href: "/assistant", title: "Business assistant", sub: "Ask about your business in plain words and get answers with the records behind them", icon: "help" },
       ],
     },
     {
-      key: "administration",
-      label: "Administration",
+      key: "team",
+      label: "Team",
       icon: "team",
       items: [
         { href: "/meetings", title: "Meetings", sub: "Team, client and supplier meetings: agenda, video, minutes and actions", icon: "team" },
         { href: "/calendar", title: "Calendar", sub: "Meetings, actions, deliveries, due dates and leave in one place, also on your phone", icon: "clock" },
-        { href: "/hr", title: c("seeEmployees") ? "Employees" : "My employee file", sub: c("seeEmployees") ? "Employee files, contracts, certificates and licences with expiry" : "Your details, certificates and leave balance", icon: "team" },
-        { href: "/hr/leave", title: "Leave", sub: c("manageHr") ? "Leave requests to approve, who is away and balances" : "Ask for leave and see your balance", icon: "clock" },
+        c("seeEmployees") && { href: "/hr", title: "Employees", sub: "Employee files, contracts, certificates and licences with expiry", icon: "team" },
+        c("manageHr") && { href: "/hr/leave", title: "Leave", sub: "Leave requests to approve, who is away and balances", icon: "clock" },
         c("manageHr") && { href: "/timesheets/approve", title: "Approve timesheets", sub: "Weeks of hours submitted by the team", icon: "check" },
+        c("runPayroll") && { href: "/payroll", title: "Payroll", sub: "Monthly pay with PAYE, NSSF, SDL and WCF, payslips", icon: "cash" },
         { href: "/hse", title: "Health & safety", sub: c("manageHr") ? "Incidents, inspections, toolbox talks and actions" : "Report an incident or near miss, record an inspection", icon: "shield" },
         c("seeQuality") && { href: "/quality", title: "Quality", sub: "Non-conformance reports: supplier problems, complaints, root cause and actions", icon: "check" },
-        c("runPayroll") && { href: "/payroll", title: "Payroll", sub: "Monthly pay with PAYE, NSSF, SDL and WCF, payslips", icon: "cash" },
-        { href: "/payroll/my", title: "My payslips", sub: "Your monthly payslips", icon: "receipt", feature: "payroll" },
-      ],
-    },
-    {
-      key: "add",
-      label: "Add new",
-      icon: "plus",
-      items: [
-        c("seeCrm") && { href: "/crm/new", title: "+ New opportunity", sub: "A possible order to follow up", icon: "plus" },
-        c("editSales") && { href: "/rfqs/new", title: "+ New client RFQ", sub: "Record a request from a client", icon: "plus" },
-        c("editSales") && { href: "/quotations/new", title: "+ New quotation", sub: "Prepare prices for a client", icon: "plus" },
-        canPlanService(role) && { href: "/jobs/new", title: "+ New service job", sub: "Installation, repair, maintenance or consultation", icon: "plus" },
-        c("requestPurchases") && { href: "/requisitions/new", title: "+ New purchase request", sub: "Ask for goods to be bought", icon: "plus" },
-        c("editPurchasing") && { href: "/purchase-orders/new", title: "+ New purchase order", sub: "Order from a supplier", icon: "plus" },
-        c("editInvoices") && { href: "/invoices/new", title: "+ New invoice", sub: "Bill a client", icon: "plus" },
-        c("editClients") && { href: "/clients/new", title: "+ New client", sub: "Company, industry, TIN/VRN, sites, terms", icon: "plus" },
-        c("editSuppliers") && { href: "/suppliers/new", title: "+ New supplier", sub: "Contact, country, currency, lead time, terms", icon: "plus" },
-        c("editProducts") && { href: "/products/new", title: "+ New product", sub: "SKU, brand, part number, unit, price, safety", icon: "plus" },
-        { href: "/expenses/new", title: "+ New expense", sub: "Fuel, rent, airtime… with a photo of the receipt", icon: "plus" },
-        c("seeDocuments") && { href: "/documents/new", title: "+ New document", sub: "Certificate, licence, SDS or other paper", icon: "plus" },
-        c("importData") && { href: "/import", title: "Import from spreadsheet", sub: "Load many records at once from the template", icon: "upload" },
       ],
     },
     {
       key: "company",
-      label: "Company & account",
+      label: "Company",
       icon: "building",
       items: [
-        isManager && { href: "/settings", title: "Settings", sub: "All company settings in one place, with the status of each", icon: "settings" },
         {
-          href: "/settings/company",
-          title: "Company details & branding",
-          sub: isManager ? "Name, TIN, VRN, logo, colours, bank details" : "View the company's details",
-          icon: "building",
+          href: "/settings",
+          title: "Settings",
+          sub: isManager ? "Company details, team & roles, security, features, backups, alerts, billing" : "Company details, your account and notifications",
+          icon: "settings",
         },
-        c("seeDocuments") && { href: "/compliance", title: "Legal & compliance", sub: "Registrations, licences, tax calendar, inspections and directors", icon: "shield", feature: "compliance" },
-        c("seeDocuments") && { href: "/documents", title: "Documents", sub: "Certificates, licences, SDS and other papers, with expiry reminders", icon: "doc" },
-        isManager && { href: "/settings/team", title: "Team & roles", sub: "Invite people, change roles", icon: "team" },
+        c("seeDocuments") && { href: "/compliance", title: "Legal & compliance", sub: "Registrations, licences and permits, tax calendar, inspections and directors", icon: "shield", feature: "compliance" },
+        c("seeDocuments") && { href: "/documents", title: "Documents", sub: "Files library: certificates, SDS, product and company papers, with expiry reminders", icon: "doc" },
         isManager && { href: "/branches", title: "Branches", sub: "Branches or business units with their stores and people", icon: "building" },
-        isManager && { href: "/settings/security", title: "Security", sub: "Two-step verification, automatic sign-out, password rules", icon: "lock" },
-        isManager && { href: "/activity", title: "Activity log", sub: "Every change, who made it and when", icon: "activity" },
-        c("seeFinance") && { href: "/integrations", title: "Integrations & API", sub: "Accounting export, API keys for other systems", icon: "upload" },
-        isManager && { href: "/settings/backups", title: "Backups", sub: "Automatic daily copies of your data, back up now, download", icon: "lock" },
-        !c("manageExpenses") && { href: "/expenses", title: "My expenses", sub: "Money you spent for the business", icon: "cash" },
-        { href: "/suggestions", title: "Suggestion Box", sub: "Share an idea to improve the business", icon: "inbox", feature: "suggestions" },
-        isManager && { href: "/growth", title: "Growth & recommendations", sub: "Your business level and features that could help", icon: "activity" },
-        isManager && { href: "/settings/features", title: "Features & business level", sub: "Switch features on or off, change your level", icon: "check" },
-        { href: "/notifications", title: "Notifications", sub: "Your alerts, phone notifications and emails", icon: "bell" },
-        isManager && { href: "/settings/notifications", title: "Alerts setup", sub: "Connect phone push and email sending", icon: "settings" },
-        isManager && { href: "/settings/go-live", title: "Go-live checklist", sub: "What is ready and what is left", icon: "check" },
-        { href: "/help", title: "Help", sub: "Short guide for your role, step by step", icon: "help" },
-        { href: "/guide", title: "App guide", sub: "Every function, where to find it and how to use it", icon: "help" },
-        { href: "/playbooks", title: "Playbooks", sub: "Step-by-step guides with examples and business situations; request the ones you need", icon: "doc" },
-        { href: "/services", title: "Services & prices", sub: "Training, setup, add-ons and playbooks from LeMo Tech", icon: "inbox" },
-        c("seeFinance") && { href: "/settings/billing", title: "Plan & billing", sub: "Your LeMoSp plan, invoices and how to pay", icon: "receipt" },
-        { href: "/how-it-works", title: "How it works", sub: "One order, from the first call to the profit, step by step", icon: "activity" },
-        { href: "/account", title: "Your account", sub: "Your details, password, appearance, sign out", icon: "user" },
-        { href: "/account#password", title: "Change password", sub: "Put a new password for signing in", icon: "lock" },
+        // Settings lists it for managers; finance staff reach it here.
+        c("seeFinance") && (all || !isManager) && { href: "/integrations", title: "Integrations & API", sub: "Accounting export, API keys for other systems", icon: "upload" },
+        // The screens inside Settings: search finds them, the menus show Settings once.
+        all && { href: "/settings/company", title: "Company details & branding", sub: isManager ? "Name, TIN, VRN, logo, colours, bank details" : "View the company's details", icon: "building" },
+        all && isManager && { href: "/settings/team", title: "Team & roles", sub: "Invite people, change roles", icon: "team" },
+        all && isManager && { href: "/settings/security", title: "Security", sub: "Two-step verification, automatic sign-out, password rules", icon: "lock" },
+        all && isManager && { href: "/activity", title: "Activity log", sub: "Every change, who made it and when", icon: "activity" },
+        all && isManager && { href: "/settings/backups", title: "Backups", sub: "Automatic daily copies of your data, back up now, download", icon: "lock" },
+        all && c("importData") && { href: "/import", title: "Import from spreadsheet", sub: "Load many records at once from the template", icon: "upload" },
+        all && isManager && { href: "/growth", title: "Growth & recommendations", sub: "Your business level and features that could help", icon: "activity" },
+        all && isManager && { href: "/settings/features", title: "Features & business level", sub: "Switch features on or off, change your level", icon: "check" },
+        all && isManager && { href: "/settings/notifications", title: "Alerts setup", sub: "Connect phone push and email sending", icon: "settings" },
+        all && isManager && { href: "/settings/go-live", title: "Go-live checklist", sub: "What is ready and what is left", icon: "check" },
+        all && c("seeFinance") && { href: "/settings/billing", title: "Plan & billing", sub: "Your LeMoSp plan, invoices and how to pay", icon: "receipt" },
+        all && { href: "/services", title: "Services & prices", sub: "Training, setup, add-ons and playbooks from LeMo Tech", icon: "inbox" },
         opts.isPlatformAdmin === true && platformAdminItem(),
       ],
+    },
+    {
+      key: "help",
+      label: "Help",
+      icon: "help",
+      items: [
+        { href: "/help", title: "Help", sub: "Guide for your role, guided tour, playbooks and how it works", icon: "help" },
+        { href: "/guide", title: "App guide", sub: "Every function, where to find it and how to use it", icon: "doc" },
+        // Both open from Help.
+        all && { href: "/playbooks", title: "Playbooks", sub: "Step-by-step guides with examples and business situations; request the ones you need", icon: "doc" },
+        all && { href: "/how-it-works", title: "How it works", sub: "One order, from the first call to the profit, step by step", icon: "activity" },
+        { href: "/suggestions", title: "Suggestion Box", sub: "Share an idea to improve the business", icon: "inbox", feature: "suggestions" },
+      ],
+    },
+    {
+      // Quick "+ New" forms. Every list has its own "+ New" button, so the menus leave these out.
+      key: "add",
+      label: "Add new",
+      icon: "plus",
+      items: all
+        ? [
+            c("seeCrm") && { href: "/crm/new", title: "+ New opportunity", sub: "A possible order to follow up", icon: "plus" },
+            c("editSales") && { href: "/rfqs/new", title: "+ New client RFQ", sub: "Record a request from a client", icon: "plus" },
+            c("editSales") && { href: "/quotations/new", title: "+ New quotation", sub: "Prepare prices for a client", icon: "plus" },
+            canPlanService(role) && { href: "/jobs/new", title: "+ New service job", sub: "Installation, repair, maintenance or consultation", icon: "plus" },
+            c("requestPurchases") && { href: "/requisitions/new", title: "+ New purchase request", sub: "Ask for goods to be bought", icon: "plus" },
+            c("editPurchasing") && { href: "/purchase-orders/new", title: "+ New purchase order", sub: "Order from a supplier", icon: "plus" },
+            c("editInvoices") && { href: "/invoices/new", title: "+ New invoice", sub: "Bill a client", icon: "plus" },
+            c("editClients") && { href: "/clients/new", title: "+ New client", sub: "Company, industry, TIN/VRN, sites, terms", icon: "plus" },
+            c("editSuppliers") && { href: "/suppliers/new", title: "+ New supplier", sub: "Contact, country, currency, lead time, terms", icon: "plus" },
+            c("editProducts") && { href: "/products/new", title: "+ New product", sub: "SKU, brand, part number, unit, price, safety", icon: "plus" },
+            { href: "/expenses/new", title: "+ New expense", sub: "Fuel, rent, airtime… with a photo of the receipt", icon: "plus" },
+            c("seeDocuments") && { href: "/documents/new", title: "+ New document", sub: "Certificate, licence, SDS or other paper", icon: "plus" },
+          ]
+        : [],
     },
   ];
   // Drivers always keep their deliveries screen. The service screens show only once their features exist and are on.
@@ -223,6 +275,10 @@ export function moreMenu(role: Role, isManager: boolean, opts: MenuOptions = {})
     ...cat,
     items: cat.items.filter((i): i is MenuItem => Boolean(i)).filter(visible),
   }));
+  // With the general ledger on, Accounts holds the full profit & loss: the menus show it once there.
+  if (!all && cats.some((cat) => cat.items.some((i) => i.href === "/accounts"))) {
+    for (const cat of cats) cat.items = cat.items.filter((i) => i.href !== "/profit-loss");
+  }
   const grow = role === "driver" ? null : growCategory(opts.features ?? []);
   if (grow) cats.push(grow);
   return cats.filter((cat) => cat.items.length > 0);
@@ -269,6 +325,6 @@ function growCategory(features: FeatureRow[]): MenuCategory | null {
 /** The category a role most likely wants first. */
 export function defaultCategory(role: Role): string {
   return (
-    { sales: "sales", procurement: "purchasing", warehouse: "stock", driver: "stock", finance: "finance", management: "sales" } as Record<Role, string>
+    { sales: "sales", procurement: "purchasing", warehouse: "stock", driver: "deliver", finance: "finance", management: "sales" } as Record<Role, string>
   )[role];
 }

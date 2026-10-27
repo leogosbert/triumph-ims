@@ -11,6 +11,7 @@ import { qrSvg } from "@/lib/growth-tools/qr";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { saveCatalogueSettings } from "./actions";
+import { BackLink } from "@/components/BackLink";
 import "../../growth-tools.css";
 
 export const metadata = { title: "Online catalogue" };
@@ -46,9 +47,7 @@ export default async function CataloguePage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      <p className="small">
-        <Link href="/products">{tr("← Products")}</Link>
-      </p>
+      <BackLink href="/products" label="Products" />
       <div className="page-head">
         <h1>{tr("Online catalogue")}</h1>
         {s?.published ? <span className="badge tone-ok">{tr("Public")}</span> : <span className="badge tone-off">{tr("Not public")}</span>}

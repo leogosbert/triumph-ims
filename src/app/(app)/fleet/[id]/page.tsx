@@ -16,6 +16,7 @@ import { StatusBadge, todayTz } from "@/lib/sales";
 import { DELIVERY_STATUS } from "@/lib/stock";
 import { addVehicleLog, removeVehicleLog, saveVehicle } from "../actions";
 import { VehicleFields } from "../VehicleFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Vehicle" };
 
@@ -56,9 +57,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      <p className="small">
-        <Link href="/fleet">{tr("← Vehicles")}</Link>
-      </p>
+      <BackLink href="/fleet" label="Vehicles" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{vehicle.plate}</h1>
         {!vehicle.active && <span className="badge tone-off">{tr("Off the road")}</span>}

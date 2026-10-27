@@ -12,6 +12,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { dismissNotice } from "./actions";
+import { BackLink } from "@/components/BackLink";
 import "../../../growth-tools.css";
 
 export const metadata = { title: "Tender alerts" };
@@ -66,9 +67,7 @@ export default async function TenderAlertsPage({ searchParams }: { searchParams:
 
   return (
     <>
-      <p className="small">
-        <Link href="/tenders">{tr("← Tenders")}</Link>
-      </p>
+      <BackLink href="/tenders" label="Tenders" />
       <div className="page-head">
         <h1>{tr("Tender alerts")}</h1>
         <Link href="/tenders/alerts/new" className="btn btn-primary btn-small">

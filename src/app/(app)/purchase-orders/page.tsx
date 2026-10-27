@@ -10,6 +10,7 @@ import { PO_STATUS } from "@/lib/purchasing";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Purchase orders" };
 
@@ -56,9 +57,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchasing">{tr("← Purchasing")}</Link>
-      </p>
+      <BackLink href="/purchasing" label="Purchasing" />
       <div className="page-head">
         <h1>{tr("Purchase orders")}</h1>
         {can(role, "editPurchasing") && (

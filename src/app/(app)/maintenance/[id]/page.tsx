@@ -14,6 +14,7 @@ import { CONTRACT_STATUS, FREQUENCIES, JOB_STATUS, canSeeAllService, formatWhen,
 import { saveContract, setContractStatus } from "../actions";
 import { ContractFields, type EquipmentOption } from "../ContractFields";
 import { canKeepContracts, type Contract } from "../rules";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Maintenance contract" };
 
@@ -70,9 +71,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/maintenance">{tr("← Maintenance contracts")}</Link>
-      </p>
+      <BackLink href="/maintenance" label="Maintenance contracts" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{c.title}</h1>
         <StatusBadge map={CONTRACT_STATUS} status={c.status} />

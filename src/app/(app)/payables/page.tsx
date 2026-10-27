@@ -6,6 +6,7 @@ import { getAppContext } from "@/lib/context";
 import { agingBucket, daysOverdue, n, openBase } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Money we owe" };
 
@@ -52,9 +53,7 @@ export default async function PayablesPage() {
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Money we owe")}</h1>
       <p className="muted small">{tr("Unpaid supplier bills. Totals are converted to")}{" "}{company.base_currency}{" "}{tr("at each bill's rate.")}</p>
       {byCurrency.size > 0 && (

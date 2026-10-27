@@ -7,6 +7,7 @@ import { getAppContext } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { decideBankChange } from "../../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Bank details" };
 
@@ -62,9 +63,8 @@ export default async function BankChange({ params, searchParams }: { params: Pro
 
   return (
     <>
-      <p className="small">
-        <Link href="/portal-admin">{tr("← Portals")}</Link> · <Link href={`/suppliers/${b.supplier_id}#portal`}>{b.supplier?.name}</Link>
-      </p>
+      <BackLink href="/portal-admin" label="Portals"> · <Link href={`/suppliers/${b.supplier_id}#portal`}>{b.supplier?.name}</Link>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{tr("New bank details")}</h1>
         <span className={`badge tone-${pending ? "warn" : b.status === "approved" ? "ok" : "off"}`}>

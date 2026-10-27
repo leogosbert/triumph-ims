@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -9,6 +8,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { recordInspection } from "../../actions";
 import { loadLinkOptions } from "../../options";
 import { InspectionFields } from "../InspectionFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Record inspection" };
 
@@ -22,9 +22,7 @@ export default async function NewInspectionPage({ searchParams }: { searchParams
 
   return (
     <>
-      <p className="small">
-        <Link href="/hse?tab=inspections">{tr("← Health & safety")}</Link>
-      </p>
+      <BackLink href="/hse?tab=inspections" label="Health & safety" />
       <h1>{tr("Inspection / toolbox talk")}</h1>
       <Notice {...notice} />
       <form action={recordInspection} className="card">

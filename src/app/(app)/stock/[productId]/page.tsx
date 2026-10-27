@@ -7,6 +7,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { daysUntil, fmtQty, storeOptions, type OnHand } from "@/lib/stock";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Stock card" };
 
@@ -50,9 +51,8 @@ export default async function StockCardPage({ params, searchParams }: { params: 
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link> · <Link href={`/products/${product.id}`}>{tr("Product details")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock"> · <Link href={`/products/${product.id}`}>{tr("Product details")}</Link>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{product.name}</h1>
         <span className="badge">{product.sku}</span>

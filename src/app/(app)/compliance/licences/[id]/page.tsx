@@ -18,6 +18,7 @@ import { deleteLicence, saveLicence, setLicenceStatus } from "../../actions";
 import { LicenceFields } from "../../LicenceFields";
 import { LinkedFiles } from "../../LinkedFiles";
 import { Disclaimer, RequirementFacts } from "../../parts";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Licence" };
 
@@ -47,9 +48,7 @@ export default async function LicencePage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      <p className="small">
-        <Link href="/compliance/licences">{tr("← Licences")}</Link>
-      </p>
+      <BackLink href="/compliance/licences" label="Licences" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{l.name}</h1>
         <StatusBadge map={LICENCE_STATUS} status={l.status} />

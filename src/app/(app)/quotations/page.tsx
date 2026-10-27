@@ -11,6 +11,7 @@ import { can } from "@/lib/roles";
 import { QUOTE_STATUS, quoteNo, StatusBadge, todayTz } from "@/lib/sales";
 import { OrderProgressMini } from "@/components/OrderProgress";
 import { loadOrderJourneys } from "@/lib/orders";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Quotations" };
 
@@ -67,9 +68,7 @@ export default async function QuotationsPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/sales">{tr("← Sales")}</Link>
-      </p>
+      <BackLink href="/sales" label="Sales" />
       <div className="page-head">
         <h1>{tr("Quotations")}</h1>
         {can(role, "editSales") && (

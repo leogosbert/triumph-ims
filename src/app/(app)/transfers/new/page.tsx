@@ -10,6 +10,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { storeOptions } from "@/lib/stock";
 import { createTransfer } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New stock transfer" };
 
@@ -24,9 +25,7 @@ export default async function NewTransferPage({ searchParams }: { searchParams: 
 
   return (
     <>
-      <p className="small">
-        <Link href="/transfers">{tr("← Stock transfers")}</Link>
-      </p>
+      <BackLink href="/transfers" label="Stock transfers" />
       <h1>{tr("New stock transfer")}</h1>
       <Notice {...notice} />
       {stores.length < 2 ? (

@@ -14,6 +14,7 @@ import { productOptions } from "@/lib/options";
 import { INVITE_STATUS, SRFQ_STATUS } from "@/lib/purchasing";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 import {
   addSrfqLine,
   awardSupplier,
@@ -109,8 +110,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
 
   return (
     <>
-      <p className="small">
-        <Link href="/supplier-rfqs">{tr("← Supplier RFQs")}</Link>
+      <BackLink href="/supplier-rfqs" label="Supplier RFQs">
         {r.quotation_id && (
           <>
             {" · "}
@@ -123,7 +123,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
             <Link href={`/rfqs/${r.rfq_id}`}>{tr("Client RFQ")}</Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{r.title ?? r.number}</h1>
         <StatusBadge map={SRFQ_STATUS} status={r.status} />

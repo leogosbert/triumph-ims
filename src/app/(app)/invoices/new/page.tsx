@@ -9,6 +9,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { clientOptions } from "@/lib/options";
 import { can } from "@/lib/roles";
 import { newInvoice } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New invoice" };
 
@@ -36,9 +37,7 @@ export default async function NewInvoicePage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/invoices">{tr("← Invoices")}</Link>
-      </p>
+      <BackLink href="/invoices" label="Invoices" />
       <h1>{tr("New invoice")}</h1>
       <Notice {...notice} />
 

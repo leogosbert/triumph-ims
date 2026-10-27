@@ -8,6 +8,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { fmtQty } from "@/lib/stock";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Goods received" };
 
@@ -32,9 +33,8 @@ export default async function GrnPage({ params, searchParams }: { params: Promis
 
   return (
     <>
-      <p className="small">
-        <Link href="/receiving">{tr("← Receive goods")}</Link> · <Link href={`/purchase-orders/${g.po?.id}`}>{g.po?.number}</Link>
-      </p>
+      <BackLink href="/receiving" label="Receive goods"> · <Link href={`/purchase-orders/${g.po?.id}`}>{g.po?.number}</Link>
+      </BackLink>
       <h1>{g.number}</h1>
       <p className="muted small">{tr("From")}{" "}{g.po?.supplier?.name}{" "}{tr("into")}{" "}{g.store?.name}{" "}{tr("on")}{" "}{formatDate(g.received_on)}
         {g.received_by && <>{" "}{tr("by")}{" "}{names.get(g.received_by)}</>}

@@ -29,6 +29,7 @@ import { deleteItem, saveItem, setItemStatus } from "../../actions";
 import { ItemFields } from "../../ItemFields";
 import { LinkedFiles } from "../../LinkedFiles";
 import { Disclaimer, RequirementFacts } from "../../parts";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Compliance item" };
 
@@ -74,9 +75,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
 
   return (
     <>
-      <p className="small">
-        <Link href="/compliance/checklist">{tr("← Checklist")}</Link>
-      </p>
+      <BackLink href="/compliance/checklist" label="Checklist" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{tr(item.name)}</h1>
         <StatusBadge map={ITEM_STATUS} status={item.status} />

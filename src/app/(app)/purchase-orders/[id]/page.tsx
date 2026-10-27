@@ -33,6 +33,7 @@ import { BILL_STATUS, shownStatus } from "@/lib/finance";
 import { applyLandedCost } from "../../finance/actions";
 import { BranchField } from "@/components/BranchField";
 import { branchList } from "@/lib/branches";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Purchase order" };
 
@@ -125,8 +126,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
 
   return (
     <>
-      <p className="small">
-        <Link href="/purchase-orders">{tr("← Purchase orders")}</Link>
+      <BackLink href="/purchase-orders" label="Purchase orders">
         {po.srfq_id && can(role, "editPurchasing") && (
           <>
             {" · "}
@@ -140,7 +140,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
             </Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{po.supplier?.name}</h1>
         <StatusBadge map={PO_STATUS} status={po.status} />

@@ -10,6 +10,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { fmtQty } from "@/lib/stock";
 import { reorderAction } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "What to reorder" };
 
@@ -52,9 +53,7 @@ export default async function ReorderPage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <h1>{tr("What to reorder")}</h1>
       <p className="muted small">
         {tr("Products at or below their reorder level. The suggested quantity fills up to the maximum stock level (or twice the reorder level), less what is already ordered or requested.")}

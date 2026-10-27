@@ -12,6 +12,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "LPO financing" };
 
@@ -61,9 +62,7 @@ export default async function FinancingPage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <div className="page-head">
         <h1>{tr("LPO financing")}</h1>
         <Link href="/financing/new" className="btn btn-primary btn-small">

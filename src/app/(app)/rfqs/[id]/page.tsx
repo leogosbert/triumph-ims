@@ -15,6 +15,7 @@ import { can } from "@/lib/roles";
 import { QUOTE_STATUS, quoteNo, RECEIVED_VIA, RFQ_STATUS, StatusBadge } from "@/lib/sales";
 import { addRfqLine, cancelRfq, quoteFromRfq, removeRfqLine, saveRfq } from "../actions";
 import { createSupplierRfq } from "../../supplier-rfqs/actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "RFQ" };
 
@@ -52,9 +53,7 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
 
   return (
     <>
-      <p className="small">
-        <Link href="/rfqs">{tr("← RFQs")}</Link>
-      </p>
+      <BackLink href="/rfqs" label="RFQs" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{rfq.client?.name}</h1>
         <StatusBadge map={RFQ_STATUS} status={rfq.status} />

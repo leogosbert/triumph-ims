@@ -8,6 +8,7 @@ import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Head-office figures" };
 
@@ -63,9 +64,7 @@ export default async function HeadOfficePage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/branches">{tr("← Branches")}</Link>
-      </p>
+      <BackLink href="/branches" label="Branches" />
       <h1>{tr("Head-office figures")}</h1>
       <p className="muted small">
         {tr("Every branch side by side. Sales and profit are before VAT; money owed and stock are as of today. Amounts in")} {base}.

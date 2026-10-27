@@ -17,6 +17,7 @@ import { fmtQty, storeOptions } from "@/lib/stock";
 import { addJobHours, addJobLine, invoiceJob, jobStatus, removeJobHours, removeJobLine, saveJob, saveProgress } from "../actions";
 import { JobFields } from "../JobFields";
 import { SignOff } from "./SignOff";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Service job" };
 
@@ -81,9 +82,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
 
   return (
     <>
-      <p className="small">
-        <Link href="/jobs">{tr("← Service jobs")}</Link>
-      </p>
+      <BackLink href="/jobs" label="Service jobs" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{j.title}</h1>
         <span className="sj-actions">

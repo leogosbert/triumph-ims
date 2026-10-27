@@ -11,6 +11,7 @@ import { companyPeople } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { saveRfq } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New RFQ" };
 
@@ -24,9 +25,7 @@ export default async function NewRfqPage({ searchParams }: { searchParams: Searc
 
   return (
     <>
-      <p className="small">
-        <Link href="/rfqs">{tr("← RFQs")}</Link>
-      </p>
+      <BackLink href="/rfqs" label="RFQs" />
       <h1>{tr("New client RFQ")}</h1>
       <p className="muted small">{tr("Record a request for quotation from a client. You'll add the items next.")}</p>
       <Notice {...notice} />

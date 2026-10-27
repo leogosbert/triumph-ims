@@ -4,6 +4,7 @@ import { GuideView, type GuideViewSection } from "@/components/GuideView";
 import { getAppContext } from "@/lib/context";
 import { GUIDE } from "@/lib/guide";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "App guide" };
 
@@ -33,9 +34,7 @@ export default async function GuidePage() {
   }));
   return (
     <>
-      <p className="small no-print">
-        <Link href="/help">{tr("← Help")}</Link>
-      </p>
+      <BackLink href="/help" label="Help" />
       <Link href="/how-it-works" className="tile guide-journey no-print">
         <span className="tile-title">{tr("How it works: one order, step by step")}</span>
         <span className="tile-sub">{tr("Follow an order from the first call with a customer to the agreed terms, delivery, payment and profit, with animations. Press Next to move on.")}</span>

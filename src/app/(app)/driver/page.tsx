@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
 import { type SearchParams } from "@/lib/messages";
 import { getDict } from "@/lib/lang";
 import { DriverApp, type DriverDelivery } from "./DriverApp";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "My deliveries" };
 export const dynamic = "force-dynamic";
@@ -57,9 +57,7 @@ export default async function DriverPage({ searchParams }: { searchParams: Searc
   return (
     <>
       {only && (
-        <p className="small">
-          <Link href={`/deliveries/${only}`}>← Back to the delivery note</Link>
-        </p>
+        <BackLink href={`/deliveries/${only}`} label="Back to the delivery note" />
       )}
       <div className="page-head">
         <h1>{only ? t["dr.record"] : t["dr.title"]}</h1>

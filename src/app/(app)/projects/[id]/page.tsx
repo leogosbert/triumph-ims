@@ -16,6 +16,7 @@ import { canInvoiceService, MILESTONE_STATUS, PROJECT_BILLING, PROJECT_STATUS, t
 import { addMilestone, invoiceProject, markMilestone, removeMilestone, saveProject, setProjectStatus } from "../actions";
 import { canKeepProjects, hoursText, invoicedTotal, type Entry, type InvoiceRow, type Milestone, type Project } from "../projectData";
 import { ProjectFields } from "../ProjectFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Project" };
 
@@ -84,9 +85,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      <p className="small">
-        <Link href="/projects">{tr("← Projects")}</Link>
-      </p>
+      <BackLink href="/projects" label="Projects" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{project.name}</h1>
         <StatusBadge map={PROJECT_STATUS} status={project.status} />

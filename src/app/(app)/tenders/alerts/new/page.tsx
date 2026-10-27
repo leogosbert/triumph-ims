@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
@@ -9,6 +8,7 @@ import { getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { addNotice } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Paste a tender notice" };
 
@@ -20,9 +20,7 @@ export default async function NewNoticePage({ searchParams }: { searchParams: Se
   if (!features.on("tender_alerts")) return <FeatureOff title="Tender alerts" isManager={isManager} />;
   return (
     <>
-      <p className="small">
-        <Link href="/tenders/alerts">{tr("← Tender alerts")}</Link>
-      </p>
+      <BackLink href="/tenders/alerts" label="Tender alerts" />
       <h1>{tr("Paste a tender notice")}</h1>
       <Notice {...notice} />
       <form action={addNotice} className="card grid">

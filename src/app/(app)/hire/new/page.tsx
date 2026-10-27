@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -10,6 +9,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { clientOptions } from "@/lib/options";
 import { RATE_PERIODS, canPlanService, todayTz } from "@/lib/services";
 import { createHire } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New hire" };
 
@@ -26,9 +26,7 @@ export default async function NewHirePage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href="/hire">{tr("← Equipment hire")}</Link>
-      </p>
+      <BackLink href="/hire" label="Equipment hire" />
       <h1>{tr("New hire")}</h1>
       <Notice {...notice} />
       <form action={createHire} className="card">

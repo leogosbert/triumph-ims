@@ -15,6 +15,7 @@ import { StatusBadge } from "@/lib/sales";
 import { saveInspection } from "../../actions";
 import { linkedNames, loadLinkOptions } from "../../options";
 import { InspectionFields } from "../InspectionFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Inspection" };
 
@@ -42,9 +43,7 @@ export default async function InspectionPage({ params, searchParams }: { params:
 
   return (
     <>
-      <p className="small">
-        <Link href="/hse?tab=inspections">{tr("← Health & safety")}</Link>
-      </p>
+      <BackLink href="/hse?tab=inspections" label="Health & safety" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{insp.topic || kind}</h1>
         <StatusBadge map={INSPECTION_RESULTS} status={insp.result} />

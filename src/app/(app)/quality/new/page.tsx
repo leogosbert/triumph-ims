@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -12,6 +11,7 @@ import { todayTz } from "@/lib/services";
 import { createNcr } from "../actions";
 import { NcrFields } from "../NcrFields";
 import { loadNcrOptions } from "../options";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New NCR" };
 
@@ -26,9 +26,7 @@ export default async function NewNcrPage({ searchParams }: { searchParams: Searc
 
   return (
     <>
-      <p className="small">
-        <Link href="/quality">{tr("← Quality")}</Link>
-      </p>
+      <BackLink href="/quality" label="Quality" />
       <h1>{tr("New NCR")}</h1>
       <Notice {...notice} />
       <form action={createNcr} className="card">

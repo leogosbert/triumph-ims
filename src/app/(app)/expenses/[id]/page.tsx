@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -15,6 +14,7 @@ import { branchList } from "@/lib/branches";
 import { saveExpense, voidExpense } from "../actions";
 import { ExpenseFields } from "../ExpenseFields";
 import { ReceiptPicker } from "../ReceiptPicker";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Expense" };
 
@@ -43,9 +43,7 @@ export default async function ExpensePage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      <p className="small">
-        <Link href="/expenses">{tr("← Expenses")}</Link>
-      </p>
+      <BackLink href="/expenses" label="Expenses" />
       <div className="page-head">
         <h1 style={{ margin: 0, ...(e.voided_at ? { textDecoration: "line-through" } : {}) }}>{e.description}</h1>
         <div className="head-amount num">{formatMoney(e.amount, e.currency)}</div>

@@ -29,6 +29,7 @@ import { MeetingBadge, whenRange } from "../../parts";
 import { ProposalFields } from "./ProposalFields";
 import { RefreshWhile } from "./RefreshWhile";
 import styles from "../../meetings.module.css";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Minutes" };
 export const maxDuration = 10;
@@ -93,6 +94,7 @@ export default async function MinutesPage({ params, searchParams }: { params: Pr
 
   return (
     <>
+      <BackLink href={`/meetings/${id}`} label={m.title} />
       {writing && <RefreshWhile />}
       <div className="page-head">
         <h1>{tr("Minutes")}</h1>

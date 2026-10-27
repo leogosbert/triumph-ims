@@ -9,6 +9,7 @@ import { rankAgenda } from "@/lib/ai/meetings";
 import { canManage, MEETING_COLUMNS, type AgendaCandidate, type Meeting } from "@/lib/meetings/model";
 import { addSuggested } from "../../actions";
 import styles from "../../meetings.module.css";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Suggest topics" };
 export const maxDuration = 10;
@@ -41,6 +42,7 @@ export default async function SuggestPage({ params, searchParams }: { params: Pr
 
   return (
     <>
+      <BackLink href={`/meetings/${id}`} label={m.title} />
       <div className="page-head">
         <h1>{tr("Suggest topics")}</h1>
       </div>

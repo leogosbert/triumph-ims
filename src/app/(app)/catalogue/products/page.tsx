@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { setCatalogueCategory, setCatalogueDocument, setCatalogueProduct } from "../actions";
 import { PhotoUpload } from "./PhotoUpload";
+import { BackLink } from "@/components/BackLink";
 import "../../../growth-tools.css";
 
 export const metadata = { title: "Catalogue products" };
@@ -53,9 +53,7 @@ export default async function CatalogueProductsPage({ searchParams }: { searchPa
 
   return (
     <>
-      <p className="small">
-        <Link href="/catalogue">{tr("← Online catalogue")}</Link>
-      </p>
+      <BackLink href="/catalogue" label="Online catalogue" />
       <h1>{tr("Catalogue products")}</h1>
       <p className="muted small">{tr("Tick the products to show. Prices appear only where “Show price” is ticked. Stock and costs are never shown.")}</p>
       <Notice {...notice} />

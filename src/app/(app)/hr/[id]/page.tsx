@@ -29,6 +29,7 @@ import { StatusBadge } from "@/lib/sales";
 import { todayTz } from "@/lib/services";
 import { addCertificate, removeCertificate, saveEmployee, setEmployeeStatus } from "../actions";
 import { EmployeeFields } from "../EmployeeFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Employee" };
 
@@ -86,9 +87,7 @@ export default async function EmployeePage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        {can(role, "seeEmployees") ? <Link href="/hr">{tr("← Employees")}</Link> : <Link href="/hr/leave">{tr("← Leave")}</Link>}
-      </p>
+      <BackLink href={can(role, "seeEmployees") ? "/hr" : "/hr/leave"} label={can(role, "seeEmployees") ? "Employees" : "Leave"} />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{e.full_name}</h1>
         {!active && <span className="badge tone-off">{tr("Left")}</span>}

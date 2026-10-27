@@ -5,6 +5,7 @@ import { getAppContext } from "@/lib/context";
 import { PERIOD_PRESETS, type Period, type StGroup } from "@/lib/ledger";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { BackLink as SharedBackLink } from "@/components/BackLink";
 
 /** The app context for an Accounts page: management and finance only. */
 export async function ledgerContext() {
@@ -29,12 +30,9 @@ export function amt(n: number, currency: string): string {
   return n < 0 ? `(${s})` : s;
 }
 
-export function BackLink({ href = "/accounts", label = "← Accounts" }: { href?: string; label?: string }) {
-  return (
-    <p className="small no-print">
-      <Link href={href}>{tr(label)}</Link>
-    </p>
-  );
+/** The shared back link, pointing to Accounts unless told otherwise. */
+export function BackLink({ href = "/accounts", label = "Accounts" }: { href?: string; label?: string }) {
+  return <SharedBackLink href={href} label={label} />;
 }
 
 /** Preset period tabs plus a custom from/to form (GET, so the period stays in the address). */

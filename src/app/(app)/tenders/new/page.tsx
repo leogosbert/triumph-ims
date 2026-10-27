@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { companyPeople } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { createTender } from "../actions";
 import { TenderFields } from "../TenderFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New tender" };
 
@@ -29,9 +29,7 @@ export default async function NewTenderPage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      <p className="small">
-        <Link href="/tenders">{tr("← Tenders")}</Link>
-      </p>
+      <BackLink href="/tenders" label="Tenders" />
       <h1>{tr("New tender")}</h1>
       <p className="muted small">{tr("Record the tender as soon as you see it: the app reminds you before it closes and keeps the checklist of papers.")}</p>
       <Notice {...notice} />

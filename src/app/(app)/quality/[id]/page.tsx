@@ -19,6 +19,7 @@ import { setRecordStatus } from "../../hse/actions";
 import { saveNcr } from "../actions";
 import { NcrFields } from "../NcrFields";
 import { loadNcrOptions, ncrLinkedNames } from "../options";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "NCR" };
 
@@ -61,9 +62,7 @@ export default async function NcrPage({ params, searchParams }: { params: Promis
 
   return (
     <>
-      <p className="small">
-        <Link href="/quality">{tr("← Quality")}</Link>
-      </p>
+      <BackLink href="/quality" label="Quality" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{ncr.title}</h1>
         <StatusBadge map={NCR_STATUS} status={ncr.status} />

@@ -12,6 +12,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { addSource, removeSource, saveAlertSettings, toggleSource } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Tender alert settings" };
 
@@ -52,9 +53,7 @@ export default async function AlertSettingsPage({ searchParams }: { searchParams
 
   return (
     <>
-      <p className="small">
-        <Link href="/tenders/alerts">{tr("← Tender alerts")}</Link>
-      </p>
+      <BackLink href="/tenders/alerts" label="Tender alerts" />
       <h1>{tr("Tender alert settings")}</h1>
       <Notice {...notice} />
       <form action={saveAlertSettings} className="card grid">

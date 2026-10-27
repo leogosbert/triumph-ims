@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -9,6 +8,7 @@ import { clientOptions } from "@/lib/options";
 import { can } from "@/lib/roles";
 import { storeOptions } from "@/lib/stock";
 import { newDelivery } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New delivery note" };
 
@@ -20,9 +20,7 @@ export default async function NewDeliveryPage({ searchParams }: { searchParams: 
   const [clients, stores] = await Promise.all([clientOptions(supabase, company.id), storeOptions(supabase, company.id)]);
   return (
     <>
-      <p className="small">
-        <Link href="/deliveries">{tr("← Deliveries")}</Link>
-      </p>
+      <BackLink href="/deliveries" label="Deliveries" />
       <h1>{tr("New delivery note")}</h1>
       <p className="muted small">{tr("To deliver a won order, open the accepted quotation and use “Create delivery note”: the items are copied, and later deliveries only include what is still outstanding.")}</p>
       <Notice {...notice} />

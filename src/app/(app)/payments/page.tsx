@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/format";
 import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Payments received" };
 
@@ -46,9 +47,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Payments received")}</h1>
       <nav className="tabs-row" aria-label={tr("Month")}>
         <Link href={`/payments?m=${m.prev}`}>{tr("← Earlier")}</Link>

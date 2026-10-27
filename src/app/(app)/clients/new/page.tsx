@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { RecordFields } from "@/components/RecordFields";
@@ -9,6 +8,7 @@ import { CLIENT_SECTIONS } from "@/lib/fields";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { saveClient } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New client" };
 
@@ -20,9 +20,7 @@ export default async function NewClientPage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      <p className="small">
-        <Link href="/clients">{tr("← Clients")}</Link>
-      </p>
+      <BackLink href="/clients" label="Clients" />
       <h1>{tr("New client")}</h1>
       <Notice {...notice} />
       <form action={saveClient}>

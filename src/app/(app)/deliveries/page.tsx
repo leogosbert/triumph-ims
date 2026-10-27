@@ -9,6 +9,7 @@ import { LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { DELIVERY_STATUS } from "@/lib/stock";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Deliveries" };
 
@@ -45,9 +46,7 @@ export default async function DeliveriesPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <div className="page-head">
         <h1>{tr("Deliveries")}</h1>
         {can(role, "editDeliveries") && (

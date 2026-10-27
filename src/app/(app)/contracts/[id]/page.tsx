@@ -12,6 +12,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { endContract, removeContractPrice, saveContract, setContractPrice } from "../actions";
 import { ContractFields } from "../ContractFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Contract" };
 
@@ -38,9 +39,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
 
   return (
     <>
-      <p className="small">
-        <Link href="/contracts">{tr("← Contracts")}</Link>
-      </p>
+      <BackLink href="/contracts" label="Contracts" />
       <h1 style={{ marginBottom: 4 }}>{k.client?.name}</h1>
       <p style={{ margin: "4px 0" }}>{k.title}</p>
       <p className="muted small">

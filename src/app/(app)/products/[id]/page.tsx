@@ -12,6 +12,7 @@ import { formatMoney, marginPercent } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
 import { saveProduct, saveProductCost, setProductActive } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Product" };
 
@@ -52,9 +53,7 @@ export default async function ProductPage({
 
   return (
     <>
-      <p className="small">
-        <Link href="/products">{tr("← Products")}</Link>
-      </p>
+      <BackLink href="/products" label="Products" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{product.name}</h1>
         <span className="badge">{product.sku}</span>

@@ -13,6 +13,7 @@ import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
 import { cancelBill, payBill, saveBill, voidSupplierPayment } from "../actions";
 import { BillFields } from "../BillFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier bill" };
 
@@ -64,15 +65,14 @@ export default async function BillPage({ params, searchParams }: { params: Promi
 
   return (
     <>
-      <p className="small">
-        <Link href="/bills">{tr("← Supplier bills")}</Link>
+      <BackLink href="/bills" label="Supplier bills">
         {b.po && (
           <>
             {" · "}
             <Link href={`/purchase-orders/${b.po.id}`}>{b.po.number}</Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{b.supplier?.name}</h1>
         <StatusBadge map={BILL_STATUS} status={shown} />

@@ -14,6 +14,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { dismissNotice, makeTender, readAgain, restoreNotice, saveNotice } from "../actions";
+import { BackLink } from "@/components/BackLink";
 import "../../../../growth-tools.css";
 
 export const metadata = { title: "Tender notice" };
@@ -51,9 +52,7 @@ export default async function NoticePage({ params, searchParams }: { params: Pro
 
   return (
     <>
-      <p className="small">
-        <Link href="/tenders/alerts">{tr("← Tender alerts")}</Link>
-      </p>
+      <BackLink href="/tenders/alerts" label="Tender alerts" />
       <div className="gt-head">
         {n.score !== null && <span className={`gt-score ${d?.tone ?? "off"}`}>{n.score}</span>}
         <div className="gt-main">

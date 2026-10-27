@@ -13,6 +13,7 @@ import { can } from "@/lib/roles";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
 import { PortalAccess } from "@/components/PortalAccess";
 import { saveSupplier, setSupplierActive } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier" };
 
@@ -48,9 +49,7 @@ export default async function SupplierPage({
 
   return (
     <>
-      <p className="small">
-        <Link href="/suppliers">{tr("← Suppliers")}</Link>
-      </p>
+      <BackLink href="/suppliers" label="Suppliers" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{supplier.name}</h1>
         <span className="badge">{supplier.code}</span>

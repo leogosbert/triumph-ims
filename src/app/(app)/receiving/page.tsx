@@ -6,6 +6,7 @@ import { formatDate } from "@/lib/format";
 import { PO_STATUS } from "@/lib/purchasing";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Receive goods" };
 
@@ -37,9 +38,7 @@ export default async function ReceivingPage() {
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <h1>{tr("Receive goods")}</h1>
       <p className="muted small">{tr("Choose the purchase order the delivery belongs to. Check quantities against the supplier's delivery note.")}</p>
       {pos.length === 0 ? (

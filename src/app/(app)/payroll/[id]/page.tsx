@@ -13,6 +13,7 @@ import { PAYROLL_STATUS, RUN_PAY_METHODS, monthLabel, plain, statutoryItems, typ
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
 import { approveRun, cancelRun, payRun, payStatutory, refreshRun, removeLine, updateLine } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Pay run" };
 
@@ -80,9 +81,7 @@ export default async function PayRunPage({ params, searchParams }: { params: Pro
 
   return (
     <>
-      <p className="small">
-        <Link href="/payroll">{tr("← Payroll")}</Link>
-      </p>
+      <BackLink href="/payroll" label="Payroll" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{monthLabel(run.period, tr)}</h1>
         <StatusBadge map={PAYROLL_STATUS} status={run.status} />

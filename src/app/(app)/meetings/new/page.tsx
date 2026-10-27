@@ -7,6 +7,7 @@ import { companyPeople } from "@/lib/people";
 import { canOrganise } from "@/lib/meetings/model";
 import { createMeeting } from "../actions";
 import { MeetingForm } from "../parts";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New meeting" };
 
@@ -22,6 +23,7 @@ export default async function NewMeetingPage({ searchParams }: { searchParams: S
   ]);
   return (
     <>
+      <BackLink href="/meetings" label="Meetings" />
       <div className="page-head">
         <h1>{tr("New meeting")}</h1>
       </div>

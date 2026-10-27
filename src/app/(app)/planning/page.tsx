@@ -9,6 +9,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { fmtQty } from "@/lib/stock";
 import { planningAction } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Purchase planning" };
 
@@ -61,9 +62,7 @@ export default async function PlanningPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <h1>{tr("Purchase planning")}</h1>
       <p className="muted small">
         {tr("From what you dispatched: sales per day, how long the stock lasts, and when to order given the supplier's lead time (two weeks when not known) plus a week of safety stock. The quantity covers a month after the goods arrive.")}

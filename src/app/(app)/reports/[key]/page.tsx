@@ -13,6 +13,7 @@ import { TimingFields } from "@/components/reports/TimingFields";
 import { scheduleReport } from "../../scheduled-reports/actions";
 import { findReport, MAX_ROWS, type FilterKey } from "@/lib/reports/defs";
 import { cellText, colLabel, FILTER_LABELS, filterOptions, filterText, mayOpen, parseParams, periodText, runReport, toQuery } from "@/lib/reports/run";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Report" };
 
@@ -91,9 +92,7 @@ export default async function ReportPage({ params, searchParams }: { params: Pro
 
   return (
     <>
-      <p className="small no-print">
-        <Link href="/reports">{tr("← Reports")}</Link>
-      </p>
+      <BackLink href="/reports" label="Reports" />
       <h1 className="no-print">{tr(def.title)}</h1>
       <p className="muted small no-print">{tr(def.description)}</p>
 

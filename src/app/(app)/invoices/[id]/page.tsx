@@ -21,6 +21,7 @@ import { can } from "@/lib/roles";
 import { BranchField } from "@/components/BranchField";
 import { branchList } from "@/lib/branches";
 import { quoteNo, StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 import {
   addInvoiceLine,
   cancelInvoice,
@@ -117,8 +118,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
 
   return (
     <>
-      <p className="small">
-        <Link href="/invoices">{tr("← Invoices")}</Link>
+      <BackLink href="/invoices" label="Invoices">
         {inv.quotation && can(role, "seeSales") && (
           <>
             {" · "}
@@ -131,7 +131,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
             <Link href={`/deliveries/${inv.delivery.id}`}>{inv.delivery.number}</Link>
           </>
         )}
-      </p>
+      </BackLink>
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{inv.client?.name}</h1>
         <StatusBadge map={INVOICE_STATUS} status={shown} />

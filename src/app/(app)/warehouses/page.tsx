@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { requireManager } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { saveWarehouse } from "../stock/actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Stores" };
 
@@ -47,9 +47,7 @@ export default async function WarehousesPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/stock">{tr("← Stock")}</Link>
-      </p>
+      <BackLink href="/stock" label="Stock" />
       <h1>{tr("Stores and warehouses")}</h1>
       <Notice {...notice} />
       {stores.map((w) => (

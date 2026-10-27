@@ -19,6 +19,7 @@ import "./services.css";
 import "./polish.css";
 import "./glass.css";
 import "./my.css";
+import "./nav.css";
 
 // IBM Plex is bundled in src/app/fonts (SIL Open Font License), so builds never depend on downloading Google Fonts.
 const sans = localFont({

@@ -18,6 +18,7 @@ import { assignConversation, linkConversation, markUnread, setConversationStatus
 import { HtmlFrame } from "../HtmlFrame";
 import { ReplyBox } from "../ReplyBox";
 import { noticeFromInbox } from "../../tenders/alerts/actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Conversation" };
 
@@ -78,9 +79,7 @@ export default async function ConversationPage({ params, searchParams }: { param
 
   return (
     <>
-      <p className="small">
-        <Link href="/inbox">{tr("← Inbox")}</Link>
-      </p>
+      <BackLink href="/inbox" label="Inbox" />
       <h1 style={{ overflowWrap: "anywhere" }}>
         {c.channel === "whatsapp" ? "💬 " : c.channel === "portal" ? "🌐 " : "✉️ "}
         {who}

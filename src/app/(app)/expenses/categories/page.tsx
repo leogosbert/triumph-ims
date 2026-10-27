@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -7,6 +6,7 @@ import { getAppContext, stage13Ready } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { addCategory, updateCategory } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Expense categories" };
 
@@ -26,9 +26,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/expenses">{tr("← Expenses")}</Link>
-      </p>
+      <BackLink href="/expenses" label="Expenses" />
       <h1>{tr("Expense categories")}</h1>
       <p className="muted small">{tr("Rename the categories to match how you think about your spending. A category that is switched off is hidden when recording new expenses; old expenses keep it.")}</p>
       <Notice {...notice} />

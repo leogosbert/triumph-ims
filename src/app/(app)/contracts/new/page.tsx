@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -11,6 +10,7 @@ import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { createContract } from "../actions";
 import { ContractFields } from "../ContractFields";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New contract" };
 
@@ -34,9 +34,7 @@ export default async function NewContractPage({ searchParams }: { searchParams: 
 
   return (
     <>
-      <p className="small">
-        <Link href="/contracts">{tr("← Contracts")}</Link>
-      </p>
+      <BackLink href="/contracts" label="Contracts" />
       <h1>{tr("New contract")}</h1>
       <Notice {...notice} />
       <form action={createContract} className="card">

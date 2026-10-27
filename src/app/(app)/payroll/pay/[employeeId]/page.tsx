@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -10,6 +9,7 @@ import { readSettings } from "@/lib/payroll";
 import { can } from "@/lib/roles";
 import { savePay } from "../../actions";
 import { PayForm, type PayValues } from "./PayForm";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Pay details" };
 
@@ -49,9 +49,7 @@ export default async function EmployeePayPage({ params, searchParams }: { params
 
   return (
     <>
-      <p className="small">
-        <Link href="/payroll/pay">{tr("← Pay details")}</Link>
-      </p>
+      <BackLink href="/payroll/pay" label="Pay details" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{e.full_name}</h1>
         {!p && <span className="badge tone-warn">{tr("Not set")}</span>}

@@ -8,6 +8,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { RFQ_STATUS, StatusBadge, todayTz } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "RFQs" };
 
@@ -54,9 +55,7 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
 
   return (
     <>
-      <p className="small">
-        <Link href="/sales">{tr("← Sales")}</Link>
-      </p>
+      <BackLink href="/sales" label="Sales" />
       <div className="page-head">
         <h1>{tr("Client RFQs")}</h1>
         {can(role, "editSales") && (

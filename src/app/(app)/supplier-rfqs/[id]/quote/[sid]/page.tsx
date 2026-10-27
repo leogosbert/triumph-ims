@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -9,6 +8,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { saveSupplierQuote } from "../../../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Supplier prices" };
 
@@ -41,9 +41,7 @@ export default async function SupplierQuotePage({
 
   return (
     <>
-      <p className="small">
-        <Link href={`/supplier-rfqs/${id}`}>← {r.title ?? r.number}</Link>
-      </p>
+      <BackLink href={`/supplier-rfqs/${id}`} label={r.title ?? r.number} />
       <h1>{tr("Prices from")}{" "}{inv.supplier?.name}</h1>
       <p className="muted small">{tr("Type the prices exactly as the supplier quoted them, in their currency. Leave an item empty if they can't supply it.")}</p>
       <Notice {...notice} />

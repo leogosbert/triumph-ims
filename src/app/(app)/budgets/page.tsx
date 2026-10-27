@@ -13,6 +13,7 @@ import { loadPnlMonths, type Pnl } from "@/lib/pnl";
 import { can } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { saveBudget } from "./actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Budgets vs actual" };
 
@@ -72,9 +73,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Sear
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Budgets vs actual")}</h1>
       <nav className="tabs-row" aria-label={tr("Year")}>
         <Link href={`/budgets?y=${year - 1}&line=${encodeURIComponent(selected.key)}`}>← {year - 1}</Link>

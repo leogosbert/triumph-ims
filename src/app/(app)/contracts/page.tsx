@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Contracts" };
 
@@ -52,9 +53,7 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
   return (
     <>
       {can(role, "seeCrm") && (
-        <p className="small">
-          <Link href="/crm">{tr("← Pipeline")}</Link>
-        </p>
+        <BackLink href="/crm" label="Pipeline" />
       )}
       <div className="page-head">
         <h1>{tr("Contracts")}</h1>

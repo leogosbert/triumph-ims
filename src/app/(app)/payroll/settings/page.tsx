@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -12,6 +11,7 @@ import { formatMoney } from "@/lib/money";
 import { readSettings, type PayrollSettings } from "@/lib/payroll";
 import { can } from "@/lib/roles";
 import { saveSettings } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Payroll rates" };
 
@@ -42,9 +42,7 @@ export default async function PayrollSettingsPage({ searchParams }: { searchPara
 
   return (
     <>
-      <p className="small">
-        <Link href="/payroll">{tr("← Payroll")}</Link>
-      </p>
+      <BackLink href="/payroll" label="Payroll" />
       <div className="page-head">
         <h1>{tr("Payroll rates")}</h1>
       </div>

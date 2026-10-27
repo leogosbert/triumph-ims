@@ -10,6 +10,7 @@ import { can } from "@/lib/roles";
 import { quoteNo } from "@/lib/sales";
 import { fmtQty } from "@/lib/stock";
 import { newDelivery } from "../deliveries/actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Still to deliver" };
 
@@ -75,9 +76,7 @@ export default async function BackordersPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/deliveries">{tr("← Deliveries")}</Link>
-      </p>
+      <BackLink href="/deliveries" label="Deliveries" />
       <h1>{tr("Still to deliver")}</h1>
       <p className="muted small">{tr("Accepted quotations whose goods have not all gone out yet, with the stock you have now.")}</p>
       <Notice {...notice} />

@@ -8,6 +8,7 @@ import { formatMoney } from "@/lib/money";
 import { PAYROLL_STATUS, monthLabel } from "@/lib/payroll";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "My payslips" };
 
@@ -27,9 +28,7 @@ export default async function MyPayslipsPage() {
   return (
     <>
       {can(role, "runPayroll") && (
-        <p className="small">
-          <Link href="/payroll">{tr("← Payroll")}</Link>
-        </p>
+        <BackLink href="/payroll" label="Payroll" />
       )}
       <div className="page-head">
         <h1>{tr("My payslips")}</h1>

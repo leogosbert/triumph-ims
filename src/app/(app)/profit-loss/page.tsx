@@ -7,6 +7,7 @@ import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { loadPnl, type Pnl } from "@/lib/pnl";
 import { can } from "@/lib/roles";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Profit & loss" };
 
@@ -56,9 +57,7 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: S
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Profit & loss")}</h1>
       <nav className="tabs-row" aria-label={tr("Month")}>
         <Link href={`/profit-loss?m=${m.prev}`}>{tr("← Earlier")}</Link>

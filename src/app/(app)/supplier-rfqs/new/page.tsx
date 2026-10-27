@@ -1,5 +1,4 @@
 import { primeLang, tr } from "@/lib/tr";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -7,6 +6,7 @@ import { getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { createSupplierRfq } from "../actions";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "New supplier RFQ" };
 
@@ -17,9 +17,7 @@ export default async function NewSupplierRfqPage({ searchParams }: { searchParam
   if (!can(role, "editPurchasing")) redirect("/");
   return (
     <>
-      <p className="small">
-        <Link href="/supplier-rfqs">{tr("← Supplier RFQs")}</Link>
-      </p>
+      <BackLink href="/supplier-rfqs" label="Supplier RFQs" />
       <h1>{tr("Ask suppliers for prices")}</h1>
       <p className="muted small">{tr("Tip: to buy for a client order, open the accepted quotation (or the client RFQ) and use “Request supplier quotes” so the items are copied across.")}</p>
       <Notice {...notice} />

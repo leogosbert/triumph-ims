@@ -15,6 +15,7 @@ import { convertProspect, linkQuotation, moveOpportunity, quoteOpportunity, save
 import { ActivityForm, type ActivityRow } from "../ActivityForm";
 import { OpportunityFields } from "../OpportunityFields";
 import { Timeline } from "../Timeline";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Opportunity" };
 
@@ -61,9 +62,7 @@ export default async function OpportunityPage({ params, searchParams }: { params
 
   return (
     <>
-      <p className="small">
-        <Link href="/crm">{tr("← Pipeline")}</Link>
-      </p>
+      <BackLink href="/crm" label="Pipeline" />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{party}</h1>
         <StatusBadge map={OPP_BADGE} status={o.stage} />

@@ -8,6 +8,7 @@ import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { quoteNo } from "@/lib/sales";
+import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Profit" };
 
@@ -132,9 +133,7 @@ export default async function ProfitPage({ searchParams }: { searchParams: Searc
 
   return (
     <>
-      <p className="small">
-        <Link href="/finance">{tr("← Finance")}</Link>
-      </p>
+      <BackLink href="/finance" label="Finance" />
       <h1>{tr("Profit")}</h1>
       <nav className="tabs-row" aria-label={tr("Month")}>
         <Link href={`/profit?m=${m.prev}`}>{tr("← Earlier")}</Link>

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
 import { toNumber } from "@/lib/fields";
-import { optional, str } from "@/lib/format";
+import { optional, str, choice, LOST_CHOICE } from "@/lib/format";
 import { EMPLOYMENT_TYPES, LEAVE_KINDS } from "@/lib/hr";
 import { friendlyError, withNotice } from "@/lib/messages";
 
@@ -162,7 +162,8 @@ export async function requestLeave(form: FormData) {
 
 export async function decideLeave(form: FormData) {
   const path = backTo(form, "/hr/leave");
-  const approve = str(form, "decision") === "approve";
+  const approve = choice(form, "decision", "approve", "decline");
+  if (approve === null) fail(path, LOST_CHOICE);
   const { supabase } = await getAppContext();
   const { error } = await supabase.rpc("decide_leave", {
     p_request: str(form, "request_id"),

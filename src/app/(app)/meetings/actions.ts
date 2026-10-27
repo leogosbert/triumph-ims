@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
-import { optional, str } from "@/lib/format";
+import { optional, str, choice, LOST_CHOICE } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { siteUrl } from "@/lib/supabase/env";
 import { fromLocalInput } from "@/lib/services";
@@ -576,7 +576,8 @@ export async function editProposal(form: FormData) {
 export async function decideProposal(form: FormData) {
   const meeting = str(form, "meeting_id");
   const path = `/meetings/${meeting}/minutes#updates`;
-  const approve = str(form, "approve") === "1";
+  const approve = choice(form, "approve", "1", "0");
+  if (approve === null) fail(path, LOST_CHOICE);
   const { supabase } = await getAppContext();
   const { error } = await supabase.rpc("meeting_proposal_decide", { p_proposal: str(form, "proposal_id"), p_approve: approve, p_note: optional(form, "note") });
   if (error) fail(path, `Nothing was changed: ${error.message}`);

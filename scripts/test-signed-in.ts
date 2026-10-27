@@ -11,6 +11,7 @@ import { describe, it } from "node:test";
 import { friendlyError, withNotice } from "../src/lib/messages";
 import { moreMenu } from "../src/lib/menu";
 import { can, type Role } from "../src/lib/roles";
+import { choice } from "../src/lib/format";
 
 const ROOT = join(__dirname, "..");
 
@@ -45,6 +46,30 @@ describe("menu", () => {
       const hrefs = moreMenu(role, role === "management", { on: () => true, isPlatformAdmin: false, features: [] })
         .flatMap((g) => g.items.map((i) => i.href));
       assert.equal(hrefs.includes("/supplier-rfqs"), can([role], "editPurchasing"), role);
+    }
+  });
+});
+
+describe("two-button choices refuse a lost button value", () => {
+  const fd = (v?: string) => {
+    const f = new FormData();
+    f.set("id", "q1");
+    if (v !== undefined) f.set("outcome", v);
+    return f;
+  };
+  it("reads yes and no", () => {
+    assert.equal(choice(fd("accepted"), "outcome", "accepted", "rejected"), true);
+    assert.equal(choice(fd("rejected"), "outcome", "accepted", "rejected"), false);
+  });
+  it("gives null (not 'no') when the button value is missing or unknown", () => {
+    assert.equal(choice(fd(), "outcome", "accepted", "rejected"), null);
+    assert.equal(choice(fd(""), "outcome", "accepted", "rejected"), null);
+    assert.equal(choice(fd("maybe"), "outcome", "accepted", "rejected"), null);
+  });
+  it("every two-button decision action checks for a lost choice", () => {
+    for (const f of ["quotations", "purchase-orders", "hr", "timesheets/approve", "requisitions", "meetings", "portal-admin"]) {
+      const src = readFileSync(join(ROOT, "src/app/(app)", f, "actions.ts"), "utf8");
+      assert.match(src, /=== null\)[^\n]*LOST_CHOICE/, f);
     }
   });
 });

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
-import { optional, str } from "@/lib/format";
+import { optional, str, choice, LOST_CHOICE } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 
 function backTo(form: FormData) {
@@ -17,7 +17,8 @@ function fail(path: string, error: string): never {
 
 export async function decideWeek(form: FormData) {
   const path = backTo(form);
-  const approve = str(form, "decision") === "approve";
+  const approve = choice(form, "decision", "approve", "return");
+  if (approve === null) fail(path, LOST_CHOICE);
   const note = optional(form, "note");
   if (!approve && !note) fail(path, "Say what needs to change.");
   const { supabase } = await getAppContext();

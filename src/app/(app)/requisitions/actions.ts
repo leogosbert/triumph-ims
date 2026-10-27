@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
 import { toNumber } from "@/lib/fields";
-import { optional, str } from "@/lib/format";
+import { optional, str, choice, LOST_CHOICE } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 
 function refresh(id?: string) {
@@ -98,7 +98,8 @@ export async function submitRequisition(form: FormData) {
 
 export async function decideRequisition(form: FormData) {
   const id = str(form, "id");
-  const approve = str(form, "decision") === "approve";
+  const approve = choice(form, "decision", "approve", "reject");
+  if (approve === null) fail(`/requisitions/${id}`, LOST_CHOICE);
   const { supabase } = await getAppContext();
   const { error } = await supabase.rpc("decide_requisition", { p_id: id, p_approve: approve, p_note: optional(form, "note") });
   if (error) fail(`/requisitions/${id}`, error.message);

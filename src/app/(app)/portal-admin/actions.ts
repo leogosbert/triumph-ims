@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppContext } from "@/lib/context";
-import { str } from "@/lib/format";
+import { str, choice, LOST_CHOICE } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { portalLoginUrl, sendPortalEmail } from "@/lib/portal/server";
 import { siteUrl } from "@/lib/supabase/env";
@@ -79,7 +79,8 @@ export async function decideBankChange(form: FormData) {
   const { supabase, company } = await getAppContext();
   const id = str(form, "id");
   const back = `/portal-admin/bank/${id}`;
-  const approve = str(form, "approve") === "true";
+  const approve = choice(form, "approve", "true", "false");
+  if (approve === null) redirect(withNotice(back, { error: LOST_CHOICE }));
   const { data, error } = await supabase.rpc("portal_decide_bank_change", { p_id: id, p_approve: approve, p_note: str(form, "note") || null });
   if (error || !data) redirect(withNotice(back, { error: friendlyError(error?.message) }));
   const r = data as { supplier: string | null; status: string; note: string | null; emails: string[] };

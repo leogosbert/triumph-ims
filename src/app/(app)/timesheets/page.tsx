@@ -45,8 +45,8 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: S
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user, features } = await getAppContext();
-  const manager = canInvoiceService(role);
+  const { supabase, company, roles, user, features } = await getAppContext();
+  const manager = canInvoiceService(roles);
   const team = manager && pick(sp.view) === "team";
   const week = mondayOf(pick(sp.week));
   const sunday = addDays(week, 6);
@@ -96,7 +96,7 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: S
         <h1>{tr("Timesheets")}</h1>
         {manager && (
           <span style={{ display: "flex", gap: 6 }}>
-            {approval && can(role, "manageHr") && (
+            {approval && can(roles, "manageHr") && (
               <Link href="/timesheets/approve" className="btn btn-small">
                 {tr("Approve weeks")}
               </Link>

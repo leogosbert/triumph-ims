@@ -29,12 +29,12 @@ export default async function SupplierPage({
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "seeSuppliers")) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seeSuppliers")) redirect("/");
 
   const [{ data: supplier }, { data: linkedData }] = await Promise.all([
     supabase.from("suppliers").select("*").eq("id", id).eq("company_id", company.id).maybeSingle(),
-    can(role, "seeCosts")
+    can(roles, "seeCosts")
       ? supabase
           .from("product_costs")
           .select("product_id, last_cost, product:products(name, sku)")
@@ -45,7 +45,7 @@ export default async function SupplierPage({
   ]);
   if (!supplier) notFound();
   const linked = (linkedData ?? []) as unknown as Linked[];
-  const editable = can(role, "editSuppliers");
+  const editable = can(roles, "editSuppliers");
 
   return (
     <>
@@ -63,7 +63,7 @@ export default async function SupplierPage({
         )}
       </p>
       <Notice {...notice} />
-      {can(role, "seeBills") && features.on("statements") && (
+      {can(roles, "seeBills") && features.on("statements") && (
         <p className="small">
           <Link href={`/suppliers/${supplier.id}/statement`}>{tr("Statement of account →")}</Link>
         </p>
@@ -85,13 +85,13 @@ export default async function SupplierPage({
         </section>
       )}
 
-      {can(role, "seeDocuments") && features.on("documents") && (
+      {can(roles, "seeDocuments") && features.on("documents") && (
         <LinkedDocuments supabase={supabase} companyId={company.id} field="supplier_id" id={id} back={`/suppliers/${id}#documents`} kind="certificate" />
       )}
       <PortalAccess
         supabase={supabase}
         companyId={company.id}
-        role={role}
+        role={roles}
         features={features}
         party="supplier"
         partyId={supplier.id}

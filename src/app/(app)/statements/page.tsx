@@ -25,9 +25,9 @@ function group(rows: { pid: string; name: string; due_date: string | null; total
 
 export default async function StatementsPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
-  const seeClients = can(role, "seeInvoices");
-  const seeSuppliers = can(role, "seeBills");
+  const { supabase, company, roles } = await getAppContext();
+  const seeClients = can(roles, "seeInvoices");
+  const seeSuppliers = can(roles, "seeBills");
   if (!seeClients && !seeSuppliers) redirect("/");
   const base = company.base_currency;
 

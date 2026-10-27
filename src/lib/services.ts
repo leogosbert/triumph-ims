@@ -3,7 +3,7 @@
  * and hire. Client-safe lists and helpers; English labels are keys that screens translate with tr().
  * The database rules (supabase/migrations/20261021000100_service_business.sql) are the real guard.
  */
-import type { Role } from "@/lib/roles";
+import { hasRole, type Role, type RoleSet } from "@/lib/roles";
 
 /** Shown until the goods-and-services SQL has been run. */
 export const SERVICES_MISSING = "Service jobs need the latest database update. Ask LeMo Tech to run it.";
@@ -91,11 +91,11 @@ export const HIRE_STATUS: Record<string, { label: string; tone: string }> = {
 
 /** Who plans and runs service work (jobs, contracts, equipment, hire). Mirrors public.service_roles(). */
 export const SERVICE_ROLES: Role[] = ["management", "sales", "warehouse"];
-export const canPlanService = (role: Role) => SERVICE_ROLES.includes(role);
+export const canPlanService = (role: RoleSet) => hasRole(role, ...SERVICE_ROLES);
 /** Sees every job, contract, hire and the reports. */
-export const canSeeAllService = (role: Role) => canPlanService(role) || role === "finance";
+export const canSeeAllService = (role: RoleSet) => canPlanService(role) || hasRole(role, "finance");
 /** Makes invoices from jobs, projects and hires; sets rates. */
-export const canInvoiceService = (role: Role) => role === "management" || role === "finance";
+export const canInvoiceService = (role: RoleSet) => hasRole(role, "management", "finance");
 
 export type ChecklistItem = { text: string; done: boolean };
 

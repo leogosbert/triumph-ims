@@ -16,7 +16,7 @@ type Slip = { line_id: string; run_id: string; period: string; pay_date: string 
 
 export default async function MyPayslipsPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const { data, error } = await supabase.rpc("my_payslips", { p_company: company.id });
   if (error && (isMissingTable(error) || error.code === "PGRST202" || /function .* does not exist|Could not find the function/i.test(error.message))) {
     return <NotReady title="My payslips" />;
@@ -27,7 +27,7 @@ export default async function MyPayslipsPage() {
 
   return (
     <>
-      {can(role, "runPayroll") && (
+      {can(roles, "runPayroll") && (
         <BackLink href="/payroll" label="Payroll" />
       )}
       <div className="page-head">

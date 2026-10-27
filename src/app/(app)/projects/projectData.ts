@@ -1,10 +1,10 @@
-import type { Role } from "@/lib/roles";
+import { hasRole, type RoleSet } from "@/lib/roles";
 
 /**
  * Who may add and change projects and their milestones. The database allows management and sales
  * (projects_insert / projects_update / project_milestones_* policies), so the buttons follow that.
  */
-export const canKeepProjects = (role: Role) => role === "management" || role === "sales";
+export const canKeepProjects = (role: RoleSet) => hasRole(role, "management", "sales");
 
 export type Project = {
   id: string;

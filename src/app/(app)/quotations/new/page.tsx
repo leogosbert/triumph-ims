@@ -15,8 +15,8 @@ export default async function NewQuotationPage({ searchParams }: { searchParams:
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editSales")) redirect("/quotations");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editSales")) redirect("/quotations");
   const clients = await clientOptions(supabase, company.id);
 
   return (

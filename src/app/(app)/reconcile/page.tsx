@@ -40,8 +40,8 @@ export default async function ReconcilePage({ searchParams }: { searchParams: Se
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const method = typeof sp.method === "string" && (sp.method === "all" || sp.method in PAY_METHODS) ? sp.method : "mobile_money";
   const show = sp.show === "all" ? "all" : "open";
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "reconcile")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "reconcile")) redirect("/");
   const base = company.base_currency;
 
   if (!stage13Ready(company)) {

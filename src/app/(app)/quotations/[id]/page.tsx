@@ -71,7 +71,7 @@ export default async function QuotationPage({
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user, profile, features } = await getAppContext();
+  const { supabase, company, roles, user, profile, features } = await getAppContext();
   const lang = await primeLang();
 
   const { data: q } = await supabase
@@ -83,8 +83,8 @@ export default async function QuotationPage({
   if (!q) notFound();
   const branches = features.on("branches") ? await branchList(supabase, company.id) : [];
 
-  const showCosts = can(role, "seeCosts");
-  const canEdit = can(role, "editSales");
+  const showCosts = can(roles, "seeCosts");
+  const canEdit = can(roles, "editSales");
   const isDraft = q.status === "draft";
   const editable = canEdit && isDraft;
 
@@ -139,7 +139,7 @@ export default async function QuotationPage({
       contractLines = lines.filter((l) => l.product_id && priceOf.has(l.product_id) && (priceOf.get(l.product_id) !== n(l.unit_price) || n(l.discount_pct) !== 0)).length;
     }
   }
-  const buyer = can(role, "editPurchasing");
+  const buyer = can(roles, "editPurchasing");
   const [{ data: srfqData }, { data: poData }] = buyer
     ? await Promise.all([
         supabase.from("supplier_rfqs").select("id, number, status").eq("quotation_id", id),
@@ -148,18 +148,18 @@ export default async function QuotationPage({
     : [{ data: [] }, { data: [] }];
   const linkedSrfqs = (srfqData ?? []) as { id: string; number: string; status: string }[];
   const linkedPos = (poData ?? []) as unknown as { id: string; number: string; status: string; supplier: { name: string } | null }[];
-  const showDeliveries = q.status === "accepted" && can(role, "seeDeliveries");
+  const showDeliveries = q.status === "accepted" && can(roles, "seeDeliveries");
   const { data: dnData } = showDeliveries
     ? await supabase.from("deliveries").select("id, number, status").eq("quotation_id", id).order("created_at")
     : { data: [] };
   const linkedDns = (dnData ?? []) as { id: string; number: string; status: string }[];
-  const showInvoices = q.status === "accepted" && can(role, "seeInvoices");
-  const showOrderCosts = q.status === "accepted" && (can(role, "seeProfit") || can(role, "editOrderCosts"));
+  const showInvoices = q.status === "accepted" && can(roles, "seeInvoices");
+  const showOrderCosts = q.status === "accepted" && (can(roles, "seeProfit") || can(roles, "editOrderCosts"));
   const [{ data: invData }, { data: profitData }, { data: ocData }] = await Promise.all([
     showInvoices
       ? supabase.from("invoices").select("id, number, status, total, amount_paid, currency, due_date").eq("quotation_id", id).order("created_at")
       : Promise.resolve({ data: [] }),
-    showOrderCosts && can(role, "seeProfit")
+    showOrderCosts && can(roles, "seeProfit")
       ? supabase.from("invoice_profit").select("revenue_base, cost_base, lines_without_cost").eq("quotation_id", id)
       : Promise.resolve({ data: [] }),
     showOrderCosts
@@ -222,7 +222,7 @@ export default async function QuotationPage({
         {q.created_by && <>{" "}{tr("· by")}{" "}{names.get(q.created_by)}</>}
       </p>
       <Notice {...notice} />
-      <BranchField kind="quotation" id={q.id} branchId={q.branch_id ?? null} branches={branches} canMove={can(role, "manageBranches")} />
+      <BranchField kind="quotation" id={q.id} branchId={q.branch_id ?? null} branches={branches} canMove={can(roles, "manageBranches")} />
       {!["rejected", "cancelled", "superseded"].includes(q.status) && <OrderProgress steps={progress} journey={journey} team={team} assign={setStageOwner} />}
 
       {isDraft && q.review_note && (
@@ -269,7 +269,7 @@ export default async function QuotationPage({
         </form>
       )}
 
-      {q.status === "pending_approval" && can(role, "approveQuotes") && q.submitted_by !== user.id && (
+      {q.status === "pending_approval" && can(roles, "approveQuotes") && q.submitted_by !== user.id && (
         <form action={reviewQuote} className="card">
           <input type="hidden" name="id" value={q.id} />
           <h2>{tr("Your decision")}</h2>
@@ -309,7 +309,7 @@ export default async function QuotationPage({
         </section>
       )}
 
-      {stage13Ready(company) && features.on("reminders") && can(role, "followUpQuotes") && ["approved", "sent"].includes(q.status) && (
+      {stage13Ready(company) && features.on("reminders") && can(roles, "followUpQuotes") && ["approved", "sent"].includes(q.status) && (
         <QuoteFollowUpCard
           supabase={supabase}
           company={company}
@@ -365,7 +365,7 @@ export default async function QuotationPage({
         </section>
       )}
 
-      {q.status === "accepted" && can(role, "seeFinance") && features.ready && features.list.some((f) => f.key === "lpo_financing" && f.enabled) && (
+      {q.status === "accepted" && can(roles, "seeFinance") && features.ready && features.list.some((f) => f.key === "lpo_financing" && f.enabled) && (
         <section className="card">
           <h2>{tr("LPO financing")}</h2>
           <p className="muted small">{tr("Need cash to buy the goods before the client pays? Make a bank-ready financing pack for this order.")}</p>
@@ -375,7 +375,7 @@ export default async function QuotationPage({
         </section>
       )}
 
-      {q.status === "accepted" && canPlanService(role) && features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled) && (
+      {q.status === "accepted" && canPlanService(roles) && features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled) && (
         <section className="card">
           <h2>{tr("Installation and service work")}</h2>
           <p className="muted small">{tr("Plan the installation or other work on this order as a service job: technicians, checklist, materials and the client's sign-off.")}</p>
@@ -397,7 +397,7 @@ export default async function QuotationPage({
               </li>
             ))}
           </ul>
-          {can(role, "editDeliveries") && (
+          {can(roles, "editDeliveries") && (
             <form action={newDelivery} className="actions">
               <input type="hidden" name="quotation_id" value={q.id} />
               <SubmitButton className="btn btn-primary" pendingText={tr("Creating…")}>{tr("Create delivery note")}</SubmitButton>
@@ -420,7 +420,7 @@ export default async function QuotationPage({
               </li>
             ))}
           </ul>
-          {can(role, "editInvoices") && (
+          {can(roles, "editInvoices") && (
             <form action={newInvoice} className="actions">
               <input type="hidden" name="quotation_id" value={q.id} />
               <input type="hidden" name="back" value={`/quotations/${q.id}#invoices`} />
@@ -435,8 +435,8 @@ export default async function QuotationPage({
 
       {showOrderCosts && (
         <section className="card" id="profit">
-          <h2>{tr("Order costs")}{can(role, "seeProfit") ? tr(" & profit") : ""}</h2>
-          {can(role, "seeProfit") && (
+          <h2>{tr("Order costs")}{can(roles, "seeProfit") ? tr(" & profit") : ""}</h2>
+          {can(roles, "seeProfit") && (
             <dl className="kv">
               <dt>{tr("Invoiced (before VAT)")}</dt>
               <dd>{formatMoney(orderProfit.rev, company.base_currency)}</dd>
@@ -468,7 +468,7 @@ export default async function QuotationPage({
             back={`/quotations/${q.id}#profit`}
             quotationId={q.id}
             base={company.base_currency}
-            canEdit={can(role, "editOrderCosts")}
+            canEdit={can(roles, "editOrderCosts")}
           />
         </section>
       )}

@@ -13,8 +13,8 @@ export const metadata = { title: "Expense categories" };
 export default async function CategoriesPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "manageExpenses") || !stage13Ready(company)) redirect("/expenses");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "manageExpenses") || !stage13Ready(company)) redirect("/expenses");
   const { data } = await supabase
     .from("expense_categories")
     .select("id, name, active")

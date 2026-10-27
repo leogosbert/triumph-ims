@@ -41,8 +41,8 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const search = cleanSearch(typeof sp.q === "string" ? sp.q : "");
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeInvoices")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeInvoices")) redirect("/");
 
   let q = supabase
     .from("invoices")
@@ -71,10 +71,10 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      <BackLink href={can(role, "seeFinance") ? "/finance" : "/sales"} label={can(role, "seeFinance") ? "Finance" : "Sales"} />
+      <BackLink href={can(roles, "seeFinance") ? "/finance" : "/sales"} label={can(roles, "seeFinance") ? "Finance" : "Sales"} />
       <div className="page-head">
         <h1>{tr("Invoices")}</h1>
-        {can(role, "editInvoices") && (
+        {can(roles, "editInvoices") && (
           <Link href="/invoices/new" className="btn btn-primary btn-small">{tr("+ Invoice")}</Link>
         )}
       </div>

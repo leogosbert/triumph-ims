@@ -50,8 +50,8 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "editPurchasing")) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "editPurchasing")) redirect("/");
 
   const { data: r } = await supabase.from("supplier_rfqs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!r) notFound();

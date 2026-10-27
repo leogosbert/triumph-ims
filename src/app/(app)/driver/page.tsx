@@ -4,6 +4,7 @@ import { type SearchParams } from "@/lib/messages";
 import { getDict } from "@/lib/lang";
 import { DriverApp, type DriverDelivery } from "./DriverApp";
 import { BackLink } from "@/components/BackLink";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "My deliveries" };
 export const dynamic = "force-dynamic";
@@ -17,10 +18,10 @@ type Row = Omit<DriverDelivery, "client" | "lines"> & {
 export default async function DriverPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const only = typeof sp.d === "string" ? sp.d : null;
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   const { t } = await getDict();
-  const supervisor = role === "management" || role === "warehouse";
-  if (role !== "driver" && !supervisor) redirect("/");
+  const supervisor = hasRole(roles, "management") || hasRole(roles, "warehouse");
+  if (!hasRole(roles, "driver") && !supervisor) redirect("/");
   if (supervisor && !only) redirect("/deliveries");
 
   let q = supabase

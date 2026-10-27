@@ -11,6 +11,7 @@ import { COMPLIANCE_CATEGORIES, requirement } from "@/lib/compliance/catalogue";
 import { canSeeCompliance, ITEM_FIELDS, ITEM_STATUS, type ComplianceItem } from "@/lib/compliance/model";
 import { StatusBadge } from "@/lib/sales";
 import { ComplianceTabs, Disclaimer } from "../parts";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Compliance checklist" };
 
@@ -20,8 +21,8 @@ export default async function ChecklistPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) redirect("/");
   const show = pick(sp.show) ?? "all";
 
   const [{ data, error }, links] = await Promise.all([
@@ -62,7 +63,7 @@ export default async function ChecklistPage({ searchParams }: { searchParams: Se
             </Link>
           </div>
         )}
-        {!isManager && role === "finance" && (
+        {!isManager && hasRole(roles, "finance") && (
           <Link href="/compliance/checklist/new" className="btn btn-small">
             {tr("+ Tax item")}
           </Link>

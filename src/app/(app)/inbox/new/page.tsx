@@ -18,8 +18,8 @@ export default async function NewConversationPage({ searchParams }: { searchPara
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canUseInbox(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canUseInbox(roles)) redirect("/");
   const channel = pick(sp.channel) === "whatsapp" ? "whatsapp" : "email";
   const link = /^(client|supplier):[0-9a-f-]{36}$/i.test(pick(sp.link)) ? pick(sp.link) : "";
   const [clients, { data: suppliers }] = await Promise.all([

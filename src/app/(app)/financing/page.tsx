@@ -37,8 +37,8 @@ export default async function FinancingPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features, isManager } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/");
+  const { supabase, company, roles, features, isManager } = await getAppContext();
+  if (!can(roles, "seeFinance")) redirect("/");
   if (!features.on("lpo_financing")) return <FeatureOff title="LPO financing" isManager={isManager} />;
   const view = sp.view === "closed" ? "closed" : "open";
   const { data, error } = await supabase

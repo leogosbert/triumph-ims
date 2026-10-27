@@ -18,8 +18,8 @@ type Dn = { id: string; number: string; delivered_at: string | null; client: { n
 export default async function NewInvoicePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editInvoices")) redirect("/invoices");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editInvoices")) redirect("/invoices");
 
   const [clients, { data: dnData }, { data: invoiced }] = await Promise.all([
     clientOptions(supabase, company.id),

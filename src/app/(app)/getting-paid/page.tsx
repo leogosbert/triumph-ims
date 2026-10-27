@@ -16,8 +16,8 @@ type FiscalSummary = { set_up: boolean; mode: string | null; registered: boolean
 export default async function GettingPaidPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seeFinance")) redirect("/");
 
   const [fiscal, pay, rem, orders, logs] = await Promise.all([
     supabase.rpc("fiscal_summary", { p_company: company.id }),

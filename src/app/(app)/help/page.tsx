@@ -2,7 +2,7 @@ import { APP_VERSION, BUILD_ID } from "@/lib/releases";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { getAppContext } from "@/lib/context";
-import { ROLE_LABELS, type Role } from "@/lib/roles";
+import { ROLE_LABELS, onlyRoles, type Role } from "@/lib/roles";
 import { TourButton } from "@/components/tour/TourButton";
 import { LEVELS, type Level } from "@/lib/levels";
 import { startDemo } from "@/app/demo-actions";
@@ -84,7 +84,7 @@ const GUIDES: Guide[] = [
 
 export default async function HelpPage() {
   await primeLang();
-  const { role, company } = await getAppContext();
+  const { role, roles, company } = await getAppContext();
   const level: Level = company.business_level ?? "medium";
   const mine = GUIDES.find((g) => g.role === role);
   const others = GUIDES.filter((g) => g.role !== role);
@@ -108,7 +108,7 @@ export default async function HelpPage() {
         <p className="small muted">{tr("Every function of LeMoSp: what it does, where to find it on a phone and on a laptop, and how to use it step by step.")}</p>
         <Link href="/guide" className="btn btn-primary btn-small">{tr("Open the App guide")} →</Link>
       </section>
-      {role !== "driver" && (
+      {!onlyRoles(roles, "driver") && (
         <section className="card" id="demos">
           <h2>{tr("Demos")}</h2>
           {company.is_demo ? (
@@ -131,7 +131,7 @@ export default async function HelpPage() {
           <li><Link href="/pricing">{tr("Prices")}</Link></li>
         </ul>
       </section>
-      {role !== "driver" && (
+      {!onlyRoles(roles, "driver") && (
         <section className="card help-tour" data-tour="help-tour">
           <div>
             <h2>{tr("Take the guided tour for your business level")}</h2>

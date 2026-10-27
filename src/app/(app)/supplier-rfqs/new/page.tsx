@@ -13,8 +13,8 @@ export const metadata = { title: "New supplier RFQ" };
 export default async function NewSupplierRfqPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { role } = await getAppContext();
-  if (!can(role, "editPurchasing")) redirect("/");
+  const { roles } = await getAppContext();
+  if (!can(roles, "editPurchasing")) redirect("/");
   return (
     <>
       <BackLink href="/supplier-rfqs" label="Supplier RFQs" />

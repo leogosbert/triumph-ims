@@ -7,7 +7,7 @@ import { Notice } from "@/components/Notice";
 import { displayName, getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
-import { can } from "@/lib/roles";
+import { can, onlyRoles } from "@/lib/roles";
 import { AgingChart, BarList, ControlTower, KpiGrid, SalesChart } from "@/components/Dashboard";
 import { loadDashboard } from "@/lib/dashboard";
 import { backupTowerItem } from "@/lib/backups";
@@ -52,8 +52,8 @@ function quickActions(role: Parameters<typeof can>[0], t: Dict) {
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, profile, company, role, isManager, user, features } = await getAppContext();
-  if (role === "driver") redirect("/driver");
+  const { supabase, profile, company, roles, isManager, user, features } = await getAppContext();
+  if (onlyRoles(roles, "driver")) redirect("/driver");
   const sp = (await searchParams) ?? {};
   const welcomeLevel = typeof sp.welcome === "string" && isLevel(sp.welcome) ? sp.welcome : null;
   const firstName = displayName(profile).split(" ")[0];
@@ -68,7 +68,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       await supabase.rpc("refresh_alerts", { p_company: company.id });
       const { t: dict } = await getDict();
       return Promise.all([
-        loadDashboard(supabase, company.id, role, dict),
+        loadDashboard(supabase, company.id, roles, dict),
         // Automatic backups: an orange line for managers when the last one is more than 2 days old.
         isManager && !company.is_demo ? backupTowerItem(supabase, company.id) : Promise.resolve(null),
       ]);
@@ -80,7 +80,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
           supabase.from("clients").select("id", { count: "exact", head: true }).eq("company_id", company.id),
         ])
       : Promise.resolve(null),
-    can(role, "approveQuotes")
+    can(roles, "approveQuotes")
       ? supabase
           .from("quotations")
           .select("id, number, revision, total, currency, submitted_by, client:clients(name)")
@@ -91,7 +91,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
           .limit(10)
           .then(({ data }) => (data ?? []) as unknown as Pending[])
       : Promise.resolve([] as Pending[]),
-    can(role, "approvePOs")
+    can(roles, "approvePOs")
       ? supabase
           .from("purchase_orders")
           .select("id, number, total, currency, supplier:suppliers(name)")
@@ -117,7 +117,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   if (overdue) dash.tower.attention.unshift({ ...overdue, label: tr(overdue.label) });
   const heroKpis = dash.kpis.slice(0, 2);
   const restKpis = dash.kpis.slice(2);
-  const actions = quickActions(role, t);
+  const actions = quickActions(roles, t);
   const today = new Intl.DateTimeFormat(t.locale, { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Dar_es_Salaam" }).format(new Date());
   const base = company.base_currency;
 

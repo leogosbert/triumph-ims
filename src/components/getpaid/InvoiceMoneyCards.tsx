@@ -6,7 +6,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { FISCAL_STATUS, payLinkUrl } from "@/lib/getpaid/common";
 import { waDigits } from "@/lib/inbox/whatsapp";
 import { formatMoney } from "@/lib/money";
-import { can, type Role } from "@/lib/roles";
+import { can, type RoleSet } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
 import type { createClient } from "@/lib/supabase/server";
 import { tr } from "@/lib/tr";
@@ -56,7 +56,7 @@ export async function InvoiceMoneyCards({
 }: {
   supabase: Supabase;
   company: Company;
-  role: Role;
+  role: RoleSet;
   on: (key: string) => boolean;
   inv: MoneyInvoice;
 }) {

@@ -7,6 +7,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { portalLoginUrl } from "@/lib/portal/server";
+import { hasRole, type Role } from "@/lib/roles";
 
 export const metadata = { title: "Portals" };
 
@@ -15,7 +16,7 @@ type Sub = { id: string; kind: string; supplier_invoice_no: string | null; refer
 type Bank = { id: string; bank_name: string; requested_at: string; supplier: { name: string } | null };
 type Log = { id: string; action: string; details: Record<string, unknown> | null; created_at: string };
 
-const ROLES = ["management", "sales", "procurement", "finance", "warehouse"];
+const ROLES: Role[] = ["management", "sales", "procurement", "finance", "warehouse"];
 
 const ACTION: Record<string, string> = {
   portal_sign_in: "signed in",
@@ -38,9 +39,9 @@ const ACTION: Record<string, string> = {
 export default async function PortalAdmin({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!ROLES.includes(role)) redirect("/");
-  const isManager = role === "management";
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!hasRole(roles, ...ROLES)) redirect("/");
+  const isManager = hasRole(roles, "management");
 
   const [{ data: peopleData, error }, { data: subData }, { data: bankData }, { data: logData }] = await Promise.all([
     supabase
@@ -111,7 +112,7 @@ export default async function PortalAdmin({ searchParams }: { searchParams: Sear
           <span className="n">{subs.length}</span>
           <span className="l">{tr("Documents to check")}</span>
         </a>
-        {(isManager || role === "finance") && (
+        {(isManager || hasRole(roles, "finance")) && (
           <a href="#bank" className={`stat${banks.length ? " alert" : ""}`}>
             <span className="n">{banks.length}</span>
             <span className="l">{tr("Bank changes to approve")}</span>
@@ -119,7 +120,7 @@ export default async function PortalAdmin({ searchParams }: { searchParams: Sear
         )}
       </div>
 
-      {(isManager || role === "finance") && banks.length > 0 && (
+      {(isManager || hasRole(roles, "finance")) && banks.length > 0 && (
         <section className="card" id="bank">
           <h2>{tr("Bank changes to approve")}</h2>
           <ul className="list">

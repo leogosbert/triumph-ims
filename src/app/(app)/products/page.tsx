@@ -32,8 +32,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const category = typeof sp.category === "string" ? sp.category : "";
   const archived = sp.archived === "1";
-  const { supabase, company, role, features } = await getAppContext();
-  const showCosts = can(role, "seeCosts");
+  const { supabase, company, roles, features } = await getAppContext();
+  const showCosts = can(roles, "seeCosts");
 
   let query = supabase
     .from("products")
@@ -83,13 +83,13 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
         q={q}
         archived={archived}
         filter={{ name: "category", label: "Categories", value: category, options: CATEGORIES }}
-        addHref={can(role, "editProducts") ? "/products/new" : undefined}
+        addHref={can(roles, "editProducts") ? "/products/new" : undefined}
         addLabel="New product"
       />
       {rows.length === 0 ? (
         <p className="card muted">
           {q || category ? tr("No products match your search.") : tr("No products yet.")}{" "}
-          {can(role, "importData") && !q && !category && (
+          {can(roles, "importData") && !q && !category && (
             <>{tr("You can")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
             </>
           )}

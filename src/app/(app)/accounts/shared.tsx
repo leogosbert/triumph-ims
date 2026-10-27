@@ -10,7 +10,7 @@ import { BackLink as SharedBackLink } from "@/components/BackLink";
 /** The app context for an Accounts page: management and finance only. */
 export async function ledgerContext() {
   const ctx = await getAppContext();
-  if (!can(ctx.role, "seeLedger")) redirect("/");
+  if (!can(ctx.roles, "seeLedger")) redirect("/");
   const closedUntil = (ctx.company as { books_closed_until?: string | null }).books_closed_until ?? null;
   return { ...ctx, closedUntil };
 }

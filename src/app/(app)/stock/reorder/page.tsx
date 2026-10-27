@@ -33,8 +33,8 @@ type Suggestion = {
 export default async function ReorderPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!can(role, "seeReorder")) redirect("/stock");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!can(roles, "seeReorder")) redirect("/stock");
   const { data, error } = await supabase.rpc("reorder_suggestions", { p_company: company.id });
   if (error && /reorder_suggestions|max_level/.test(error.message)) return <NotReady title="What to reorder" />;
   if (error) throw new Error(error.message);
@@ -48,8 +48,8 @@ export default async function ReorderPage({ searchParams }: { searchParams: Sear
   }
   // Groups with a supplier first, then the rest.
   const ordered = [...groups.values()].sort((a, b) => (a.supplier ? 0 : 1) - (b.supplier ? 0 : 1) || a.name.localeCompare(b.name));
-  const canPo = can(role, "editPurchasing");
-  const canRequest = can(role, "requestPurchases") && features.on("requisitions");
+  const canPo = can(roles, "editPurchasing");
+  const canRequest = can(roles, "requestPurchases") && features.on("requisitions");
 
   return (
     <>

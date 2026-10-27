@@ -16,8 +16,8 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: S
   const sp = (await searchParams) ?? {};
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const prev = monthRange(m.prev);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeProfit")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeProfit")) redirect("/");
   const base = company.base_currency;
   const ready = stage13Ready(company);
   const yearStart = `${m.month.slice(0, 4)}-01-01`;

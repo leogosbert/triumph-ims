@@ -15,8 +15,8 @@ export const metadata = { title: "New delivery note" };
 export default async function NewDeliveryPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editDeliveries")) redirect("/deliveries");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editDeliveries")) redirect("/deliveries");
   const [clients, stores] = await Promise.all([clientOptions(supabase, company.id), storeOptions(supabase, company.id)]);
   return (
     <>

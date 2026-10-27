@@ -50,8 +50,8 @@ const OUTCOME: Record<string, string> = {
 export default async function PayLinksPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager, features } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/");
+  const { supabase, company, roles, isManager, features } = await getAppContext();
+  if (!can(roles, "seeFinance")) redirect("/");
 
   const [setRes, ordRes, evRes] = await Promise.all([
     supabase.from("pay_settings").select("provider, on_documents, allow_partial").eq("company_id", company.id).maybeSingle(),

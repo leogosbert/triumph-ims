@@ -1,9 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Role } from "@/lib/roles";
+import { hasRole, type Role, type RoleSet } from "@/lib/roles";
 
 /** Who uses the shared inbox. Mirrors public.inbox_roles() in the database (the real guard). */
 export const INBOX_ROLES: Role[] = ["management", "sales", "procurement", "finance"];
-export const canUseInbox = (role: Role) => INBOX_ROLES.includes(role);
+export const canUseInbox = (role: RoleSet) => hasRole(role, ...INBOX_ROLES);
 
 export type Channel = "email" | "whatsapp" | "portal";
 

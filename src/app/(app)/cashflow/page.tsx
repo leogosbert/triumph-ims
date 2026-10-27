@@ -23,8 +23,8 @@ export default async function CashflowPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "planFinance")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "planFinance")) redirect("/");
   const weeks = sp.w === "26" ? 26 : 13;
   const base = company.base_currency;
   const [{ data: wData, error }, { data: posData }, { data: invData }, { data: billData }] = await Promise.all([

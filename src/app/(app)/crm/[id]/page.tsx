@@ -9,7 +9,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { companyPeople, namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { QUOTE_STATUS, StatusBadge, quoteNo } from "@/lib/sales";
 import { convertProspect, linkQuotation, moveOpportunity, quoteOpportunity, saveOpportunity } from "../actions";
 import { ActivityForm, type ActivityRow } from "../ActivityForm";
@@ -23,8 +23,8 @@ export default async function OpportunityPage({ params, searchParams }: { params
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
   const { data: o } = await supabase.from("opportunities").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!o) notFound();
 
@@ -169,7 +169,7 @@ export default async function OpportunityPage({ params, searchParams }: { params
           </>
         ) : (
           <>
-            {can(role, "editSales") && isOpen && (
+            {can(roles, "editSales") && isOpen && (
               <form action={quoteOpportunity} className="actions" style={{ marginTop: 0 }}>
                 <input type="hidden" name="id" value={o.id} />
                 <SubmitButton className="btn btn-primary btn-small">{tr("Start a quotation")}</SubmitButton>
@@ -227,7 +227,7 @@ export default async function OpportunityPage({ params, searchParams }: { params
           <OpportunityFields
             v={o}
             clients={(clients ?? []) as { id: string; name: string }[]}
-            people={people.filter((p) => p.role === "sales" || p.role === "management" || p.id === o.owner_id)}
+            people={people.filter((p) => hasRole(p.roles, "sales", "management") || p.id === o.owner_id)}
             base={company.base_currency}
           />
           <SubmitButton>{tr("Save")}</SubmitButton>

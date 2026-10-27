@@ -14,8 +14,8 @@ type Quote = { id: string; number: string; revision: number; status: string; tot
 
 export default async function SalesPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeSales")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeSales")) redirect("/");
   const today = todayTz();
   const monthStart = `${today.slice(0, 7)}-01`;
   const cnt = { count: "exact" as const, head: true };
@@ -58,7 +58,7 @@ export default async function SalesPage() {
     <>
       <div className="page-head">
         <h1>{tr("Sales")}</h1>
-        {can(role, "editSales") && (
+        {can(roles, "editSales") && (
           <div className="actions" style={{ marginTop: 0 }}>
             <Link href="/rfqs/new" className="btn btn-primary btn-small">{tr("+ RFQ")}</Link>
             <Link href="/quotations/new" className="btn btn-small">{tr("+ Quotation")}</Link>
@@ -90,7 +90,7 @@ export default async function SalesPage() {
 
       {approvals.length > 0 && (
         <section className="card">
-          <h2>{can(role, "approveQuotes") ? tr("Waiting for your approval") : tr("Waiting for approval")}</h2>
+          <h2>{can(roles, "approveQuotes") ? tr("Waiting for your approval") : tr("Waiting for approval")}</h2>
           <ul className="list">
             {approvals.map((q) => (
               <li key={q.id} className="row">

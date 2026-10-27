@@ -13,7 +13,7 @@ import { portalLoginUrl, sendPortalEmail } from "@/lib/portal/server";
 
 async function ctx() {
   const c = await getAppContext();
-  if (!canUseInbox(c.role)) redirect(withNotice("/", { error: "Your role does not include the inbox." }));
+  if (!canUseInbox(c.roles)) redirect(withNotice("/", { error: "Your role does not include the inbox." }));
   return c;
 }
 

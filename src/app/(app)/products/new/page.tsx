@@ -16,8 +16,8 @@ export const metadata = { title: "New product" };
 export default async function NewProductPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { role, company } = await getAppContext();
-  if (!can(role, "editProducts")) redirect("/products");
+  const { roles, company } = await getAppContext();
+  if (!can(roles, "editProducts")) redirect("/products");
   const sp = (await searchParams) ?? {};
   // A service company mostly adds services; ?type=hire etc. comes from the service screens.
   const type = typeof sp.type === "string" && sp.type in ITEM_TYPE_LABELS ? sp.type : company.business_type === "services" ? "service" : "goods";
@@ -33,7 +33,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
         <RecordFields sections={PRODUCT_SECTIONS} values={{ item_type: type, unit, hazardous: false, sds_on_file: false }} />
         <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Adding…")}>{tr("Add product")}</SubmitButton>
       </form>
-      {can(role, "editCosts") && (
+      {can(roles, "editCosts") && (
         <p className="muted small" style={{ marginTop: 8 }}>{tr("You can add the supplier and cost after saving.")}</p>
       )}
     </>

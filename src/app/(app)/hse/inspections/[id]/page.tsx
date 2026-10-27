@@ -16,6 +16,7 @@ import { saveInspection } from "../../actions";
 import { linkedNames, loadLinkOptions } from "../../options";
 import { InspectionFields } from "../InspectionFields";
 import { BackLink } from "@/components/BackLink";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Inspection" };
 
@@ -23,12 +24,12 @@ export default async function InspectionPage({ params, searchParams }: { params:
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   const { data, error } = await supabase.from("hse_inspections").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Inspection" />;
   if (!data) notFound();
   const insp = data as Inspection;
-  const editor = role === "management" || insp.inspector_id === user.id;
+  const editor = hasRole(roles, "management") || insp.inspector_id === user.id;
   const [linked, names, options] = await Promise.all([
     linkedNames(supabase, insp),
     namesFor(supabase, [insp.inspector_id]),

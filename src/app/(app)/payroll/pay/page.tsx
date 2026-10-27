@@ -8,7 +8,7 @@ import { isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { EMPLOYEE_PAY_METHODS } from "@/lib/payroll";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { BackLink } from "@/components/BackLink";
 
 export const metadata = { title: "Pay details" };
@@ -19,8 +19,8 @@ type Pay = { employee_id: string; basic_salary: number; housing_allowance: numbe
 export default async function PayDetailsPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "runPayroll")) redirect("/payroll/my");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "runPayroll")) redirect("/payroll/my");
   const [{ data: empData, error: empError }, { data: payData, error: payError }] = await Promise.all([
     supabase.from("employees").select("id, employee_no, full_name, job_title, department").eq("company_id", company.id).eq("status", "active").order("full_name"),
     supabase.from("employee_pay").select("employee_id, basic_salary, housing_allowance, transport_allowance, other_allowance, pay_method").eq("company_id", company.id),
@@ -43,7 +43,7 @@ export default async function PayDetailsPage({ searchParams }: { searchParams: S
       {employees.length === 0 ? (
         <div className="card">
           <p className="muted">{tr("No employees yet. Management adds employees first, then you enter their pay here.")}</p>
-          {role === "management" && (
+          {hasRole(roles, "management") && (
             <Link href="/hr" className="btn btn-primary">
               {tr("Go to employees")}
             </Link>

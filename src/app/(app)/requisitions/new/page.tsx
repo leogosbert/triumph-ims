@@ -17,8 +17,8 @@ export const metadata = { title: "New purchase request" };
 export default async function NewRequisitionPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "requestPurchases")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "requestPurchases")) redirect("/");
   const probe = await supabase.from("requisitions").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New purchase request" />;
   const stores = await storeOptions(supabase, company.id);

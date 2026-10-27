@@ -29,8 +29,8 @@ export default async function HirePage({ searchParams }: { searchParams: SearchP
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeAllService(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeAllService(roles)) redirect("/");
   const tab = TABS.find((t) => t.key === sp.tab)?.key ?? "out";
   const today = todayTz();
   const monthStart = today.slice(0, 8) + "01";
@@ -96,7 +96,7 @@ export default async function HirePage({ searchParams }: { searchParams: SearchP
       return { ...p, owned: Number(row?.owned ?? 0), onHire: Number(row?.on_hire ?? 0), tracked: Boolean(row?.tracked) };
     }),
   );
-  const planner = canPlanService(role);
+  const planner = canPlanService(roles);
 
   return (
     <>

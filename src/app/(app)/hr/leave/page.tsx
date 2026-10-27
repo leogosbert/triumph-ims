@@ -30,8 +30,8 @@ export default async function LeavePage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  const manager = can(role, "manageHr");
+  const { supabase, company, roles } = await getAppContext();
+  const manager = can(roles, "manageHr");
   const tab = TABS.find((t) => t.key === pick(sp.tab)) ?? TABS[0];
   const today = todayTz();
 
@@ -124,7 +124,7 @@ export default async function LeavePage({ searchParams }: { searchParams: Search
 
   return (
     <>
-      {can(role, "seeEmployees") && (
+      {can(roles, "seeEmployees") && (
         <BackLink href="/hr" label="Employees" />
       )}
       <div className="page-head">

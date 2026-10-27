@@ -36,8 +36,8 @@ export default async function ReportPage({ params, searchParams }: { params: Pro
   const { key } = await params;
   const def = findReport(key);
   if (!def) notFound();
-  const { supabase, company, role, features, profile } = await getAppContext();
-  if (!mayOpen(def, role, features)) redirect("/reports");
+  const { supabase, company, roles, features, profile } = await getAppContext();
+  if (!mayOpen(def, roles, features)) redirect("/reports");
 
   const sp = (await searchParams) ?? {};
   const p = parseParams(def, sp);

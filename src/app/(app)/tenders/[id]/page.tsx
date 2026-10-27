@@ -11,7 +11,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { companyPeople, namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { addTask, removeTask, saveTender, setTenderStatus, toggleTask } from "../actions";
 import { TenderFields } from "../TenderFields";
@@ -25,8 +25,8 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
   const { data: t } = await supabase.from("tenders").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!t) notFound();
   const [{ data: taskData }, { data: clients }, people, { data: opps }, { data: contracts }] = await Promise.all([
@@ -261,7 +261,7 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
           <TenderFields
             v={t}
             clients={(clients ?? []) as { id: string; name: string }[]}
-            people={people.filter((p) => p.role === "sales" || p.role === "management" || p.id === t.owner_id)}
+            people={people.filter((p) => hasRole(p.roles, "sales", "management") || p.id === t.owner_id)}
             opportunities={oppChoices as { id: string; number: string; title: string }[]}
             base={company.base_currency}
           />

@@ -22,11 +22,11 @@ export default async function ContractPage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeContracts")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeContracts")) redirect("/");
   const { data: k } = await supabase.from("contracts").select("*, client:clients(id, name)").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!k) notFound();
-  const edit = can(role, "seeCrm") && !k.cancelled_at;
+  const edit = can(roles, "seeCrm") && !k.cancelled_at;
   const [{ data: priceData }, { data: products }, { data: tenders }] = await Promise.all([
     supabase.from("contract_prices").select("id, unit_price, notes, product:products(id, name, sku, unit, selling_price)").eq("contract_id", id).limit(2000),
     edit ? supabase.from("products").select("id, name, sku").eq("company_id", company.id).eq("active", true).order("name").limit(3000) : Promise.resolve({ data: [] }),

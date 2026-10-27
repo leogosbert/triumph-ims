@@ -1,13 +1,14 @@
 import type { createClient } from "@/lib/supabase/server";
 import type { PackData } from "@/lib/compliance/audits";
 import type { ComplianceItem, Licence } from "@/lib/compliance/model";
+import { hasRole, type RoleSet } from "@/lib/roles";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
 /** Everything the inspection packs check against, in one round of reads. null when the SQL is not run yet. */
-export async function loadPackData(supabase: Supabase, companyId: string, today: string, role: string): Promise<PackData | { missing: true; error: unknown }> {
-  const finance = role === "management" || role === "finance";
-  const sales = finance || role === "sales";
+export async function loadPackData(supabase: Supabase, companyId: string, today: string, role: RoleSet): Promise<PackData | { missing: true; error: unknown }> {
+  const finance = hasRole(role, "management", "finance");
+  const sales = finance || hasRole(role, "sales");
   const count = (q: PromiseLike<{ count: number | null }>) => Promise.resolve(q).then((r) => r.count ?? 0, () => 0);
   const docKind = (kinds: string[]) =>
     supabase.from("documents").select("id", { count: "exact", head: true }).eq("company_id", companyId).in("kind", kinds).is("archived_at", null);

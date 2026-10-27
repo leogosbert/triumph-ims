@@ -10,14 +10,15 @@ import { companyPeople } from "@/lib/people";
 import { createItem } from "../../actions";
 import { ItemFields } from "../../ItemFields";
 import { BackLink } from "@/components/BackLink";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "New compliance item" };
 
 export default async function NewItemPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!isManager && role !== "finance") redirect("/compliance/checklist");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!isManager && !hasRole(roles, "finance")) redirect("/compliance/checklist");
   const lic = await supabase.from("licences").select("id, name").eq("company_id", company.id).order("name").limit(500);
   if (isMissingTable(lic.error)) return <NotReady title="New compliance item" />;
   const people = await companyPeople(supabase, company.id);

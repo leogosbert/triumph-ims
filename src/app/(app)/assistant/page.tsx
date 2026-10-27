@@ -6,6 +6,7 @@ import { aiConfigured, EXAMPLE_QUESTIONS } from "@/lib/assistant";
 import { getAppContext } from "@/lib/context";
 import { askAssistant } from "./actions";
 import type { SearchParams } from "@/lib/messages";
+import { hasRole, onlyRoles } from "@/lib/roles";
 
 export const metadata = { title: "Business assistant" };
 
@@ -13,15 +14,15 @@ export default async function AssistantPage({ searchParams }: { searchParams: Se
   const sp = (await searchParams) ?? {};
   const initial = typeof sp.q === "string" ? sp.q.slice(0, 500) : "";
   await primeLang();
-  const { role, features } = await getAppContext();
-  if (role === "driver") redirect("/");
+  const { roles, features } = await getAppContext();
+  if (onlyRoles(roles, "driver")) redirect("/");
   if (!features.on("ai_assistant")) {
     return (
       <>
         <h1>{tr("Business assistant")}</h1>
         <p className="card muted">
           {tr("The assistant is switched off for this company.")}{" "}
-          {role === "management" ? <Link href="/settings/features">{tr("Switch it on in Features & business level.")}</Link> : tr("Ask management to switch it on.")}
+          {hasRole(roles, "management") ? <Link href="/settings/features">{tr("Switch it on in Features & business level.")}</Link> : tr("Ask management to switch it on.")}
         </p>
       </>
     );

@@ -16,8 +16,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ key: str
   const { key, format } = await params;
   const def = findReport(key);
   if (!def || (format !== "pdf" && format !== "xlsx")) return new Response("Not found", { status: 404 });
-  const { supabase, company, role, features, profile } = await getAppContext();
-  if (!mayOpen(def, role, features)) return new Response("Not allowed", { status: 403 });
+  const { supabase, company, roles, features, profile } = await getAppContext();
+  if (!mayOpen(def, roles, features)) return new Response("Not allowed", { status: 403 });
 
   const sp: Record<string, string | string[]> = {};
   for (const [k, v] of new URL(req.url).searchParams) {

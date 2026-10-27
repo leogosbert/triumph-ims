@@ -19,6 +19,7 @@ import {
 } from "@/lib/compliance/model";
 import { deleteDirector, saveComplianceSettings, saveDirector, setSharesDecided } from "../actions";
 import { ComplianceTabs, Disclaimer } from "../parts";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Directors & shares" };
 
@@ -112,9 +113,9 @@ function DirectorFields({ v }: { v: Partial<Director> }) {
 export default async function DirectorsPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
-  const seesPeople = role === "management" || role === "finance";
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) redirect("/");
+  const seesPeople = hasRole(roles, "management") || hasRole(roles, "finance");
   const [setRes, dirRes] = await Promise.all([
     supabase.from("compliance_settings").select("year_end_month, incorporated_on, shares_decided, shares_decided_at, shareholding_note, board_note, legal_rules").eq("company_id", company.id).maybeSingle(),
     seesPeople ? supabase.from("company_directors").select(DIRECTOR_FIELDS).eq("company_id", company.id).order("sort").order("full_name").limit(200) : Promise.resolve({ data: [], error: null }),

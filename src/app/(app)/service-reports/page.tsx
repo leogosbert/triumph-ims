@@ -46,8 +46,8 @@ const hrs = (n: number) => (Math.round(n * 100) / 100).toLocaleString("en-GB");
 export default async function ServiceReportsPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeAllService(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeAllService(roles)) redirect("/");
   const today = todayTz();
   const month = typeof sp.month === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(sp.month) ? sp.month : today.slice(0, 7);
   const from = `${month}-01`;

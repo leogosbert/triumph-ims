@@ -15,8 +15,8 @@ export const metadata = { title: "New supplier" };
 export default async function NewSupplierPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { role, company } = await getAppContext();
-  if (!can(role, "editSuppliers")) redirect("/suppliers");
+  const { roles, company } = await getAppContext();
+  if (!can(roles, "editSuppliers")) redirect("/suppliers");
 
   return (
     <>

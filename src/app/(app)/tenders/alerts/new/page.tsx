@@ -15,8 +15,8 @@ export const metadata = { title: "Paste a tender notice" };
 export default async function NewNoticePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { role, features, isManager } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { roles, features, isManager } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
   if (!features.on("tender_alerts")) return <FeatureOff title="Tender alerts" isManager={isManager} />;
   return (
     <>

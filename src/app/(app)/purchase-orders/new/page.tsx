@@ -16,8 +16,8 @@ export default async function NewPoPage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editPurchasing")) redirect("/purchase-orders");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editPurchasing")) redirect("/purchase-orders");
   const quotationId = typeof sp.quotation === "string" ? sp.quotation : "";
 
   const [{ data: suppliers }, { data: quote }] = await Promise.all([

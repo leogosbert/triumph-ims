@@ -10,10 +10,10 @@ import { saveRecord } from "@/lib/records";
 import { can } from "@/lib/roles";
 
 export async function saveProduct(form: FormData) {
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const id = str(form, "id");
   const back = id ? `/products/${id}` : "/products/new";
-  if (!can(role, "editProducts")) redirect(withNotice(back, { error: "You don't have permission to edit products." }));
+  if (!can(roles, "editProducts")) redirect(withNotice(back, { error: "You don't have permission to edit products." }));
 
   const { values, error } = parseSections(form, PRODUCT_SECTIONS);
   if (error) redirect(withNotice(back, { error }));
@@ -35,10 +35,10 @@ export async function saveProduct(form: FormData) {
 }
 
 export async function saveProductCost(form: FormData) {
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const productId = str(form, "product_id");
   const back = `/products/${productId}#costs`;
-  if (!can(role, "editCosts")) redirect(withNotice(back, { error: "You don't have permission to change costs." }));
+  if (!can(roles, "editCosts")) redirect(withNotice(back, { error: "You don't have permission to change costs." }));
 
   const cost = toNumber(str(form, "last_cost"));
   if (Number.isNaN(cost) || (cost !== null && cost < 0))

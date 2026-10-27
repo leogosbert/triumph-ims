@@ -31,8 +31,8 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeDocuments")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeDocuments")) redirect("/");
   const view = sp.view === "expiring" || sp.view === "archive" ? sp.view : "all";
   const kind = typeof sp.kind === "string" ? sp.kind : "";
   const q = typeof sp.q === "string" ? sp.q.trim().toLowerCase() : "";

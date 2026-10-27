@@ -6,7 +6,7 @@ import { requireManager } from "@/lib/context";
 import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
-import { isRole } from "@/lib/roles";
+import { isRole, type Role } from "@/lib/roles";
 
 const HEX = /^#[0-9A-Fa-f]{6}$/;
 const CCY = /^[A-Z]{3}$/;
@@ -118,6 +118,11 @@ export async function setLogo(path: string | null) {
   return { error: null };
 }
 
+/** Ticked extra roles (the main role is left out). */
+function extraRoles(form: FormData, main: Role): Role[] {
+  return [...new Set(form.getAll("extra").map(String))].filter((r): r is Role => isRole(r) && r !== main);
+}
+
 export async function inviteMember(form: FormData) {
   const { supabase, company } = await requireManager();
   const back = "/settings/team";
@@ -125,7 +130,11 @@ export async function inviteMember(form: FormData) {
   const role = str(form, "role");
   if (!isRole(role)) redirect(withNotice(back, { error: "Please choose a role." }));
 
-  const { error } = await supabase.rpc("invite_member", { p_company: company.id, p_email: email, p_role: role });
+  // With the multiple-roles SQL the invitation can carry extra roles too.
+  const { error } =
+    form.get("multi") === "1"
+      ? await supabase.rpc("invite_member", { p_company: company.id, p_email: email, p_role: role, p_extra: extraRoles(form, role) })
+      : await supabase.rpc("invite_member", { p_company: company.id, p_email: email, p_role: role });
   if (error) redirect(withNotice(back, { error: friendlyError(error.message) }));
   revalidatePath(back);
   redirect(
@@ -151,8 +160,14 @@ export async function updateMember(form: FormData) {
   const active = str(form, "active") === "true";
   if (!isRole(role)) redirect(withNotice(back, { error: "Please choose a role." }));
 
+  const membership = str(form, "membership_id");
+  // Main role and extra roles first (it keeps a manager in place), then access on or off.
+  if (form.get("multi") === "1") {
+    const { error } = await supabase.rpc("set_member_roles", { p_membership: membership, p_role: role, p_extra: extraRoles(form, role) });
+    if (error) redirect(withNotice(back, { error: friendlyError(error.message) }));
+  }
   const { error } = await supabase.rpc("update_membership", {
-    p_membership: str(form, "membership_id"),
+    p_membership: membership,
     p_role: role,
     p_active: active,
   });

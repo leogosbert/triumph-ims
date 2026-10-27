@@ -113,8 +113,8 @@ export async function retryFiscal(form: FormData) {
 
 export async function sendFiscalQueue(form: FormData) {
   const path = backTo(form, "/getting-paid/tra");
-  const { role } = await getAppContext();
-  if (!can(role, "editInvoices")) fail(path, "You don't have permission to do that.");
+  const { roles } = await getAppContext();
+  if (!can(roles, "editInvoices")) fail(path, "You don't have permission to do that.");
   const r = await runFiscalQueue(20);
   if (r.status === "not_configured") fail(path, "VFD is not set up on the server (TRA_VFD_PRIVATE_KEY and TRA_VFD_TIN).");
   done(path, `${r.posted} sent to TRA, ${r.failed} not accepted.`);

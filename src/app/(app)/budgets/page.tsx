@@ -31,8 +31,8 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Sear
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "planFinance")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "planFinance")) redirect("/");
   const today = todayTz();
   const thisYear = Number(today.slice(0, 4));
   const year = typeof sp.y === "string" && /^\d{4}$/.test(sp.y) ? Number(sp.y) : thisYear;

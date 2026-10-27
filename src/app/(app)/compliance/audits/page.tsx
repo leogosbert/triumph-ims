@@ -20,9 +20,9 @@ export default async function AuditsPage({ searchParams }: { searchParams: Searc
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
-  const d = await loadPackData(supabase, company.id, todayTz(), role);
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeCompliance(roles)) redirect("/");
+  const d = await loadPackData(supabase, company.id, todayTz(), roles);
   if ("missing" in d) {
     if (isMissingTable(d.error as { code?: string; message?: string })) return <NotReady title="Inspections & audits" />;
     throw new Error(String((d.error as { message?: string })?.message ?? "error"));

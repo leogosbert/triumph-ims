@@ -8,6 +8,7 @@ import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { decideBankChange } from "../../actions";
 import { BackLink } from "@/components/BackLink";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Bank details" };
 
@@ -36,8 +37,8 @@ export default async function BankChange({ params, searchParams }: { params: Pro
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (role !== "management" && role !== "finance") redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!hasRole(roles, "management") && !hasRole(roles, "finance")) redirect("/");
   const { data } = await supabase
     .from("supplier_bank_details")
     .select("*, supplier:suppliers(name, phone, email), requester:portal_users(name, email, phone)")
@@ -149,7 +150,7 @@ export default async function BankChange({ params, searchParams }: { params: Pro
         </p>
       )}
 
-      {pending && role === "management" && (
+      {pending && hasRole(roles, "management") && (
         <section className="card">
           <h2>{tr("Decision")}</h2>
           <form action={decideBankChange}>
@@ -171,7 +172,7 @@ export default async function BankChange({ params, searchParams }: { params: Pro
           </form>
         </section>
       )}
-      {pending && role !== "management" && <p className="small muted">{tr("Only management can approve bank details.")}</p>}
+      {pending && !hasRole(roles, "management") && <p className="small muted">{tr("Only management can approve bank details.")}</p>}
     </>
   );
 }

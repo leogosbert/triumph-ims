@@ -49,8 +49,8 @@ type CreditNote = { id: string; number: string; issued_on: string; amount: numbe
 export default async function TraPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager, features } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/");
+  const { supabase, company, roles, isManager, features } = await getAppContext();
+  if (!can(roles, "seeFinance")) redirect("/");
 
   const [setRes, queueRes, daysRes, cnRes] = await Promise.all([
     supabase.from("fiscal_settings").select("*").eq("company_id", company.id).maybeSingle(),
@@ -76,7 +76,7 @@ export default async function TraPage({ searchParams }: { searchParams: SearchPa
   const credits = (cnRes.data ?? []) as unknown as CreditNote[];
   const serverVfd = vfdConfigured();
   const serverTinMatches = serverVfd && s?.tin ? vfdEnv()?.tin === s.tin : false;
-  const edit = can(role, "editInvoices");
+  const edit = can(roles, "editInvoices");
 
   return (
     <>

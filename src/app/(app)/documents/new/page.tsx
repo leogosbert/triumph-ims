@@ -17,8 +17,8 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!can(role, "seeDocuments")) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!can(roles, "seeDocuments")) redirect("/");
   const probe = await supabase.from("documents").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New document" />;
   const links = await loadLinkOptions(supabase, company.id);

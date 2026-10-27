@@ -20,8 +20,8 @@ type Inv = {
 
 export default async function ReceivablesPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeFinance")) redirect("/");
   const { data, error } = await supabase
     .from("invoices")
     .select("total, amount_paid, exchange_rate, due_date, client:clients(id, name, credit_limit)")

@@ -17,8 +17,8 @@ type Rate = { id: string; currency: string; rate: number; updated_at: string; up
 export default async function RatesPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  const edit = can(role, "seeFinance");
+  const { supabase, company, roles } = await getAppContext();
+  const edit = can(roles, "seeFinance");
   const { data } = await supabase.from("exchange_rates").select("id, currency, rate, updated_at, updated_by").eq("company_id", company.id).order("currency");
   const rates = (data ?? []) as Rate[];
   const names = await namesFor(supabase, rates.map((r) => r.updated_by));

@@ -32,8 +32,8 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeContracts")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeContracts")) redirect("/");
   const view = sp.view === "ended" ? "ended" : "current";
   const { data, error } = await supabase
     .from("contracts")
@@ -52,12 +52,12 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
 
   return (
     <>
-      {can(role, "seeCrm") && (
+      {can(roles, "seeCrm") && (
         <BackLink href="/crm" label="Pipeline" />
       )}
       <div className="page-head">
         <h1>{tr("Contracts")}</h1>
-        {can(role, "seeCrm") && (
+        {can(roles, "seeCrm") && (
           <Link href="/contracts/new" className="btn btn-primary btn-small">
             {tr("+ Contract")}
           </Link>

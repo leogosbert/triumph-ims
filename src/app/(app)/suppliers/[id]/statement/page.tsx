@@ -14,8 +14,8 @@ export default async function SupplierStatementPage({ params, searchParams }: { 
   await primeLang();
   const { id } = await params;
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeBills")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeBills")) redirect("/");
   const { data: client } = await supabase.from("suppliers").select("id, name, code").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!client) notFound();
   const def = defaultPeriod();

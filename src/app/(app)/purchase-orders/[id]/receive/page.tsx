@@ -18,8 +18,8 @@ export default async function ReceivePoPage({ params, searchParams }: { params: 
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "receiveGoods")) redirect(`/purchase-orders/${id}`);
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "receiveGoods")) redirect(`/purchase-orders/${id}`);
   const [{ data: po }, { data: lineData }, stores] = await Promise.all([
     supabase.from("purchase_orders").select("id, number, status, supplier:suppliers(name)").eq("id", id).eq("company_id", company.id).maybeSingle(),
     supabase.from("po_lines").select("id, line_no, description, quantity, received_qty, unit, product_id").eq("po_id", id).order("line_no"),

@@ -37,8 +37,8 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
   const notice = await readNotice(searchParams);
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const cat = typeof sp.cat === "string" ? sp.cat : "";
-  const { supabase, company, role, user } = await getAppContext();
-  const manage = can(role, "manageExpenses");
+  const { supabase, company, roles, user } = await getAppContext();
+  const manage = can(roles, "manageExpenses");
   const base = company.base_currency;
 
   if (!stage13Ready(company)) {
@@ -83,7 +83,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      {can(role, "seeFinance") && (
+      {can(roles, "seeFinance") && (
         <BackLink href="/finance" label="Finance" />
       )}
       <div className="page-head">

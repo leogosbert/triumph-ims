@@ -15,8 +15,8 @@ type Grn = { id: string; number: string; received_on: string; po: { number: stri
 
 export default async function ReceivingPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "receiveGoods")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "receiveGoods")) redirect("/");
   const today = todayTz();
   const [{ data: poData }, { data: grnData }] = await Promise.all([
     supabase

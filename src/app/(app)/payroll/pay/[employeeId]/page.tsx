@@ -17,8 +17,8 @@ export default async function EmployeePayPage({ params, searchParams }: { params
   await primeLang();
   const { employeeId } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "runPayroll")) redirect("/payroll/my");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "runPayroll")) redirect("/payroll/my");
   const [{ data: emp, error: empError }, { data: payRow, error: payError }, { data: settingsRow }, { count: staff }] = await Promise.all([
     supabase.from("employees").select("id, employee_no, full_name, job_title, status, tin, nssf_no").eq("id", employeeId).eq("company_id", company.id).maybeSingle(),
     supabase.from("employee_pay").select("*").eq("employee_id", employeeId).eq("company_id", company.id).maybeSingle(),

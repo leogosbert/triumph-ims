@@ -21,8 +21,8 @@ export default async function GuidePage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) redirect("/");
   const q = (pick(sp.q) ?? "").trim().slice(0, 200);
   const guide = ACTIVITY_GUIDES.find((g) => g.key === pick(sp.activity));
   const one = requirement(pick(sp.code));

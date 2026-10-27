@@ -60,8 +60,8 @@ async function checkEquipment(supabase: Supabase, companyId: string, equipmentId
 
 export async function createContract(form: FormData) {
   const path = "/maintenance/new";
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepContracts(role)) fail(path, "Only management and sales can add maintenance contracts.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepContracts(roles)) fail(path, "Only management and sales can add maintenance contracts.");
   const values = contractValues(form, path);
   const clientId = str(form, "client_id");
   if (!clientId) fail(path, "Choose the client.");
@@ -90,8 +90,8 @@ export async function createContract(form: FormData) {
 export async function saveContract(form: FormData) {
   const id = str(form, "id");
   const path = `/maintenance/${id}`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepContracts(role)) fail(path, "Only management and sales can change maintenance contracts.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepContracts(roles)) fail(path, "Only management and sales can change maintenance contracts.");
   const values = contractValues(form, path);
   const { data: current } = await supabase
     .from("service_contracts")
@@ -126,8 +126,8 @@ export async function setContractStatus(form: FormData) {
   const status = str(form, "status");
   const path = `/maintenance/${id}`;
   if (!STATUS_MSG[status]) fail(path, "Something went wrong. Please try again.");
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepContracts(role)) fail(path, "Only management and sales can change maintenance contracts.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepContracts(roles)) fail(path, "Only management and sales can change maintenance contracts.");
   const { data, error } = await supabase
     .from("service_contracts")
     .update({ status })
@@ -142,8 +142,8 @@ export async function setContractStatus(form: FormData) {
 
 /** Creates jobs for the visits due in the next 14 days (public.create_due_service_visits). */
 export async function planDueVisits() {
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail("/maintenance", "You cannot plan service visits.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail("/maintenance", "You cannot plan service visits.");
   const { data, error } = await supabase.rpc("create_due_service_visits", { p_company: company.id });
   if (error) fail("/maintenance", error.message);
   revalidatePath("/maintenance");

@@ -6,7 +6,7 @@ import { COMPLIANCE_CATALOGUE } from "@/lib/compliance/catalogue";
 import { addDays } from "@/lib/compliance/model";
 import { changedRules, type LegalRules } from "@/lib/compliance/rules";
 import { formatMoney } from "@/lib/money";
-import type { Role } from "@/lib/roles";
+import { hasRole, type Role, type RoleSet } from "@/lib/roles";
 import { tr } from "@/lib/tr";
 import { addUsualLicences } from "./actions";
 
@@ -28,12 +28,12 @@ export async function LegalHealth({
 }: {
   supabase: Awaited<ReturnType<typeof createClient>>;
   company: Company;
-  role: Role;
+  role: RoleSet;
   isManager: boolean;
   rules: LegalRules;
   today: string;
 }) {
-  const seesSales = role === "management" || role === "finance" || role === "sales";
+  const seesSales = hasRole(role, "management", "finance", "sales");
   const [invRes, itemsRes, licRes] = await Promise.all([
     seesSales
       ? supabase

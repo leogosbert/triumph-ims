@@ -27,12 +27,12 @@ function Row({ label, value, strong, minus }: { label: string; value: string; st
 export default async function PayslipPage({ params }: { params: Promise<{ lineId: string }> }) {
   await primeLang();
   const { lineId } = await params;
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const { data, error } = await supabase.from("payroll_lines").select("*").eq("id", lineId).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Payslip" />;
   if (!data) notFound();
   const l = data as PayrollLine;
-  const runner = can(role, "runPayroll");
+  const runner = can(roles, "runPayroll");
 
   // Management and finance read the run; an employee reads their own month through my_payslips.
   let run: RunInfo | null = null;

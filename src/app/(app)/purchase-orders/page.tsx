@@ -39,8 +39,8 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seePurchasing")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seePurchasing")) redirect("/");
 
   let query = supabase
     .from("purchase_orders")
@@ -60,7 +60,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
       <BackLink href="/purchasing" label="Purchasing" />
       <div className="page-head">
         <h1>{tr("Purchase orders")}</h1>
-        {can(role, "editPurchasing") && (
+        {can(roles, "editPurchasing") && (
           <Link href="/purchase-orders/new" className="btn btn-primary btn-small">{tr("+ New PO")}</Link>
         )}
       </div>

@@ -9,8 +9,8 @@ export const metadata = { title: "Load opening stock" };
 
 export default async function OpeningStockPage() {
   await primeLang();
-  const { role } = await getAppContext();
-  if (!can(role, "adjustStock")) redirect("/stock");
+  const { roles } = await getAppContext();
+  if (!can(roles, "adjustStock")) redirect("/stock");
   return (
     <>
       <BackLink href="/stock" label="Stock" />

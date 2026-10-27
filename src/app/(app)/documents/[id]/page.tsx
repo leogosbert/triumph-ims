@@ -29,8 +29,8 @@ export default async function DocumentPage({ params, searchParams }: { params: P
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!can(role, "seeDocuments")) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!can(roles, "seeDocuments")) redirect("/");
   const { data: d } = await supabase.from("documents").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!d) notFound();
   const [links, names, signed] = await Promise.all([

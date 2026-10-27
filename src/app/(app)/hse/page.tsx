@@ -20,6 +20,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { namesFor } from "@/lib/people";
 import { StatusBadge } from "@/lib/sales";
 import { daysFromToday, formatWhen } from "@/lib/services";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Health & safety" };
 
@@ -37,8 +38,8 @@ export default async function HsePage({ searchParams }: { searchParams: SearchPa
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  const manager = role === "management";
+  const { supabase, company, roles, user } = await getAppContext();
+  const manager = hasRole(roles, "management");
   const tab = TABS.some((t) => t.key === sp.tab) ? String(sp.tab) : "incidents";
 
   const probe = await supabase.from("hse_incidents").select("id").eq("company_id", company.id).limit(1);

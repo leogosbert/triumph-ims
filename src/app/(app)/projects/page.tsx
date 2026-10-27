@@ -19,7 +19,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const showAll = sp.view === "all";
   let q = supabase
     .from("projects")
@@ -66,14 +66,14 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Sea
     <>
       <div className="page-head">
         <h1>{tr("Projects")}</h1>
-        {canKeepProjects(role) && (
+        {canKeepProjects(roles) && (
           <Link href="/projects/new" className="btn btn-primary btn-small">
             {tr("+ Project")}
           </Link>
         )}
       </div>
       <p className="muted small">{tr("Consulting and installation projects with their budget, milestones, hours and invoices.")}</p>
-      {!canInvoiceService(role) && <p className="muted small">{tr("Hours show only what you can see: your own hours.")}</p>}
+      {!canInvoiceService(roles) && <p className="muted small">{tr("Hours show only what you can see: your own hours.")}</p>}
       <Notice {...notice} />
       <nav className="tabs-row" aria-label={tr("Show")}>
         <Link href="/projects" aria-current={!showAll ? "page" : undefined}>

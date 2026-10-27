@@ -101,6 +101,35 @@ const PERMISSIONS = {
 
 export type Permission = keyof typeof PERMISSIONS;
 
-export function can(role: Role, permission: Permission): boolean {
-  return (PERMISSIONS[permission] as readonly Role[]).includes(role);
+/**
+ * A person's roles: one role, or the main role plus extra roles
+ * (getAppContext().roles; in small teams one person can have several roles).
+ */
+export type RoleSet = Role | readonly Role[];
+
+function list(who: RoleSet): readonly Role[] {
+  return typeof who === "string" ? [who] : who;
+}
+
+/** May someone with these roles do this? True when any of their roles may. */
+export function can(who: RoleSet, permission: Permission): boolean {
+  const allowed = PERMISSIONS[permission] as readonly Role[];
+  return list(who).some((r) => allowed.includes(r));
+}
+
+/** Does the person have any of these roles (main or extra)? */
+export function hasRole(who: RoleSet, ...roles: Role[]): boolean {
+  return list(who).some((r) => roles.includes(r));
+}
+
+/** Only these roles and nothing else (e.g. a driver with no other role). */
+export function onlyRoles(who: RoleSet, ...roles: Role[]): boolean {
+  return list(who).every((r) => roles.includes(r));
+}
+
+/** Main role first, then the extra roles (no duplicates, unknown values dropped). */
+export function rolesOf(role: Role, extra?: readonly unknown[] | null): Role[] {
+  const out: Role[] = [role];
+  for (const r of extra ?? []) if (isRole(r) && !out.includes(r)) out.push(r);
+  return out;
 }

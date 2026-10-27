@@ -34,8 +34,8 @@ export default async function ContractPage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeAllService(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeAllService(roles)) redirect("/");
   const { data: row, error } = await supabase
     .from("service_contracts")
     .select("*, client:clients(name)")
@@ -45,7 +45,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
   if (isMissingTable(error)) return <NotReady title="Maintenance contract" />;
   if (!row) notFound();
   const c = row as unknown as Contract & { client: { name: string } | null };
-  const editor = canKeepContracts(role);
+  const editor = canKeepContracts(roles);
 
   const [{ data: jobData }, { data: eqData }] = await Promise.all([
     supabase

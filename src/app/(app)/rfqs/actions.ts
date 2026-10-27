@@ -25,10 +25,10 @@ function header(form: FormData) {
 
 export async function saveRfq(form: FormData) {
   kickOutbox(); // send any alerts this creates right after the response
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   const id = str(form, "id");
   const back = id ? `/rfqs/${id}` : "/rfqs/new";
-  if (!can(role, "editSales")) redirect(withNotice(back, { error: "You don't have permission to edit RFQs." }));
+  if (!can(roles, "editSales")) redirect(withNotice(back, { error: "You don't have permission to edit RFQs." }));
   const values = header(form);
   if (!values.client_id) redirect(withNotice(back, { error: "Please choose the client." }));
 

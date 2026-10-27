@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 
 /** Trial balance as a CSV file for the accountant (opening, movement and closing per account). */
 export async function GET(req: NextRequest) {
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeLedger")) return new Response("Only management or finance can see the books.", { status: 403 });
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeLedger")) return new Response("Only management or finance can see the books.", { status: 403 });
   const sp = req.nextUrl.searchParams;
   const toQ = sp.get("to");
   const fromQ = sp.get("from");

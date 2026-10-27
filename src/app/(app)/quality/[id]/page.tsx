@@ -12,7 +12,7 @@ import { NCR_DISPOSITIONS, NCR_SOURCES, NCR_STATUS, withCurrent, type Ncr } from
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { formatWhen, todayTz } from "@/lib/services";
 import { setRecordStatus } from "../../hse/actions";
@@ -38,13 +38,13 @@ export default async function NcrPage({ params, searchParams }: { params: Promis
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!can(role, "seeQuality")) redirect("/");
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!can(roles, "seeQuality")) redirect("/");
   const { data, error } = await supabase.from("quality_ncrs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="NCR" />;
   if (!data) notFound();
   const ncr = data as Ncr;
-  const manager = role === "management";
+  const manager = hasRole(roles, "management");
   const editor = manager || (ncr.raised_by === user.id && ncr.status !== "closed");
   const [linked, names, options] = await Promise.all([
     ncrLinkedNames(supabase, ncr),

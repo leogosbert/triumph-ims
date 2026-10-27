@@ -478,3 +478,41 @@ pre.st-code {
   font-size: 0.78rem;
   word-break: break-all;
 }
+
+/* Team & roles: extra roles as tick boxes, across the whole member form. */
+.st-extra-roles {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.st-extra-roles legend {
+  width: 100%;
+  padding: 0;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+.st-extra-roles label.check {
+  min-height: 36px;
+}
+.st-form .st-extra-roles {
+  margin: 4px 0;
+}
+.st-member-form .st-extra-roles {
+  order: 1;
+}
+.st-member-form .btn {
+  order: 2;
+}
+@media (min-width: 640px) {
+  .st-member-form .btn {
+    order: 0;
+  }
+  .st-member-form .st-extra-roles {
+    order: 3;
+  }
+}

@@ -36,8 +36,8 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeSales")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeSales")) redirect("/");
 
   let query = supabase
     .from("rfqs")
@@ -58,7 +58,7 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
       <BackLink href="/sales" label="Sales" />
       <div className="page-head">
         <h1>{tr("Client RFQs")}</h1>
-        {can(role, "editSales") && (
+        {can(roles, "editSales") && (
           <Link href="/rfqs/new" className="btn btn-primary btn-small">{tr("+ New RFQ")}</Link>
         )}
       </div>

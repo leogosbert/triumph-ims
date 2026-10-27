@@ -30,8 +30,8 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const currency = typeof sp.currency === "string" ? sp.currency : "";
   const archived = sp.archived === "1";
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeSuppliers")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeSuppliers")) redirect("/");
 
   let query = supabase
     .from("suppliers")
@@ -60,7 +60,7 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
         q={q}
         archived={archived}
         filter={{ name: "currency", label: "Currencies", value: currency, options: CURRENCIES }}
-        addHref={can(role, "editSuppliers") ? "/suppliers/new" : undefined}
+        addHref={can(roles, "editSuppliers") ? "/suppliers/new" : undefined}
         addLabel="New supplier"
       />
       {rows.length === 0 ? (

@@ -34,8 +34,8 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeAllService(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeAllService(roles)) redirect("/");
   const showAll = sp.view === "all";
   const { data, error } = await supabase
     .from("service_contracts")
@@ -69,7 +69,7 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
     <>
       <div className="page-head">
         <h1>{tr("Maintenance contracts")}</h1>
-        {canKeepContracts(role) && (
+        {canKeepContracts(roles) && (
           <Link href="/maintenance/new" className="btn btn-primary btn-small">
             {tr("+ Contract")}
           </Link>
@@ -102,7 +102,7 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
           <div className="l">{tr("Contract value per month")}</div>
         </div>
       </div>
-      {canPlanService(role) && (
+      {canPlanService(roles) && (
         <form action={planDueVisits} className="actions-bar">
           <SubmitButton className="btn btn-primary btn-small" pendingText={tr("Planning…")}>
             {tr("Plan due visits")}

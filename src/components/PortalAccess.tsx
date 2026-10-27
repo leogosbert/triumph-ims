@@ -2,7 +2,7 @@ import { tr } from "@/lib/tr";
 import Link from "next/link";
 import { formatDate, formatDateTime } from "@/lib/format";
 import type { Features } from "@/lib/features";
-import type { Role } from "@/lib/roles";
+import { hasRole, type Role, type RoleSet } from "@/lib/roles";
 import type { createClient } from "@/lib/supabase/server";
 import { SubmitButton } from "@/components/SubmitButton";
 import { inviteToPortal, revokePortal, shareDocument } from "@/app/(app)/portal-admin/actions";
@@ -33,18 +33,18 @@ export async function PortalAccess({
 }: {
   supabase: Supabase;
   companyId: string;
-  role: Role;
+  role: RoleSet;
   features: Features;
   party: "client" | "supplier";
   partyId: string;
   contacts?: { id: string; name: string | null; email: string | null; position: string | null; phone: string | null }[];
 }) {
-  if (!STAFF.includes(role)) return null;
+  if (!hasRole(role, ...STAFF)) return null;
   const key = party === "client" ? "client_portal" : "supplier_portal";
   const field = party === "client" ? "client_id" : "supplier_id";
   const back = `/${party === "client" ? "clients" : "suppliers"}/${partyId}#portal`;
-  const isManager = role === "management";
-  const canShare = role === "management" || role === (party === "client" ? "sales" : "procurement");
+  const isManager = hasRole(role, "management");
+  const canShare = hasRole(role, "management", party === "client" ? "sales" : "procurement");
 
   const { data: userData, error } = await supabase
     .from("portal_users")

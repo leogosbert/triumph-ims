@@ -32,8 +32,8 @@ export default async function NoticePage({ params, searchParams }: { params: Pro
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features, isManager } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, company, roles, features, isManager } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
   if (!features.on("tender_alerts")) return <FeatureOff title="Tender alerts" isManager={isManager} />;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { data: n } = await supabase.from("tender_notices").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();

@@ -19,8 +19,8 @@ type Rate = { user_id: string; bill_rate: number | null; cost_rate: number | nul
 export default async function TeamRatesPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canInvoiceService(role)) redirect("/timesheets");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canInvoiceService(roles)) redirect("/timesheets");
   const { data, error } = await supabase.from("team_rates").select("user_id, bill_rate, cost_rate, title").eq("company_id", company.id);
   if (isMissingTable(error)) return <NotReady title="Team rates" />;
   if (error) throw new Error(error.message);

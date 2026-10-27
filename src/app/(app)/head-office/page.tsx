@@ -37,8 +37,8 @@ function dayBefore(iso: string) {
 export default async function HeadOfficePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "planFinance")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "planFinance")) redirect("/");
   const year = sp.y === "1";
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const today = todayTz();

@@ -15,8 +15,8 @@ export const metadata = { title: "New client" };
 export default async function NewClientPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { role, company } = await getAppContext();
-  if (!can(role, "editClients")) redirect("/clients");
+  const { roles, company } = await getAppContext();
+  if (!can(roles, "editClients")) redirect("/clients");
 
   return (
     <>
@@ -28,7 +28,7 @@ export default async function NewClientPage({ searchParams }: { searchParams: Se
         <RecordFields
           sections={CLIENT_SECTIONS}
           values={{ currency: company.base_currency, credit_limit: 0 }}
-          lockedKeys={can(role, "setCreditLimit") ? [] : ["credit_limit"]}
+          lockedKeys={can(roles, "setCreditLimit") ? [] : ["credit_limit"]}
         />
         <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Adding…")}>{tr("Add client")}</SubmitButton>
       </form>

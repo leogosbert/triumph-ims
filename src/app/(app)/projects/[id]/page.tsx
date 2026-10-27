@@ -24,7 +24,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const { data, error } = await supabase
     .from("projects")
     .select("*, client:clients(name)")
@@ -35,8 +35,8 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
   if (error) throw new Error(error.message);
   if (!data) notFound();
   const project = data as unknown as Project & { client: { name: string } | null };
-  const keeper = canKeepProjects(role);
-  const invoicer = canInvoiceService(role);
+  const keeper = canKeepProjects(roles);
+  const invoicer = canInvoiceService(roles);
   const cur = project.currency;
 
   const [{ data: msData }, { data: tsData }, people] = await Promise.all([

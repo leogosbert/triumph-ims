@@ -25,8 +25,8 @@ export default async function FinancingRequestPage({ params, searchParams }: { p
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features, isManager } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/");
+  const { supabase, company, roles, features, isManager } = await getAppContext();
+  if (!can(roles, "seeFinance")) redirect("/");
   if (!features.on("lpo_financing")) return <FeatureOff title="LPO financing" isManager={isManager} />;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { data: f } = await supabase

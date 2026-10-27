@@ -13,7 +13,7 @@ import { formatMoney } from "@/lib/money";
 import { productOptions } from "@/lib/options";
 import { namesFor } from "@/lib/people";
 import { PO_STATUS } from "@/lib/purchasing";
-import { can, ROLE_LABELS, type Role } from "@/lib/roles";
+import { ROLE_LABELS, can, hasRole, type Role } from "@/lib/roles";
 import { quoteNo, StatusBadge, todayTz } from "@/lib/sales";
 import {
   addPoLine,
@@ -57,8 +57,8 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user, features } = await getAppContext();
-  if (!can(role, "seePurchasing")) redirect("/");
+  const { supabase, company, roles, user, features } = await getAppContext();
+  if (!can(roles, "seePurchasing")) redirect("/");
 
   const { data: po } = await supabase
     .from("purchase_orders")
@@ -68,7 +68,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
     .maybeSingle();
   if (!po) notFound();
 
-  const canEdit = can(role, "editPurchasing");
+  const canEdit = can(roles, "editPurchasing");
   const isDraft = po.status === "draft";
   const editable = canEdit && isDraft;
   const { data: grnData } = await supabase.from("goods_receipts").select("id, number, received_on").eq("po_id", id).order("created_at");
@@ -86,7 +86,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
   const mayDecide =
     po.status === "pending_approval" &&
     po.submitted_by !== user.id &&
-    (current ? (role === current.role || role === "management") && !approvals.some((a) => a.approved_by === user.id) : can(role, "approvePOs"));
+    (current ? (roles.includes(current.role as Role) || hasRole(roles, "management")) && !approvals.some((a) => a.approved_by === user.id) : can(roles, "approvePOs"));
   const stepName = (a: { role: string; label: string | null }) => `${a.label ? `${a.label} · ` : ""}${tr(ROLE_LABELS[a.role as Role] ?? a.role)}`;
   const [{ data: lineData }, { data: quote }, products, names] = await Promise.all([
     supabase
@@ -94,15 +94,15 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
       .select("id, line_no, description, quantity, unit, unit_price, line_total, received_qty, product:products(sku)")
       .eq("po_id", id)
       .order("line_no"),
-    po.quotation_id && can(role, "seeSales")
+    po.quotation_id && can(roles, "seeSales")
       ? supabase.from("quotations").select("id, number, revision, client:clients(name)").eq("id", po.quotation_id).maybeSingle()
       : Promise.resolve({ data: null }),
     editable ? productOptions(supabase, company.id) : Promise.resolve([]),
     namesFor(supabase, [po.created_by, po.submitted_by, po.approved_by, ...approvals.map((a) => a.approved_by)]),
   ]);
   const lines = (lineData ?? []) as unknown as Line[];
-  const showCosts = can(role, "editOrderCosts") && po.status !== "cancelled" && !isDraft;
-  const showBills = can(role, "seeBills") && !["draft", "pending_approval", "cancelled"].includes(po.status);
+  const showCosts = can(roles, "editOrderCosts") && po.status !== "cancelled" && !isDraft;
+  const showBills = can(roles, "seeBills") && !["draft", "pending_approval", "cancelled"].includes(po.status);
   const [{ data: costData }, { data: billData }] = await Promise.all([
     showCosts
       ? supabase.from("order_costs").select("id, kind, description, amount, currency, exchange_rate, incurred_on").eq("po_id", id).order("incurred_on")
@@ -127,7 +127,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
   return (
     <>
       <BackLink href="/purchase-orders" label="Purchase orders">
-        {po.srfq_id && can(role, "editPurchasing") && (
+        {po.srfq_id && can(roles, "editPurchasing") && (
           <>
             {" · "}
             <Link href={`/supplier-rfqs/${po.srfq_id}`}>{tr("Supplier RFQ")}</Link>
@@ -157,7 +157,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         {po.supplier_ref && <>{" "}{tr("· their ref")}{" "}{po.supplier_ref}</>}
       </p>
       <Notice {...notice} />
-      <BranchField kind="purchase_order" id={po.id} branchId={po.branch_id ?? null} branches={branches} canMove={can(role, "manageBranches")} />
+      <BranchField kind="purchase_order" id={po.id} branchId={po.branch_id ?? null} branches={branches} canMove={can(roles, "manageBranches")} />
 
       {isDraft && po.review_note && (
         <div className="banner bad">
@@ -276,7 +276,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         </section>
       )}
 
-      {po.quotation_id && po.direct_to_client !== undefined && can(role, "receiveGoods") && !["received", "closed", "cancelled"].includes(po.status) && (
+      {po.quotation_id && po.direct_to_client !== undefined && can(roles, "receiveGoods") && !["received", "closed", "cancelled"].includes(po.status) && (
         <section className="card" id="direct">
           <h2>{tr("Direct supply to the client")}</h2>
           {!po.direct_to_client ? (
@@ -319,7 +319,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         </section>
       )}
 
-      {(can(role, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status) && !po.direct_to_client) || grns.length > 0 ? (
+      {(can(roles, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status) && !po.direct_to_client) || grns.length > 0 ? (
         <section className="card">
           <h2>{tr("Goods received")}</h2>
           {grns.length === 0 && <p className="muted small">{tr("Nothing received yet.")}</p>}
@@ -331,7 +331,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
               </li>
             ))}
           </ul>
-          {can(role, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status) && (
+          {can(roles, "receiveGoods") && ["approved", "sent", "confirmed", "partially_received"].includes(po.status) && (
             <Link href={`/purchase-orders/${po.id}/receive`} className="btn btn-primary" style={{ marginTop: 8 }}>{tr("Receive goods")}</Link>
           )}
         </section>
@@ -351,7 +351,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
               </li>
             ))}
           </ul>
-          {can(role, "editBills") && (
+          {can(roles, "editBills") && (
             <Link href={`/bills/new?po=${po.id}`} className="btn" style={{ marginTop: 8 }}>{tr("Record supplier's invoice")}</Link>
           )}
         </section>
@@ -366,7 +366,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
             back={`/purchase-orders/${po.id}#costs`}
             poId={po.id}
             base={company.base_currency}
-            canEdit={can(role, "editOrderCosts")}
+            canEdit={can(roles, "editOrderCosts")}
           />
           {n(po.subtotal) > 0 && (
             <div className="scroll-x" style={{ marginTop: 12 }}>

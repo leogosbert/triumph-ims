@@ -23,8 +23,8 @@ export default async function TransferPage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeStock")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeStock")) redirect("/");
   const { data: t, error } = await supabase.from("stock_transfers").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Stock transfer" />;
   if (!t) notFound();
@@ -39,7 +39,7 @@ export default async function TransferPage({ params, searchParams }: { params: P
   const onHand = new Map<string, number>();
   for (const s of stockData ?? []) onHand.set(s.product_id, (onHand.get(s.product_id) ?? 0) + Number(s.quantity));
   const names = await namesFor(supabase, [t.created_by, t.sent_by, t.received_by]);
-  const mover = can(role, "moveStock");
+  const mover = can(roles, "moveStock");
   const draft = t.status === "draft";
   const short = draft ? lines.filter((l) => Number(l.quantity) > (onHand.get(l.product_id) ?? 0)) : [];
   // Products with stock in the source store first.

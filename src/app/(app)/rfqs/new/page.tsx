@@ -19,8 +19,8 @@ export default async function NewRfqPage({ searchParams }: { searchParams: Searc
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editSales")) redirect("/rfqs");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editSales")) redirect("/rfqs");
   const [clients, people] = await Promise.all([clientOptions(supabase, company.id), companyPeople(supabase, company.id)]);
 
   return (

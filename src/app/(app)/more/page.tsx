@@ -4,7 +4,8 @@ import { Icon } from "@/components/Icon";
 import { ThemePicker } from "@/components/ThemePicker";
 import { BackgroundPicker } from "@/components/BackgroundPicker";
 import { getAppContext } from "@/lib/context";
-import { moreMenu, type MenuItem } from "@/lib/menu";
+import { type MenuItem } from "@/lib/menu";
+import { moreMenuFor } from "@/lib/roleNav";
 import { APP_VERSION, BUILD_ID } from "@/lib/releases";
 
 export const metadata = { title: "More" };
@@ -39,8 +40,8 @@ function Tile({ item }: { item: MenuItem }) {
  */
 export default async function MorePage() {
   await primeLang();
-  const { role, isManager, features, isPlatformAdmin } = await getAppContext();
-  const groups = moreMenu(role, isManager, { on: features.on, isPlatformAdmin, features: features.list, menu: true });
+  const { roles, isManager, features, isPlatformAdmin } = await getAppContext();
+  const groups = moreMenuFor(roles, isManager, { on: features.on, isPlatformAdmin, features: features.list, menu: true });
 
   return (
     <>

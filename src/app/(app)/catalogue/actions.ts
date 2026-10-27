@@ -103,8 +103,8 @@ export async function setCatalogueDocument(form: FormData) {
 export async function convertEnquiry(form: FormData) {
   const id = str(form, "id");
   const path = `/catalogue/enquiries/${id}`;
-  const { supabase, role } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, roles } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
   const client = str(form, "client_id");
   const { data: rfq, error } = await supabase.rpc("catalogue_enquiry_convert", { p_enquiry: id, p_client: UUID.test(client) ? client : null });
   if (error) fail(path, error.message);
@@ -116,8 +116,8 @@ export async function convertEnquiry(form: FormData) {
 export async function closeEnquiry(form: FormData) {
   const id = str(form, "id");
   const path = `/catalogue/enquiries/${id}`;
-  const { supabase, role } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, roles } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
   const { error } = await supabase.rpc("catalogue_enquiry_close", { p_enquiry: id, p_closed: str(form, "closed") === "1" });
   if (error) fail(path, error.message);
   revalidatePath("/catalogue/enquiries");

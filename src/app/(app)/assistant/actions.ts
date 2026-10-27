@@ -3,23 +3,24 @@
 import { askBusiness } from "@/lib/ai/ask";
 import { aiAnswer, aiConfigured, builtInAnswer, detectTopic, type Answer } from "@/lib/assistant";
 import { getAppContext } from "@/lib/context";
+import { onlyRoles } from "@/lib/roles";
 import { primeLang, tr } from "@/lib/tr";
 
 /** One question to the business assistant. */
 export async function askAssistant(question: string): Promise<Answer> {
   const lang = await primeLang();
   const q = String(question ?? "").trim().slice(0, 500);
-  const { supabase, company, role, isManager, isPlatformAdmin, features } = await getAppContext();
-  if (!features.on("ai_assistant") || role === "driver") {
+  const { supabase, company, role, roles, isManager, isPlatformAdmin, features } = await getAppContext();
+  if (!features.on("ai_assistant") || onlyRoles(roles, "driver")) {
     return { topic: "help", title: tr("Assistant is switched off"), text: tr("Management can switch it on in Features & business level.") };
   }
-  if (!q) return builtInAnswer({ supabase, company, role }, "", "help");
+  if (!q) return builtInAnswer({ supabase, company, role: roles }, "", "help");
 
   // Not about the figures ("how do I…", "what documents do I need…"): the App guide, the compliance
   // list and the records answer it, with their sources as the rows.
   if (detectTopic(q) === "help") {
     const a = await askBusiness({ supabase, company, role, isManager, isPlatformAdmin, features: { on: features.on, list: features.list } }, q, lang, { allowFigures: false });
-    if (a.sources.length === 0) return builtInAnswer({ supabase, company, role }, q, "help");
+    if (a.sources.length === 0) return builtInAnswer({ supabase, company, role: roles }, q, "help");
     return {
       // Not "help": its rows would turn into buttons that ask the row as a question.
       topic: "summary",
@@ -38,7 +39,7 @@ export async function askAssistant(question: string): Promise<Answer> {
     };
   }
 
-  const facts = await builtInAnswer({ supabase, company, role }, q);
+  const facts = await builtInAnswer({ supabase, company, role: roles }, q);
   if (!aiConfigured()) return facts;
   // The daily allowance for the outside AI service; without it the built-in answer is enough.
   const { data: allowed, error } = await supabase.rpc("use_assistant", { p_company: company.id });

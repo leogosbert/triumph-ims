@@ -29,8 +29,8 @@ const code: React.CSSProperties = { overflowWrap: "anywhere", wordBreak: "break-
 export default async function InboxSetupPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canUseInbox(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canUseInbox(roles)) redirect("/");
   const { data, error } = await supabase.from("inbox_settings").select("*").eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Inbox setup" />;
   const s = (data ?? null) as (InboxSettings & { mailbox_checked_at?: string | null; mailbox_error?: string | null }) | null;

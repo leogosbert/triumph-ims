@@ -20,8 +20,8 @@ function pct(a: number, b: number) {
 
 export default async function InsightsPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeInsights")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeInsights")) redirect("/");
   const base = company.base_currency;
   const yearAgo = new Date(Date.now() - 365 * DAY).toISOString();
   const quarterAgo = new Date(Date.now() - 90 * DAY).toISOString();

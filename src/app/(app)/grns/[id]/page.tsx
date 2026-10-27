@@ -6,7 +6,7 @@ import { getAppContext } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { fmtQty } from "@/lib/stock";
 import { BackLink } from "@/components/BackLink";
 
@@ -18,8 +18,8 @@ export default async function GrnPage({ params, searchParams }: { params: Promis
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "receiveGoods") && role !== "finance") redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "receiveGoods") && !hasRole(roles, "finance")) redirect("/");
   const { data: g } = await supabase
     .from("goods_receipts")
     .select("*, po:purchase_orders(id, number, supplier:suppliers(name)), store:warehouses(name)")

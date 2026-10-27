@@ -1,6 +1,6 @@
 import type { createClient } from "@/lib/supabase/server";
 import { agingBucket, daysOverdue, n, openBase } from "@/lib/finance";
-import { can, type Role } from "@/lib/roles";
+import { can, type RoleSet } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import type { Dict } from "@/lib/i18n";
 
@@ -19,7 +19,7 @@ function addDays(iso: string, days: number) {
 }
 
 /** Everything the home dashboard shows, limited to what this role may see. */
-export async function loadDashboard(supabase: Supabase, companyId: string, role: Role, t: Dict) {
+export async function loadDashboard(supabase: Supabase, companyId: string, role: RoleSet, t: Dict) {
   const today = todayTz();
   const monthStart = `${today.slice(0, 7)}-01`;
   const yearStart = `${today.slice(0, 4)}-01-01`;

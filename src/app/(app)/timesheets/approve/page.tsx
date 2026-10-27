@@ -50,8 +50,8 @@ export default async function ApproveTimesheetsPage({ searchParams }: { searchPa
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "manageHr")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "manageHr")) redirect("/");
   const tab = TABS.find((t) => t.key === pick(sp.tab)) ?? TABS[0];
   const back = tab.key === "waiting" ? "/timesheets/approve" : `/timesheets/approve?tab=${tab.key}`;
 

@@ -25,8 +25,8 @@ export default async function SupplierQuotePage({
   await primeLang();
   const { id, sid } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editPurchasing")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editPurchasing")) redirect("/");
 
   const [{ data: r }, { data: inv }, { data: lineData }, { data: qlData }] = await Promise.all([
     supabase.from("supplier_rfqs").select("id, number, title, status").eq("id", id).eq("company_id", company.id).maybeSingle(),

@@ -26,8 +26,8 @@ export default async function SupplierRfqsPage({ searchParams }: { searchParams:
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "editPurchasing")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "editPurchasing")) redirect("/");
 
   let query = supabase
     .from("supplier_rfqs")

@@ -7,7 +7,7 @@ import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { payrollError } from "@/lib/payroll";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 
 function fail(path: string, error: string): never {
   redirect(withNotice(path, { error: friendlyError(payrollError(error)) }));
@@ -24,7 +24,7 @@ function amount(form: FormData, key: string): number | "bad" {
 
 async function payrollContext(path: string) {
   const ctx = await getAppContext();
-  if (!can(ctx.role, "runPayroll")) fail(path, "Only management or finance can run payroll.");
+  if (!can(ctx.roles, "runPayroll")) fail(path, "Only management or finance can run payroll.");
   return ctx;
 }
 
@@ -91,8 +91,8 @@ export async function refreshRun(form: FormData) {
 export async function approveRun(form: FormData) {
   const runId = str(form, "run_id");
   const path = `/payroll/${runId}`;
-  const { supabase, role } = await payrollContext(path);
-  if (role !== "management") fail(path, "Only management can approve payroll.");
+  const { supabase, roles } = await payrollContext(path);
+  if (!hasRole(roles, "management")) fail(path, "Only management can approve payroll.");
   const { error } = await supabase.rpc("approve_payroll_run", { p_run: runId });
   if (error) fail(path, error.message);
   revalidatePath(path);
@@ -208,8 +208,8 @@ export async function savePay(form: FormData) {
 
 export async function saveSettings(form: FormData) {
   const path = "/payroll/settings";
-  const { supabase, company, role } = await getAppContext();
-  if (role !== "management") fail(path, "Only management can change payroll rates.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!hasRole(roles, "management")) fail(path, "Only management can change payroll rates.");
 
   const bands: { from: number; rate: number }[] = [];
   for (let i = 0; i < 12; i++) {

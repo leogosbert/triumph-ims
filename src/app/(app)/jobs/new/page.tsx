@@ -23,8 +23,8 @@ export default async function NewJobPage({ searchParams }: { searchParams: Searc
   await primeLang();
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) redirect("/jobs");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) redirect("/jobs");
   const probe = await supabase.from("service_jobs").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New service job" />;
 

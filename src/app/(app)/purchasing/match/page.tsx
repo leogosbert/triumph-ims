@@ -35,8 +35,8 @@ const MATCH: Record<string, { label: string; tone: string }> = {
 export default async function MatchPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeBills")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeBills")) redirect("/");
   const view = sp.view === "all" ? "all" : "check";
   const { data: poData, error } = await supabase
     .from("purchase_orders")

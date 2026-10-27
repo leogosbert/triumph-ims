@@ -27,10 +27,10 @@ export default async function AuditPackPage({ params, searchParams }: { params: 
   const notice = await readNotice(searchParams);
   const pack = auditPack(key);
   if (!pack) notFound();
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) redirect("/");
   const today = todayTz();
-  const d = await loadPackData(supabase, company.id, today, role);
+  const d = await loadPackData(supabase, company.id, today, roles);
   if ("missing" in d) {
     if (isMissingTable(d.error as { code?: string; message?: string })) return <NotReady title="Inspection pack" />;
     throw new Error(String((d.error as { message?: string })?.message ?? "error"));

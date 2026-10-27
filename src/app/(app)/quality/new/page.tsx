@@ -18,8 +18,8 @@ export const metadata = { title: "New NCR" };
 export default async function NewNcrPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeQuality")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeQuality")) redirect("/");
   const probe = await supabase.from("quality_ncrs").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New NCR" />;
   const options = await loadNcrOptions(supabase, company.id);

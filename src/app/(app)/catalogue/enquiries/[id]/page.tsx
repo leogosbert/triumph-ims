@@ -21,8 +21,8 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features, isManager } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, company, roles, features, isManager } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
   if (!features.on("online_catalogue")) return <FeatureOff title="Online catalogue" isManager={isManager} />;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { data: e } = await supabase.from("catalogue_enquiries").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();

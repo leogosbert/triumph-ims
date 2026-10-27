@@ -23,8 +23,8 @@ function money(form: FormData, key: string, path: string, message: string) {
 
 export async function createHire(form: FormData) {
   const path = "/hire/new";
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "You don't have permission to do that.");
   const client_id = str(form, "client_id");
   if (!client_id) fail(path, "Choose the client.");
   const out_on = str(form, "out_on");
@@ -56,8 +56,8 @@ export async function createHire(form: FormData) {
 export async function saveHire(form: FormData) {
   const id = str(form, "id");
   const path = `/hire/${id}`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "You don't have permission to do that.");
   const { data, error } = await supabase
     .from("hire_agreements")
     .update({
@@ -79,8 +79,8 @@ export async function saveHire(form: FormData) {
 export async function addHireLine(form: FormData) {
   const id = str(form, "agreement_id");
   const path = `/hire/${id}#items`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "You don't have permission to do that.");
   const product_id = str(form, "product_id");
   if (!product_id) fail(path, "Choose the item.");
   const quantity = toNumber(str(form, "quantity"));
@@ -105,8 +105,8 @@ export async function addHireLine(form: FormData) {
 export async function removeHireLine(form: FormData) {
   const id = str(form, "agreement_id");
   const path = `/hire/${id}#items`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "You don't have permission to do that.");
   const { data, error } = await supabase.from("hire_lines").delete().eq("id", str(form, "line_id")).eq("company_id", company.id).select("id");
   if (error || !data?.length) fail(path, error?.message ?? "0 rows");
   revalidatePath(`/hire/${id}`);
@@ -117,8 +117,8 @@ export async function removeHireLine(form: FormData) {
 export async function returnHire(form: FormData) {
   const id = str(form, "id");
   const path = `/hire/${id}`;
-  const { supabase, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "You don't have permission to do that.");
   const day = str(form, "returned_on");
   const { error } = await supabase.rpc("return_hire", {
     p_id: id,
@@ -134,8 +134,8 @@ export async function returnHire(form: FormData) {
 export async function cancelHire(form: FormData) {
   const id = str(form, "id");
   const path = `/hire/${id}`;
-  const { supabase, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "You don't have permission to do that.");
   const { error } = await supabase.rpc("cancel_hire", { p_id: id });
   if (error) fail(path, error.message);
   revalidatePath("/hire");
@@ -146,8 +146,8 @@ export async function cancelHire(form: FormData) {
 export async function invoiceHire(form: FormData) {
   const id = str(form, "id");
   const path = `/hire/${id}`;
-  const { supabase, role } = await getAppContext();
-  if (!canInvoiceService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, roles } = await getAppContext();
+  if (!canInvoiceService(roles)) fail(path, "You don't have permission to do that.");
   const until = str(form, "until");
   const { data, error } = await supabase.rpc("invoice_hire", { p_id: id, p_until: DATE.test(until) ? until : null });
   if (error || !data) fail(path, error?.message ?? "0 rows");

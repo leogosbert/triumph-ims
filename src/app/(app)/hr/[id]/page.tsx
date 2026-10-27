@@ -47,19 +47,19 @@ export default async function EmployeePage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { data, error } = await supabase.from("employees").select(EMPLOYEE_FIELDS).eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Employee" />;
   if (error) throw new Error(error.message);
   if (!data) {
-    if (!can(role, "seeEmployees")) redirect("/hr");
+    if (!can(roles, "seeEmployees")) redirect("/hr");
     notFound();
   }
   const e = data as unknown as Employee;
   const self = e.user_id === user.id;
-  if (!can(role, "seeEmployees") && !self) redirect("/hr");
-  const manager = can(role, "manageHr");
+  if (!can(roles, "seeEmployees") && !self) redirect("/hr");
+  const manager = can(roles, "manageHr");
   const year = thisYear();
   const today = todayTz();
 
@@ -87,7 +87,7 @@ export default async function EmployeePage({ params, searchParams }: { params: P
 
   return (
     <>
-      <BackLink href={can(role, "seeEmployees") ? "/hr" : "/hr/leave"} label={can(role, "seeEmployees") ? "Employees" : "Leave"} />
+      <BackLink href={can(roles, "seeEmployees") ? "/hr" : "/hr/leave"} label={can(roles, "seeEmployees") ? "Employees" : "Leave"} />
       <div className="page-head">
         <h1 style={{ margin: 0 }}>{e.full_name}</h1>
         {!active && <span className="badge tone-off">{tr("Left")}</span>}
@@ -120,7 +120,7 @@ export default async function EmployeePage({ params, searchParams }: { params: P
             {tr("Ask for leave")}
           </Link>
         )}
-        {can(role, "runPayroll") && (
+        {can(roles, "runPayroll") && (
           <Link href={`/payroll/pay/${e.id}`} className="btn btn-small">
             {tr("Pay details")}
           </Link>

@@ -19,8 +19,8 @@ export const metadata = { title: "New project" };
 export default async function NewProjectPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepProjects(role)) redirect("/projects");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepProjects(roles)) redirect("/projects");
   const probe = await supabase.from("projects").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New project" />;
   const [clients, people] = await Promise.all([clientOptions(supabase, company.id), companyPeople(supabase, company.id)]);

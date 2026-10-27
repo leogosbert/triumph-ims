@@ -39,8 +39,8 @@ export default async function BillsPage({ searchParams }: { searchParams: Search
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeBills")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeBills")) redirect("/");
 
   let q = supabase
     .from("supplier_bills")
@@ -57,10 +57,10 @@ export default async function BillsPage({ searchParams }: { searchParams: Search
 
   return (
     <>
-      <BackLink href={can(role, "seeFinance") ? "/finance" : "/purchasing"} label={can(role, "seeFinance") ? "Finance" : "Purchasing"} />
+      <BackLink href={can(roles, "seeFinance") ? "/finance" : "/purchasing"} label={can(roles, "seeFinance") ? "Finance" : "Purchasing"} />
       <div className="page-head">
         <h1>{tr("Supplier bills")}</h1>
-        {can(role, "editBills") && (
+        {can(roles, "editBills") && (
           <Link href="/bills/new" className="btn btn-primary btn-small">{tr("+ Bill")}</Link>
         )}
       </div>

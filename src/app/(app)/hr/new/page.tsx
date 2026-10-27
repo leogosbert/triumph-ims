@@ -17,8 +17,8 @@ export const metadata = { title: "New employee" };
 export default async function NewEmployeePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "manageHr")) redirect("/hr");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "manageHr")) redirect("/hr");
   const { data: linked, error } = await supabase.from("employees").select("user_id").eq("company_id", company.id).not("user_id", "is", null).limit(5000);
   if (isMissingTable(error)) return <NotReady title="New employee" />;
   const taken = new Set(((linked ?? []) as { user_id: string }[]).map((r) => r.user_id));

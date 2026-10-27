@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/format";
 import { LEVELS } from "@/lib/levels";
 import { outboxStatus } from "@/lib/outbox";
 import { SettingsHead } from "./SettingsHead";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Settings" };
 
@@ -36,7 +37,7 @@ const fill = (s: string, vars: Record<string, string | number>) =>
 
 export default async function SettingsPage() {
   await primeLang();
-  const { supabase, company, isManager, features, role } = await getAppContext();
+  const { supabase, company, isManager, features, roles } = await getAppContext();
   const on = features.on;
   const showTeam = isManager && on("team");
   const showBackups = isManager && on("data_export");
@@ -121,7 +122,7 @@ export default async function SettingsPage() {
           icon: "receipt",
           title: tr("Plan & billing"),
           sub: tr("Your LeMoSp plan, invoices from LeMo Tech and how to pay"),
-          show: role === "management" || role === "finance",
+          show: hasRole(roles, "management") || hasRole(roles, "finance"),
         },
         {
           href: "/services",

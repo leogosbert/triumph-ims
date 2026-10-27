@@ -39,14 +39,14 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) redirect("/");
   const { data, error } = await supabase.from("compliance_items").select(ITEM_FIELDS).eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Compliance item" />;
   if (!data) notFound();
   const item = data as ComplianceItem;
   const req = requirement(item.code);
-  const write = canWriteItem(role, item.finance_ok);
+  const write = canWriteItem(roles, item.finance_ok);
   const back = `/compliance/checklist/${item.id}`;
 
   const [deadlinesRes, licenceRes, licencesRes, people, names] = await Promise.all([

@@ -11,8 +11,8 @@ export const metadata = { title: "Reports" };
 
 export default async function ReportsPage() {
   await primeLang();
-  const { role, features, company } = await getAppContext();
-  const mine = reportsFor(role, features);
+  const { roles, features, company } = await getAppContext();
+  const mine = reportsFor(roles, features);
   if (mine.length === 0) redirect("/");
   return (
     <>

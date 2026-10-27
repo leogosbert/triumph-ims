@@ -6,7 +6,7 @@ import type { Features } from "@/lib/features";
 import { formatDate } from "@/lib/format";
 import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
-import { can, type Role } from "@/lib/roles";
+import { can, type RoleSet } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import type { createClient } from "@/lib/supabase/server";
 import { addImportantDate, deleteImportantDate } from "./actions";
@@ -44,7 +44,7 @@ export async function ClientCrm({
   supabase: Supabase;
   companyId: string;
   clientId: string;
-  role: Role;
+  role: RoleSet;
   features: Features;
 }) {
   if (!can(role, "seeCrm")) return null;

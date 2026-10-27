@@ -9,7 +9,7 @@ import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Pipeline" };
 
@@ -36,9 +36,9 @@ export default async function PipelinePage({ searchParams }: { searchParams: Sea
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
-  const who = sp.who === "all" || (sp.who !== "mine" && role === "management") ? "all" : "mine";
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
+  const who = sp.who === "all" || (sp.who !== "mine" && hasRole(roles, "management")) ? "all" : "mine";
   const view = sp.view === "closed" ? "closed" : "open";
   const base = company.base_currency;
 

@@ -18,8 +18,8 @@ export const metadata = { title: "New maintenance contract" };
 export default async function NewContractPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canKeepContracts(role)) redirect("/maintenance");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canKeepContracts(roles)) redirect("/maintenance");
   const { data: eqData, error } = await supabase
     .from("client_equipment")
     .select("id, name, serial_no, client_id, client:clients(name)")

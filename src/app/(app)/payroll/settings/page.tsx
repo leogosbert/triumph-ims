@@ -9,7 +9,7 @@ import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { readSettings, type PayrollSettings } from "@/lib/payroll";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { saveSettings } from "../actions";
 import { BackLink } from "@/components/BackLink";
 
@@ -29,13 +29,13 @@ const FIELDS: { key: Exclude<keyof PayrollSettings, "paye_bands">; label: string
 export default async function PayrollSettingsPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "runPayroll")) redirect("/payroll/my");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "runPayroll")) redirect("/payroll/my");
   const { data, error } = await supabase.from("payroll_settings").select("*").eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Payroll rates" />;
   const s = readSettings(data as Record<string, unknown> | null);
   const updatedAt = (data as { updated_at?: string } | null)?.updated_at;
-  const editor = role === "management";
+  const editor = hasRole(roles, "management");
   const bands = [...s.paye_bands].sort((a, b) => a.from - b.from);
   const rows = editor ? [...bands, ...Array.from({ length: Math.max(0, Math.min(12, bands.length + 2) - bands.length) }, () => null)] : bands;
   const base = company.base_currency;

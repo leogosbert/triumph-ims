@@ -45,8 +45,8 @@ export default async function TenderAlertsPage({ searchParams }: { searchParams:
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features, isManager } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, company, roles, features, isManager } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
   if (!features.on("tender_alerts")) return <FeatureOff title="Tender alerts" isManager={isManager} />;
   const view = sp.view === "done" ? "done" : sp.view === "waiting" ? "waiting" : "decide";
   const statuses = view === "done" ? ["converted", "dismissed", "expired"] : view === "waiting" ? ["new"] : ["matched"];

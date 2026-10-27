@@ -10,7 +10,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { PAYROLL_STATUS, RUN_PAY_METHODS, monthLabel, plain, statutoryItems, type PayrollLine, type PayrollRun } from "@/lib/payroll";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
 import { approveRun, cancelRun, payRun, payStatutory, refreshRun, removeLine, updateLine } from "../actions";
 import { BackLink } from "@/components/BackLink";
@@ -23,8 +23,8 @@ export default async function PayRunPage({ params, searchParams }: { params: Pro
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "runPayroll")) redirect("/payroll/my");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "runPayroll")) redirect("/payroll/my");
   const { data: runRow, error } = await supabase
     .from("payroll_runs")
     .select("id, number, period, status, pay_date, employees, gross, nssf_employee, paye, deductions, net, nssf_employer, sdl, wcf, approved_at, paid_at, paid_method")
@@ -39,7 +39,7 @@ export default async function PayRunPage({ params, searchParams }: { params: Pro
   const base = company.base_currency;
   const money = (n: number) => formatMoney(n, base);
   const isDraft = run.status === "draft";
-  const isManager = role === "management";
+  const isManager = hasRole(roles, "management");
   const settled = run.status === "approved" || run.status === "paid";
   const canCancel = isDraft || (run.status === "approved" && isManager);
   const cost = Number(run.gross) + Number(run.nssf_employer) + Number(run.sdl) + Number(run.wcf);

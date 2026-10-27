@@ -20,8 +20,8 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const poId = typeof sp.po === "string" ? sp.po : null;
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!can(role, "editBills")) redirect("/bills");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!can(roles, "editBills")) redirect("/bills");
 
   const [{ data: po }, { data: sups }] = await Promise.all([
     poId

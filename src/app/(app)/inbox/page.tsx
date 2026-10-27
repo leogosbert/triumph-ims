@@ -19,8 +19,8 @@ export default async function InboxPage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!canUseInbox(role)) redirect("/");
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!canUseInbox(roles)) redirect("/");
   const view = sp.view === "closed" ? "closed" : "open";
   const channel = sp.channel === "email" || sp.channel === "whatsapp" || sp.channel === "portal" ? sp.channel : "";
   const unread = sp.unread === "1";

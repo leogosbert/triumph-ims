@@ -13,7 +13,7 @@ import { inboxChannels } from "@/lib/inbox/server";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { clientOptions } from "@/lib/options";
 import { companyPeople, namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { assignConversation, linkConversation, markUnread, setConversationStatus } from "../actions";
 import { HtmlFrame } from "../HtmlFrame";
 import { ReplyBox } from "../ReplyBox";
@@ -41,8 +41,8 @@ export default async function ConversationPage({ params, searchParams }: { param
   const { id } = await params;
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features } = await getAppContext();
-  if (!canUseInbox(role)) redirect("/");
+  const { supabase, company, roles, features } = await getAppContext();
+  if (!canUseInbox(roles)) redirect("/");
 
   const { data: conv, error } = await supabase
     .from("inbox_conversations")
@@ -75,7 +75,7 @@ export default async function ConversationPage({ params, searchParams }: { param
   const showHtml = typeof sp.html === "string" ? sp.html : "";
   const who = c.client?.name ?? c.supplier?.name ?? c.counterpart_name ?? c.counterpart_address;
   const lastIn = [...messages].reverse().find((m) => m.direction === "in");
-  const inboxPeople = people.filter((p) => (INBOX_ROLES as string[]).includes(p.role));
+  const inboxPeople = people.filter((p) => hasRole(p.roles, ...INBOX_ROLES));
 
   return (
     <>
@@ -94,14 +94,14 @@ export default async function ConversationPage({ params, searchParams }: { param
       <p className="small" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
         {c.client && <Link href={`/clients/${c.client.id}`}>{tr("Client")}: {c.client.name}</Link>}
         {c.supplier && <Link href={`/suppliers/${c.supplier.id}`}>{tr("Supplier")}: {c.supplier.name}</Link>}
-        {c.client && can(role, "editSales") && <Link href={`/rfqs/new?client=${c.client.id}`}>{tr("+ RFQ from this request")}</Link>}
+        {c.client && can(roles, "editSales") && <Link href={`/rfqs/new?client=${c.client.id}`}>{tr("+ RFQ from this request")}</Link>}
         {c.channel === "email" && (
           <Link href={`/inbox/new?channel=whatsapp&link=${c.client ? `client:${c.client.id}` : c.supplier ? `supplier:${c.supplier.id}` : ""}&name=${encodeURIComponent(who)}`}>
             {tr("Message on WhatsApp instead")}
           </Link>
         )}
       </p>
-      {c.channel === "email" && lastIn && can(role, "seeCrm") && features.ready && features.list.some((f) => f.key === "tender_alerts" && f.enabled) && (
+      {c.channel === "email" && lastIn && can(roles, "seeCrm") && features.ready && features.list.some((f) => f.key === "tender_alerts" && f.enabled) && (
         <form action={noticeFromInbox} className="small" style={{ margin: "0 0 8px" }}>
           <input type="hidden" name="message_id" value={lastIn.id} />
           <input type="hidden" name="back" value={`/inbox/${c.id}`} />

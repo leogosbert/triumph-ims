@@ -30,8 +30,8 @@ const DEFAULTS: Settings = { enabled: false, schedule: [-3, 0, 7, 14], channels:
 export default async function RemindersPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager, features } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/");
+  const { supabase, company, roles, isManager, features } = await getAppContext();
+  if (!can(roles, "seeFinance")) redirect("/");
 
   const [setRes, upRes, logRes, optRes, wa] = await Promise.all([
     supabase.from("reminder_settings").select("*").eq("company_id", company.id).maybeSingle(),

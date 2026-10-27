@@ -6,7 +6,7 @@ import { getAppContext } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { LIST_LIMIT } from "@/lib/records";
-import { can } from "@/lib/roles";
+import { can, onlyRoles } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { DELIVERY_STATUS } from "@/lib/stock";
 import { BackLink } from "@/components/BackLink";
@@ -28,9 +28,9 @@ export default async function DeliveriesPage({ searchParams }: { searchParams: S
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
-  const { supabase, company, role } = await getAppContext();
-  if (role === "driver") redirect("/driver");
-  if (!can(role, "seeDeliveries")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (onlyRoles(roles, "driver")) redirect("/driver");
+  if (!can(roles, "seeDeliveries")) redirect("/");
 
   let q = supabase
     .from("deliveries")
@@ -49,7 +49,7 @@ export default async function DeliveriesPage({ searchParams }: { searchParams: S
       <BackLink href="/stock" label="Stock" />
       <div className="page-head">
         <h1>{tr("Deliveries")}</h1>
-        {can(role, "editDeliveries") && (
+        {can(roles, "editDeliveries") && (
           <Link href="/deliveries/new" className="btn btn-primary btn-small">{tr("+ Delivery note")}</Link>
         )}
       </div>

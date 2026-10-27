@@ -58,8 +58,8 @@ async function fillName(supabase: Supabase, companyId: string, values: ReturnTyp
 export async function createEquipment(form: FormData) {
   const clientParam = str(form, "back_client");
   const path = `/equipment/new${clientParam ? `?client=${encodeURIComponent(clientParam)}` : ""}`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "You don't have permission to do that.");
   const values = equipmentValues(form, path);
   await fillName(supabase, company.id, values, path);
   // No next service date given: count the interval from installation (or today).
@@ -79,8 +79,8 @@ export async function createEquipment(form: FormData) {
 export async function saveEquipment(form: FormData) {
   const id = str(form, "id");
   const path = `/equipment/${id}`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "You don't have permission to do that.");
   const values = equipmentValues(form, path);
   await fillName(supabase, company.id, values, path);
   const { data, error } = await supabase
@@ -99,8 +99,8 @@ export async function setEquipmentActive(form: FormData) {
   const id = str(form, "id");
   const active = str(form, "active") === "true";
   const path = `/equipment/${id}`;
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) fail(path, "You don't have permission to do that.");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) fail(path, "You don't have permission to do that.");
   const { data, error } = await supabase
     .from("client_equipment")
     .update({ active })

@@ -15,6 +15,7 @@ import { StatusBadge } from "@/lib/sales";
 import { todayTz } from "@/lib/services";
 import { markFiled, reopenFiling, skipFiling } from "../actions";
 import { ComplianceTabs, Disclaimer } from "../parts";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Tax & filing calendar" };
 
@@ -43,8 +44,8 @@ function guessAmount(r: Row, runs: Map<string, Run>, vat: Map<string, number>): 
 export default async function CalendarPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeCompliance(roles)) redirect("/");
   const refresh = await supabase.rpc("compliance_refresh_calendar", { p_company: company.id });
   if (isMissingTable(refresh.error)) return <NotReady title="Tax & filing calendar" />;
 
@@ -67,7 +68,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
   const months = [...new Set(open.map((r) => r.period_start.slice(0, 7)))];
   const runs = new Map<string, Run>();
   const vat = new Map<string, number>();
-  if (months.length && (role === "management" || role === "finance")) {
+  if (months.length && (hasRole(roles, "management") || hasRole(roles, "finance"))) {
     const first = `${months.reduce((a, b) => (a < b ? a : b))}-01`;
     const [runRes, invRes] = await Promise.all([
       supabase.from("payroll_runs").select("period, paye, sdl, nssf_employee, nssf_employer, wcf").eq("company_id", company.id).in("status", ["approved", "paid"]).gte("period", first).limit(200),
@@ -85,7 +86,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
   const later = open.filter((r) => r.due > addDays(today, 30));
 
   const filingForm = (r: Row) => {
-    const write = canWriteItem(role, !!r.item?.finance_ok);
+    const write = canWriteItem(roles, !!r.item?.finance_ok);
     const guess = guessAmount(r, runs, vat);
     const late = r.due < today ? monthsLate(r.due, today) : 0;
     const isTax = r.item?.category === "tax";
@@ -216,7 +217,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
                       </span>
                       <StatusBadge map={DEADLINE_STATUS} status={r.status} />
                     </div>
-                    {canWriteItem(role, !!r.item?.finance_ok) && (
+                    {canWriteItem(roles, !!r.item?.finance_ok) && (
                       <form action={reopenFiling} style={{ marginTop: 4 }}>
                         <input type="hidden" name="id" value={r.id} />
                         <SubmitButton className="btn btn-small" pendingText="…">

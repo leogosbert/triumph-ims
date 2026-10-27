@@ -7,7 +7,7 @@ import { getAppContext } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { companyPeople } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { createOpportunity } from "../actions";
 import { OpportunityFields } from "../OpportunityFields";
 import { BackLink } from "@/components/BackLink";
@@ -18,8 +18,8 @@ export default async function NewOpportunityPage({ searchParams }: { searchParam
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/");
   const probe = await supabase.from("opportunities").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New opportunity" />;
   const [{ data: clients }, people] = await Promise.all([
@@ -38,7 +38,7 @@ export default async function NewOpportunityPage({ searchParams }: { searchParam
         <OpportunityFields
           v={{ client_id: client, source: client ? "existing_client" : "other", currency: company.base_currency }}
           clients={(clients ?? []) as { id: string; name: string }[]}
-          people={people.filter((p) => p.role === "sales" || p.role === "management")}
+          people={people.filter((p) => hasRole(p.roles, "sales", "management"))}
           base={company.base_currency}
         />
         <div className="field">

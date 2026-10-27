@@ -24,8 +24,9 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { brandingUrl, getAppContext } from "@/lib/context";
 import type { Key } from "@/lib/i18n";
 import { getDict } from "@/lib/lang";
-import { defaultCategory, moreMenu } from "@/lib/menu";
-import { bottomNav, sideNav } from "@/lib/nav";
+import { defaultCategory } from "@/lib/menu";
+import { bottomNav } from "@/lib/nav";
+import { moreMenuFor, sideNavFor } from "@/lib/roleNav";
 import { setLanguage } from "../lang-actions";
 import { onAdminHost } from "@/lib/hosts-server";
 
@@ -42,7 +43,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
     );
   }
-  const { supabase, company, role, user, isManager, profile, memberships, features, isPlatformAdmin } = await getAppContext();
+  const { supabase, company, role, roles, user, isManager, profile, memberships, features, isPlatformAdmin } = await getAppContext();
   // Everything else the frame needs, at the same time.
   const [{ lang, t }, { count: unread }, theme, background, look] = await Promise.all([
     getDict(),
@@ -127,7 +128,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <GlassSplash logo={logo} name={company.name} tagline={`${t["shell.poweredBy"]} LeMoSp`} />
         </>
       )}
-      <SideNav look={look} items={sideNav(role, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled), isManager)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
+      <SideNav look={look} items={sideNavFor(roles, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled), isManager)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">
           <CompanyButton className="topbar-brand" title={company.name}>
@@ -192,7 +193,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <NavPills />
       <BottomNav
         items={bottomNav(role, t, features.on)}
-        menu={moreMenu(role, isManager, { on: features.on, isPlatformAdmin, features: features.list, menu: true })}
+        menu={moreMenuFor(roles, isManager, { on: features.on, isPlatformAdmin, features: features.list, menu: true })}
         menuStart={defaultCategory(role)}
       />
       <TourHost

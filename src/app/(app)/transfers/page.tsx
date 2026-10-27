@@ -31,8 +31,8 @@ export default async function TransfersPage({ searchParams }: { searchParams: Se
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeStock")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeStock")) redirect("/");
   const view = sp.view === "done" ? "done" : "open";
   let q = supabase
     .from("stock_transfers")
@@ -52,7 +52,7 @@ export default async function TransfersPage({ searchParams }: { searchParams: Se
       <BackLink href="/stock" label="Stock" />
       <div className="page-head">
         <h1>{tr("Stock transfers")}</h1>
-        {can(role, "moveStock") && (
+        {can(roles, "moveStock") && (
           <Link href="/transfers/new" className="btn btn-primary btn-small">
             {tr("+ Transfer")}
           </Link>

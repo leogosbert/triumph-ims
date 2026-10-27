@@ -37,8 +37,8 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
   await primeLang();
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
-  const { supabase, company, role, user } = await getAppContext();
-  const all = canSeeAllService(role);
+  const { supabase, company, roles, user } = await getAppContext();
+  const all = canSeeAllService(roles);
   const view = typeof sp.view === "string" && VIEWS.some(([v]) => v === sp.view) ? sp.view : all ? "open" : "mine";
 
   let q = supabase
@@ -72,7 +72,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     <>
       <div className="page-head">
         <h1>{tr(all ? "Service jobs" : "My jobs")}</h1>
-        {canPlanService(role) && (
+        {canPlanService(roles) && (
           <Link href="/jobs/new" className="btn btn-primary btn-small">
             {tr("+ Job")}
           </Link>
@@ -94,7 +94,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
             <div className="n">{lateCount}</div>
             <div className="l">{tr("Late")}</div>
           </div>
-          {canInvoiceService(role) && (
+          {canInvoiceService(roles) && (
             <div className={`stat ${toInvoice ? "alert" : ""}`}>
               <div className="n">{toInvoice}</div>
               <div className="l">{tr("Completed, not invoiced")}</div>
@@ -112,7 +112,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
       {jobs.length === 0 ? (
         <p className="card muted">
           {view === "mine" ? tr("No open jobs for you. Jobs you are assigned to show here.") : tr("No jobs here.")}{" "}
-          {canPlanService(role) && view === "open" && <Link href="/jobs/new">{tr("Create the first job")}</Link>}
+          {canPlanService(roles) && view === "open" && <Link href="/jobs/new">{tr("Create the first job")}</Link>}
         </p>
       ) : (
         <ul className="rec-list">

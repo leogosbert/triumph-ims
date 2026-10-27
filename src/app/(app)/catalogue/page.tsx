@@ -30,12 +30,12 @@ function suggestSlug(name: string) {
 export default async function CataloguePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, features, isManager } = await getAppContext();
+  const { supabase, company, roles, features, isManager } = await getAppContext();
   if (!features.on("online_catalogue")) return <FeatureOff title="Online catalogue" isManager={isManager} />;
   const [{ data: s, error }, { count: shown }, { count: newEnquiries }] = await Promise.all([
     supabase.from("catalogue_settings").select("*").eq("company_id", company.id).maybeSingle(),
     supabase.from("catalogue_products").select("product_id", { count: "exact", head: true }).eq("company_id", company.id).eq("public", true),
-    can(role, "seeCrm")
+    can(roles, "seeCrm")
       ? supabase.from("catalogue_enquiries").select("id", { count: "exact", head: true }).eq("company_id", company.id).eq("status", "new")
       : Promise.resolve({ count: 0 }),
   ]);
@@ -59,7 +59,7 @@ export default async function CataloguePage({ searchParams }: { searchParams: Se
           <div className="n">{shown ?? 0}</div>
           <div className="l">{tr("Products shown")}</div>
         </Link>
-        {can(role, "seeCrm") && (
+        {can(roles, "seeCrm") && (
           <Link href="/catalogue/enquiries" className="stat">
             <div className={`n${newEnquiries ? " text-warn" : ""}`}>{newEnquiries ?? 0}</div>
             <div className="l">{tr("New requests")}</div>

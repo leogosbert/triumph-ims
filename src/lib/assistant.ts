@@ -4,7 +4,7 @@ import { stage13Ready, type Company } from "@/lib/context";
 import { daysOverdue, monthRange, n, openBase } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
 import { loadPnl } from "@/lib/pnl";
-import { can, type Role } from "@/lib/roles";
+import { can, hasRole, type RoleSet } from "@/lib/roles";
 import { todayTz } from "@/lib/sales";
 import { fmtQty } from "@/lib/stock";
 import { tr } from "@/lib/tr";
@@ -47,7 +47,7 @@ export type Topic =
   | "summary"
   | "help";
 
-type Ctx = { supabase: Supabase; company: Company; role: Role };
+type Ctx = { supabase: Supabase; company: Company; role: RoleSet };
 
 const TOPICS: [Topic, RegExp][] = [
   ["remind", /remind|reminder|draft|write .*(email|message)|kumbusha|ukumbusho|andika (barua|ujumbe)/],
@@ -435,7 +435,7 @@ async function approvals(ctx: Ctx): Promise<Answer> {
     topic: "approvals",
     title: tr("Waiting for approval"),
     text: `${q.length} ${tr("quotations and")} ${p.length} ${tr("purchase orders are waiting for approval.")} ${
-      ctx.role === "management" ? tr("Open each one, check the margin and approve or send back.") : tr("Management approves them.")
+      hasRole(ctx.role, "management") ? tr("Open each one, check the margin and approve or send back.") : tr("Management approves them.")
     }`,
     rows: [
       ...q.map((d) => ({ label: `${d.number} · ${d.client?.name ?? ""}`, value: formatMoney(d.total, d.currency), href: `/quotations/${d.id}`, tone: "warn" as const })),

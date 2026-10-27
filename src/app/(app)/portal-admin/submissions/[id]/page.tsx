@@ -9,6 +9,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { reviewSubmission } from "../../actions";
 import { BackLink } from "@/components/BackLink";
+import { hasRole, onlyRoles } from "@/lib/roles";
 
 export const metadata = { title: "Supplier document" };
 
@@ -47,8 +48,8 @@ export default async function PortalSubmission({ params, searchParams }: { param
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!["management", "procurement", "finance", "warehouse"].includes(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!hasRole(roles, "management", "procurement", "finance", "warehouse")) redirect("/");
   const { data } = await supabase
     .from("portal_submissions")
     .select("*, supplier:suppliers(name), po:purchase_orders(id, number, total, currency), portal_user:portal_users(name, email)")
@@ -66,8 +67,8 @@ export default async function PortalSubmission({ params, searchParams }: { param
     .order("created_at");
   const files = (fileData ?? []) as { id: string; file_name: string; size_bytes: number | null }[];
   const st = STATUS[s.status] ?? STATUS.submitted;
-  const canBill = s.kind === "invoice" && (role === "management" || role === "finance");
-  const canCheck = role !== "warehouse";
+  const canBill = s.kind === "invoice" && (hasRole(roles, "management") || hasRole(roles, "finance"));
+  const canCheck = !onlyRoles(roles, "warehouse");
   const open = s.status === "submitted";
 
   return (

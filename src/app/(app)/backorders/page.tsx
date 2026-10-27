@@ -29,8 +29,8 @@ type DLine = { quotation_line_id: string; quantity: number; delivery: { status: 
 export default async function BackordersPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeDeliveries")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeDeliveries")) redirect("/");
   const { data: qData, error } = await supabase
     .from("quotations")
     .select("id, number, revision, decided_at, updated_at, client:clients(name), lines:quotation_lines(id, line_no, product_id, description, quantity, unit)")
@@ -72,7 +72,7 @@ export default async function BackordersPage({ searchParams }: { searchParams: S
         .sort((a, b) => a.line_no - b.line_no),
     }))
     .filter((q) => q.lines.length > 0);
-  const canDeliver = can(role, "editDeliveries");
+  const canDeliver = can(roles, "editDeliveries");
 
   return (
     <>

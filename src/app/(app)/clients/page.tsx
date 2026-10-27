@@ -29,7 +29,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const industry = typeof sp.industry === "string" ? sp.industry : "";
   const archived = sp.archived === "1";
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
 
   let query = supabase
     .from("clients")
@@ -55,13 +55,13 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
         q={q}
         archived={archived}
         filter={{ name: "industry", label: "Industries", value: industry, options: INDUSTRIES }}
-        addHref={can(role, "editClients") ? "/clients/new" : undefined}
+        addHref={can(roles, "editClients") ? "/clients/new" : undefined}
         addLabel="New client"
       />
       {rows.length === 0 ? (
         <p className="card muted">
           {q || industry ? tr("No clients match your search.") : tr("No clients yet.")}{" "}
-          {can(role, "importData") && !q && !industry && (
+          {can(roles, "importData") && !q && !industry && (
             <>{tr("You can")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
             </>
           )}

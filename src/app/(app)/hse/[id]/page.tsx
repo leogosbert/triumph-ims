@@ -16,6 +16,7 @@ import { saveIncident, setRecordStatus } from "../actions";
 import { IncidentFields } from "../IncidentFields";
 import { linkedNames, loadLinkOptions } from "../options";
 import { BackLink } from "@/components/BackLink";
+import { hasRole } from "@/lib/roles";
 
 export const metadata = { title: "Incident" };
 
@@ -34,12 +35,12 @@ export default async function IncidentPage({ params, searchParams }: { params: P
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
   const { data, error } = await supabase.from("hse_incidents").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Incident" />;
   if (!data) notFound();
   const inc = data as Incident;
-  const manager = role === "management";
+  const manager = hasRole(roles, "management");
   const [linked, names, options] = await Promise.all([
     linkedNames(supabase, inc),
     namesFor(supabase, [inc.reported_by, inc.closed_by]),

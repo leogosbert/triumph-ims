@@ -17,8 +17,8 @@ export default async function NewHirePage({ searchParams }: { searchParams: Sear
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canPlanService(role)) redirect("/hire");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canPlanService(roles)) redirect("/hire");
   const probe = await supabase.from("hire_agreements").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New hire" />;
   const clients = await clientOptions(supabase, company.id);

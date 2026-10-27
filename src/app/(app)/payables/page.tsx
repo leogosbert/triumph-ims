@@ -21,8 +21,8 @@ type Bill = {
 
 export default async function PayablesPage() {
   await primeLang();
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeFinance")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeFinance")) redirect("/");
   const { data, error } = await supabase
     .from("supplier_bills")
     .select("total, amount_paid, exchange_rate, currency, due_date, supplier:suppliers(id, name)")

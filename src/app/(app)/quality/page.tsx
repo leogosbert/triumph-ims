@@ -28,8 +28,8 @@ export default async function QualityPage({ searchParams }: { searchParams: Sear
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeQuality")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeQuality")) redirect("/");
   const tab = TABS.some((t) => t.key === sp.tab) ? String(sp.tab) : "open";
   const source = typeof sp.source === "string" && sp.source in NCR_SOURCES ? sp.source : "";
 

@@ -10,8 +10,8 @@ import { tr } from "@/lib/tr";
  */
 export async function ComplianceCard() {
   try {
-    const { supabase, company, role, features } = await getAppContext();
-    if (!canSeeCompliance(role) || !features.on("compliance")) return null;
+    const { supabase, company, roles, features } = await getAppContext();
+    if (!canSeeCompliance(roles) || !features.on("compliance")) return null;
     const { data, error } = await supabase.rpc("compliance_summary", { p_company: company.id });
     if (error || !data || typeof data !== "object") return null;
     const s = data as ComplianceSummary;

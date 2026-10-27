@@ -26,7 +26,7 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
+  const { supabase, company, roles } = await getAppContext();
 
   const { data: rfq } = await supabase
     .from("rfqs")
@@ -42,8 +42,8 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
   ]);
   const lines = (lineData ?? []) as unknown as Line[];
   const quotes = (quoteData ?? []) as Quote[];
-  const editable = can(role, "editSales") && ["new", "quoting", "quoted"].includes(rfq.status);
-  const linesEditable = can(role, "editSales") && ["new", "quoting"].includes(rfq.status);
+  const editable = can(roles, "editSales") && ["new", "quoting", "quoted"].includes(rfq.status);
+  const linesEditable = can(roles, "editSales") && ["new", "quoting"].includes(rfq.status);
   const [clients, people, products, names] = await Promise.all([
     editable ? clientOptions(supabase, company.id) : Promise.resolve([]),
     editable ? companyPeople(supabase, company.id) : Promise.resolve([]),
@@ -132,7 +132,7 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
             ))}
           </ul>
         )}
-        {can(role, "editSales") && ["new", "quoting", "quoted"].includes(rfq.status) && lines.length > 0 && (
+        {can(roles, "editSales") && ["new", "quoting", "quoted"].includes(rfq.status) && lines.length > 0 && (
           <form action={quoteFromRfq} style={{ marginTop: 12 }}>
             <input type="hidden" name="rfq_id" value={rfq.id} />
             <input type="hidden" name="client_id" value={rfq.client_id} />
@@ -143,7 +143,7 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
         )}
       </section>
 
-      {can(role, "editPurchasing") && ["new", "quoting"].includes(rfq.status) && lines.length > 0 && (
+      {can(roles, "editPurchasing") && ["new", "quoting"].includes(rfq.status) && lines.length > 0 && (
         <form action={createSupplierRfq} className="card">
           <input type="hidden" name="rfq_id" value={rfq.id} />
           <p className="small muted" style={{ marginTop: 0 }}>{tr("Need supplier prices before quoting? Send these items to suppliers.")}</p>
@@ -170,7 +170,7 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
         </section>
       )}
 
-      {can(role, "editSales") && ["new", "quoting", "quoted"].includes(rfq.status) && (
+      {can(roles, "editSales") && ["new", "quoting", "quoted"].includes(rfq.status) && (
         <form action={cancelRfq}>
           <input type="hidden" name="id" value={rfq.id} />
           <SubmitButton className="btn btn-block btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel this RFQ")}</SubmitButton>

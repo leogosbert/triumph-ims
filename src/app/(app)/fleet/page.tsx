@@ -18,8 +18,8 @@ export default async function FleetPage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeFleet")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeFleet")) redirect("/");
   const showAll = sp.view === "all";
   let q = supabase
     .from("vehicles")
@@ -45,7 +45,7 @@ export default async function FleetPage({ searchParams }: { searchParams: Search
     <>
       <div className="page-head">
         <h1>{tr("Vehicles")}</h1>
-        {can(role, "editFleet") && (
+        {can(roles, "editFleet") && (
           <Link href="/fleet/new" className="btn btn-primary btn-small">
             {tr("+ Vehicle")}
           </Link>

@@ -38,8 +38,8 @@ export default async function BillPage({ params, searchParams }: { params: Promi
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeBills")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeBills")) redirect("/");
 
   const { data: b } = await supabase
     .from("supplier_bills")
@@ -55,7 +55,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
     .order("paid_on");
   const pays = (payData ?? []) as unknown as Pay[];
 
-  const edit = can(role, "editBills");
+  const edit = can(roles, "editBills");
   const open = isOpen(b.status);
   const editable = edit && b.status === "open" && n(b.amount_paid) === 0;
   const ccy = b.currency as string;
@@ -131,7 +131,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                   </span>
                 </div>
                 {p.voided_at && <div className="small text-warn">{tr("Voided:")}{" "}{p.void_reason}</div>}
-                {!p.voided_at && can(role, "voidPayments") && (
+                {!p.voided_at && can(roles, "voidPayments") && (
                   <details className="small">
                     <summary>{tr("Void this payment")}</summary>
                     <form action={voidSupplierPayment} className="inline-form" style={{ marginTop: 6 }}>

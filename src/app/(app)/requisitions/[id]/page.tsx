@@ -11,7 +11,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { productOptions } from "@/lib/options";
 import { namesFor } from "@/lib/people";
-import { can } from "@/lib/roles";
+import { can, hasRole } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { REQUEST_STATUS, fmtQty, storeOptions } from "@/lib/stock";
 import { addRequisitionLine, cancelRequisition, decideRequisition, orderRequisition, removeRequisitionLine, saveRequisition, submitRequisition } from "../actions";
@@ -27,14 +27,14 @@ export default async function RequisitionPage({ params, searchParams }: { params
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, user } = await getAppContext();
-  if (!can(role, "requestPurchases")) redirect("/");
+  const { supabase, company, roles, user } = await getAppContext();
+  if (!can(roles, "requestPurchases")) redirect("/");
   const { data: r, error } = await supabase.from("requisitions").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Purchase request" />;
   if (!r) notFound();
   const mine = r.created_by === user.id;
   const draft = r.status === "draft";
-  const canOrder = r.status === "approved" && can(role, "editPurchasing");
+  const canOrder = r.status === "approved" && can(roles, "editPurchasing");
   const [{ data: lineData }, stores, products, { data: po }, { data: supplierData }] = await Promise.all([
     supabase.from("requisition_lines").select("id, product_id, description, quantity, unit, note, product:products(sku)").eq("requisition_id", id).order("created_at"),
     storeOptions(supabase, company.id, false),
@@ -65,7 +65,7 @@ export default async function RequisitionPage({ params, searchParams }: { params
     lastSupplier = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
     if (!suppliers.some((s) => s.id === lastSupplier)) lastSupplier = "";
   }
-  const cancellable = ["draft", "submitted", "approved"].includes(r.status) && (mine || role === "management");
+  const cancellable = ["draft", "submitted", "approved"].includes(r.status) && (mine || hasRole(roles, "management"));
 
   return (
     <>
@@ -145,9 +145,9 @@ export default async function RequisitionPage({ params, searchParams }: { params
           <form action={submitRequisition}>
             <input type="hidden" name="id" value={r.id} />
             <p className="small muted">
-              {role === "management" ? tr("As management, your own request is approved when you send it.") : tr("Management will be asked to approve it.")}
+              {hasRole(roles, "management") ? tr("As management, your own request is approved when you send it.") : tr("Management will be asked to approve it.")}
             </p>
-            <SubmitButton disabled={lines.length === 0}>{role === "management" ? tr("Approve and send to procurement") : tr("Send for approval")}</SubmitButton>
+            <SubmitButton disabled={lines.length === 0}>{hasRole(roles, "management") ? tr("Approve and send to procurement") : tr("Send for approval")}</SubmitButton>
           </form>
           <details style={{ marginTop: 12 }}>
             <summary>{tr("Change details")}</summary>
@@ -160,7 +160,7 @@ export default async function RequisitionPage({ params, searchParams }: { params
         </section>
       )}
 
-      {r.status === "submitted" && role === "management" && (
+      {r.status === "submitted" && hasRole(roles, "management") && (
         <section className="card">
           <h2>{tr("Decision")}</h2>
           <form action={decideRequisition}>

@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 /** /payroll/[id]/export/payments | paye | nssf — CSV lists for the bank, TRA and NSSF (management and finance). */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string; kind: string }> }) {
   const { id, kind } = await params;
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "runPayroll")) return new Response("Not allowed", { status: 403 });
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "runPayroll")) return new Response("Not allowed", { status: 403 });
   if (!["payments", "paye", "nssf"].includes(kind)) return new Response("Unknown list", { status: 404 });
   const { data: run } = await supabase.from("payroll_runs").select("number, period").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!run) return new Response("Pay run not found", { status: 404 });

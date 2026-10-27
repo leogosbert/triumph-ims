@@ -42,8 +42,8 @@ export default async function QuotationsPage({ searchParams }: { searchParams: S
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeSales")) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeSales")) redirect("/");
 
   let query = supabase
     .from("quotations")
@@ -71,7 +71,7 @@ export default async function QuotationsPage({ searchParams }: { searchParams: S
       <BackLink href="/sales" label="Sales" />
       <div className="page-head">
         <h1>{tr("Quotations")}</h1>
-        {can(role, "editSales") && (
+        {can(roles, "editSales") && (
           <Link href="/quotations/new" className="btn btn-primary btn-small">{tr("+ New quotation")}</Link>
         )}
       </div>

@@ -26,8 +26,8 @@ export default async function HireDetailPage({ params, searchParams }: { params:
   await primeLang();
   const { id } = await params;
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!canSeeAllService(role)) redirect("/");
+  const { supabase, company, roles } = await getAppContext();
+  if (!canSeeAllService(roles)) redirect("/");
   const { data, error } = await supabase
     .from("hire_agreements")
     .select("*, client:clients(name)")
@@ -39,7 +39,7 @@ export default async function HireDetailPage({ params, searchParams }: { params:
   if (!data) notFound();
   const h = data as unknown as Hire;
   const today = todayTz();
-  const planner = canPlanService(role);
+  const planner = canPlanService(roles);
   const out = h.status === "out";
   const editableLines = out && !h.invoiced_until && planner;
 
@@ -73,7 +73,7 @@ export default async function HireDetailPage({ params, searchParams }: { params:
   const span = unbilledSpan(h, today);
   const running = span.open && (h.status === "out" || h.status === "returned") ? chargeBetween(lines, span.from, span.to, h.rate_period) : null;
   const period = tr(RATE_PERIODS[h.rate_period]?.per ?? h.rate_period);
-  const canInvoice = canInvoiceService(role) && (h.status === "out" || h.status === "returned") && span.open;
+  const canInvoice = canInvoiceService(roles) && (h.status === "out" || h.status === "returned") && span.open;
 
   return (
     <>

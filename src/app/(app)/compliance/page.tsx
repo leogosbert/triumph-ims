@@ -24,8 +24,8 @@ type ExpLicence = { id: string; name: string; authority: string | null; expires_
 export default async function CompliancePage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
-  const { supabase, company, role, isManager } = await getAppContext();
-  if (!canSeeCompliance(role)) redirect("/");
+  const { supabase, company, roles, isManager } = await getAppContext();
+  if (!canSeeCompliance(roles)) redirect("/");
 
   // Bring the calendar up to date first (harmless when nothing repeats).
   const refresh = await supabase.rpc("compliance_refresh_calendar", { p_company: company.id });
@@ -144,7 +144,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: S
         </>
       )}
 
-      {s.set_up && <LegalHealth supabase={supabase} company={company} role={role} isManager={isManager} rules={rules} today={today} />}
+      {s.set_up && <LegalHealth supabase={supabase} company={company} role={roles} isManager={isManager} rules={rules} today={today} />}
 
       {(filings.length > 0 || items.length > 0) && (
         <section className="card">

@@ -8,8 +8,8 @@ import { can } from "@/lib/roles";
 export type StockRow = { sku: string; store: string; quantity: number | string; batch_no: string; expiry_date: string };
 
 export async function importOpeningStock(rows: StockRow[]): Promise<{ ok: true; count: number } | { ok: false; error: string }> {
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "adjustStock")) return { ok: false, error: "Only management and warehouse can load stock." };
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "adjustStock")) return { ok: false, error: "Only management and warehouse can load stock." };
   if (!Array.isArray(rows) || rows.length === 0) return { ok: false, error: "The file has no rows." };
   const { data, error } = await supabase.rpc("import_opening_stock", { p_company: company.id, p_rows: rows });
   if (error) return { ok: false, error: friendlyError(error.message) };

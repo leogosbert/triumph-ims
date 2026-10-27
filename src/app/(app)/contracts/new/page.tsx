@@ -18,8 +18,8 @@ export default async function NewContractPage({ searchParams }: { searchParams: 
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const { supabase, company, role } = await getAppContext();
-  if (!can(role, "seeCrm")) redirect("/contracts");
+  const { supabase, company, roles } = await getAppContext();
+  if (!can(roles, "seeCrm")) redirect("/contracts");
   const [{ data: tenders, error }, { data: clients }] = await Promise.all([
     supabase.from("tenders").select("id, number, title, reference, our_price, currency").eq("company_id", company.id).eq("status", "won").order("decided_at", { ascending: false }).limit(100),
     supabase.from("clients").select("id, name").eq("company_id", company.id).order("name").limit(3000),

@@ -6,10 +6,10 @@ import { displayName, getAppContext } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { num, thisYear, type AdminSummary, type LeaveBalance } from "@/lib/hr";
 import { joinOpen, type MeetingSummary } from "@/lib/meetings/model";
-import { moreMenu } from "@/lib/menu";
+import { moreMenuFor } from "@/lib/roleNav";
 import { formatMoney } from "@/lib/money";
 import { monthLabel } from "@/lib/payroll";
-import { can, ROLE_LABELS, type Role } from "@/lib/roles";
+import { can, hasRole, ROLE_LABELS, type Role } from "@/lib/roles";
 import { daysFromToday, formatWhen, OPEN_JOB, todayTz } from "@/lib/services";
 
 export const metadata = { title: "My page" };
@@ -116,7 +116,7 @@ type CalItem = { uid: string; date: string; time?: string | null; kind: string; 
 
 export default async function MyPage() {
   await primeLang();
-  const { supabase, user, profile, company, role, isManager, features, membership } = await getAppContext();
+  const { supabase, user, profile, company, roles, isManager, features, membership } = await getAppContext();
   const cid = company.id;
   const me = user.id;
   const on = features.on;
@@ -125,7 +125,7 @@ export default async function MyPage() {
   const in14 = addDays(today, 14);
   const in30 = addDays(today, 30);
   const week = mondayOf(today);
-  const c = (p: Parameters<typeof can>[1]) => can(role, p);
+  const c = (p: Parameters<typeof can>[1]) => can(roles, p);
   const adminOn = on("hr_people") || on("timesheet_approval") || on("hse") || on("quality");
 
   const [
@@ -257,7 +257,7 @@ export default async function MyPage() {
             .limit(10),
         )
       : null,
-    canSeeCompliance(role) && on("compliance")
+    canSeeCompliance(roles) && on("compliance")
       ? safe(
           supabase
             .from("compliance_deadlines")
@@ -321,9 +321,9 @@ export default async function MyPage() {
             .limit(6),
         )
       : null,
-    (role === "sales" || role === "finance") && on("invoices")
+    hasRole(roles, "sales", "finance") && on("invoices")
       ? safe(
-          role === "sales"
+          !hasRole(roles, "finance", "management")
             ? supabase
                 .from("invoices")
                 .select("id, number, due_date, total, amount_paid, currency, client:clients(name), quotation:quotations!inner(created_by)")
@@ -343,7 +343,7 @@ export default async function MyPage() {
                 .limit(6),
         )
       : null,
-    role === "procurement" && on("purchases")
+    hasRole(roles, "procurement") && on("purchases")
       ? safe(
           supabase
             .from("purchase_orders")
@@ -354,13 +354,13 @@ export default async function MyPage() {
             .limit(6),
         )
       : null,
-    role === "procurement" && on("supplier_rfqs")
+    hasRole(roles, "procurement") && on("supplier_rfqs")
       ? safe(supabase.from("supplier_rfqs").select("id, number, title, due_on").eq("company_id", cid).eq("status", "open").order("due_on", { ascending: true, nullsFirst: false }).limit(5))
       : null,
-    role === "procurement" && on("requisitions")
+    hasRole(roles, "procurement") && on("requisitions")
       ? safe(supabase.from("requisitions").select("id, number, reason, needed_by").eq("company_id", cid).eq("status", "approved").order("needed_by", { ascending: true, nullsFirst: false }).limit(5))
       : null,
-    role === "warehouse" && on("goods_received")
+    hasRole(roles, "warehouse") && on("goods_received")
       ? safe(
           supabase
             .from("purchase_orders")
@@ -371,10 +371,10 @@ export default async function MyPage() {
             .limit(6),
         )
       : null,
-    role === "warehouse" && on("stock_transfers")
+    hasRole(roles, "warehouse") && on("stock_transfers")
       ? safe(supabase.from("stock_transfers").select("id, number, status, reason").eq("company_id", cid).in("status", ["draft", "in_transit"]).order("created_at").limit(6))
       : null,
-    role === "driver" && on("deliveries")
+    hasRole(roles, "driver") && on("deliveries")
       ? safe(
           supabase
             .from("deliveries")
@@ -386,7 +386,7 @@ export default async function MyPage() {
             .limit(8),
         )
       : null,
-    role === "finance" && on("supplier_bills")
+    hasRole(roles, "finance") && on("supplier_bills")
       ? safe(
           supabase
             .from("supplier_bills")
@@ -398,7 +398,7 @@ export default async function MyPage() {
             .limit(6),
         )
       : null,
-    role === "finance" && on("mobile_money")
+    hasRole(roles, "finance") && on("mobile_money")
       ? (async () => {
           try {
             const { count, error } = await supabase
@@ -478,7 +478,7 @@ export default async function MyPage() {
     const current = steps.find((s) => !s.approved_at);
     const mine =
       p.submitted_by !== me &&
-      (current ? (role === current.role || role === "management") && !steps.some((s) => s.approved_by === me) : role === "management");
+      (current ? hasRole(roles, current.role, "management") && !steps.some((s) => s.approved_by === me) : hasRole(roles, "management"));
     if (mine) approvals.push({ key: `p${p.id}`, href: `/purchase-orders/${p.id}`, title: `${tr("Purchase order")} ${p.number}`, sub: p.supplier?.name ?? "", side: formatMoney(p.total, p.currency) });
   }
   for (const r of list<{ id: string; number: string; reason: string | null; needed_by: string | null }>(reqsToApprove)) {
@@ -587,7 +587,7 @@ export default async function MyPage() {
     }),
   );
   push(
-    role === "sales" ? tr("My clients' overdue invoices") : tr("Overdue invoices"),
+    !hasRole(roles, "finance", "management") ? tr("My clients' overdue invoices") : tr("Overdue invoices"),
     "receipt",
     "/invoices?tab=overdue",
     list<{ id: string; number: string; due_date: string; total: number; amount_paid: number; currency: string; client: Named }>(overdueInvoices).map((i) => ({
@@ -704,8 +704,8 @@ export default async function MyPage() {
   const noticeRows = list<{ id: string; title: string; body: string | null; link: string | null; severity: string; created_at: string }>(notices);
 
   // ---------- Shortcuts ----------
-  const menu = moreMenu(role, isManager, { on, features: features.list }).flatMap((cat) => cat.items);
-  const shortcuts = SHORTCUTS[role]
+  const menu = moreMenuFor(roles, isManager, { on, features: features.list }).flatMap((cat) => cat.items);
+  const shortcuts = [...new Set(roles.flatMap((r) => SHORTCUTS[r]))]
     .map((href) => menu.find((i) => i.href === href))
     .filter((i): i is NonNullable<typeof i> => Boolean(i))
     .slice(0, 6);
@@ -725,7 +725,9 @@ export default async function MyPage() {
           {greeting()}, {firstName}
         </h1>
         <div className="my-hero-roles">
-          <span className="my-chip">{tr(ROLE_LABELS[role])}</span>
+          {roles.map((r) => (
+            <span key={r} className="my-chip">{tr(ROLE_LABELS[r])}</span>
+          ))}
           {jobLine && <span className="my-chip">{jobLine}</span>}
           <span className="my-chip my-chip-plain">{membership.company.name}</span>
         </div>

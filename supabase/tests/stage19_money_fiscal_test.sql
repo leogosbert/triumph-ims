@@ -273,10 +273,9 @@ reset role;
 
 -- ---- 7. Daily totals ----------------------------------------------------------------------------------------
 select tests.login('fin.fx@g.test'); set role authenticated;
--- The receipt is dated 2026-10-25 and the credit note today (Dar date), so sum the days in between.
-select tests.check((select sum(receipts) = 1 and sum(credit_notes) = 1 and sum(total_incl) = 1180000 - 118000 and sum(typed) = 2
-                      from public.fiscal_daily_totals(:'co', '2026-10-25', greatest(date '2026-10-25', (now() at time zone 'Africa/Dar_es_Salaam')::date))),
-  'daily totals from the receipt day: 1 receipt, 1 credit note, net 1,062,000');
+select tests.check((select receipts = 1 and credit_notes = 1 and total_incl = 1180000 - 118000 and typed = 2
+                      from public.fiscal_daily_totals(:'co', '2026-10-25', '2026-10-25')),
+  'daily totals for the receipt day: 1 receipt, 1 credit note, net 1,062,000');
 reset role;
 select tests.login('sales.fx@g.test'); set role authenticated;
 select tests.blocked(format('select * from public.fiscal_daily_totals(%L, null, null)', :'co'), 'sales do not see the daily totals');

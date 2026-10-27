@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { formatMoney } from "@/lib/money";
 import { PO_STATUS } from "@/lib/purchasing";
@@ -16,7 +15,7 @@ type Q = { id: string; number: string; revision: number; total: number; currency
 export default async function PurchasingPage() {
   await primeLang();
   const { supabase, company, roles, features } = await getAppContext();
-  if (!can(roles, "seePurchasing")) redirect("/");
+  if (!can(roles, "seePurchasing")) noAccess();
   const today = todayTz();
   const cnt = { count: "exact" as const, head: true };
   const edit = can(roles, "editPurchasing");

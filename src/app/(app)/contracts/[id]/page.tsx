@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { LinkedDocuments } from "@/components/LinkedDocuments";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { contractKindLabel, daysUntil } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -23,7 +23,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeContracts")) redirect("/");
+  if (!can(roles, "seeContracts")) noAccess();
   const { data: k } = await supabase.from("contracts").select("*, client:clients(id, name)").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!k) notFound();
   const edit = can(roles, "seeCrm") && !k.cancelled_at;

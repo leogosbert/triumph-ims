@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { monthRange } from "@/lib/finance";
 import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -17,7 +16,7 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: S
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const prev = monthRange(m.prev);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeProfit")) redirect("/");
+  if (!can(roles, "seeProfit")) noAccess();
   const base = company.base_currency;
   const ready = stage13Ready(company);
   const yearStart = `${m.month.slice(0, 4)}-01-01`;

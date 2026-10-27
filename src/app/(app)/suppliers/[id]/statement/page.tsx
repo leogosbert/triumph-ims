@@ -1,7 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { StatementView } from "@/components/StatementView";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { methodLabel } from "@/lib/finance";
 import { type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
@@ -15,7 +15,7 @@ export default async function SupplierStatementPage({ params, searchParams }: { 
   const { id } = await params;
   const sp = (await searchParams) ?? {};
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeBills")) redirect("/");
+  if (!can(roles, "seeBills")) noAccess();
   const { data: client } = await supabase.from("suppliers").select("id, name, code").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!client) notFound();
   const def = defaultPeriod();

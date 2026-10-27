@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { OPEN_STAGES, isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { companyPeople } from "@/lib/people";
@@ -19,7 +18,7 @@ export default async function NewTenderPage({ searchParams }: { searchParams: Se
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   const [{ data: opps, error }, { data: clients }, people] = await Promise.all([
     supabase.from("opportunities").select("id, number, title").eq("company_id", company.id).in("stage", OPEN_STAGES).order("created_at", { ascending: false }).limit(300),
     supabase.from("clients").select("id, name").eq("company_id", company.id).order("name").limit(3000),

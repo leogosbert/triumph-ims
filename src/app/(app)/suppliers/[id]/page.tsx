@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { RecordFields } from "@/components/RecordFields";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { SUPPLIER_SECTIONS } from "@/lib/fields";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -30,7 +30,7 @@ export default async function SupplierPage({
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features } = await getAppContext();
-  if (!can(roles, "seeSuppliers")) redirect("/");
+  if (!can(roles, "seeSuppliers")) noAccess();
 
   const [{ data: supplier }, { data: linkedData }] = await Promise.all([
     supabase.from("suppliers").select("*").eq("id", id).eq("company_id", company.id).maybeSingle(),

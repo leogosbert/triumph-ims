@@ -191,11 +191,19 @@ export function stage13Ready(company: Pick<Company, "quote_followup_days">) {
   return company.quote_followup_days !== undefined;
 }
 
+/** The note shown on the dashboard when someone opens a screen their roles do not include. */
+export const NO_ACCESS_MESSAGE = "Your role can't open that screen. Ask management if you need it.";
+
+/** Sends the person to their home screen with a friendly note: their roles can't open this screen. */
+export function noAccess(message: string = NO_ACCESS_MESSAGE): never {
+  redirect(`/?error=${encodeURIComponent(message)}`);
+}
+
 /** Same as getAppContext, but only management may continue. */
 export async function requireManager() {
   const ctx = await getAppContext();
   if (!ctx.isManager) {
-    redirect(`/?error=${encodeURIComponent("Only management can open that page.")}`);
+    noAccess("Only management can open that screen.");
   }
   return ctx;
 }

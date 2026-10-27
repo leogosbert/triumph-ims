@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
 import { PrintButton } from "@/components/reports/PrintButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -28,7 +28,7 @@ export default async function AuditPackPage({ params, searchParams }: { params: 
   const pack = auditPack(key);
   if (!pack) notFound();
   const { supabase, company, roles, isManager } = await getAppContext();
-  if (!canSeeCompliance(roles)) redirect("/");
+  if (!canSeeCompliance(roles)) noAccess();
   const today = todayTz();
   const d = await loadPackData(supabase, company.id, today, roles);
   if ("missing" in d) {

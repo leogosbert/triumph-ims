@@ -1,9 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -24,7 +24,7 @@ export default async function TransferPage({ params, searchParams }: { params: P
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeStock")) redirect("/");
+  if (!can(roles, "seeStock")) noAccess();
   const { data: t, error } = await supabase.from("stock_transfers").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Stock transfer" />;
   if (!t) notFound();

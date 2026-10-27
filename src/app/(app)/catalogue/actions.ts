@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
 import { can } from "@/lib/roles";
@@ -104,7 +104,7 @@ export async function convertEnquiry(form: FormData) {
   const id = str(form, "id");
   const path = `/catalogue/enquiries/${id}`;
   const { supabase, roles } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   const client = str(form, "client_id");
   const { data: rfq, error } = await supabase.rpc("catalogue_enquiry_convert", { p_enquiry: id, p_client: UUID.test(client) ? client : null });
   if (error) fail(path, error.message);
@@ -117,7 +117,7 @@ export async function closeEnquiry(form: FormData) {
   const id = str(form, "id");
   const path = `/catalogue/enquiries/${id}`;
   const { supabase, roles } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   const { error } = await supabase.rpc("catalogue_enquiry_close", { p_enquiry: id, p_closed: str(form, "closed") === "1" });
   if (error) fail(path, error.message);
   revalidatePath("/catalogue/enquiries");

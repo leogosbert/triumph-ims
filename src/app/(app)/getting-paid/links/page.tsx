@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { PAY_ORDER_STATUS } from "@/lib/getpaid/common";
@@ -51,7 +50,7 @@ export default async function PayLinksPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, isManager, features } = await getAppContext();
-  if (!can(roles, "seeFinance")) redirect("/");
+  if (!can(roles, "seeFinance")) noAccess();
 
   const [setRes, ordRes, evRes] = await Promise.all([
     supabase.from("pay_settings").select("provider, on_documents, allow_partial").eq("company_id", company.id).maybeSingle(),

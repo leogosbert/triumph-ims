@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -40,7 +39,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seePurchasing")) redirect("/");
+  if (!can(roles, "seePurchasing")) noAccess();
 
   let query = supabase
     .from("purchase_orders")

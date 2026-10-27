@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { sendRfqViaPortal } from "@/app/(app)/portal-admin/actions";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -51,7 +51,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features } = await getAppContext();
-  if (!can(roles, "editPurchasing")) redirect("/");
+  if (!can(roles, "editPurchasing")) noAccess();
 
   const { data: r } = await supabase.from("supplier_rfqs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!r) notFound();

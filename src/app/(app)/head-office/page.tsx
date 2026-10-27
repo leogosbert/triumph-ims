@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { monthRange } from "@/lib/finance";
 import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -38,7 +37,7 @@ export default async function HeadOfficePage({ searchParams }: { searchParams: S
   await primeLang();
   const sp = (await searchParams) ?? {};
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "planFinance")) redirect("/");
+  if (!can(roles, "planFinance")) noAccess();
   const year = sp.y === "1";
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const today = todayTz();

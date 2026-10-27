@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysOverdue, INVOICE_STATUS, n, shownStatus } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -42,7 +41,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const search = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeInvoices")) redirect("/");
+  if (!can(roles, "seeInvoices")) noAccess();
 
   let q = supabase
     .from("invoices")

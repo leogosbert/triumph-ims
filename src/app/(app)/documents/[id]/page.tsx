@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ScanDocument } from "@/components/ai/ScanDocument";
 import { aiReady } from "@/lib/ai/claude";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysUntil, docKindLabel } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -30,7 +30,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
   const { supabase, company, roles, isManager } = await getAppContext();
-  if (!can(roles, "seeDocuments")) redirect("/");
+  if (!can(roles, "seeDocuments")) noAccess();
   const { data: d } = await supabase.from("documents").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!d) notFound();
   const [links, names, signed] = await Promise.all([

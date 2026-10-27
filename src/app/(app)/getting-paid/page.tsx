@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
@@ -17,7 +16,7 @@ export default async function GettingPaidPage({ searchParams }: { searchParams: 
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features } = await getAppContext();
-  if (!can(roles, "seeFinance")) redirect("/");
+  if (!can(roles, "seeFinance")) noAccess();
 
   const [fiscal, pay, rem, orders, logs] = await Promise.all([
     supabase.rpc("fiscal_summary", { p_company: company.id }),

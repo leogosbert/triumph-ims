@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -45,7 +44,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!canSeeCompliance(roles)) redirect("/");
+  if (!canSeeCompliance(roles)) noAccess();
   const refresh = await supabase.rpc("compliance_refresh_calendar", { p_company: company.id });
   if (isMissingTable(refresh.error)) return <NotReady title="Tax & filing calendar" />;
 

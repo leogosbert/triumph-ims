@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { ENQUIRY_STATUS } from "@/lib/growth-tools/catalogue";
@@ -22,7 +21,7 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Se
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features, isManager } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   if (!features.on("online_catalogue")) return <FeatureOff title="Online catalogue" isManager={isManager} />;
   const view = sp.view === "all" ? "all" : "new";
   let query = supabase.from("catalogue_enquiries").select("id, kind, name, company_name, status, lines, created_at, message").eq("company_id", company.id).order("created_at", { ascending: false }).limit(300);

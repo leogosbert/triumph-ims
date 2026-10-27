@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { AgingTable, type AgingRow } from "@/components/AgingTable";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { agingBucket, daysOverdue, n, openBase } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
@@ -22,7 +21,7 @@ type Bill = {
 export default async function PayablesPage() {
   await primeLang();
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeFinance")) redirect("/");
+  if (!can(roles, "seeFinance")) noAccess();
   const { data, error } = await supabase
     .from("supplier_bills")
     .select("total, amount_paid, exchange_rate, currency, due_date, supplier:suppliers(id, name)")

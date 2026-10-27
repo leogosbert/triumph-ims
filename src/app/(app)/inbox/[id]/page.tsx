@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { INBOX_ROLES, canUseInbox, type Conversation, type InboxMessage } from "@/lib/inbox/common";
@@ -42,7 +42,7 @@ export default async function ConversationPage({ params, searchParams }: { param
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features } = await getAppContext();
-  if (!canUseInbox(roles)) redirect("/");
+  if (!canUseInbox(roles)) noAccess();
 
   const { data: conv, error } = await supabase
     .from("inbox_conversations")

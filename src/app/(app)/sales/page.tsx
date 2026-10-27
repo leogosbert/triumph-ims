@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
@@ -15,7 +14,7 @@ type Quote = { id: string; number: string; revision: number; status: string; tot
 export default async function SalesPage() {
   await primeLang();
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeSales")) redirect("/");
+  if (!can(roles, "seeSales")) noAccess();
   const today = todayTz();
   const monthStart = `${today.slice(0, 7)}-01`;
   const cnt = { count: "exact" as const, head: true };

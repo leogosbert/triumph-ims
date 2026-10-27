@@ -1,11 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -40,7 +39,7 @@ export default async function AlertSettingsPage({ searchParams }: { searchParams
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features, isManager } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   if (!features.on("tender_alerts")) return <FeatureOff title="Tender alerts" isManager={isManager} />;
   const [{ data: s, error }, { data: sources }, { data: cats }] = await Promise.all([
     supabase.from("tender_alert_settings").select("*").eq("company_id", company.id).maybeSingle(),

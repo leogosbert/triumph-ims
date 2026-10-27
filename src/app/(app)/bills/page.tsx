@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { BILL_STATUS, daysOverdue, n, shownStatus } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -40,7 +39,7 @@ export default async function BillsPage({ searchParams }: { searchParams: Search
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeBills")) redirect("/");
+  if (!can(roles, "seeBills")) noAccess();
 
   let q = supabase
     .from("supplier_bills")

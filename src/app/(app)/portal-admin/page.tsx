@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -40,7 +39,7 @@ export default async function PortalAdmin({ searchParams }: { searchParams: Sear
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features } = await getAppContext();
-  if (!hasRole(roles, ...ROLES)) redirect("/");
+  if (!hasRole(roles, ...ROLES)) noAccess();
   const isManager = hasRole(roles, "management");
 
   const [{ data: peopleData, error }, { data: subData }, { data: bankData }, { data: logData }] = await Promise.all([

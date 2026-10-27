@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { toNumber } from "@/lib/fields";
 import { optional, str } from "@/lib/format";
 import { friendlyError, withNotice } from "@/lib/messages";
@@ -16,7 +16,7 @@ function fail(path: string, error: string): never {
 
 async function ctx() {
   const c = await getAppContext();
-  if (!can(c.role, "seeFinance")) redirect("/");
+  if (!can(c.roles, "seeFinance")) noAccess();
   return c;
 }
 

@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { aiConfigured, EXAMPLE_QUESTIONS } from "@/lib/assistant";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { askAssistant } from "./actions";
 import type { SearchParams } from "@/lib/messages";
 import { hasRole, onlyRoles } from "@/lib/roles";
@@ -15,7 +14,7 @@ export default async function AssistantPage({ searchParams }: { searchParams: Se
   const initial = typeof sp.q === "string" ? sp.q.slice(0, 500) : "";
   await primeLang();
   const { roles, features } = await getAppContext();
-  if (onlyRoles(roles, "driver")) redirect("/");
+  if (onlyRoles(roles, "driver")) noAccess();
   if (!features.on("ai_assistant")) {
     return (
       <>

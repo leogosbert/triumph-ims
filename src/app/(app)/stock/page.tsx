@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { Notice } from "@/components/Notice";
 import { StockGauge } from "@/components/StockGauge";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { cleanSearch } from "@/lib/records";
@@ -20,7 +19,7 @@ export default async function StockPage({ searchParams }: { searchParams: Search
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features } = await getAppContext();
-  if (!can(roles, "seeStock")) redirect("/");
+  if (!can(roles, "seeStock")) noAccess();
   const store = typeof sp.store === "string" ? sp.store : "";
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "").toLowerCase();
   const view = sp.view === "all" ? "all" : "instock";

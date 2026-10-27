@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
@@ -21,7 +20,7 @@ function pct(a: number, b: number) {
 export default async function InsightsPage() {
   await primeLang();
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeInsights")) redirect("/");
+  if (!can(roles, "seeInsights")) noAccess();
   const base = company.base_currency;
   const yearAgo = new Date(Date.now() - 365 * DAY).toISOString();
   const quarterAgo = new Date(Date.now() - 90 * DAY).toISOString();

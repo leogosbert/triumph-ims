@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -114,7 +113,7 @@ export default async function DirectorsPage({ searchParams }: { searchParams: Se
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, isManager } = await getAppContext();
-  if (!canSeeCompliance(roles)) redirect("/");
+  if (!canSeeCompliance(roles)) noAccess();
   const seesPeople = hasRole(roles, "management") || hasRole(roles, "finance");
   const [setRes, dirRes] = await Promise.all([
     supabase.from("compliance_settings").select("year_end_month, incorporated_on, shares_decided, shares_decided_at, shareholding_note, board_note, legal_rules").eq("company_id", company.id).maybeSingle(),

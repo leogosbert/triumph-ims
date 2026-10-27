@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { monthRange, n } from "@/lib/finance";
 import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -64,7 +63,7 @@ export default async function ProfitPage({ searchParams }: { searchParams: Searc
   const sp = (await searchParams) ?? {};
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeProfit")) redirect("/");
+  if (!can(roles, "seeProfit")) noAccess();
   const base = company.base_currency;
   const minMargin = n(company.quote_min_margin_pct ?? 12);
 

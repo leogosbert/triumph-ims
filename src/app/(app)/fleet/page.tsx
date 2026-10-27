@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { VEHICLE_KINDS, dueSoon, type Vehicle } from "@/lib/fleet";
 import { formatDate } from "@/lib/format";
@@ -19,7 +18,7 @@ export default async function FleetPage({ searchParams }: { searchParams: Search
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeFleet")) redirect("/");
+  if (!can(roles, "seeFleet")) noAccess();
   const showAll = sp.view === "all";
   let q = supabase
     .from("vehicles")

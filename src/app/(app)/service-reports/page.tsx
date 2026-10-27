@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { NotReady } from "@/components/NotReady";
 import { PrintButton } from "@/components/reports/PrintButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { chunk, formatDate } from "@/lib/format";
 import type { SearchParams } from "@/lib/messages";
@@ -47,7 +46,7 @@ export default async function ServiceReportsPage({ searchParams }: { searchParam
   await primeLang();
   const sp = (await searchParams) ?? {};
   const { supabase, company, roles } = await getAppContext();
-  if (!canSeeAllService(roles)) redirect("/");
+  if (!canSeeAllService(roles)) noAccess();
   const today = todayTz();
   const month = typeof sp.month === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(sp.month) ? sp.month : today.slice(0, 7);
   const from = `${month}-01`;

@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { PO_STATUS } from "@/lib/purchasing";
 import { can } from "@/lib/roles";
@@ -16,7 +15,7 @@ type Grn = { id: string; number: string; received_on: string; po: { number: stri
 export default async function ReceivingPage() {
   await primeLang();
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "receiveGoods")) redirect("/");
+  if (!can(roles, "receiveGoods")) noAccess();
   const today = todayTz();
   const [{ data: poData }, { data: grnData }] = await Promise.all([
     supabase

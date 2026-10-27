@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -37,7 +36,7 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, user } = await getAppContext();
-  if (!can(roles, "requestPurchases")) redirect("/");
+  if (!can(roles, "requestPurchases")) noAccess();
   const tabs = ["open", ...(hasRole(roles, "management") ? ["approve"] : []), ...(can(roles, "seeAllRequests") ? ["order"] : []), "done"];
   const view = typeof sp.view === "string" && tabs.includes(sp.view) ? sp.view : "open";
   const { data, error } = await supabase

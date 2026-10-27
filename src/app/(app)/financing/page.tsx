@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { FIN_STATUS } from "@/lib/growth-tools/financing";
@@ -38,7 +37,7 @@ export default async function FinancingPage({ searchParams }: { searchParams: Se
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features, isManager } = await getAppContext();
-  if (!can(roles, "seeFinance")) redirect("/");
+  if (!can(roles, "seeFinance")) noAccess();
   if (!features.on("lpo_financing")) return <FeatureOff title="LPO financing" isManager={isManager} />;
   const view = sp.view === "closed" ? "closed" : "open";
   const { data, error } = await supabase

@@ -1,11 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
 import { STEP_ROLES } from "@/lib/branches";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -33,7 +32,7 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Se
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, user } = await getAppContext();
-  if (!can(roles, "seePurchasing")) redirect("/");
+  if (!can(roles, "seePurchasing")) noAccess();
   const [{ data: stepData, error }, { data: poData }] = await Promise.all([
     supabase.from("approval_steps").select("step, role, min_amount, label").eq("company_id", company.id).eq("doc_type", "purchase_order").order("step"),
     supabase

@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { PayMethodFields } from "@/components/PayMethodFields";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { BILL_STATUS, daysOverdue, isOpen, methodLabel, n, shownStatus } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -39,7 +39,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeBills")) redirect("/");
+  if (!can(roles, "seeBills")) noAccess();
 
   const { data: b } = await supabase
     .from("supplier_bills")

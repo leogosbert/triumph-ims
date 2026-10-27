@@ -5,7 +5,7 @@ import { CountUp } from "@/components/CountUp";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { displayName, getAppContext } from "@/lib/context";
-import { readNotice, type SearchParams } from "@/lib/messages";
+import { readNotice, withNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can, onlyRoles } from "@/lib/roles";
 import { AgingChart, BarList, ControlTower, KpiGrid, SalesChart } from "@/components/Dashboard";
@@ -35,16 +35,16 @@ function greeting(t: Dict) {
   return t["home.evening"];
 }
 
-function quickActions(role: Parameters<typeof can>[0], t: Dict) {
+function quickActions(roles: Parameters<typeof can>[0], t: Dict) {
   const all: { show: boolean; href: string; label: string; icon: IconName }[] = [
-    { show: can(role, "editSales"), href: "/rfqs/new", label: t["qa.rfq"], icon: "plus" },
-    { show: can(role, "editSales"), href: "/quotations/new", label: t["qa.quote"], icon: "doc" },
-    { show: can(role, "editPurchasing"), href: "/purchase-orders/new", label: t["qa.po"], icon: "purchasing" },
-    { show: can(role, "receiveGoods"), href: "/receiving", label: t["qa.receive"], icon: "stock" },
-    { show: can(role, "editDeliveries"), href: "/deliveries/new", label: t["qa.deliver"], icon: "deliveries" },
-    { show: can(role, "editInvoices"), href: "/invoices/new", label: t["qa.invoice"], icon: "doc" },
-    { show: can(role, "editInvoices"), href: "/invoices?tab=unpaid", label: t["qa.payment"], icon: "cash" },
-    { show: can(role, "seeStock"), href: "/stock", label: t["qa.stock"], icon: "stock" },
+    { show: can(roles, "editSales"), href: "/rfqs/new", label: t["qa.rfq"], icon: "plus" },
+    { show: can(roles, "editSales"), href: "/quotations/new", label: t["qa.quote"], icon: "doc" },
+    { show: can(roles, "editPurchasing"), href: "/purchase-orders/new", label: t["qa.po"], icon: "purchasing" },
+    { show: can(roles, "receiveGoods"), href: "/receiving", label: t["qa.receive"], icon: "stock" },
+    { show: can(roles, "editDeliveries"), href: "/deliveries/new", label: t["qa.deliver"], icon: "deliveries" },
+    { show: can(roles, "editInvoices"), href: "/invoices/new", label: t["qa.invoice"], icon: "doc" },
+    { show: can(roles, "editInvoices"), href: "/invoices?tab=unpaid", label: t["qa.payment"], icon: "cash" },
+    { show: can(roles, "seeStock"), href: "/stock", label: t["qa.stock"], icon: "stock" },
   ];
   return all.filter((a) => a.show).slice(0, 4);
 }
@@ -53,7 +53,8 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, profile, company, roles, isManager, user, features } = await getAppContext();
-  if (onlyRoles(roles, "driver")) redirect("/driver");
+  // Drivers start on their deliveries; a note (e.g. "your role can't open that screen") goes with them.
+  if (onlyRoles(roles, "driver")) redirect(withNotice("/driver", notice));
   const sp = (await searchParams) ?? {};
   const welcomeLevel = typeof sp.welcome === "string" && isLevel(sp.welcome) ? sp.welcome : null;
   const firstName = displayName(profile).split(" ")[0];

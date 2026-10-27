@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -27,7 +27,7 @@ export default async function HireDetailPage({ params, searchParams }: { params:
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!canSeeAllService(roles)) redirect("/");
+  if (!canSeeAllService(roles)) noAccess();
   const { data, error } = await supabase
     .from("hire_agreements")
     .select("*, client:clients(name)")

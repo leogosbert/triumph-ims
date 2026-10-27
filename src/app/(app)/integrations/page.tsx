@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ApiKeyCreator } from "@/components/assistant/ApiKeyCreator";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { monthRange } from "@/lib/finance";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { isMissingTable } from "@/lib/crm";
@@ -33,7 +32,7 @@ export default async function IntegrationsPage({ searchParams }: { searchParams:
   const notice = await readNotice(searchParams);
   const sp = (await searchParams) ?? {};
   const { supabase, company, roles, features } = await getAppContext();
-  if (!can(roles, "seeFinance")) redirect("/");
+  if (!can(roles, "seeFinance")) noAccess();
   const isManager = hasRole(roles, "management");
   if (!features.on("integrations")) {
     return (

@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { createSupplierRfq } from "../actions";
@@ -14,7 +13,7 @@ export default async function NewSupplierRfqPage({ searchParams }: { searchParam
   await primeLang();
   const notice = await readNotice(searchParams);
   const { roles } = await getAppContext();
-  if (!can(roles, "editPurchasing")) redirect("/");
+  if (!can(roles, "editPurchasing")) noAccess();
   return (
     <>
       <BackLink href="/supplier-rfqs" label="Supplier RFQs" />

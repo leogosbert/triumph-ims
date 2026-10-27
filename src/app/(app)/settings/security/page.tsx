@@ -1,11 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { StepUpForm } from "@/components/ConfirmIdentity";
 import { Notice } from "@/components/Notice";
 import { LockPreference } from "@/components/LockPreference";
 import { SubmitButton } from "@/components/SubmitButton";
-import { displayName, getAppContext, type Profile } from "@/lib/context";
+import { displayName, getAppContext, type Profile, noAccess } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { EVENT_LABELS, type SecurityEventRow } from "@/lib/securityLabels";
@@ -92,7 +91,7 @@ export default async function SecuritySettingsPage({ searchParams }: { searchPar
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, isManager } = await getAppContext();
-  if (!isManager) redirect("/");
+  if (!isManager) noAccess();
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   const meWithCode = aal?.currentLevel === "aal2";
   const { t } = await getDict();

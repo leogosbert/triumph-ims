@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { REMINDER_CHANNELS, REMINDER_STATUS, stepLabel } from "@/lib/getpaid/common";
@@ -31,7 +30,7 @@ export default async function RemindersPage({ searchParams }: { searchParams: Se
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, isManager, features } = await getAppContext();
-  if (!can(roles, "seeFinance")) redirect("/");
+  if (!can(roles, "seeFinance")) noAccess();
 
   const [setRes, upRes, logRes, optRes, wa] = await Promise.all([
     supabase.from("reminder_settings").select("*").eq("company_id", company.id).maybeSingle(),

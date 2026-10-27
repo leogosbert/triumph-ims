@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { fmtQty } from "@/lib/stock";
@@ -39,7 +38,7 @@ export default async function PlanningPage({ searchParams }: { searchParams: Sea
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features } = await getAppContext();
-  if (!can(roles, "planPurchases")) redirect("/");
+  if (!can(roles, "planPurchases")) noAccess();
   const days = PERIODS.includes(Number(sp.days)) ? Number(sp.days) : 90;
   const view = sp.view === "all" ? "all" : "order";
   const { data, error } = await supabase.rpc("demand_plan", { p_company: company.id, p_days: days });

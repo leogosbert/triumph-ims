@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { contractKindLabel, daysUntil, isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -33,7 +32,7 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeContracts")) redirect("/");
+  if (!can(roles, "seeContracts")) noAccess();
   const view = sp.view === "ended" ? "ended" : "current";
   const { data, error } = await supabase
     .from("contracts")

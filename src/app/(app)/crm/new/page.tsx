@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { companyPeople } from "@/lib/people";
@@ -19,7 +18,7 @@ export default async function NewOpportunityPage({ searchParams }: { searchParam
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   const probe = await supabase.from("opportunities").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New opportunity" />;
   const [{ data: clients }, people] = await Promise.all([

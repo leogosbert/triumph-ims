@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { CURRENCIES, INCOTERMS, PAYMENT_TERMS } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -58,7 +58,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, user, features } = await getAppContext();
-  if (!can(roles, "seePurchasing")) redirect("/");
+  if (!can(roles, "seePurchasing")) noAccess();
 
   const { data: po } = await supabase
     .from("purchase_orders")

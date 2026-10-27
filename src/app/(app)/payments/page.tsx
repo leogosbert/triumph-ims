@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { methodLabel, monthRange, n } from "@/lib/finance";
 import { formatDate } from "@/lib/format";
 import { type SearchParams } from "@/lib/messages";
@@ -31,7 +30,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
   const sp = (await searchParams) ?? {};
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeInvoices")) redirect("/");
+  if (!can(roles, "seeInvoices")) noAccess();
 
   const { data, error } = await supabase
     .from("payments")

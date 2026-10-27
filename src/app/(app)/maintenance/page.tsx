@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -35,7 +34,7 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!canSeeAllService(roles)) redirect("/");
+  if (!canSeeAllService(roles)) noAccess();
   const showAll = sp.view === "all";
   const { data, error } = await supabase
     .from("service_contracts")

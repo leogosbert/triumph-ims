@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ListToolbar } from "@/components/ListToolbar";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { CURRENCIES } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
@@ -31,7 +30,7 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
   const currency = typeof sp.currency === "string" ? sp.currency : "";
   const archived = sp.archived === "1";
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeSuppliers")) redirect("/");
+  if (!can(roles, "seeSuppliers")) noAccess();
 
   let query = supabase
     .from("suppliers")

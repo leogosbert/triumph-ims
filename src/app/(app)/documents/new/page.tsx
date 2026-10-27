@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { aiReady } from "@/lib/ai/claude";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { DOC_KINDS, isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
@@ -18,7 +17,7 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, isManager } = await getAppContext();
-  if (!can(roles, "seeDocuments")) redirect("/");
+  if (!can(roles, "seeDocuments")) noAccess();
   const probe = await supabase.from("documents").select("id").eq("company_id", company.id).limit(1);
   if (isMissingTable(probe.error)) return <NotReady title="New document" />;
   const links = await loadLinkOptions(supabase, company.id);

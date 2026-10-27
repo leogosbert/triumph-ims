@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { AgingTable, type AgingRow } from "@/components/AgingTable";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { agingBucket, n, openBase } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
@@ -21,7 +20,7 @@ type Inv = {
 export default async function ReceivablesPage() {
   await primeLang();
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeFinance")) redirect("/");
+  if (!can(roles, "seeFinance")) noAccess();
   const { data, error } = await supabase
     .from("invoices")
     .select("total, amount_paid, exchange_rate, due_date, client:clients(id, name, credit_limit)")

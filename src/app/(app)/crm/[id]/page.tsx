@@ -1,9 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { OPEN_STAGES, OPP_BADGE, OPP_STAGES, daysUntil, sourceLabel, tenderStatusLabel } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -24,7 +24,7 @@ export default async function OpportunityPage({ params, searchParams }: { params
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   const { data: o } = await supabase.from("opportunities").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (!o) notFound();
 

@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDateTime } from "@/lib/format";
 import { canUseInbox, type Conversation } from "@/lib/inbox/common";
@@ -20,7 +19,7 @@ export default async function InboxPage({ searchParams }: { searchParams: Search
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, user } = await getAppContext();
-  if (!canUseInbox(roles)) redirect("/");
+  if (!canUseInbox(roles)) noAccess();
   const view = sp.view === "closed" ? "closed" : "open";
   const channel = sp.channel === "email" || sp.channel === "whatsapp" || sp.channel === "portal" ? sp.channel : "";
   const unread = sp.unread === "1";

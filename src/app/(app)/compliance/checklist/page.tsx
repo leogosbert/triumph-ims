@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysUntil, isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -22,7 +21,7 @@ export default async function ChecklistPage({ searchParams }: { searchParams: Se
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, isManager } = await getAppContext();
-  if (!canSeeCompliance(roles)) redirect("/");
+  if (!canSeeCompliance(roles)) noAccess();
   const show = pick(sp.show) ?? "all";
 
   const [{ data, error }, links] = await Promise.all([

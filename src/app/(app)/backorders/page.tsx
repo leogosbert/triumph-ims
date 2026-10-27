@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { chunk, formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
@@ -30,7 +29,7 @@ export default async function BackordersPage({ searchParams }: { searchParams: S
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeDeliveries")) redirect("/");
+  if (!can(roles, "seeDeliveries")) noAccess();
   const { data: qData, error } = await supabase
     .from("quotations")
     .select("id, number, revision, decided_at, updated_at, client:clients(name), lines:quotation_lines(id, line_no, product_id, description, quantity, unit)")

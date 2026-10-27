@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { aiReady } from "@/lib/ai/claude";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { darDateTime } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { daysLeft } from "@/lib/growth-tools/dates";
@@ -33,7 +33,7 @@ export default async function NoticePage({ params, searchParams }: { params: Pro
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features, isManager } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   if (!features.on("tender_alerts")) return <FeatureOff title="Tender alerts" isManager={isManager} />;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { data: n } = await supabase.from("tender_notices").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();

@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
@@ -37,7 +36,7 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeSales")) redirect("/");
+  if (!can(roles, "seeSales")) noAccess();
 
   let query = supabase
     .from("rfqs")

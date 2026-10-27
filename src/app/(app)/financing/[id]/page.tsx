@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { coverPct, estimatedInterest, FACILITY_LABEL, FIN_STATUS, nextSteps } from "@/lib/growth-tools/financing";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -26,7 +26,7 @@ export default async function FinancingRequestPage({ params, searchParams }: { p
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features, isManager } = await getAppContext();
-  if (!can(roles, "seeFinance")) redirect("/");
+  if (!can(roles, "seeFinance")) noAccess();
   if (!features.on("lpo_financing")) return <FeatureOff title="LPO financing" isManager={isManager} />;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { data: f } = await supabase

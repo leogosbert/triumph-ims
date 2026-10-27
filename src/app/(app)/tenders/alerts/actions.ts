@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { aiReady } from "@/lib/ai/claude";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { optional, str } from "@/lib/format";
 import { readTender, toContext } from "@/lib/growth-tools/tenderRead";
 import { friendlyError, withNotice } from "@/lib/messages";
@@ -24,7 +24,7 @@ function refresh(id?: string) {
 
 async function ctx() {
   const c = await getAppContext();
-  if (!can(c.role, "seeCrm")) redirect("/");
+  if (!can(c.roles, "seeCrm")) noAccess();
   return c;
 }
 

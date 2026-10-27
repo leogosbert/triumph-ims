@@ -1,8 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { SRFQ_STATUS } from "@/lib/purchasing";
@@ -27,7 +26,7 @@ export default async function SupplierRfqsPage({ searchParams }: { searchParams:
   const notice = await readNotice(searchParams);
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "editPurchasing")) redirect("/");
+  if (!can(roles, "editPurchasing")) noAccess();
 
   let query = supabase
     .from("supplier_rfqs")

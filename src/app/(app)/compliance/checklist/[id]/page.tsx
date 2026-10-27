@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -40,7 +40,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, isManager } = await getAppContext();
-  if (!canSeeCompliance(roles)) redirect("/");
+  if (!canSeeCompliance(roles)) noAccess();
   const { data, error } = await supabase.from("compliance_items").select(ITEM_FIELDS).eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Compliance item" />;
   if (!data) notFound();

@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { chunk, formatDate } from "@/lib/format";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
@@ -36,7 +35,7 @@ export default async function MatchPage({ searchParams }: { searchParams: Search
   await primeLang();
   const sp = (await searchParams) ?? {};
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeBills")) redirect("/");
+  if (!can(roles, "seeBills")) noAccess();
   const view = sp.view === "all" ? "all" : "check";
   const { data: poData, error } = await supabase
     .from("purchase_orders")

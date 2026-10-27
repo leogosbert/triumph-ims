@@ -1,7 +1,6 @@
 import { tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { PERIOD_PRESETS, type Period, type StGroup } from "@/lib/ledger";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
@@ -10,7 +9,7 @@ import { BackLink as SharedBackLink } from "@/components/BackLink";
 /** The app context for an Accounts page: management and finance only. */
 export async function ledgerContext() {
   const ctx = await getAppContext();
-  if (!can(ctx.roles, "seeLedger")) redirect("/");
+  if (!can(ctx.roles, "seeLedger")) noAccess();
   const closedUntil = (ctx.company as { books_closed_until?: string | null }).books_closed_until ?? null;
   return { ...ctx, closedUntil };
 }

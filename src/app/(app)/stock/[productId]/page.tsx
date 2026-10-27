@@ -1,8 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
@@ -30,7 +30,7 @@ export default async function StockCardPage({ params, searchParams }: { params: 
   const { productId } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "seeStock")) redirect("/");
+  if (!can(roles, "seeStock")) noAccess();
 
   const [{ data: product }, { data: ohData }, { data: mvData }, stores] = await Promise.all([
     supabase.from("products").select("id, sku, name, unit, reorder_level").eq("id", productId).eq("company_id", company.id).maybeSingle(),

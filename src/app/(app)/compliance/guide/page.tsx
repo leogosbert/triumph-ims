@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { AUDIT_PACKS } from "@/lib/compliance/audits";
@@ -22,7 +21,7 @@ export default async function GuidePage({ searchParams }: { searchParams: Search
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, isManager } = await getAppContext();
-  if (!canSeeCompliance(roles)) redirect("/");
+  if (!canSeeCompliance(roles)) noAccess();
   const q = (pick(sp.q) ?? "").trim().slice(0, 200);
   const guide = ACTIVITY_GUIDES.find((g) => g.key === pick(sp.activity));
   const one = requirement(pick(sp.code));

@@ -1,9 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { decideBankChange } from "../../actions";
@@ -38,7 +38,7 @@ export default async function BankChange({ params, searchParams }: { params: Pro
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!hasRole(roles, "management") && !hasRole(roles, "finance")) redirect("/");
+  if (!hasRole(roles, "management") && !hasRole(roles, "finance")) noAccess();
   const { data } = await supabase
     .from("supplier_bank_details")
     .select("*, supplier:suppliers(name, phone, email), requester:portal_users(name, email, phone)")

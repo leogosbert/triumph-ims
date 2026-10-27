@@ -1,10 +1,10 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDateTime } from "@/lib/format";
 import { ENQUIRY_STATUS } from "@/lib/growth-tools/catalogue";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -22,7 +22,7 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features, isManager } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   if (!features.on("online_catalogue")) return <FeatureOff title="Online catalogue" isManager={isManager} />;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { data: e } = await supabase.from("catalogue_enquiries").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();

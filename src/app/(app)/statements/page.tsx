@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { daysOverdue, openBase } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
@@ -28,7 +27,7 @@ export default async function StatementsPage() {
   const { supabase, company, roles } = await getAppContext();
   const seeClients = can(roles, "seeInvoices");
   const seeSuppliers = can(roles, "seeBills");
-  if (!seeClients && !seeSuppliers) redirect("/");
+  if (!seeClients && !seeSuppliers) noAccess();
   const base = company.base_currency;
 
   const [{ data: inv }, { data: bills }, { data: cl }, { data: su }] = await Promise.all([

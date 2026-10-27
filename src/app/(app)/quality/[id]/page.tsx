@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { CorrectiveActions } from "@/components/CorrectiveActions";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { NCR_DISPOSITIONS, NCR_SOURCES, NCR_STATUS, withCurrent, type Ncr } from "@/lib/hse";
@@ -39,7 +39,7 @@ export default async function NcrPage({ params, searchParams }: { params: Promis
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, user } = await getAppContext();
-  if (!can(roles, "seeQuality")) redirect("/");
+  if (!can(roles, "seeQuality")) noAccess();
   const { data, error } = await supabase.from("quality_ncrs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="NCR" />;
   if (!data) notFound();

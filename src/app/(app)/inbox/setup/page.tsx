@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { canUseInbox, suggestInboxAddress, type InboxSettings } from "@/lib/inbox/common";
 import { formatDateTime } from "@/lib/format";
@@ -30,7 +29,7 @@ export default async function InboxSetupPage({ searchParams }: { searchParams: S
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, isManager } = await getAppContext();
-  if (!canUseInbox(roles)) redirect("/");
+  if (!canUseInbox(roles)) noAccess();
   const { data, error } = await supabase.from("inbox_settings").select("*").eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Inbox setup" />;
   const s = (data ?? null) as (InboxSettings & { mailbox_checked_at?: string | null; mailbox_error?: string | null }) | null;

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/context";
-import { type SearchParams } from "@/lib/messages";
+import { getAppContext, noAccess } from "@/lib/context";
+import { readNotice, type SearchParams } from "@/lib/messages";
+import { Notice } from "@/components/Notice";
 import { getDict } from "@/lib/lang";
 import { DriverApp, type DriverDelivery } from "./DriverApp";
 import { BackLink } from "@/components/BackLink";
@@ -17,11 +18,12 @@ type Row = Omit<DriverDelivery, "client" | "lines"> & {
 
 export default async function DriverPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
+  const notice = await readNotice(searchParams);
   const only = typeof sp.d === "string" ? sp.d : null;
   const { supabase, company, roles, user } = await getAppContext();
   const { t } = await getDict();
   const supervisor = hasRole(roles, "management") || hasRole(roles, "warehouse");
-  if (!hasRole(roles, "driver") && !supervisor) redirect("/");
+  if (!hasRole(roles, "driver") && !supervisor) noAccess();
   if (supervisor && !only) redirect("/deliveries");
 
   let q = supabase
@@ -63,6 +65,7 @@ export default async function DriverPage({ searchParams }: { searchParams: Searc
       <div className="page-head">
         <h1>{only ? t["dr.record"] : t["dr.title"]}</h1>
       </div>
+      <Notice {...notice} />
       <DriverApp companyId={company.id} userId={user.id} deliveries={deliveries} t={t} />
     </>
   );

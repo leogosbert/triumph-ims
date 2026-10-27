@@ -1,11 +1,11 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -28,7 +28,7 @@ export default async function RequisitionPage({ params, searchParams }: { params
   const { id } = await params;
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, user } = await getAppContext();
-  if (!can(roles, "requestPurchases")) redirect("/");
+  if (!can(roles, "requestPurchases")) noAccess();
   const { data: r, error } = await supabase.from("requisitions").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Purchase request" />;
   if (!r) notFound();

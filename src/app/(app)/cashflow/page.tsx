@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { formatDate } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
@@ -24,7 +23,7 @@ export default async function CashflowPage({ searchParams }: { searchParams: Sea
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!can(roles, "planFinance")) redirect("/");
+  if (!can(roles, "planFinance")) noAccess();
   const weeks = sp.w === "26" ? 26 : 13;
   const base = company.base_currency;
   const [{ data: wData, error }, { data: posData }, { data: invData }, { data: billData }] = await Promise.all([

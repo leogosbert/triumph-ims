@@ -1,6 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
@@ -8,7 +8,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { PayMethodFields } from "@/components/PayMethodFields";
 import { InvoiceReminderCard } from "@/components/FollowUpCards";
 import { InvoiceMoneyCards } from "@/components/getpaid/InvoiceMoneyCards";
-import { getAppContext, stage13Ready } from "@/lib/context";
+import { getAppContext, stage13Ready, noAccess } from "@/lib/context";
 import { daysOverdue, INVOICE_STATUS, isOpen, methodLabel, n, shownStatus } from "@/lib/finance";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { CURRENCIES, PAYMENT_TERMS } from "@/lib/lists";
@@ -68,7 +68,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, profile, features } = await getAppContext();
   const lang = await primeLang();
-  if (!can(roles, "seeInvoices")) redirect("/");
+  if (!can(roles, "seeInvoices")) noAccess();
 
   const { data: inv } = await supabase
     .from("invoices")

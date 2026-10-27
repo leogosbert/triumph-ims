@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
-import { redirect } from "next/navigation";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { aiReady } from "@/lib/ai/claude";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { can } from "@/lib/roles";
 import { addNotice } from "../actions";
@@ -16,7 +15,7 @@ export default async function NewNoticePage({ searchParams }: { searchParams: Se
   await primeLang();
   const notice = await readNotice(searchParams);
   const { roles, features, isManager } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   if (!features.on("tender_alerts")) return <FeatureOff title="Tender alerts" isManager={isManager} />;
   return (
     <>

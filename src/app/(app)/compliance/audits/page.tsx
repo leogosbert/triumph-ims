@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { AUDIT_PACKS, checkPack } from "@/lib/compliance/audits";
@@ -21,7 +20,7 @@ export default async function AuditsPage({ searchParams }: { searchParams: Searc
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!canSeeCompliance(roles)) redirect("/");
+  if (!canSeeCompliance(roles)) noAccess();
   const d = await loadPackData(supabase, company.id, todayTz(), roles);
   if ("missing" in d) {
     if (isMissingTable(d.error as { code?: string; message?: string })) return <NotReady title="Inspections & audits" />;

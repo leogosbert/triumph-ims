@@ -5,7 +5,7 @@ import { Notice } from "@/components/Notice";
 import { ProductLineFields } from "@/components/ProductPicker";
 import { SharePdfButton } from "@/components/SharePdfButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { productOptions } from "@/lib/options";
@@ -35,7 +35,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
   if (onlyRoles(roles, "driver")) redirect(`/driver`);
-  if (!can(roles, "seeDeliveries")) redirect("/");
+  if (!can(roles, "seeDeliveries")) noAccess();
 
   const { data: d } = await supabase
     .from("deliveries")

@@ -1,10 +1,9 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { FeatureOff } from "@/components/growth-tools/FeatureOff";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { darDateTime, isMissingTable } from "@/lib/crm";
 import { daysLeft } from "@/lib/growth-tools/dates";
 import { DECISION_LABEL } from "@/lib/growth-tools/tenderMatch";
@@ -46,7 +45,7 @@ export default async function TenderAlertsPage({ searchParams }: { searchParams:
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, features, isManager } = await getAppContext();
-  if (!can(roles, "seeCrm")) redirect("/");
+  if (!can(roles, "seeCrm")) noAccess();
   if (!features.on("tender_alerts")) return <FeatureOff title="Tender alerts" isManager={isManager} />;
   const view = sp.view === "done" ? "done" : sp.view === "waiting" ? "waiting" : "decide";
   const statuses = view === "done" ? ["converted", "dismissed", "expired"] : view === "waiting" ? ["new"] : ["matched"];

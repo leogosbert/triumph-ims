@@ -1,9 +1,8 @@
 import { primeLang, tr } from "@/lib/tr";
-import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAppContext } from "@/lib/context";
+import { getAppContext, noAccess } from "@/lib/context";
 import { isMissingTable } from "@/lib/crm";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
@@ -26,7 +25,7 @@ export default async function RulesPage({ searchParams }: { searchParams: Search
   await primeLang();
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
-  if (!canSeeCompliance(roles)) redirect("/");
+  if (!canSeeCompliance(roles)) noAccess();
   const { data, error } = await supabase.from("compliance_settings").select("legal_rules").eq("company_id", company.id).maybeSingle();
   if (isMissingTable(error)) return <NotReady title="Tax & legal rules" />;
   const rules = legalRules(data?.legal_rules);

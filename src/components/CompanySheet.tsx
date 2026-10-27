@@ -22,6 +22,28 @@ export type CompanyCard = {
 
 const EVENT = "lemosp:company-sheet";
 
+/** Where the tapped button sits, so on a laptop the panel opens right under it. */
+type Anchor = { top: number; bottom: number; left: number; right: number };
+
+const GAP = 8;
+const EDGE = 10;
+
+/**
+ * Places the panel right under the tapped button, kept inside the window: it opens to the right
+ * from a button on the left half (the logo) and to the left from one on the right half (your name).
+ */
+function placeAt(a: Anchor | null): React.CSSProperties | undefined {
+  if (!a || typeof window === "undefined") return undefined;
+  const vw = window.innerWidth;
+  const width = Math.min(310, vw - 2 * EDGE);
+  const top = Math.max(EDGE, Math.min(a.bottom + GAP, window.innerHeight - 220));
+  const onRight = (a.left + a.right) / 2 > vw / 2;
+  const v = onRight
+    ? { "--cs-right": `${Math.max(EDGE, Math.min(vw - a.right, vw - width - EDGE))}px`, "--cs-left": "auto", "--cs-origin": "calc(100% - 24px) 0" }
+    : { "--cs-left": `${Math.max(EDGE, Math.min(a.left, vw - width - EDGE))}px`, "--cs-right": "auto", "--cs-origin": "24px 0" };
+  return { "--cs-top": `${top}px`, ...v } as React.CSSProperties;
+}
+
 /** Opens the company panel. Used by the logo in the top bar (phones) and the sidebar (laptops). */
 export function CompanyButton({ className, title, children }: { className: string; title: string; children: React.ReactNode }) {
   return (
@@ -33,7 +55,8 @@ export function CompanyButton({ className, title, children }: { className: strin
       aria-haspopup="dialog"
       onClick={(e) => {
         e.preventDefault();
-        window.dispatchEvent(new Event(EVENT));
+        const r = e.currentTarget.getBoundingClientRect();
+        window.dispatchEvent(new CustomEvent<Anchor>(EVENT, { detail: { top: r.top, bottom: r.bottom, left: r.left, right: r.right } }));
       }}
     >
       {children}
@@ -49,12 +72,16 @@ export function CompanySheet({ card }: { card: CompanyCard }) {
   const tr = useTr();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [anchor, setAnchor] = useState<Anchor | null>(null);
   const [drag, setDrag] = useState(0);
   const start = useRef<number | null>(null);
   const panel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const toggle = () => setOpen((o) => !o);
+    const toggle = (e: Event) => {
+      setAnchor((e as CustomEvent<Anchor | undefined>).detail ?? null);
+      setOpen((o) => !o);
+    };
     window.addEventListener(EVENT, toggle);
     return () => window.removeEventListener(EVENT, toggle);
   }, []);
@@ -113,7 +140,7 @@ export function CompanySheet({ card }: { card: CompanyCard }) {
         aria-modal="true"
         aria-label={card.name}
         tabIndex={-1}
-        style={drag ? { transform: `translateY(${drag}px)` } : undefined}
+        style={{ ...placeAt(anchor), ...(drag ? { transform: `translateY(${drag}px)` } : null) }}
       >
         <div className="csheet-hero">
           {card.logo ? <img src={card.logo} alt="" className="csheet-logo" /> : <span className="csheet-logo mark">{card.initials}</span>}

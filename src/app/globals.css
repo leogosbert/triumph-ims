@@ -3474,14 +3474,15 @@ body:has(.bottomnav) .install-arrow {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
+/* Opens under the button that was tapped (CompanySheet sets --cs-*); the top-left spot is the fallback. */
 .csheet-panel {
-  top: calc(66px + env(safe-area-inset-top));
-  left: 10px;
-  right: auto;
+  top: var(--cs-top, calc(66px + env(safe-area-inset-top)));
+  left: var(--cs-left, 10px);
+  right: var(--cs-right, auto);
   width: min(310px, calc(100vw - 20px));
-  max-height: min(68dvh, 540px);
+  max-height: min(68dvh, 540px, calc(100dvh - var(--cs-top, 66px) - 12px));
   border-radius: 20px;
-  transform-origin: 24px 0;
+  transform-origin: var(--cs-origin, 24px 0);
   transform: translateY(-8px) scale(0.9);
   opacity: 0;
   transition: transform 0.28s var(--ease-spring), opacity 0.18s ease;
@@ -3599,8 +3600,8 @@ body:has(.bottomnav) .install-arrow {
 }
 @media (min-width: 1024px) {
   .csheet-panel {
-    top: 12px;
-    left: calc(var(--side-w) - 12px);
+    top: var(--cs-top, 12px);
+    left: var(--cs-left, calc(var(--side-w) - 12px));
     width: 310px;
   }
 }

@@ -5,11 +5,14 @@ import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { displayName, getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
+import { companyPeople } from "@/lib/people";
+import { todayTz } from "@/lib/services";
 import { ANNOUNCE, canManage, endsAt, joinOpen, MEETING_COLUMNS, recordingActive, type Meeting, type Recording } from "@/lib/meetings/model";
 import { transcriptionReady } from "@/lib/meetings/recording-core";
 import { dailyReady, dailyToken, ensureDailyRoom, jitsiUrl, withToken, type VideoJoin } from "@/lib/meetings/video";
 import { startMeeting } from "../../actions";
 import { MeetingBadge, StageBar, whenRange } from "../../parts";
+import { LastTime, loadLastTime } from "../../LastTime";
 import { LiveRoom } from "./LiveRoom";
 import styles from "../../meetings.module.css";
 import { BackLink } from "@/components/BackLink";
@@ -49,12 +52,14 @@ export default async function RoomPage({ params, searchParams }: { params: Promi
   if (!data) notFound();
   const m = data as unknown as Meeting;
   const manage = canManage(m, user.id, roles);
-  const [{ data: texts }, { data: mine }, rec] = await Promise.all([
+  const [{ data: texts }, { data: mine }, rec, last] = await Promise.all([
     supabase.from("meeting_texts").select("transcript, notes").eq("meeting_id", id).maybeSingle(),
     supabase.from("meeting_attendees").select("id").eq("meeting_id", id).eq("user_id", user.id).maybeSingle(),
     // Missing before the v1.25 SQL is run: then there is no Record button.
     supabase.from("meeting_recordings").select("id, started_by, started_at, last_part_at, status, deleted_at").eq("meeting_id", id).eq("status", "recording").maybeSingle(),
+    m.status === "planned" || m.status === "live" ? loadLastTime(supabase, m) : Promise.resolve(null),
   ]);
+  const names = last ? new Map((await companyPeople(supabase, company.id)).map((p) => [p.id, p.name])) : new Map<string, string>();
   const recordingsReady = !rec.error;
   const recNow = recordingsReady && rec.data && recordingActive(rec.data as Pick<Recording, "status" | "deleted_at" | "last_part_at" | "started_at">) ? (rec.data as Recording) : null;
   const live = m.status === "live";
@@ -114,6 +119,8 @@ export default async function RoomPage({ params, searchParams }: { params: Promi
         </p>
       )}
       {m.status === "cancelled" && <p className="banner warn">{tr("This meeting was cancelled.")}</p>}
+
+      {last && <LastTime data={last} names={names} today={todayTz()} compact />}
 
       {(m.status === "planned" || live) && (
         <LiveRoom

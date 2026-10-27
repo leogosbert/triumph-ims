@@ -665,3 +665,18 @@
 .guestRoomInline {
   margin-top: 8px;
 }
+
+/* "Last time" on a regular meeting: what the meeting before it decided and gave out. */
+.lastHead {
+  margin: 14px 0 6px;
+  font-size: 0.95rem;
+}
+
+.lastList {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.lastList li + li {
+  margin-top: 4px;
+}

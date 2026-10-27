@@ -4,6 +4,7 @@ import { useTr } from "@/lib/tr-client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { CompanyButton } from "@/components/CompanySheet";
 import { Icon } from "@/components/Icon";
 import { MenuSheet } from "@/components/MenuSheet";
@@ -137,6 +138,76 @@ function RailToggle() {
   );
 }
 
+/**
+ * Folded sidebar: pointing at an icon (or tabbing to it) pops its name out beside it in a small glass
+ * label, instead of the browser's slow plain tooltip. The label sits outside the sidebar, so the sidebar's
+ * scrolling never clips it.
+ */
+function RailTips() {
+  const [tip, setTip] = useState<{ text: string; top: number; left: number } | null>(null);
+  useEffect(() => {
+    const side = document.querySelector<HTMLElement>("aside.sidenav");
+    if (!side) return;
+    let held: HTMLElement | null = null;
+    const release = () => {
+      // The browser's own tooltip comes back once the label is gone.
+      if (held?.dataset.tipTitle) {
+        held.setAttribute("title", held.dataset.tipTitle);
+        delete held.dataset.tipTitle;
+      }
+      held = null;
+      setTip(null);
+    };
+    const show = (e: Event) => {
+      const el = (e.target as HTMLElement | null)?.closest<HTMLElement>("nav a, .sidenav-brand");
+      if (!el || !side.contains(el)) return;
+      if (document.documentElement.getAttribute("data-side") !== "rail") return release();
+      if (el === held) return;
+      release();
+      const text = (el.querySelector(".nav-txt, strong")?.textContent ?? el.getAttribute("title") ?? "").trim();
+      if (!text) return;
+      const title = el.getAttribute("title");
+      if (title) {
+        el.dataset.tipTitle = title;
+        el.removeAttribute("title");
+      }
+      held = el;
+      const r = el.getBoundingClientRect();
+      setTip({ text, top: r.top + r.height / 2, left: side.getBoundingClientRect().right + 10 });
+    };
+    const hide = (e: Event) => {
+      const to = (e as PointerEvent | FocusEvent).relatedTarget as Node | null;
+      if (held && to && held.contains(to)) return;
+      release();
+    };
+    side.addEventListener("pointerover", show);
+    side.addEventListener("focusin", show);
+    side.addEventListener("pointerout", hide);
+    side.addEventListener("focusout", hide);
+    side.addEventListener("click", release);
+    side.addEventListener("scroll", release, true);
+    window.addEventListener("resize", release);
+    return () => {
+      release();
+      side.removeEventListener("pointerover", show);
+      side.removeEventListener("focusin", show);
+      side.removeEventListener("pointerout", hide);
+      side.removeEventListener("focusout", hide);
+      side.removeEventListener("click", release);
+      side.removeEventListener("scroll", release, true);
+      window.removeEventListener("resize", release);
+    };
+  }, []);
+  if (!tip) return null;
+  // Into <body>: the sidebar's frosted blur would otherwise hold the label inside the sidebar.
+  return createPortal(
+    <span className="rail-tip" role="presentation" style={{ top: tip.top, left: tip.left }}>
+      {tip.text}
+    </span>,
+    document.body,
+  );
+}
+
 /** Headings fold their group away (remembered on this device); the open screen's link stays. */
 const CLOSED_KEY = "lemosp-side-closed-v2";
 function useClosedGroups(): [string[], (g: string) => void] {
@@ -261,6 +332,7 @@ export function SideNav({
           );
         })}
       </nav>
+      {glass && <RailTips />}
       <a className="powered" href="/help">
         <span>{poweredBy}</span>
         <img className="on-dark" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />

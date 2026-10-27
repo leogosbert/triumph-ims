@@ -206,7 +206,13 @@ export function JourneyStory({ end, inApp }: { end: React.ReactNode; inApp: bool
       </div>
 
       <nav className="j-nav" aria-label={tr("Steps")}>
-        <button type="button" className="btn j-back" onClick={() => go(idx - 1)} disabled={idx === 0}>
+        <button
+          type="button"
+          className="btn j-back"
+          onClick={() => go(idx - 1)}
+          disabled={idx === 0}
+          title={idx === 0 ? tr("This is the first step") : undefined}
+        >
           ‹ {tr("Back")}
         </button>
         {idx < total && (

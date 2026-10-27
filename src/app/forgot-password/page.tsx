@@ -64,12 +64,12 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={onSubmit}>
             <p className="muted">{tr("Enter your email and we'll send you a link to set a new password.")}</p>
-            {error && <p className="notice notice-error">{error}</p>}
+            {error && <p className="notice notice-error" role="alert">{tr(error)}</p>}
             <div className="field">
               <label htmlFor="email">{tr("Email")}</label>
               <input id="email" name="email" type="email" autoComplete="email" required />
             </div>
-            <button className="btn btn-primary btn-block" disabled={busy}>
+            <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
               {busy ? tr("Sending…") : tr("Send reset link")}
             </button>
           </form>

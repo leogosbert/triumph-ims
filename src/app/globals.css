@@ -2043,13 +2043,21 @@ a {
     transform 0.55s var(--ease-out),
     visibility 0s linear 0.55s;
 }
+/* The drawing grows a little as it lifts; the screen itself stays the size of the window (no
+   sideways scroll while it fades). */
+:root.splash-on .splash {
+  overflow: hidden;
+}
 :root.splash-on.splash-done .splash {
   opacity: 0;
   visibility: hidden;
-  transform: scale(1.06);
   pointer-events: none;
 }
+:root.splash-on.splash-done .splash-inner {
+  transform: scale(1.06);
+}
 .splash-inner {
+  transition: transform 0.55s var(--ease-out);
   display: flex;
   flex-direction: column;
   align-items: center;

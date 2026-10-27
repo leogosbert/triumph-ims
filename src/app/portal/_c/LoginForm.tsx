@@ -68,7 +68,12 @@ export function LoginForm({
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <button className="btn btn-primary btn-block" type="submit" disabled={pending || disabled}>
+          <button
+            className="btn btn-primary btn-block"
+            type="submit"
+            disabled={pending || disabled}
+            title={disabled ? tr("The portal is not set up on the server yet.") : undefined}
+          >
             {pending ? tr("Please wait…") : tr("Send me a sign-in code")}
           </button>
           <p className="small muted" style={{ marginTop: 12 }}>

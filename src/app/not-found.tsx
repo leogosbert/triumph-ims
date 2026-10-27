@@ -16,9 +16,10 @@ export default async function NotFound() {
         <h1>{tr("Page not found")}</h1>
         <p className="muted">{tr("This address doesn't lead anywhere. The link may be old or mistyped, or the page has been removed.")}</p>
         <div className="actions">
-          <Link className="btn btn-primary" href="/">
+          {/* A plain link: "/" sends signed-out visitors on to the sign-in page, so it is not prefetched. */}
+          <a className="btn btn-primary" href="/">
             {tr("Go to the start")}
-          </Link>
+          </a>
           <Link className="btn" href="/how-it-works">
             {tr("How it works")}
           </Link>

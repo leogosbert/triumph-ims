@@ -2,7 +2,7 @@ import type { Role } from "@/lib/roles";
 
 /**
  * The App guide (/guide): every function of LeMoSp, where to find it and how to use it, step by step.
- * English text is the key; the page translates it with tr() (Kiswahili in src/lib/sw.ts).
+ * English text; the page shows it through tr().
  *
  * `phone`: the path on a phone, starting from the bottom bar ("More" opens the menu).
  * `laptop`: the path in the side menu on a laptop or tablet.
@@ -115,7 +115,7 @@ export const GUIDE: GuideSection[] = [
           "Open Playbooks and choose one: setting up, running a goods business, a service business or both, mining services, order to payment, numbers and decisions, getting paid, stock, routines, security, running a bigger business, or connecting and automating.",
           "Read it step by step with Next and Back. Each step has the actions in the app, a sample record and \"If this happens\" situations with what to do.",
           "Chapters jumps to any part. Your place is remembered on this device.",
-          "Download PDF gives the whole playbook to print or share with your team, in English or Kiswahili.",
+          "Download PDF gives the whole playbook to print or share with your team.",
           "Playbooks you do not have yet show a lock: press Request this playbook and LeMo Tech gives it to your company.",
         ],
       },
@@ -178,31 +178,33 @@ export const GUIDE: GuideSection[] = [
       },
       {
         id: "language",
-        title: "Language and appearance",
-        summary: "English or Kiswahili, light or dark, and the look of the app.",
-        phone: ["EN·SW button at the top"],
-        laptop: ["EN·SW button at the top"],
+        title: "Appearance",
+        summary: "Light or dark, and the look of the app.",
+        phone: ["Your account → Appearance"],
+        laptop: ["Your account → Appearance"],
         roles: "all",
         steps: [
-          "Tap EN·SW at the top to switch between English and Kiswahili.",
           "In the Glass look, the moon button at the top switches between light and dark.",
           "In Your account → Appearance choose Auto, Light or Dark; the Style, Glass or Classic; and the Background: Photos, Architecture, Aurora, Grid, Waves, Mountains or Plain.",
-          "The company panel (tap the company logo) also has Appearance and Language.",
+          "The company panel (tap the company logo) also has Appearance.",
         ],
       },
       {
         id: "app-lock",
         title: "App lock",
-        summary: "When you come back to the app, it asks for your password before showing anything.",
-        phone: ["Lock screen"],
-        laptop: ["Lock screen"],
+        summary: "After you have been away from the app for a while (15 minutes unless you change it), it asks for your password before showing anything.",
+        phone: ["Your account → Stay signed in"],
+        laptop: ["Your account → Stay signed in"],
         roles: "all",
         steps: [
-          "The lock screen (Welcome back) appears every time you reopen the app or switch back to it from another app.",
-          "Enter your password and press Unlock to continue where you left off.",
+          "Choose how long you can be away under Your account → Stay signed in → Ask for my password again: 5, 15 or 30 minutes, 1, 4 or 8 hours, every time, or never. It is saved for that phone or computer.",
+          "Coming back sooner never asks. After longer, the lock screen (Welcome back) appears: enter your password and press Unlock to continue where you left off.",
           "Someone else's phone? Press Not you? Sign out.",
         ],
-        tips: ["The driver screen is not locked, so drivers can record deliveries quickly.", "There is no setting to switch it off: it keeps company data safe on lost or shared phones."],
+        tips: [
+          "The driver screen is not locked, so drivers can record deliveries quickly.",
+          "Different from the company's automatic sign-out (Settings → Security), which management sets for everyone: it signs people out after a time without use.",
+        ],
       },
     ],
   },

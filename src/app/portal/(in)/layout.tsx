@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import { brandForCompany } from "@/lib/brands";
 import { portalDb, requirePortal } from "@/lib/portal/server";
-import { LangSwitch } from "@/components/LangSwitch";
 import { signOut } from "../actions";
 import { PortalTabs } from "../_c/PortalTabs";
 
@@ -61,7 +60,6 @@ export default async function PortalFrame({ children }: { children: React.ReactN
           </span>
         </div>
         <div className="portal-top-actions">
-          <LangSwitch className="portal-lang" />
           <form action={signOut}>
             <button type="submit" className="btn btn-small">{tr("Sign out")}</button>
           </form>
@@ -70,7 +68,6 @@ export default async function PortalFrame({ children }: { children: React.ReactN
       <PortalTabs tabs={tabs} />
       <main className="page portal-page">{children}</main>
       <footer className="portal-foot small muted">
-        <LangSwitch className="portal-lang-foot" />
         <span>
           {me.account.name} · {me.account.email}
         </span>

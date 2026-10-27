@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { getLang } from "@/lib/lang";
 import { LangProvider } from "@/lib/tr-client";
 import { getThemePref, THEME_SCRIPT } from "@/lib/theme";
 import { LOOK_SCRIPT } from "@/lib/look";
@@ -86,14 +85,13 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const lang = await getLang();
   const theme = await getThemePref();
   const adminHost = await onAdminHost();
   // Glass or Classic (Account → Appearance → Style). LeMoSp ADMIN keeps its own look.
   const look = adminHost ? "classic" : await getLookPref();
   return (
     <html
-      lang={lang}
+      lang="en"
       data-app={adminHost ? "admin" : undefined}
       data-look={look}
       className={`${sans.variable} ${mono.variable}`}
@@ -107,12 +105,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <Splash />
         <NavProgress />
-        <LangProvider lang={lang === "sw" ? "sw" : "en"}>
+        <LangProvider>
           <AdminHostProvider admin={adminHost}>
             {children}
             {/* On the admin address LeMoSp ADMIN is the only app, so its card shows on every page. */}
             <InstallPrompt variant={adminHost ? "admin" : "main"} />
-            <UpdatePrompt lang={lang === "sw" ? "sw" : "en"} />
+            <UpdatePrompt />
           </AdminHostProvider>
         </LangProvider>
       </body>

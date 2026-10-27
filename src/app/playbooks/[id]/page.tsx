@@ -2,10 +2,8 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppBackground } from "@/components/AppBackground";
-import { LangSwitch } from "@/components/LangSwitch";
 import { PlaybookViewer } from "@/components/playbook/PlaybookViewer";
-import { getLang } from "@/lib/lang";
-import { findPlaybook, PLAYBOOKS, translatePlaybook } from "@/lib/playbooks";
+import { findPlaybook, PLAYBOOKS, type Playbook } from "@/lib/playbooks";
 import { playbookAccess } from "@/lib/playbooks/access";
 import { nameTheCompany, tailorPlaybook, type PlaybookProfile, type TailorResult } from "@/lib/playbooks/personalize";
 import { playbookProfile } from "@/lib/playbooks/profile";
@@ -35,7 +33,6 @@ export default async function PlaybookPage({ params, searchParams }: { params: P
   await primeLang();
   const raw = findPlaybook((await params).id);
   if (!raw) notFound();
-  const lang = await getLang();
   const access = await playbookAccess();
   const inApp = access.signedIn;
   const open = access.state(raw.id) === "granted";
@@ -44,7 +41,7 @@ export default async function PlaybookPage({ params, searchParams }: { params: P
   // A given playbook is made for the reader's company: its name, size, what it sells and its features.
   const profile = open ? await playbookProfile(access.companyId) : null;
   const fit = profile ? tailorPlaybook(raw, profile, { all: full }) : null;
-  let pb = translatePlaybook(fit?.pb ?? raw, lang === "sw" ? "sw" : "en", tr);
+  let pb = fit?.pb ?? raw;
   if (profile) pb = nameTheCompany(pb, profile.name);
 
   return (
@@ -54,7 +51,6 @@ export default async function PlaybookPage({ params, searchParams }: { params: P
         <Link href="/playbooks" className="pb-back">
           ‹ {tr("All playbooks")}
         </Link>
-        <LangSwitch />
       </header>
       <div className="j-intro pb-head">
         <p className="j-eyebrow">{tr("Playbook")}</p>
@@ -111,7 +107,7 @@ function MadeFor({ id, profile, fit, full }: { id: string; profile: PlaybookProf
 }
 
 /** What is inside, and how to get it: request it for the company, or sign in first. */
-function Locked({ id, pb, access }: { id: string; pb: ReturnType<typeof translatePlaybook>; access: Awaited<ReturnType<typeof playbookAccess>> }) {
+function Locked({ id, pb, access }: { id: string; pb: Playbook; access: Awaited<ReturnType<typeof playbookAccess>> }) {
   const state = access.state(id);
   const key = access.itemKey(id);
   const note = access.note(id);

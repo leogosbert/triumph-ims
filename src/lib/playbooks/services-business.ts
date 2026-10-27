@@ -6,7 +6,6 @@ import type { Playbook } from "./types";
  * withholding tax, professional bodies), setting LeMoSp up for services, service jobs, maintenance
  * contracts, equipment, hire, projects and timesheets, pricing and withholding tax, other ways of
  * supplying and a monthly routine with the service reports.
- * Kiswahili: src/lib/playbooks/sw/services-business.ts.
  */
 export const SERVICES_BUSINESS: Playbook = {
   id: "services-business",

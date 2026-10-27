@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
 import { AppBackground } from "@/components/AppBackground";
-import { LangSwitch } from "@/components/LangSwitch";
 import { acceptInvitation, createCompany, signOut } from "@/app/actions";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
@@ -37,7 +36,6 @@ export default async function WelcomePage({ searchParams }: { searchParams: Sear
   return (
     <div className="auth-wrap">
       <AppBackground kind="architecture" />
-      <LangSwitch className="auth-lang" />
       <img className="auth-logo" src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
       <div className="auth-card">
         <div className="brand">

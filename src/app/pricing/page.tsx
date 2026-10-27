@@ -1,7 +1,6 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { AppBackground } from "@/components/AppBackground";
-import { LangSwitch } from "@/components/LangSwitch";
 import { CATEGORIES, priceText, type PriceItem } from "@/lib/billing";
 import { formatMoney } from "@/lib/money";
 import { createClient } from "@/lib/supabase/server";
@@ -41,7 +40,6 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         <Link href={user ? "/" : "/login"} className="j-logo" aria-label={tr("LeMoSp")}>
           <img src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
         </Link>
-        <LangSwitch />
       </header>
       <div className="j-intro">
         <p className="j-eyebrow">{tr("Prices")}</p>

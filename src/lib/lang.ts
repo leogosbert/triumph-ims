@@ -1,10 +1,8 @@
-import { cookies } from "next/headers";
-import { dictionary, isLang, LANG_COOKIE, type Lang } from "@/lib/i18n";
+import { dictionary, type Lang } from "@/lib/i18n";
 
-/** The signed-in person's language (cookie), English by default. */
+/** The app is English only (an old "lang" cookie is ignored). */
 export async function getLang(): Promise<Lang> {
-  const v = (await cookies()).get(LANG_COOKIE)?.value;
-  return isLang(v) ? v : "en";
+  return "en";
 }
 
 export async function getDict() {

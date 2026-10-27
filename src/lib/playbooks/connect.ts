@@ -3,7 +3,6 @@ import type { Playbook } from "./types";
 /**
  * Playbook: connect and automate. The business assistant, the monthly accounting files, the
  * read-only API for other systems, alerts and scheduled reports, backups and exports.
- * Kiswahili: ./sw/connect.ts.
  */
 export const CONNECT: Playbook = {
   id: "connect",
@@ -374,7 +373,7 @@ export const CONNECT: Playbook = {
         {
           id: "kiswahili-questions",
           title: "Ask in Kiswahili",
-          body: "The assistant understands the most common Kiswahili words for each topic. The answer comes in the language the app is set to: press EN·SW at the top to change it.",
+          body: "The assistant understands the most common Kiswahili words for each topic, so you can ask in Kiswahili, English or a mix.",
           do: [
             "Ask Mauzo ya mwezi huu for sales this month.",
             "Ask Faida ya mwezi huu for profit this month.",
@@ -392,7 +391,7 @@ export const CONNECT: Playbook = {
             title: "Wateja gani hawajalipa?",
             lines: [
               ["Topic found", "Money owed to us"],
-              ["Answer in", "Kiswahili"],
+              ["Asked in", "Kiswahili"],
             ],
             stamp: "Answered",
             tone: "ok",

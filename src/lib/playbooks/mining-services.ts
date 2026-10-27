@@ -4,7 +4,6 @@ import type { Playbook } from "./types";
  * Playbook: running a mining services company that supplies and works on mine sites: drilling
  * consumables and roof support, mining chemicals, conveyor parts, pumps, valves and lubricants,
  * equipment rental, contract drilling, fabrication and installation, and lubrication and pump servicing.
- * Kiswahili: src/lib/playbooks/sw/mining-services.ts.
  */
 export const MINING_SERVICES: Playbook = {
   id: "mining-services",

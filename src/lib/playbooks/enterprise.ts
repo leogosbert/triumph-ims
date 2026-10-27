@@ -4,7 +4,6 @@ import type { Playbook } from "./types";
  * Playbook: running a bigger business at Enterprise level (branches, approvals in steps, budgets,
  * cash-flow forecast, purchase planning, fleet, head-office figures, scheduled reports, documents).
  * Sample company: Kilimanjaro Supplies Ltd, now with branches in Arusha, Dar es Salaam and Mwanza.
- * Kiswahili: ./sw/enterprise.ts.
  */
 export const ENTERPRISE: Playbook = {
   id: "enterprise",

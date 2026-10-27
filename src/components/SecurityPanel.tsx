@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { recordBrowserEvent, signOutOtherDevices } from "@/app/security-actions";
 import { useConfirmIdentity } from "@/components/ConfirmIdentity";
-import { LockPreference } from "@/components/LockPreference";
 import { TotpSetup } from "@/components/TotpSetup";
 import { createClient } from "@/lib/supabase/client";
 import { useTr } from "@/lib/tr-client";
@@ -105,8 +104,6 @@ export function SecurityPanel({ lastSignIn, required }: { lastSignIn: string | n
             </button>
           </div>
         ))}
-
-      <LockPreference />
 
       <div className="sec-row" style={{ marginTop: 14 }}>
         <div>

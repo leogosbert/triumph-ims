@@ -2,9 +2,7 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { AppBackground } from "@/components/AppBackground";
 import { Icon } from "@/components/Icon";
-import { LangSwitch } from "@/components/LangSwitch";
-import { getLang } from "@/lib/lang";
-import { PLAYBOOKS, scenarioCount, stepCount, translatePlaybook } from "@/lib/playbooks";
+import { PLAYBOOKS, scenarioCount, stepCount } from "@/lib/playbooks";
 import { playbookAccess } from "@/lib/playbooks/access";
 import { recommendedFor, tailorPlaybook } from "@/lib/playbooks/personalize";
 import { playbookProfile } from "@/lib/playbooks/profile";
@@ -20,13 +18,12 @@ export const metadata = {
  */
 export default async function PlaybooksPage() {
   await primeLang();
-  const lang = await getLang();
   const access = await playbookAccess();
   const inApp = access.signedIn;
   const profile = await playbookProfile(access.companyId);
   const picks = profile ? recommendedFor(profile) : new Set<string>();
   // Each playbook as it would be for this company (its size and features), the best fits first.
-  const books = PLAYBOOKS.map((p) => ({ raw: p, fit: profile ? tailorPlaybook(p, profile).pb : p, t: translatePlaybook(p, lang === "sw" ? "sw" : "en", tr) })).sort(
+  const books = PLAYBOOKS.map((p) => ({ raw: p, fit: profile ? tailorPlaybook(p, profile).pb : p, t: p })).sort(
     (a, b) => Number(picks.has(b.raw.id)) - Number(picks.has(a.raw.id)),
   );
 
@@ -37,7 +34,6 @@ export default async function PlaybooksPage() {
         <Link href={inApp ? "/" : "/login"} className="j-logo" aria-label={tr("LeMoSp")}>
           <img src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
         </Link>
-        <LangSwitch />
       </header>
       <div className="j-intro">
         <p className="j-eyebrow">{tr("Playbooks")}</p>

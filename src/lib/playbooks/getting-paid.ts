@@ -4,7 +4,6 @@ import type { Playbook } from "./types";
  * Playbook: getting paid on time. Terms and credit limits, clear invoices, reminders, promises to pay,
  * money owed by age, statements, recording payments (bank, cash, cheque, mobile money), checking them
  * against the statement, and the hard cases (disputes, bounced cheques, wrong entries, foreign money).
- * Kiswahili: src/lib/playbooks/sw/getting-paid.ts.
  */
 export const GETTING_PAID: Playbook = {
   id: "getting-paid",

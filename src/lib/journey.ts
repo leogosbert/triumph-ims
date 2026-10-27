@@ -2,7 +2,7 @@
  * "How it works" (/how-it-works): one order followed from the first meeting with a customer to the
  * profit at the end, a step at a time. Each step says what happens in the business, what you do in
  * LeMoSp and where to find it, with an animated sample document.
- * English text is the key; the page translates it with useTr() (Kiswahili in src/lib/sw.ts).
+ * English text; the page shows it through useTr().
  * Sample business: Kilimanjaro Hotels Ltd buys paper and toner; Dar Office Supplies supplies them.
  */
 

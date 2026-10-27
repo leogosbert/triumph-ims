@@ -5,7 +5,6 @@ import type { Playbook } from "./types";
  * purchase requests, supplier RFQs, purchase orders and approvals, import costs and landed cost, receiving
  * with batches and expiry, supplier bills and the order/receipt/bill check, counts and adjustments,
  * transfers, reordering, purchase planning, vehicles and slow-moving stock.
- * Kiswahili: src/lib/playbooks/sw/stock.ts.
  */
 export const STOCK: Playbook = {
   id: "stock",

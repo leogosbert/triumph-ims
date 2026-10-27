@@ -14,7 +14,6 @@ import { AppBackground } from "@/components/AppBackground";
 import { GlassSplash } from "@/components/GlassSplash";
 import { BRAND_COOKIE, brandByKey, type Brand } from "@/lib/brands";
 import { SectionTracker } from "@/components/SectionTracker";
-import { LangSwitch } from "@/components/LangSwitch";
 import { recordSignIn } from "@/app/security-actions";
 import { LEAKED_MESSAGE, timesLeaked } from "@/lib/pwned";
 
@@ -204,7 +203,6 @@ export default function LoginPage() {
         ) : (
           <GlassSplash name="LeMoSp" tagline={tr("a LeMo Tech Solutions product")} />
         ))}
-      <LangSwitch className="auth-lang" />
       {adminApp ? (
         <img className="auth-logo auth-logo-admin" src="/brand/lemosp-admin-on-dark.svg" alt="LeMoSp ADMIN" />
       ) : brand ? (

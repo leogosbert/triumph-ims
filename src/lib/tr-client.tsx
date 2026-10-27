@@ -1,21 +1,22 @@
 "use client";
 
-import { createContext, useContext } from "react";
-import { SW } from "@/lib/sw";
+/**
+ * Client-side twin of tr(). The app is English only, so these return English; they stay as the
+ * wrapper around screen text in client components.
+ */
 
-const LangContext = createContext<"en" | "sw">("en");
-
-export function LangProvider({ lang, children }: { lang: "en" | "sw"; children: React.ReactNode }) {
-  return <LangContext.Provider value={lang}>{children}</LangContext.Provider>;
+export function LangProvider({ children }: { lang?: "en" | "sw"; children: React.ReactNode }) {
+  return <>{children}</>;
 }
 
-/** The current language ("en" or "sw"). */
+/** The current language: always English. */
 export function useLang(): "en" | "sw" {
-  return useContext(LangContext);
+  return "en";
 }
 
-/** Client-side twin of tr(): returns a translate function for the current language. */
+const same = (s: string) => s;
+
+/** Returns the translate function (English: the text as given). */
 export function useTr(): (s: string) => string {
-  const lang = useContext(LangContext);
-  return (s: string) => (lang === "sw" ? (SW[s] ?? s) : s);
+  return same;
 }

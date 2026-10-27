@@ -6,7 +6,6 @@ import type { Playbook } from "./types";
  * Both, one quotation for goods and services, delivery notes for goods only, installation jobs with
  * materials from stock, maintenance, equipment, consulting, withholding tax, other ways of supplying and a
  * monthly routine.
- * Kiswahili: src/lib/playbooks/sw/goods-and-services.ts.
  */
 export const GOODS_AND_SERVICES: Playbook = {
   id: "goods-and-services",

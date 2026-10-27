@@ -27,7 +27,6 @@ import { getDict } from "@/lib/lang";
 import { defaultCategory } from "@/lib/menu";
 import { bottomNav } from "@/lib/nav";
 import { moreMenuFor, sideNavFor } from "@/lib/roleNav";
-import { setLanguage } from "../lang-actions";
 import { onAdminHost } from "@/lib/hosts-server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -45,7 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
   const { supabase, company, role, roles, user, isManager, profile, memberships, features, isPlatformAdmin } = await getAppContext();
   // Everything else the frame needs, at the same time.
-  const [{ lang, t }, { count: unread }, theme, background, look] = await Promise.all([
+  const [{ t }, { count: unread }, theme, background, look] = await Promise.all([
     getDict(),
     // Unread notifications (0 until the Stage 7 database update has been run).
     supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("read_at", null),
@@ -101,7 +100,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     others: memberships
       .filter((m) => m.company_id !== company.id)
       .map((m) => ({ id: m.company_id, name: m.company.name, role: t[`role.${m.role}` as Key] })),
-    lang: lang === "sw" ? "sw" : "en",
     theme,
   };
 
@@ -143,12 +141,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link href="/search" className="icon-btn only-phone" aria-label={t["shell.search"]}>
               <Icon name="search" />
             </Link>
-            <form action={setLanguage}>
-              <input type="hidden" name="lang" value={lang === "en" ? "sw" : "en"} />
-              <button type="submit" className="lang-btn" aria-label={t["shell.language"]}>
-                <span aria-current={lang === "en" ? "true" : undefined}>{tr("EN")}</span>·<span aria-current={lang === "sw" ? "true" : undefined}>{tr("SW")}</span>
-              </button>
-            </form>
             {look === "glass" && <ThemeToggle />}
             {isManager && (
               <Link href="/settings" className="icon-btn only-phone" aria-label={t["nav.settings"]}>
@@ -180,7 +172,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       <CompanySheet card={card} />
       <BrandCookie brand={company.is_demo ? null : (brandForCompany(company.id)?.key ?? null)} />
-      <IdleGuard minutes={company.idle_timeout_minutes ?? 0} />
+      <IdleGuard minutes={company.idle_timeout_minutes ?? 0} lastSignIn={user.last_sign_in_at ?? null} />
       <PrivacyScreen />
       <AppLock
         email={profile.email ?? user.email ?? ""}

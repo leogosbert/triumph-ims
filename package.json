@@ -8,7 +8,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test:db": "bash supabase/tests/run.sh",
-    "test:money": "tsx --test scripts/test-money.ts"
+    "test:money": "tsx --test scripts/test-money.ts",
+    "test:applock": "tsx --test scripts/test-applock.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

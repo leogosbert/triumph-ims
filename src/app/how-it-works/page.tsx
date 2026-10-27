@@ -3,7 +3,6 @@ import Link from "next/link";
 import { startDemo } from "@/app/demo-actions";
 import { AppBackground } from "@/components/AppBackground";
 import { DemoScalePicker } from "@/components/DemoScalePicker";
-import { LangSwitch } from "@/components/LangSwitch";
 import { JourneyStory } from "@/components/journey/JourneyStory";
 import { createClient } from "@/lib/supabase/server";
 
@@ -61,7 +60,6 @@ export default async function HowItWorksPage() {
         <Link href={inApp ? "/" : "/login"} className="j-logo" aria-label={tr("LeMoSp")}>
           <img src="/brand/lemosp-on-dark.svg" alt={tr("LeMoSp")} />
         </Link>
-        <LangSwitch />
       </header>
       <div className="j-intro">
         <p className="j-eyebrow">{tr("How it works")}</p>

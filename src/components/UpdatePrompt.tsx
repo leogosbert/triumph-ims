@@ -62,7 +62,7 @@ function controllerChange(ms: number): Promise<void> {
  * (visibility, focus, pageshow — installed apps are often resumed, not reloaded — and online).
  * "Later" hides the card but leaves a small "Update available" pill in the top bar.
  */
-export function UpdatePrompt({ lang }: { lang: "en" | "sw" }) {
+export function UpdatePrompt() {
   const tr = useTr();
   const pathname = usePathname();
   const [live, setLive] = useState<Live | null>(null);
@@ -199,7 +199,7 @@ export function UpdatePrompt({ lang }: { lang: "en" | "sw" }) {
     return slot && slot.isConnected ? createPortal(pill, slot) : pill;
   }
 
-  const notes = (lang === "sw" ? live.sw : live.en) ?? [];
+  const notes = live.en ?? [];
 
   return (
     <div className={`upd${leaving ? " leaving" : ""}`} role="dialog" aria-labelledby="upd-title">

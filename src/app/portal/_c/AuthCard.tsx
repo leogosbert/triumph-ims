@@ -1,6 +1,5 @@
 import { primeLang, tr } from "@/lib/tr";
 import { brandByKey } from "@/lib/brands";
-import { LangSwitch } from "@/components/LangSwitch";
 
 /** The sign-in frame of the portal: the company's brand when the link carries it (?b=triumph). */
 export async function AuthCard({ brandKey, title, children }: { brandKey?: string | null; title: string; children: React.ReactNode }) {
@@ -9,7 +8,6 @@ export async function AuthCard({ brandKey, title, children }: { brandKey?: strin
   const style = brand ? ({ "--brand": brand.themeColor } as React.CSSProperties) : undefined;
   return (
     <div className="auth-wrap portal-auth" style={style}>
-      <LangSwitch className="auth-lang" />
       {brand ? (
         <img className="auth-logo" src={brand.logoOnDark} alt={brand.name} />
       ) : (

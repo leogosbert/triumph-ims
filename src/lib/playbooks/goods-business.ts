@@ -5,7 +5,6 @@ import type { Playbook } from "./types";
  * importers). Registering the company (BRELA, TRA, VAT, licence, EFD, NSSF/WCF, bank), setting LeMoSp up
  * for goods, buying, stock, pricing, quoting and delivering, direct supply, getting paid, other ways of
  * supplying and a monthly routine.
- * Kiswahili: src/lib/playbooks/sw/goods-business.ts.
  */
 export const GOODS_BUSINESS: Playbook = {
   id: "goods-business",

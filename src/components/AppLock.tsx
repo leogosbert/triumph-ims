@@ -4,16 +4,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/app/actions";
 import { PasswordInput } from "@/components/PasswordInput";
-import { clearAway, LOCK_AWAY_KEY, LOCK_TOLERANCE_SECONDS, readLockPref } from "@/lib/applock";
+import { LOCK_SEEN_KEY, noteSeen, readLockPref, readNumber, SEEN_EVERY_MS, shouldLock } from "@/lib/applock";
 import { createClient } from "@/lib/supabase/client";
 import { useTr } from "@/lib/tr-client";
 
 const MAX_TRIES = 5;
 
 /**
- * App lock: when you come back to LeMoSp (reopen it or switch back from another app),
- * the screen is covered until you enter your password (and two-step code if it is on).
- * What you were doing stays underneath. Not on the driver screen (camera and offline use).
+ * App lock: when you come back to LeMoSp after being away longer than your setting (Your account →
+ * "Ask for my password again", 15 minutes unless changed), the screen is covered until you enter
+ * your password (and two-step code if it is on). Coming back sooner never asks. What you were
+ * doing stays underneath. Not on the driver screen (camera and offline use). Rules: src/lib/applock.ts.
  */
 export function AppLock({
   email,
@@ -43,47 +44,55 @@ export function AppLock({
   const out = useRef<HTMLFormElement>(null);
   const active = enabled && !pathname.startsWith("/driver");
 
+  // While the lock screen is up, this tab does not count as "the app is on screen".
+  const lockedRef = useRef(false);
+  lockedRef.current = locked;
+  // The driver screen never locks, but time spent there still counts as being in the app.
+  const activeRef = useRef(active);
+  activeRef.current = active;
+
   useEffect(() => {
-    if (!active) return;
-    const signedInAt = lastSignIn ? Date.parse(lastSignIn) : 0;
+    if (!enabled) return;
+    const signedInAt = lastSignIn ? Date.parse(lastSignIn) || 0 : 0;
 
-    function shouldLock() {
-      const pref = readLockPref();
-      if (pref < 0) return false;
-      let away = 0;
-      try {
-        away = Number(localStorage.getItem(LOCK_AWAY_KEY)) || 0;
-      } catch {
-        return false;
-      }
-      if (!away || away < signedInAt) return false; // just signed in
-      const gone = (Date.now() - away) / 1000;
-      return gone >= Math.max(pref, LOCK_TOLERANCE_SECONDS);
+    function lockIfAway() {
+      const lock = activeRef.current && shouldLock({ pref: readLockPref(), lastSeen: readNumber(LOCK_SEEN_KEY), signedInAt, now: Date.now() });
+      if (lock) setLocked(true);
+      else noteSeen();
     }
-    function markAway() {
-      try {
-        if (!localStorage.getItem(LOCK_AWAY_KEY)) localStorage.setItem(LOCK_AWAY_KEY, String(Date.now()));
-      } catch {
-        /* ignore */
-      }
-    }
+    // Every few seconds while this tab is on screen (and unlocked), note that the app is in use,
+    // so other tabs and the next launch know you were here.
+    const beat = setInterval(() => {
+      if (document.visibilityState === "visible" && !lockedRef.current) noteSeen();
+    }, SEEN_EVERY_MS);
     function onVisibility() {
-      if (document.visibilityState === "hidden") markAway();
-      else if (shouldLock()) setLocked(true);
-      else clearAway();
+      if (document.visibilityState === "hidden") {
+        if (!lockedRef.current) noteSeen();
+      } else if (!lockedRef.current) {
+        lockIfAway();
+      }
+    }
+    function onHide() {
+      if (!lockedRef.current) noteSeen();
+    }
+    // Back from the browser's page cache (e.g. the installed app brought back): same rule.
+    function onShow(e: PageTransitionEvent) {
+      if (e.persisted && !lockedRef.current) lockIfAway();
     }
 
-    // Opening the app (or reloading it) counts as coming back.
-    if (shouldLock()) setLocked(true);
-    else clearAway();
+    // Opening the app (also after the phone closed it) follows the same rule as switching back.
+    if (document.visibilityState === "visible") lockIfAway();
 
     document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("pagehide", markAway);
+    window.addEventListener("pagehide", onHide);
+    window.addEventListener("pageshow", onShow);
     return () => {
+      clearInterval(beat);
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("pagehide", markAway);
+      window.removeEventListener("pagehide", onHide);
+      window.removeEventListener("pageshow", onShow);
     };
-  }, [active, lastSignIn]);
+  }, [enabled, lastSignIn]);
 
   useEffect(() => {
     if (!locked) return;
@@ -95,7 +104,7 @@ export function AppLock({
   }, [locked]);
 
   function unlocked() {
-    clearAway();
+    noteSeen();
     tries.current = 0;
     setLocked(false);
     setStep("password");

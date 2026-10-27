@@ -3,6 +3,7 @@ import { primeLang, tr } from "@/lib/tr";
 import { Notice } from "@/components/Notice";
 import { NewPasswordField } from "@/components/NewPasswordField";
 import { SecurityPanel } from "@/components/SecurityPanel";
+import { LockPreference } from "@/components/LockPreference";
 import { StepUpForm } from "@/components/ConfirmIdentity";
 import { SignInActivity } from "@/components/SignInActivity";
 import { PasswordInput } from "@/components/PasswordInput";
@@ -13,7 +14,6 @@ import { BackgroundPicker } from "@/components/BackgroundPicker";
 import { LookPicker } from "@/components/LookPicker";
 import Link from "next/link";
 import { signOut, switchCompany } from "@/app/actions";
-import { setLanguage } from "@/app/lang-actions";
 import { displayName, getAppContext } from "@/lib/context";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { ROLE_LABELS } from "@/lib/roles";
@@ -23,10 +23,10 @@ import { changePassword, updateProfile } from "./actions";
 export const metadata = { title: "Account" };
 
 export default async function AccountPage({ searchParams }: { searchParams: SearchParams }) {
-  const lang = await primeLang();
+  await primeLang();
   const notice = await readNotice(searchParams);
   const reset = (await searchParams)?.reset === "1";
-  const { supabase, profile, user, memberships, membership } = await getAppContext();
+  const { supabase, profile, user, memberships, membership, company, roles } = await getAppContext();
   const name = displayName(profile);
   const initials = (name || "?")
     .split(/[\s@.]+/)
@@ -41,7 +41,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
         title={tr("Your account")}
         icon="user"
         back={{ href: "/settings", label: tr("← Settings") }}
-        lead={tr("Your details, password, how the app looks and the language it speaks.")}
+        lead={tr("Your details, password, when the app asks for it again, and how the app looks.")}
       />
       <Notice {...notice} />
       {reset && !notice.msg && !notice.error && (
@@ -57,11 +57,24 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
             <strong>{name}</strong>
             <span className="muted small">{user.email}</span>
             <div className="small" style={{ marginTop: 4 }}>
-              {membership.company.name} · <span className="badge">{tr(ROLE_LABELS[membership.role])}</span>
+              {membership.company.name} ·{" "}
+              {roles.map((r) => (
+                <span key={r} className="badge" style={{ marginRight: 4 }}>
+                  {tr(ROLE_LABELS[r])}
+                </span>
+              ))}
             </div>
           </div>
         </div>
       </section>
+
+      {!user.is_anonymous && (
+        <section className="card" id="stay-signed-in">
+          <h2>{tr("Stay signed in")}</h2>
+          <p className="st-card-lead">{tr("When you leave the app and come back, it asks for your password only after the time you choose here.")}</p>
+          <LockPreference idleMinutes={company.idle_timeout_minutes ?? 0} />
+        </section>
+      )}
 
       <ul className="st-jump" aria-label={tr("Jump to")}>
         <li>
@@ -77,11 +90,13 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
             <a href="#security">{tr("Two-step verification")}</a>
           </li>
         )}
+        {!user.is_anonymous && (
+          <li>
+            <a href="#stay-signed-in">{tr("Stay signed in")}</a>
+          </li>
+        )}
         <li>
           <a href="#appearance">{tr("Appearance")}</a>
-        </li>
-        <li>
-          <a href="#language">{tr("Language")}</a>
         </li>
         {!user.is_anonymous && (
           <li>
@@ -154,21 +169,6 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
         </div>
         <h3 className="st-sub-title">{tr("Background")}</h3>
         <BackgroundPicker />
-      </section>
-
-      <section className="card" id="language">
-        <h2>{tr("Language")}</h2>
-        <p className="st-card-lead">{tr("The language of menus and screens. You can also switch with EN·SW in the top bar.")}</p>
-        <div className="st-seg-wrap">
-          <form action={setLanguage} className="seg" aria-label={tr("Language")}>
-            <button type="submit" name="lang" value="en" aria-pressed={lang === "en"} lang="en">
-              English
-            </button>
-            <button type="submit" name="lang" value="sw" aria-pressed={lang === "sw"} lang="sw">
-              Kiswahili
-            </button>
-          </form>
-        </div>
       </section>
 
       {memberships.length > 1 && (

@@ -2,7 +2,7 @@ import type { Playbook } from "./types";
 
 /**
  * Playbook: setting up LeMoSp from sign-up to go-live, for a sample company
- * (Kilimanjaro Supplies Ltd, a general supplier in Arusha). Kiswahili: ./sw/setup.ts.
+ * (Kilimanjaro Supplies Ltd, a general supplier in Arusha).
  */
 export const SETUP: Playbook = {
   id: "setup",
@@ -1436,9 +1436,10 @@ export const SETUP: Playbook = {
         {
           id: "app-lock",
           title: "App lock on each phone and laptop",
-          body: "When you come back to the app, it asks for your password (and your code, if two-step is on) before showing anything. It is on for everyone, on every phone and laptop. The driver screen is not locked.",
+          body: "When you come back to the app after being away for a while, it asks for your password (and your code, if two-step is on) before showing anything. It is on for everyone, on every phone and laptop; each person chooses how long they can be away (15 minutes unless changed). The driver screen is not locked.",
           do: [
-            "Leave the app and come back: the screen shows Welcome back with your name.",
+            "Choose the time under Your account → Stay signed in → Ask for my password again.",
+            "Leave the app for longer and come back: the screen shows Welcome back with your name.",
             "Type your password and press Unlock. With two-step on, type the 6-digit code too. You continue exactly where you were.",
             "A quick trip of a few seconds, for example to take a photo, does not lock the app. Not you? Press Not you? Sign out.",
           ],
@@ -2506,43 +2507,6 @@ export const SETUP: Playbook = {
           ],
           who: "Everyone",
           scales: "all",
-        },
-        {
-          id: "language",
-          title: "Language: English or Kiswahili",
-          body: "Each person chooses their own language for menus and screens. The screens switch at once.",
-          do: [
-            "Tap the company logo at the top, then Your account, and tap Language in the jump links.",
-            "Press English or Kiswahili.",
-            "Or tap EN·SW in the top bar at any time to switch.",
-          ],
-          where: ["Tap the company logo", "Your account"],
-          href: "/account#language",
-          who: "Everyone",
-          scales: "all",
-          example: {
-            kind: "Language",
-            title: "Kilimanjaro Supplies Ltd",
-            lines: [
-              ["Juma Mushi", "Kiswahili"],
-              ["Baraka Kimaro", "Kiswahili"],
-              ["Neema Mollel", "English"],
-            ],
-            stamp: "Saved",
-            tone: "ok",
-          },
-          scenarios: [
-            {
-              title: "The storekeeper prefers Kiswahili",
-              problem: "Baraka understands the warehouse screens better in Kiswahili, but Neema works in English.",
-              fix: [
-                "Baraka opens Your account → Language on his own phone and presses Kiswahili.",
-                "Neema's screens stay in English. Each person's choice is their own.",
-              ],
-              tone: "info",
-            },
-          ],
-          tip: "Train new staff in the language they read best. Button names in the playbooks match the app in both languages.",
         },
         {
           id: "appearance",

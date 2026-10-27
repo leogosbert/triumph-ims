@@ -5,6 +5,7 @@ import { getThemePref, THEME_SCRIPT } from "@/lib/theme";
 import { LOOK_SCRIPT } from "@/lib/look";
 import { getLookPref } from "@/lib/look-server";
 import { Splash, SPLASH_SCRIPT } from "@/components/Splash";
+import { GlassSplash } from "@/components/GlassSplash";
 import { NavProgress } from "@/components/NavProgress";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
@@ -89,6 +90,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const adminHost = await onAdminHost();
   // Glass or Classic (Account → Appearance → Style). LeMoSp ADMIN keeps its own look.
   const look = adminHost ? "classic" : await getLookPref();
+  // A company brand remembered on this device opens with its own launch (the company app shell
+  // brings its own copy with the company logo, which then takes over: glass.css).
+  const brand = adminHost ? null : await getBrand();
   return (
     <html
       lang="en"
@@ -104,6 +108,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <Splash />
+        {brand && (
+          <GlassSplash
+            brand={brand.key}
+            logo={`/brands/${brand.key}/mark.svg`}
+            name={brand.shortName}
+            tagline="Powered by LeMoSp · LeMo Tech Solutions"
+          />
+        )}
         <NavProgress />
         <LangProvider>
           <AdminHostProvider admin={adminHost}>

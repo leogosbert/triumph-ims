@@ -926,7 +926,7 @@ svg.chart { width: 100%; height: auto; display: block; }
 .barlist { list-style: none; padding: 0; margin: 0; }
 .barlist li { margin-bottom: 10px; }
 .barlist .bar { height: 8px; background: var(--soft); border-radius: 4px; overflow: hidden; margin-top: 4px; }
-.barlist .bar span { display: block; height: 100%; background: var(--brand); border-radius: 4px; }
+.barlist .bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--chart-1, var(--brand)), color-mix(in srgb, var(--chart-1, var(--brand)) 60%, #06b6d4)); border-radius: 4px; }
 .help-steps { padding-left: 20px; margin: 8px 0 0; }
 .help-steps li { margin-bottom: 8px; line-height: 1.45; }
 
@@ -1788,6 +1788,33 @@ input[type="number"] {
   border-radius: 14px;
   margin-bottom: 16px;
 }
+.sk-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+@media (min-width: 640px) {
+  .sk-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.sk-stat {
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.sk-n {
+  width: 58%;
+  height: 22px;
+  margin-bottom: 10px;
+}
+:root[data-look="glass"] :is(.sk-stat, .sk-list) {
+  background: var(--g-surface);
+  border-color: var(--g-border);
+  border-radius: var(--g-radius);
+}
 .sk-list {
   background: var(--card);
   border: 1px solid var(--line);
@@ -2006,7 +2033,11 @@ a {
 }
 
 /* ---------- Launch screen ---------- */
+/* Shown while <html> has "splash-on" (SPLASH_SCRIPT, src/components/Splash.tsx); lifts on "splash-done". */
 .splash {
+  display: none;
+}
+:root.splash-on .splash {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -2014,11 +2045,16 @@ a {
   place-items: center;
   background: #0b1f3a;
   background-image: radial-gradient(60% 50% at 50% 42%, rgba(20, 184, 166, 0.16), transparent 70%);
-  pointer-events: none;
-  animation: splash-out 0.55s var(--ease-out) 1.8s forwards;
+  transition:
+    opacity 0.55s var(--ease-out),
+    transform 0.55s var(--ease-out),
+    visibility 0s linear 0.55s;
 }
-.splash-seen .splash {
-  display: none;
+:root.splash-on.splash-done .splash {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(1.06);
+  pointer-events: none;
 }
 .splash-inner {
   display: flex;
@@ -2154,38 +2190,8 @@ a {
     transform: none;
   }
 }
-@keyframes splash-out {
-  to {
-    opacity: 0;
-    visibility: hidden;
-    transform: scale(1.06);
-  }
-}
 
-/* The app rises into place as the launch screen lifts (first open only). */
-@media (prefers-reduced-motion: no-preference) {
-  html:not(.splash-seen):not(.splash-done) .topbar {
-    animation: slide-down 0.55s var(--ease-out) 1.85s backwards;
-  }
-  html:not(.splash-seen):not(.splash-done) .bottomnav {
-    animation: slide-up 0.6s var(--ease-out) 1.95s backwards;
-  }
-  html:not(.splash-seen):not(.splash-done) .sidenav {
-    animation: slide-right 0.55s var(--ease-out) 1.85s backwards;
-  }
-  html:not(.splash-seen):not(.splash-done) main.page > * {
-    animation-delay: 1.9s !important;
-  }
-  html:not(.splash-seen):not(.splash-done) main.page > *:nth-child(2) {
-    animation-delay: 1.96s !important;
-  }
-  html:not(.splash-seen):not(.splash-done) main.page > *:nth-child(3) {
-    animation-delay: 2.02s !important;
-  }
-  html:not(.splash-seen):not(.splash-done) main.page > *:nth-child(n + 4) {
-    animation-delay: 2.08s !important;
-  }
-}
+/* (slide-down / slide-up: used by the LeMoSp ADMIN bars, admin.css.) */
 @keyframes slide-down {
   from {
     transform: translateY(-100%);
@@ -2195,11 +2201,6 @@ a {
   from {
     opacity: 0;
     transform: translateY(120%);
-  }
-}
-@keyframes slide-right {
-  from {
-    transform: translateX(-100%);
   }
 }
 
@@ -2240,53 +2241,8 @@ a {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* ---------- Screen changes: content rises in, a beat apart ---------- */
-  main.page > *:not(.toast):not(:has(a.btn-primary[href$="/new"])) {
-    animation: rise 0.42s var(--ease-out) backwards;
-  }
-  main.page > *:has(a.btn-primary[href$="/new"]) {
-    animation: fade 0.35s ease-out backwards;
-  }
-  main.page > *:nth-child(2) {
-    animation-delay: 0.03s;
-  }
-  main.page > *:nth-child(3) {
-    animation-delay: 0.06s;
-  }
-  main.page > *:nth-child(4) {
-    animation-delay: 0.09s;
-  }
-  main.page > *:nth-child(5) {
-    animation-delay: 0.12s;
-  }
-  main.page > *:nth-child(n + 6) {
-    animation-delay: 0.15s;
-  }
-  /* List rows cascade in. */
-  .rec-list > li,
-  .waitlist > li,
-  .tower-card .tower-row {
-    animation: rise 0.45s var(--ease-out) backwards;
-  }
-  .rec-list > li:nth-child(1) { animation-delay: 0.06s; }
-  .rec-list > li:nth-child(2) { animation-delay: 0.09s; }
-  .rec-list > li:nth-child(3) { animation-delay: 0.12s; }
-  .rec-list > li:nth-child(4) { animation-delay: 0.15s; }
-  .rec-list > li:nth-child(5) { animation-delay: 0.18s; }
-  .rec-list > li:nth-child(6) { animation-delay: 0.21s; }
-  .rec-list > li:nth-child(7) { animation-delay: 0.24s; }
-  .rec-list > li:nth-child(8) { animation-delay: 0.27s; }
-  .rec-list > li:nth-child(n + 9) { animation-delay: 0.3s; }
-  .tower-card .tower-row:nth-of-type(2) { animation-delay: 0.08s; }
-  .tower-card .tower-row:nth-of-type(3) { animation-delay: 0.16s; }
-  .grid > .tile,
-  .quick-grid > a {
-    animation: rise 0.45s var(--ease-out) backwards;
-  }
-  .grid > .tile:nth-child(2), .quick-grid > a:nth-child(2) { animation-delay: 0.04s; }
-  .grid > .tile:nth-child(3), .quick-grid > a:nth-child(3) { animation-delay: 0.08s; }
-  .grid > .tile:nth-child(4), .quick-grid > a:nth-child(4) { animation-delay: 0.12s; }
-  .grid > .tile:nth-child(n + 5), .quick-grid > a:nth-child(n + 5) { animation-delay: 0.16s; }
+  /* Screen changes: the .app-page wrapper (src/app/(app)/template.tsx) brings each screen in,
+     in 160 ms (polish.css). No row-by-row cascades: lists are simply there. */
 
   /* Loading skeleton fades in only if loading takes a moment. */
   .skeleton {
@@ -2296,18 +2252,12 @@ a {
   /* ---------- Charts and progress grow into place ---------- */
   .barlist .bar span {
     transform-origin: 0 50%;
-    animation: grow-x 0.9s var(--ease-out) 0.25s backwards;
+    animation: grow-x 0.45s var(--ease-out) 0.05s backwards;
   }
   svg.chart rect {
     transform-box: fill-box;
     transform-origin: 50% 100%;
-    animation: grow-y 0.7s var(--ease-out) 0.2s backwards;
-  }
-  svg.chart rect:nth-of-type(2n) {
-    animation-delay: 0.28s;
-  }
-  svg.chart rect:nth-of-type(3n) {
-    animation-delay: 0.36s;
+    animation: grow-y 0.4s var(--ease-out) 0.05s backwards;
   }
   .progress-bar li.done,
   .progress-bar li.now {
@@ -2392,7 +2342,7 @@ a {
 
   /* Opening sections ("+ Add an item", control-tower rows). */
   details[open] > :not(summary) {
-    animation: rise 0.32s var(--ease-out);
+    animation: rise 0.16s var(--ease-out);
   }
   .tower-chev {
     transition: transform 0.3s var(--ease-out);
@@ -2404,7 +2354,7 @@ a {
   }
   .notice-error,
   .banner {
-    animation: rise 0.35s var(--ease-out) backwards;
+    animation: rise 0.2s var(--ease-out) backwards;
   }
   .notice-error .notice-icon {
     animation: shake 0.45s ease-in-out 0.2s;
@@ -2422,7 +2372,7 @@ a {
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(6px);
   }
 }
 @keyframes fade {
@@ -2477,8 +2427,13 @@ a {
 
 /* Reduce motion: keep it calm — short fades only, no launch drawing. */
 @media (prefers-reduced-motion: reduce) {
-  .splash {
-    animation: splash-out 0.3s ease 0.5s forwards;
+  :root.splash-on .splash {
+    transition:
+      opacity 0.2s linear,
+      visibility 0s linear 0.2s;
+  }
+  :root.splash-on.splash-done .splash {
+    transform: none;
   }
   .splash * {
     animation: none !important;

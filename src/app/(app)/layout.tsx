@@ -112,6 +112,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .map((w) => w[0]?.toUpperCase() ?? "")
       .join("") || "?";
 
+  const launchBrand = company.is_demo ? null : brandForCompany(company.id);
   const brandStyle = {
     "--brand": company.primary_color,
     "--brand-dark": company.accent_color,
@@ -120,12 +121,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="shell" style={brandStyle}>
       <AppBackground kind={background} />
-      {look === "glass" && (
-        <>
-          <SectionTracker />
-          <GlassSplash logo={logo} name={company.name} tagline={`${t["shell.poweredBy"]} LeMoSp`} />
-        </>
-      )}
+      {look === "glass" && <SectionTracker />}
+      {/* The start animation, in either style (shown on the first screen of a session only). */}
+      <GlassSplash
+        brand={launchBrand?.key ?? null}
+        logo={logo}
+        name={launchBrand?.shortName ?? company.name}
+        tagline={`${t["shell.poweredBy"]} LeMoSp · LeMo Tech Solutions`}
+      />
       <SideNav look={look} items={sideNavFor(roles, t, features.on, features.ready && features.list.some((f) => f.key === "service_jobs" && f.enabled), features.ready && features.list.some((f) => (f.key === "hr_people" || f.key === "hse") && f.enabled), isManager)} company={company.name} logo={logo} initials={initials} poweredBy={t["shell.poweredBy"]} />
       <div className="main-col">
         <header className="topbar">

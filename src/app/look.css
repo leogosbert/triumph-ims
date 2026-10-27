@@ -525,9 +525,7 @@
 
 /* ---------- v1.19: smoother screen changes ---------- */
 @media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
+  /* (No smooth scrolling on <html>: it made every screen change scroll up slowly.) */
   main.page {
     transition: opacity 0.18s ease-out;
   }

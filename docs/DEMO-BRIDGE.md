@@ -27,7 +27,19 @@ The live site sets none of these, so nothing changes there. The rules are in `sr
 
 Demo passwords are kept for the team in the Command Center, never in this repository.
 
+## The demo company
+
+Leo's decision (2026-10-30): the Demonstrator's company lives inside the live project as a **kept demo**:
+`is_demo` (sample data, never billed, no emails or pushes) with no expiry, so the scheduled purge leaves it and nobody
+can end, reset or switch it from the app (`supabase/migrations/20261030000100_kept_demos.sql`; its demo bar only says
+it is a demonstration company). Only LeMo Tech's six demo logins are members, one per role; a client is added only when
+they ask. Made with `scripts/demo/demonstrator-accounts.sql` then `scripts/demo/demonstrator-company.sql` (the demo
+manager builds the usual Medium demo, which is then kept, renamed "Mwanga Supplies Ltd (DEMO)" and joined by the others).
+To remove it, give it an expiry; the purge then takes it.
+
 ## Tests
 
 `npm run test:demo` (`scripts/test-demo.ts`): off by default, refused on the live site, exact addresses only, the seat
-read from the address, and the cookie and framing rules.
+read from the address, and the cookie and framing rules. `supabase/tests/stage21_kept_demos_test.sql`: the kept demo
+is built, has one member per role, survives the purge and Exit demo, takes a client but never a guest, and ordinary
+demos are unchanged.

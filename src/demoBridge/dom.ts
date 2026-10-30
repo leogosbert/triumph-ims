@@ -272,11 +272,24 @@ function mouse(el: Element, type: string) {
   )
 }
 
-/** Presses the element the way a mouse does (pointer and mouse events, focus, then click). */
+/** Draws a short made-up signature across a drawing pad, as a finger would (pointer down, moves, up). */
+function scribble(el: Element) {
+  const r = el.getBoundingClientRect()
+  const at = (fx: number, fy: number) => ({ clientX: r.left + r.width * fx, clientY: r.top + r.height * fy })
+  const base = { bubbles: true, cancelable: true, composed: true, button: 0, pointerId: 1, pointerType: 'pen', isPrimary: true }
+  const Ctor = typeof PointerEvent !== 'undefined' ? PointerEvent : MouseEvent
+  const path = [0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85].map((fx, i) => at(fx, i % 2 ? 0.35 : 0.65))
+  el.dispatchEvent(new Ctor('pointerdown', { ...base, ...path[0] }))
+  for (const p of path.slice(1)) el.dispatchEvent(new Ctor('pointermove', { ...base, ...p }))
+  el.dispatchEvent(new Ctor('pointerup', { ...base, ...path[path.length - 1] }))
+}
+
+/** Presses the element the way a mouse does (pointer and mouse events, focus, then click). A drawing pad gets a signature. */
 export function press(el: Element) {
   if (ring && ring.target === el) {
     ring.el.setAttribute('data-press', '')
   }
+  if (el instanceof HTMLCanvasElement) return scribble(el)
   mouse(el, 'pointerdown')
   mouse(el, 'mousedown')
   if (el instanceof HTMLElement) el.focus({ preventScroll: true })

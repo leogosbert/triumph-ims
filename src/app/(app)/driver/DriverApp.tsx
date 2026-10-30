@@ -601,7 +601,11 @@ const SignaturePad = forwardRef<SignaturePadHandle, { clearLabel: string }>(func
         ref={canvasRef}
         className="sig-pad"
         onPointerDown={(e) => {
-          e.currentTarget.setPointerCapture(e.pointerId);
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch {
+            // No live pointer to capture (a scripted stroke): drawing still works.
+          }
           drawing.current = true;
           last.current = point(e);
           const ctx = e.currentTarget.getContext("2d")!;

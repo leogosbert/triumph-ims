@@ -106,8 +106,14 @@ export function installDemoBridge(deps: BridgeDeps): () => void {
     highlight(btn, 600, undefined, doc)
     await sleep(350)
     press(btn)
-    const end = Date.now() + 20_000
+    const end = Date.now() + 25_000
+    // A press that lands while the page is still starting up can be lost; press again if nothing has happened.
+    let again = Date.now() + 7_000
     for (;;) {
+      if (Date.now() >= again && win.location.pathname.startsWith(signInPath) && !(btn as HTMLButtonElement).disabled && btn.isConnected) {
+        again = Date.now() + 7_000
+        press(btn)
+      }
       const signed = await deps.currentEmail().catch(() => null)
       if (signed && !win.location.pathname.startsWith(signInPath)) break
       const alert = doc.querySelector('form [role="alert"]')

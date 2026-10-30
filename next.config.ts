@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { frameAncestors } from "./src/demoBridge/demoConfig";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -38,7 +39,8 @@ const csp = [
   "frame-src 'self' https://*.daily.co",
   "worker-src 'self'",
   "manifest-src 'self'",
-  "frame-ancestors 'none'",
+  // Only a LeMo Demonstrator build lets the Command Center frame the app (src/demoBridge/demoConfig.ts).
+  `frame-ancestors ${frameAncestors()}`,
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
@@ -46,7 +48,7 @@ const csp = [
 ].join("; ");
 
 const common = [
-  { key: "X-Frame-Options", value: "DENY" },
+  ...(frameAncestors() === "'none'" ? [{ key: "X-Frame-Options", value: "DENY" }] : []),
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: `camera=(self${daily}), microphone=(self${daily}), display-capture=(self${daily}), geolocation=(self), payment=(), usb=(), serial=(), bluetooth=()` },

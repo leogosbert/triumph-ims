@@ -168,6 +168,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <DemoBar
             role={role}
             level={company.business_level ?? null}
+            kept={company.demo_expires_at === null}
             hoursLeft={Math.max(1, Math.ceil((Date.parse(company.demo_expires_at ?? "") - Date.now()) / 36e5) || 48)}
           />
         )}

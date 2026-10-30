@@ -57,9 +57,24 @@ function ScaleSeg({ level, current }: { level: Level; current: boolean }) {
  * Shown on every screen of a demo company: which scale this demo is, switch to another scale
  * (its quick guide starts by itself), replay the quick guide, "view as" another role, start over, leave.
  */
-export function DemoBar({ role, hoursLeft, level }: { role: string; hoursLeft: number; level?: Level | null }) {
+export function DemoBar({ role, hoursLeft, level, kept = false }: { role: string; hoursLeft: number; level?: Level | null; kept?: boolean }) {
   const tr = useTr();
   const current: Level = level ?? "medium";
+  // A kept demo (several people, shown by the LeMo Demonstrator) is never deleted, switched or reset from here, and
+  // each person keeps the role they play.
+  if (kept) {
+    return (
+      <div className="demo-bar" role="region" aria-label={tr("Demo")}>
+        <span className="demo-pill">{tr("DEMO")}</span>
+        <span className="demo-text">
+          <strong className="demo-level-name">{tr("LeMo demonstration company")}</strong> · {tr("Sample data")}
+        </span>
+        <Link href="/how-it-works" className="demo-link">
+          {tr("How it works")}
+        </Link>
+      </div>
+    );
+  }
   return (
     <div className="demo-bar" role="region" aria-label={tr("Demo")}>
       <span className="demo-pill">{tr("DEMO")}</span>

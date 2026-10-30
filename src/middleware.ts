@@ -2,6 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/env";
 import { adminUrl, allowedOnAdminHost, isAdminHost } from "@/lib/hosts";
+import { demoCookieOptions } from "@/demoBridge/demoConfig";
 
 // /api/outbox is called by the scheduled job and checks its own secret.
 // /api/app-manifest is the install details (served as /manifest.webmanifest), fetched without cookies.
@@ -37,6 +38,7 @@ export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    cookieOptions: demoCookieOptions(),
     cookies: {
       getAll() {
         return request.cookies.getAll();

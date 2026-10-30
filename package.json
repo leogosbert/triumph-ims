@@ -10,7 +10,8 @@
     "test:db": "bash supabase/tests/run.sh",
     "test:money": "tsx --test scripts/test-money.ts",
     "test:applock": "tsx --test scripts/test-applock.ts",
-    "test:signed-in": "tsx --test scripts/test-signed-in.ts"
+    "test:signed-in": "tsx --test scripts/test-signed-in.ts",
+    "test:demo": "tsx --test scripts/test-demo.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

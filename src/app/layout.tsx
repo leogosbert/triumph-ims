@@ -13,6 +13,8 @@ import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { onAdminHost } from "@/lib/hosts-server";
 import { getBrand } from "@/lib/brand-server";
 import { AdminHostProvider } from "@/lib/host-client";
+import { DemoBridge } from "@/demoBridge/DemoBridge";
+import { demoConfig } from "@/demoBridge/demoConfig";
 import "./globals.css";
 import "./look.css";
 import "./billing.css";
@@ -125,6 +127,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {/* On the admin address LeMoSp ADMIN is the only app, so its card shows on every page. */}
             <InstallPrompt variant={adminHost ? "admin" : "main"} />
             <UpdatePrompt />
+            {demoConfig.enabled && <DemoBridge />}
           </AdminHostProvider>
         </LangProvider>
       </body>

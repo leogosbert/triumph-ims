@@ -72,9 +72,28 @@ select tests.check(exists (select 1 from public.memberships m join auth.users u 
 select tests.blocked_with(format('insert into public.memberships (company_id, user_id, role) values (%L, %L, ''sales'')', :'kd', :'g21'),
                           'Guest users cannot join this demo company%', 'a guest cannot join a kept demo');
 
+-- People who handle a delivery in a kept demo can save its proof of delivery (signature and photo).
+select d.id as kdel from public.deliveries d where d.company_id = :'kd' limit 1 \gset
+select tests.login('demo.manager@lemo-demo.test'); set role authenticated;
+insert into storage.objects (bucket_id, name) values ('pod', :'kd' || '/' || :'kdel' || '/signature-21.png');
+reset role;
+select tests.check(exists (select 1 from storage.objects where bucket_id = 'pod' and name = :'kd' || '/' || :'kdel' || '/signature-21.png'),
+                   'a kept demo can save a proof-of-delivery signature');
+select tests.login('demo.sales@lemo-demo.test'); set role authenticated;
+select tests.blocked_with(format('insert into storage.objects (bucket_id, name) values (''pod'', %L)', :'kd' || '/' || :'kdel' || '/x.png'),
+                          '%row-level security%', 'sales in a kept demo still cannot save delivery files');
+reset role;
+
 -- An ordinary demo keeps its single user.
 select tests.login('solo21@d.test'); set role authenticated;
 select public.create_demo_company('small') as od \gset
+reset role;
+select tests.check(public.folder_is_guest_demo(:'od') and not public.folder_is_guest_demo(:'kd')
+                   and not public.folder_is_guest_demo('not-a-company'),
+                   'only a demo with an expiry counts as a guest demo for uploads');
+select tests.login('solo21@d.test'); set role authenticated;
+select tests.blocked_with(format('insert into storage.objects (bucket_id, name) values (''pod'', %L)', :'od' || '/x/sig.png'),
+                          '%row-level security%', 'an ordinary demo still cannot upload proof files');
 reset role;
 select tests.blocked_with(format('insert into public.memberships (company_id, user_id, role) select %L, id, ''sales'' from auth.users where email = ''client21@d.test''', :'od'),
                           'A demo company has a single user%', 'an ordinary demo still has a single user');

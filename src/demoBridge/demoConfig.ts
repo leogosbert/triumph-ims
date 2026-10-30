@@ -47,18 +47,16 @@ export const demoConfig: DemoConfig = demoConfigFrom({
 
 // ---- Seats ----------------------------------------------------------------------------------------------------
 // LeMoSp keeps the sign-in in a cookie, and one browser shares a cookie between every frame of one web address. So each
-// seat of the table opens the app at its own address: a Netlify deploy alias on the demo site
-// (https://<seat>--<site>.netlify.app), or http://<seat>.localhost:<port> on a computer. The seat is read from it.
+// seat of the table opens the app at its own address: one demo site per seat (https://lemosp-demo-<seat>.netlify.app,
+// each built with NEXT_PUBLIC_DEMO_SEAT=<seat>), or http://<seat>.localhost:<port> on a computer.
 
 export const isValidSeat = (s: string | null | undefined): s is string => !!s && /^[a-z0-9][a-z0-9-]{0,39}$/.test(s);
 
-/** The seat an address belongs to ("sales" for sales--lemosp-demo.netlify.app or sales.localhost), else null. */
-export function seatFromHost(host: string | null | undefined): string | null {
-  const h = (host ?? "").toLowerCase().replace(/:\d+$/, "");
-  const alias = /^([a-z0-9-]+?)--[a-z0-9-]+\.netlify\.app$/.exec(h);
-  const local = /^([a-z0-9-]+)\.localhost$/.exec(h);
-  const seat = alias?.[1] ?? local?.[1] ?? null;
-  return isValidSeat(seat) ? seat : null;
+/** The seat this copy plays: the site's NEXT_PUBLIC_DEMO_SEAT, or "sales" for sales.localhost on a computer; else null. */
+export function seatFromHost(host: string | null | undefined, siteSeat: string | undefined = process.env.NEXT_PUBLIC_DEMO_SEAT): string | null {
+  if (isValidSeat(siteSeat)) return siteSeat;
+  const local = /^([a-z0-9-]+)\.localhost$/.exec((host ?? "").toLowerCase().replace(/:\d+$/, ""));
+  return isValidSeat(local?.[1]) ? local[1] : null;
 }
 
 /**

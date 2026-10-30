@@ -29,14 +29,15 @@ describe("demo mode switch", () => {
 });
 
 describe("seats", () => {
-  it("reads the seat from a deploy alias or a local address", () => {
-    assert.equal(seatFromHost("sales--lemosp-demo.netlify.app"), "sales");
-    assert.equal(seatFromHost("store-keeper--lemosp-demo.netlify.app"), "store-keeper");
-    assert.equal(seatFromHost("finance.localhost:3000"), "finance");
+  it("reads the seat from the demo site's setting, or from a local address", () => {
+    assert.equal(seatFromHost("lemosp-demo-sales.netlify.app", "sales"), "sales");
+    assert.equal(seatFromHost("anything", "store-keeper"), "store-keeper");
+    assert.equal(seatFromHost("finance.localhost:3000", undefined), "finance");
   });
-  it("has no seat on the plain address or anywhere else", () => {
-    for (const h of ["lemosp-demo.netlify.app", "lemosp.netlify.app", "localhost:3000", "sales--evil.example.com", "a.b.localhost", "", null])
-      assert.equal(seatFromHost(h), null, String(h));
+  it("has no seat otherwise", () => {
+    for (const h of ["lemosp-demo.netlify.app", "lemosp.netlify.app", "localhost:3000", "a.b.localhost", "", null])
+      assert.equal(seatFromHost(h, undefined), null, String(h));
+    assert.equal(seatFromHost("x.localhost", "Bad Seat!"), "x");
   });
 });
 

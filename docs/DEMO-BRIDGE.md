@@ -16,9 +16,9 @@ The live site sets none of these, so nothing changes there. The rules are in `sr
 - **Sign-in cookies:** `SameSite=None; Secure; Partitioned`, because browsers only give a framed site its cookies that
   way. Partitioned keeps them to the table.
 - **One address per seat:** the sign-in is a cookie, and one browser shares a cookie between every frame of one
-  address. So each seat opens the app at its own address: Netlify deploy aliases on the demo site
-  (`https://<seat>--<site>.netlify.app`, from `netlify deploy --alias <seat>`), or `http://<seat>.localhost:3000` on a
-  computer. The table builds these addresses itself (its kit sets `seatAddress: 'own'`).
+  address. So each seat opens the app at its own address: one demo site per seat (`https://lemosp-demo-<seat>.netlify.app`,
+  each built with `NEXT_PUBLIC_DEMO_SEAT=<seat>`), or `http://<seat>.localhost:3000` on a computer. The table builds
+  these addresses itself (its kit sets `seatAddress: 'own'`).
 - **The bridge** (`src/demoBridge/bridge.ts`, `DemoBridge.tsx`, added to the root layout only in demo builds): answers
   the table's commands (sign in through `/login`, open a page, press, fill, choose, highlight) from the listed parent
   page only, and tells the table what happens. It never sends field values or passwords back. The protocol is the

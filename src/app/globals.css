@@ -5786,3 +5786,16 @@ table.compare.rep-table tfoot td { font-weight: 700; border-top: 2px solid var(-
   background: var(--brand);
   border-radius: 3px;
 }
+
+/* ---------- Phones: no zoom, comfortable layout ----------
+   Pinch and double-tap zoom are off (viewport tag, src/lib/no-zoom.ts and touch-action below).
+   Fields use 16px text on phones and tablets so iPhone Safari never zooms in when one is tapped. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
+body { -webkit-tap-highlight-color: transparent; overflow-wrap: break-word; }
+@media (max-width: 760px), (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea { font-size: max(16px, 1em) !important; }
+}
+@media (max-width: 760px) {
+  /* Sign-in page links under the form: a thumb-size target each. */
+  .auth-more a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 4px; }
+}

@@ -3717,3 +3717,12 @@ body:has(.header.hide) .cat-tools {
     grid-column: auto;
   }
 }
+
+/* ---------- Phones: no zoom, comfortable layout ----------
+   Pinch and double-tap zoom are off (viewport tag, assets/js/main.js and touch-action below).
+   Fields use 16px text on phones and tablets so iPhone Safari never zooms in when one is tapped. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
+body { -webkit-tap-highlight-color: transparent; overflow-wrap: break-word; }
+@media (max-width: 760px), (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea { font-size: max(16px, 1em) !important; }
+}

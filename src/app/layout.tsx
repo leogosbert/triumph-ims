@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { LangProvider } from "@/lib/tr-client";
 import { getThemePref, THEME_SCRIPT } from "@/lib/theme";
 import { LOOK_SCRIPT } from "@/lib/look";
+import { NO_ZOOM_SCRIPT } from "@/lib/no-zoom";
 import { getLookPref } from "@/lib/look-server";
 import { Splash, SPLASH_SCRIPT } from "@/components/Splash";
 import { GlassSplash } from "@/components/GlassSplash";
@@ -85,6 +86,9 @@ export const viewport: Viewport = {
   themeColor: "#0B1F3A",
   width: "device-width",
   initialScale: 1,
+  // Phones: no pinch or double-tap zoom, and no zoom when a field is tapped (src/lib/no-zoom.ts).
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
 };
 
@@ -107,7 +111,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + SPLASH_SCRIPT + LOOK_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + SPLASH_SCRIPT + LOOK_SCRIPT + NO_ZOOM_SCRIPT }} />
       </head>
       <body>
         <Splash />

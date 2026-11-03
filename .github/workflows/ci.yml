@@ -81,7 +81,7 @@ jobs:
       - uses: supabase/setup-cli@v1
         if: steps.secrets.outputs.ready == 'true'
         with:
-          version: latest
+          version: 3.0.0   # pinned: 3.0 made db commands target the local stack unless --remote is given
       - name: Link the LeMoSp project
         if: steps.secrets.outputs.ready == 'true'
         run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
@@ -89,13 +89,13 @@ jobs:
         if: steps.secrets.outputs.ready == 'true'
         run: |
           # Two entries made from the dashboard have no file here; forget them so the history matches the folder.
-          supabase migration repair --status reverted 20261009182639 20261009185001 || true
+          supabase migration repair --remote --yes --status reverted 20261009182639 20261009185001 || true
           versions=$(ls supabase/migrations/*.sql | xargs -n1 basename | cut -d_ -f1 | awk -v until="$HAND_APPLIED_UNTIL" '$1 <= until')
           # Safe to repeat: marking an already recorded migration as applied changes nothing.
-          supabase migration repair --status applied $versions
+          supabase migration repair --remote --yes --status applied $versions
       - name: Apply new migrations
         if: steps.secrets.outputs.ready == 'true'
-        run: supabase db push
+        run: supabase db push --remote --yes
 
   pdf:
     name: PDF samples

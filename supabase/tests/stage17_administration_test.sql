@@ -84,14 +84,15 @@ reset role;
 
 -- ---- 2. Leave -----------------------------------------------------------------------------------
 select tests.login('tech.ad@g.test'); set role authenticated;
--- Monday 2 November 2026 to Friday 6 November: 5 working days; the weekend after is not counted.
-select public.request_leave(:'emp_tech', 'annual', '2026-11-02', '2026-11-08', 'Family visit') as lv \gset
+-- Monday 2 November 2037 to Friday 6 November: 5 working days; the weekend after is not counted.
+-- A far-future year (same calendar as 2026) so the leave has not started yet and can still be cancelled below.
+select public.request_leave(:'emp_tech', 'annual', '2037-11-02', '2037-11-08', 'Family visit') as lv \gset
 select tests.check((select days from public.leave_requests where id = :'lv') = 5, 'leave counts working days only (5)');
-select tests.blocked(format('select public.request_leave(%L, %L, %L, %L, null)', :'emp_tech', 'annual', '2026-11-04', '2026-11-05'),
+select tests.blocked(format('select public.request_leave(%L, %L, %L, %L, null)', :'emp_tech', 'annual', '2037-11-04', '2037-11-05'),
   'overlapping leave refused');
-select tests.blocked(format('select public.request_leave(%L, %L, %L, %L, null)', :'emp_driver', 'annual', '2026-12-01', '2026-12-02'),
+select tests.blocked(format('select public.request_leave(%L, %L, %L, %L, null)', :'emp_driver', 'annual', '2037-12-01', '2037-12-02'),
   'cannot ask for leave for someone else');
-select tests.blocked(format('select public.request_leave(%L, %L, %L, %L, null)', :'emp_tech', 'annual', '2026-11-14', '2026-11-15'),
+select tests.blocked(format('select public.request_leave(%L, %L, %L, %L, null)', :'emp_tech', 'annual', '2037-11-14', '2037-11-15'),
   'weekend-only leave refused');
 select tests.blocked(format('select public.decide_leave(%L, true, null)', :'lv'), 'cannot approve own leave');
 reset role;
@@ -100,9 +101,9 @@ select tests.check((select count(*) from public.notifications where user_id = :'
 
 select tests.login('boss.ad@g.test'); set role authenticated;
 select public.decide_leave(:'lv', true, 'Enjoy');
-select tests.check((public.leave_balance(:'emp_tech', 2026) ->> 'left')::numeric = 23, 'balance: 28 - 5 = 23 days left');
+select tests.check((public.leave_balance(:'emp_tech', 2037) ->> 'left')::numeric = 23, 'balance: 28 - 5 = 23 days left');
 select tests.blocked(format('select public.decide_leave(%L, false, null)', :'lv'), 'cannot answer twice');
-select public.request_leave(:'emp_driver', 'sick', '2026-11-10', '2026-11-10', null) as lv2 \gset
+select public.request_leave(:'emp_driver', 'sick', '2037-11-10', '2037-11-10', null) as lv2 \gset
 select public.decide_leave(:'lv2', false, 'No note from the doctor');
 reset role;
 select tests.check((select count(*) from public.notifications where user_id = :'tech' and kind = 'leave_decided') = 1,

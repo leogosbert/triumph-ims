@@ -250,3 +250,10 @@
 :root[data-theme="dark"] :is(input, select, textarea)[aria-invalid="true"] {
   border-color: #ff9b8f;
 }
+
+/* Phones: on lists with the round "+" button (ui-phone.css), pop-ups sit above it instead of covering it. */
+@media (max-width: 1023px) {
+  body:has(.new-fab) .toaster {
+    bottom: calc(var(--nav-h) + 96px + env(safe-area-inset-bottom));
+  }
+}

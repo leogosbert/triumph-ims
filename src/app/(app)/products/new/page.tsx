@@ -31,7 +31,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
       <form action={saveProduct}>
         <input type="hidden" name="id" value="" />
         <RecordFields sections={PRODUCT_SECTIONS} values={{ item_type: type, unit, hazardous: false, sds_on_file: false }} />
-        <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Adding…")}>{tr("Add product")}</SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block save-bar" pendingText={tr("Adding…")}>{tr("Add product")}</SubmitButton>
       </form>
       {can(roles, "editCosts") && (
         <p className="muted small" style={{ marginTop: 8 }}>{tr("You can add the supplier and cost after saving.")}</p>

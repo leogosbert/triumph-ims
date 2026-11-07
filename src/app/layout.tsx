@@ -9,6 +9,7 @@ import { GlassSplash } from "@/components/GlassSplash";
 import { NavProgress } from "@/components/NavProgress";
 import { SubmitterValue } from "@/components/SubmitterValue";
 import { SavedFlash } from "@/components/SavedFlash";
+import { EnterNext } from "@/components/EnterNext";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { onAdminHost } from "@/lib/hosts-server";
@@ -27,6 +28,7 @@ import "./nav.css";
 import "./ui-nav.css";
 import "./ui-look.css";
 import "./ui-home.css";
+import "./ui-phone.css";
 
 // IBM Plex is bundled in src/app/fonts (SIL Open Font License), so builds never depend on downloading Google Fonts.
 const sans = localFont({
@@ -126,6 +128,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <NavProgress />
         <SubmitterValue />
         <SavedFlash />
+        <EnterNext />
         <LangProvider>
           <AdminHostProvider admin={adminHost}>
             {children}

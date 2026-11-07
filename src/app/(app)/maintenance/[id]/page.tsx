@@ -187,7 +187,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
           <form action={saveContract} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={c.id} />
             <ContractFields c={c} equipment={options} currency={company.base_currency} today={todayTz()} />
-            <SubmitButton>{tr("Save")}</SubmitButton>
+            <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>
           </form>
         </details>
       )}

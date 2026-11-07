@@ -133,7 +133,7 @@ export default async function TransferPage({ params, searchParams }: { params: P
               </div>
               <div className="field">
                 <label htmlFor="quantity">{tr("Quantity")}</label>
-                <input id="quantity" name="quantity" type="text" inputMode="decimal" required />
+                <input id="quantity" name="quantity" type="text" inputMode="decimal" required enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor="note">{tr("Note")}</label>

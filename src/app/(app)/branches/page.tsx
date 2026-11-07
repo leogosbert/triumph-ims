@@ -44,7 +44,7 @@ function BranchFields({ b, members, names }: { b?: Branch; members: Member[]; na
       </div>
       <div className="field">
         <label htmlFor={`phone-${key}`}>{tr("Phone")}</label>
-        <input id={`phone-${key}`} name="phone" type="tel" maxLength={40} defaultValue={b?.phone ?? ""} />
+        <input id={`phone-${key}`} name="phone" type="tel" maxLength={40} defaultValue={b?.phone ?? ""} enterKeyHint="next" />
       </div>
       <div className="field" style={{ gridColumn: "1 / -1" }}>
         <label htmlFor={`address-${key}`}>{tr("Address")}</label>

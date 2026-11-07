@@ -90,6 +90,7 @@ export default async function ReorderPage({ searchParams }: { searchParams: Sear
                         defaultValue={Number(r.suggest) > 0 ? fmtQty(r.suggest).replace(/,/g, "") : ""}
                         aria-label={`${tr("Quantity")} ${r.name}`}
                         style={{ width: 90 }}
+                        enterKeyHint="done"
                       />
                       <span className="small muted">{r.unit}</span>
                     </div>

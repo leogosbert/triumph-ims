@@ -76,11 +76,11 @@ export function ContractFields({
       </div>
       <div className="field">
         <label htmlFor="response_hours">{tr("Response time (hours)")}</label>
-        <input id="response_hours" name="response_hours" type="text" inputMode="numeric" defaultValue={c?.response_hours ?? ""} placeholder={tr("e.g. 24")} />
+        <input id="response_hours" name="response_hours" type="text" inputMode="numeric" defaultValue={c?.response_hours ?? ""} placeholder={tr("e.g. 24")} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="price">{tr("Price per period")}</label>
-        <input id="price" name="price" type="text" inputMode="decimal" defaultValue={c?.price ?? ""} />
+        <input id="price" name="price" type="text" inputMode="decimal" defaultValue={c?.price ?? ""} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="currency">{tr("Currency")}</label>

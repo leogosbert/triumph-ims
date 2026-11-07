@@ -76,14 +76,14 @@ export function ExpenseFields({
       </div>
       <div className="field">
         <label htmlFor="amount">{tr("Amount paid (VAT included)")}{mark("amount")}</label>
-        <input id="amount" name="amount" type="text" inputMode="decimal" required defaultValue={fmt(v.amount)} readOnly={lockMoney} style={ring("amount")} />
+        <input id="amount" name="amount" type="text" inputMode="decimal" required defaultValue={fmt(v.amount)} readOnly={lockMoney} style={ring("amount")} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="vat_amount">
           {tr("of which VAT")} <span className="hint">· {tr("0 if none")}</span>
           {mark("vat_amount")}
         </label>
-        <input id="vat_amount" name="vat_amount" type="text" inputMode="decimal" defaultValue={fmt(v.vat_amount) || "0"} style={ring("vat_amount")} />
+        <input id="vat_amount" name="vat_amount" type="text" inputMode="decimal" defaultValue={fmt(v.vat_amount) || "0"} style={ring("vat_amount")} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="currency">{tr("Currency")}{mark("currency")}</label>
@@ -102,7 +102,7 @@ export function ExpenseFields({
           <label htmlFor="exchange_rate">
             {tr("Exchange rate")} <span className="hint">· {base} {tr("per 1 unit")}</span>
           </label>
-          <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={v.exchange_rate === 1 ? "" : String(v.exchange_rate)} readOnly={lockMoney} />
+          <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={v.exchange_rate === 1 ? "" : String(v.exchange_rate)} readOnly={lockMoney} enterKeyHint="next" />
         </div>
       )}
       {lockMoney ? (

@@ -39,7 +39,7 @@ export function VehicleFields({ v = {}, drivers, editing = false }: { v?: Vehicl
       </div>
       <div className="field">
         <label htmlFor="capacity_kg">{tr("Load capacity (kg)")}</label>
-        <input id="capacity_kg" name="capacity_kg" type="text" inputMode="decimal" defaultValue={v.capacity_kg ?? ""} />
+        <input id="capacity_kg" name="capacity_kg" type="text" inputMode="decimal" defaultValue={v.capacity_kg ?? ""} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="driver_id">{tr("Usual driver")}</label>
@@ -54,7 +54,7 @@ export function VehicleFields({ v = {}, drivers, editing = false }: { v?: Vehicl
       </div>
       <div className="field">
         <label htmlFor="odometer_km">{tr("Kilometres now")}</label>
-        <input id="odometer_km" name="odometer_km" type="text" inputMode="numeric" defaultValue={v.odometer_km ?? ""} />
+        <input id="odometer_km" name="odometer_km" type="text" inputMode="numeric" defaultValue={v.odometer_km ?? ""} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="insurance_expires">{tr("Insurance expires")}</label>
@@ -70,7 +70,7 @@ export function VehicleFields({ v = {}, drivers, editing = false }: { v?: Vehicl
       </div>
       <div className="field">
         <label htmlFor="service_due_km">{tr("Next service at (km)")}</label>
-        <input id="service_due_km" name="service_due_km" type="text" inputMode="numeric" defaultValue={v.service_due_km ?? ""} />
+        <input id="service_due_km" name="service_due_km" type="text" inputMode="numeric" defaultValue={v.service_due_km ?? ""} enterKeyHint="next" />
       </div>
       {editing && (
         <div className="field">

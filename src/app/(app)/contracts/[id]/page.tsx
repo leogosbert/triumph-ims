@@ -135,7 +135,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
                 </option>
               ))}
             </select>
-            <input name="unit_price" type="text" inputMode="decimal" required placeholder={`${tr("Price")} (${k.currency})`} aria-label={tr("Contract price")} />
+            <input name="unit_price" type="text" inputMode="decimal" required placeholder={`${tr("Price")} (${k.currency})`} aria-label={tr("Contract price")} enterKeyHint="done" />
             <SubmitButton className="btn btn-small btn-primary" pendingText="…">
               {tr("Save price")}
             </SubmitButton>
@@ -152,7 +152,7 @@ export default async function ContractPage({ params, searchParams }: { params: P
             <form action={saveContract} style={{ marginTop: 10 }}>
               <input type="hidden" name="id" value={k.id} />
               <ContractFields v={k} clients={[]} tenders={(tenders ?? []) as { id: string; number: string; title: string }[]} base={company.base_currency} creating={false} />
-              <SubmitButton>{tr("Save")}</SubmitButton>
+              <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>
             </form>
           </details>
           <details className="card">

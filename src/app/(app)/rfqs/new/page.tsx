@@ -40,7 +40,7 @@ export default async function NewRfqPage({ searchParams }: { searchParams: Searc
             clients={clients}
             people={people}
           />
-          <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Saving…")}>{tr("Save RFQ")}</SubmitButton>
+          <SubmitButton className="btn btn-primary btn-block save-bar" pendingText={tr("Saving…")}>{tr("Save RFQ")}</SubmitButton>
         </form>
       )}
     </>

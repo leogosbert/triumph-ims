@@ -37,7 +37,7 @@ export default async function NewProjectPage({ searchParams }: { searchParams: S
       ) : (
         <form action={createProject} className="card">
           <ProjectFields clients={clients} people={people} currency={company.base_currency} />
-          <SubmitButton>{tr("Add project")}</SubmitButton>
+          <SubmitButton className="btn btn-primary save-bar">{tr("Add project")}</SubmitButton>
         </form>
       )}
     </>

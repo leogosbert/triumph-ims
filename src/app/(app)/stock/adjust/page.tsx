@@ -58,7 +58,7 @@ export default async function AdjustStockPage({ searchParams }: { searchParams: 
           </div>
           <div className="field">
             <label htmlFor="quantity">{tr("Quantity")}</label>
-            <input id="quantity" name="quantity" type="text" inputMode="decimal" required />
+            <input id="quantity" name="quantity" type="text" inputMode="decimal" required enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="batch_no">{tr("Batch no.")}{" "}<span className="hint">{tr("· if the product has batches")}</span>

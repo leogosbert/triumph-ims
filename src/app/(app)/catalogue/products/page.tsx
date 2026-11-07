@@ -128,7 +128,7 @@ export default async function CatalogueProductsPage({ searchParams }: { searchPa
                           <label className="row small" style={{ gap: 4 }}>
                             <input type="checkbox" name="show_price" defaultChecked={c?.show_price ?? false} /> {tr("Show price")}
                           </label>
-                          <input name="sort" type="number" defaultValue={c?.sort ?? 1000} aria-label={tr("Order")} title={tr("Order (smaller first)")} style={{ width: 80 }} />
+                          <input name="sort" type="number" defaultValue={c?.sort ?? 1000} aria-label={tr("Order")} title={tr("Order (smaller first)")} style={{ width: 80 }} inputMode="numeric" enterKeyHint="next" />
                         </div>
                         <textarea name="summary" rows={2} maxLength={600} defaultValue={c?.summary ?? ""} placeholder={tr("Short description for buyers (optional)")} aria-label={tr("Description")} />
                         <div className="gt-share">

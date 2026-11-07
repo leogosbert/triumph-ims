@@ -87,11 +87,11 @@ export function SubmitDoc({ orders, defaultPo, currency }: { orders: { id: strin
               </div>
               <div className="field">
                 <label htmlFor="sd-sub">{tr("Amount before VAT")}</label>
-                <input id="sd-sub" name="subtotal" type="text" inputMode="decimal" required />
+                <input id="sd-sub" name="subtotal" type="text" inputMode="decimal" required enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor="sd-vat">{tr("VAT")}</label>
-                <input id="sd-vat" name="vat_amount" type="text" inputMode="decimal" />
+                <input id="sd-vat" name="vat_amount" type="text" inputMode="decimal" enterKeyHint="next" />
               </div>
             </div>
           </>

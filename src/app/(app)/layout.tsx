@@ -2,6 +2,7 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { BottomNav, SideNav } from "@/components/BottomNav";
 import { NavPills } from "@/components/NavPills";
+import { PhoneHelpers } from "@/components/PhoneHelpers";
 import { CompanyButton, CompanySheet, type CompanyCard } from "@/components/CompanySheet";
 import { CompanyClosing } from "@/components/CompanyClosing";
 import { ClosingGate } from "@/components/ClosingGate";
@@ -192,6 +193,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       />
       <NavPills />
       <RecentTracker scope={`${user.id}:${company.id}`} />
+      <PhoneHelpers />
       <BottomNav
         items={bottomNav(role, t, features.on)}
         menu={moreMenuFor(roles, isManager, { on: features.on, isPlatformAdmin, features: features.list, menu: true })}

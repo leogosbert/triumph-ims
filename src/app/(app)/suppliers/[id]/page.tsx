@@ -102,7 +102,7 @@ export default async function SupplierPage({
         <input type="hidden" name="id" value={supplier.id} />
         <fieldset className="plain" disabled={!editable}>
           <RecordFields sections={SUPPLIER_SECTIONS} values={supplier} readOnly={!editable} />
-          {editable && <SubmitButton className="btn btn-primary btn-block">{tr("Save changes")}</SubmitButton>}
+          {editable && <SubmitButton className="btn btn-primary btn-block save-bar">{tr("Save changes")}</SubmitButton>}
         </fieldset>
       </form>
 

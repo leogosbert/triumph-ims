@@ -87,7 +87,7 @@ export function ContractFields({
         <label htmlFor="value_cap">
           {tr("Contract value")} <span className="hint">· {tr("optional ceiling")}</span>
         </label>
-        <input id="value_cap" name="value_cap" type="text" inputMode="decimal" defaultValue={v.value_cap ?? ""} />
+        <input id="value_cap" name="value_cap" type="text" inputMode="decimal" defaultValue={v.value_cap ?? ""} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="payment_terms">{tr("Payment terms")}</label>
@@ -100,7 +100,7 @@ export function ContractFields({
       </div>
       <div className="field">
         <label htmlFor="remind_days">{tr("Remind me (days before the end)")}</label>
-        <input id="remind_days" name="remind_days" type="number" min={0} max={180} defaultValue={v.remind_days ?? 30} />
+        <input id="remind_days" name="remind_days" type="number" min={0} max={180} defaultValue={v.remind_days ?? 30} inputMode="numeric" enterKeyHint="next" />
       </div>
       {tenders.length > 0 && (
         <div className="field">

@@ -31,7 +31,7 @@ export default async function NewEmployeePage({ searchParams }: { searchParams: 
       <Notice {...notice} />
       <form action={createEmployee} className="card">
         <EmployeeFields logins={logins} />
-        <SubmitButton>{tr("Add employee")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Add employee")}</SubmitButton>
       </form>
     </>
   );

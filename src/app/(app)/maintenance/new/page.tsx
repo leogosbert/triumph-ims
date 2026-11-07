@@ -40,7 +40,7 @@ export default async function NewContractPage({ searchParams }: { searchParams: 
       <Notice {...notice} />
       <form action={createContract} className="card">
         <ContractFields clients={clients} equipment={equipment} currency={company.base_currency} today={todayTz()} />
-        <SubmitButton>{tr("Add contract")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Add contract")}</SubmitButton>
       </form>
     </>
   );

@@ -188,7 +188,7 @@ export default async function ClientPage({
                 </div>
                 <div className="field">
                   <label htmlFor="c-phone">{tr("Phone / WhatsApp")}</label>
-                  <input id="c-phone" name="phone" type="tel" />
+                  <input id="c-phone" name="phone" type="tel" enterKeyHint="next" />
                 </div>
                 <div className="field" style={{ gridColumn: "1 / -1" }}>
                   <label htmlFor="c-email">{tr("Email")}</label>
@@ -216,7 +216,7 @@ export default async function ClientPage({
             readOnly={!editable}
             lockedKeys={can(roles, "setCreditLimit") ? [] : ["credit_limit"]}
           />
-          {editable && <SubmitButton className="btn btn-primary btn-block">{tr("Save changes")}</SubmitButton>}
+          {editable && <SubmitButton className="btn btn-primary btn-block save-bar">{tr("Save changes")}</SubmitButton>}
         </fieldset>
       </form>
 

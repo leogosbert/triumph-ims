@@ -30,7 +30,7 @@ export default async function NewClientPage({ searchParams }: { searchParams: Se
           values={{ currency: company.base_currency, credit_limit: 0 }}
           lockedKeys={can(roles, "setCreditLimit") ? [] : ["credit_limit"]}
         />
-        <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Adding…")}>{tr("Add client")}</SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block save-bar" pendingText={tr("Adding…")}>{tr("Add client")}</SubmitButton>
       </form>
     </>
   );

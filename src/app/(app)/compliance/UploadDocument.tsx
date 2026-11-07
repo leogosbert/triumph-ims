@@ -103,7 +103,7 @@ export function UploadDocument({
       </div>
       <div className="field">
         <label htmlFor="cd-remind">{tr("Remind me (days before)")}</label>
-        <input id="cd-remind" name="remind_days" type="number" min={0} max={180} defaultValue={30} />
+        <input id="cd-remind" name="remind_days" type="number" min={0} max={180} defaultValue={30} inputMode="numeric" enterKeyHint="done" />
       </div>
       {error && (
         <div className="banner warn small" style={{ gridColumn: "1 / -1" }}>

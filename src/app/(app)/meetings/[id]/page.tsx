@@ -313,7 +313,7 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
                 </label>
                 <label className="field">
                   <span>{tr("Minutes")}</span>
-                  <input type="number" name="minutes" min={1} max={240} />
+                  <input type="number" name="minutes" min={1} max={240} inputMode="numeric" enterKeyHint="done" />
                 </label>
               </div>
               <SubmitButton className="btn btn-small btn-primary">{tr("Add")}</SubmitButton>
@@ -387,7 +387,7 @@ export default async function MeetingPage({ params, searchParams }: { params: Pr
                 </label>
                 <label className="field">
                   <span>{tr("Phone (WhatsApp)")}</span>
-                  <input type="tel" name="phone" maxLength={20} placeholder="0754 123 456" />
+                  <input type="tel" name="phone" maxLength={20} placeholder="0754 123 456" enterKeyHint="next" />
                 </label>
               </div>
               <label className="field">

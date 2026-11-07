@@ -47,7 +47,7 @@ function RequestForm({ item, back }: { item: PriceItem; back: string }) {
         {COUNTABLE.has(item.unit) && (
           <div>
             <label htmlFor={`q-${item.key}`}>{tr("How many")}</label>
-            <input id={`q-${item.key}`} name="quantity" type="number" min="1" max="10000" step="1" defaultValue="1" inputMode="numeric" />
+            <input id={`q-${item.key}`} name="quantity" type="number" min="1" max="10000" step="1" defaultValue="1" inputMode="numeric" enterKeyHint="next" />
           </div>
         )}
         <div>

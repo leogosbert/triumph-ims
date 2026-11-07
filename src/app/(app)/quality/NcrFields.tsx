@@ -81,7 +81,7 @@ export function NcrFields({
       ))}
       <div className="field">
         <label htmlFor="quantity_affected">{tr("Quantity affected")}</label>
-        <input id="quantity_affected" name="quantity_affected" type="text" inputMode="decimal" defaultValue={v.quantity_affected ?? ""} />
+        <input id="quantity_affected" name="quantity_affected" type="text" inputMode="decimal" defaultValue={v.quantity_affected ?? ""} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="disposition">{tr("What to do with it")}</label>
@@ -98,7 +98,7 @@ export function NcrFields({
         <label htmlFor="cost">
           {tr("Cost")} ({base})
         </label>
-        <input id="cost" name="cost" type="text" inputMode="decimal" defaultValue={v.cost ? String(v.cost) : ""} placeholder="0" />
+        <input id="cost" name="cost" type="text" inputMode="decimal" defaultValue={v.cost ? String(v.cost) : ""} placeholder="0" enterKeyHint="next" />
       </div>
       {editing && (
         <div className="field" style={wide}>

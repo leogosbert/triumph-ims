@@ -34,11 +34,11 @@ export default async function NewAssetPage({ searchParams }: { searchParams: Sea
             <label htmlFor="cost">
               {tr("Cost")} ({company.base_currency})
             </label>
-            <input id="cost" name="cost" type="text" inputMode="decimal" required />
+            <input id="cost" name="cost" type="text" inputMode="decimal" required enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="residual">{tr("Value at the end of its life")}</label>
-            <input id="residual" name="residual" type="text" inputMode="decimal" defaultValue="0" />
+            <input id="residual" name="residual" type="text" inputMode="decimal" defaultValue="0" enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="life">{tr("Useful life")}</label>
@@ -64,7 +64,7 @@ export default async function NewAssetPage({ searchParams }: { searchParams: Sea
         <p className="small muted">
           {tr("The cost is posted to the books straight away. Choose “Already entered as a supplier bill” when the bill for it is in LeMoSp, so it is not counted twice. Cost and life cannot be changed later.")}
         </p>
-        <SubmitButton>{tr("Add asset")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Add asset")}</SubmitButton>
       </form>
     </>
   );

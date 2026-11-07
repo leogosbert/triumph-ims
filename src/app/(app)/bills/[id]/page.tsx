@@ -157,7 +157,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
               <div className="grid grid-2">
                 <div className="field">
                   <label htmlFor="amount">{tr("Amount (")}{ccy})</label>
-                  <input id="amount" name="amount" type="text" inputMode="decimal" defaultValue={fmtNum(balance)} required />
+                  <input id="amount" name="amount" type="text" inputMode="decimal" defaultValue={fmtNum(balance)} required enterKeyHint="next" />
                 </div>
                 <div className="field">
                   <label htmlFor="paid_on">{tr("Date paid")}</label>
@@ -168,7 +168,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                   <div className="field">
                     <label htmlFor="exchange_rate">{tr("Bank rate used")}{" "}<span className="hint">· {company.base_currency}{" "}{tr("per 1")}{" "}{ccy}</span>
                     </label>
-                    <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(b.exchange_rate)} />
+                    <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(b.exchange_rate)} enterKeyHint="done" />
                   </div>
                 )}
               </div>
@@ -199,7 +199,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                 notes: b.notes,
               }}
             />
-            {editable && <SubmitButton>{tr("Save")}</SubmitButton>}
+            {editable && <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>}
           </fieldset>
         </form>
       </section>

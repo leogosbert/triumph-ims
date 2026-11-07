@@ -64,7 +64,7 @@ export function DocumentFields({ v, links }: { v: DocValues; links: LinkOptions 
       </div>
       <div className="field">
         <label htmlFor="remind_days">{tr("Remind me (days before)")}</label>
-        <input id="remind_days" name="remind_days" type="number" min={0} max={180} defaultValue={v.remind_days ?? 30} />
+        <input id="remind_days" name="remind_days" type="number" min={0} max={180} defaultValue={v.remind_days ?? 30} inputMode="numeric" enterKeyHint="next" />
       </div>
       {LINK_FIELDS.map((f) =>
         links[f.list].length > 0 || v[f.key] ? (

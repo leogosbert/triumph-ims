@@ -76,7 +76,7 @@ export function SeriesForm({ s, people }: { s?: Series; people: { id: string; na
         </label>
         <label className="field">
           <span>{tr("Day of the month (monthly)")}</span>
-          <input type="number" name="month_day" min={1} max={31} defaultValue={s?.month_day ?? 1} />
+          <input type="number" name="month_day" min={1} max={31} defaultValue={s?.month_day ?? 1} inputMode="numeric" enterKeyHint="next" />
         </label>
       </div>
       <div className="inline-form">
@@ -94,7 +94,7 @@ export function SeriesForm({ s, people }: { s?: Series; people: { id: string; na
         </label>
         <label className="field">
           <span>{tr("Minutes")}</span>
-          <input type="number" name="minutes" min={5} max={600} step={5} defaultValue={s?.minutes ?? 30} />
+          <input type="number" name="minutes" min={5} max={600} step={5} defaultValue={s?.minutes ?? 30} inputMode="numeric" enterKeyHint="next" />
         </label>
       </div>
       <label className="field">

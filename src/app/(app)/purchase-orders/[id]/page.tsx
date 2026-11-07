@@ -464,11 +464,11 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
                     <input type="hidden" name="line_id" value={l.id} />
                     <div>
                       <label htmlFor={`q-${l.id}`}>{tr("Qty")}</label>
-                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} />
+                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} enterKeyHint="next" />
                     </div>
                     <div>
                       <label htmlFor={`p-${l.id}`}>{tr("Unit price")}</label>
-                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} />
+                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} enterKeyHint="done" />
                     </div>
                     <SubmitButton className="btn btn-small" pendingText="…">{tr("Update")}</SubmitButton>
                   </form>
@@ -541,7 +541,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
               <div className="field">
                 <label htmlFor="exchange_rate">{tr("Exchange rate")}{" "}<span className="hint">· {company.base_currency}{" "}{tr("per 1 unit")}</span>
                 </label>
-                <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(po.exchange_rate)} />
+                <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(po.exchange_rate)} enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor="order_date">{tr("Order date")}</label>
@@ -575,11 +575,11 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
               </div>
               <div className="field">
                 <label htmlFor="freight">{tr("Freight")}</label>
-                <input id="freight" name="freight" type="text" inputMode="decimal" defaultValue={fmtNum(po.freight)} />
+                <input id="freight" name="freight" type="text" inputMode="decimal" defaultValue={fmtNum(po.freight)} enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor="vat_rate">{tr("VAT %")}{" "}<span className="hint">{tr("· 0 for foreign suppliers")}</span></label>
-                <input id="vat_rate" name="vat_rate" type="text" inputMode="decimal" defaultValue={fmtNum(po.vat_rate)} />
+                <input id="vat_rate" name="vat_rate" type="text" inputMode="decimal" defaultValue={fmtNum(po.vat_rate)} enterKeyHint="next" />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
                 <label htmlFor="supplier_ref2">{tr("Supplier's quote reference")}</label>
@@ -598,7 +598,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
                 <textarea id="terms" name="terms" defaultValue={po.terms ?? ""} placeholder={tr("Leave empty for the standard PO terms")} />
               </div>
             </div>
-            {editable && <SubmitButton>{tr("Save details")}</SubmitButton>}
+            {editable && <SubmitButton className="btn btn-primary save-bar">{tr("Save details")}</SubmitButton>}
           </fieldset>
         </form>
       </section>

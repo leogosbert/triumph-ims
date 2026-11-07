@@ -55,11 +55,11 @@ export function LicenceFields({ v }: { v: Partial<Licence> }) {
       </div>
       <div className="field">
         <label htmlFor="remind_days">{tr("Remind me this many days before")}</label>
-        <input id="remind_days" name="remind_days" type="number" min={0} max={365} defaultValue={v.remind_days ?? 60} />
+        <input id="remind_days" name="remind_days" type="number" min={0} max={365} defaultValue={v.remind_days ?? 60} inputMode="numeric" enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="cost">{tr("Cost")}</label>
-        <input id="cost" name="cost" type="number" min={0} step="0.01" defaultValue={v.cost ?? ""} />
+        <input id="cost" name="cost" type="number" min={0} step="0.01" defaultValue={v.cost ?? ""} inputMode="decimal" enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="currency">{tr("Currency")}</label>

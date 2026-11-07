@@ -72,7 +72,7 @@ export default async function NewHirePage({ searchParams }: { searchParams: Sear
           </div>
           <div className="field">
             <label htmlFor="deposit">{tr("Deposit")}</label>
-            <input id="deposit" name="deposit" type="text" inputMode="decimal" />
+            <input id="deposit" name="deposit" type="text" inputMode="decimal" enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="currency">{tr("Currency")}</label>
@@ -84,7 +84,7 @@ export default async function NewHirePage({ searchParams }: { searchParams: Sear
           </div>
         </div>
         <p className="muted small">{tr("You add the items and their rates on the next screen.")}</p>
-        <SubmitButton>{tr("Save and add items")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Save and add items")}</SubmitButton>
       </form>
     </>
   );

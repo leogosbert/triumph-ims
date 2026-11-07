@@ -112,6 +112,7 @@ export default async function ProductPage({
                     type="text"
                     inputMode="decimal"
                     defaultValue={cost?.last_cost != null ? Number(cost.last_cost).toLocaleString("en-GB") : ""}
+                    enterKeyHint="done"
                   />
                 </div>
               </div>
@@ -136,7 +137,7 @@ export default async function ProductPage({
         <input type="hidden" name="id" value={product.id} />
         <fieldset className="plain" disabled={!editable}>
           <RecordFields sections={PRODUCT_SECTIONS} values={product} readOnly={!editable} />
-          {editable && <SubmitButton className="btn btn-primary btn-block">{tr("Save changes")}</SubmitButton>}
+          {editable && <SubmitButton className="btn btn-primary btn-block save-bar">{tr("Save changes")}</SubmitButton>}
         </fieldset>
       </form>
 

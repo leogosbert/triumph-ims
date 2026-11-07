@@ -42,7 +42,7 @@ export function DisposeForm({
           <label htmlFor="amount">
             {tr("Amount received")} ({currency})
           </label>
-          <input id="amount" name="amount" type="text" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" />
+          <input id="amount" name="amount" type="text" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" enterKeyHint="next" />
         </div>
         <div className="field">
           <label htmlFor="method">{tr("Received in")}</label>

@@ -126,7 +126,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
                 <label htmlFor={`amount_${r.id}`}>
                   {tr("Amount")} {guess && <span className="hint">· {tr("from")} {tr(guess.from)}</span>}
                 </label>
-                <input id={`amount_${r.id}`} name="amount" type="number" min={0} step="0.01" defaultValue={guess ? Math.round(guess.amount * 100) / 100 : ""} />
+                <input id={`amount_${r.id}`} name="amount" type="number" min={0} step="0.01" defaultValue={guess ? Math.round(guess.amount * 100) / 100 : ""} inputMode="decimal" enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor={`control_${r.id}`}>{tr("Control number")}</label>

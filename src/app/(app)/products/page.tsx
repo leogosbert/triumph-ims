@@ -84,6 +84,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
         archived={archived}
         filter={{ name: "category", label: "Categories", value: category, options: CATEGORIES }}
         addHref={can(roles, "editProducts") ? "/products/new" : undefined}
+        scan
         addLabel="New product"
       />
       {rows.length === 0 ? (

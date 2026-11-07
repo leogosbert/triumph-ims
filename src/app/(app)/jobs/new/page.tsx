@@ -102,7 +102,7 @@ export default async function NewJobPage({ searchParams }: { searchParams: Searc
           <label htmlFor="checklist">{tr("Checklist")}</label>
           <textarea id="checklist" name="checklist" rows={4} placeholder={tr("One point per line, e.g.\nCheck the pressure\nTighten all joints\nClean the site")} />
         </div>
-        <SubmitButton className="btn btn-primary btn-block">{tr("Create job")}</SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block save-bar">{tr("Create job")}</SubmitButton>
       </form>
     </>
   );

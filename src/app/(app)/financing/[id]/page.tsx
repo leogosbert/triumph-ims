@@ -166,7 +166,7 @@ export default async function FinancingRequestPage({ params, searchParams }: { p
               {s.needs === "date" && <input name="on" type="date" defaultValue={today} max={today} aria-label={tr("Date")} />}
               {s.needs === "amount" && (
                 <>
-                  <input name="approved_amount" type="text" inputMode="decimal" placeholder={`${tr("Approved amount")} (${formatMoney(Number(f.amount), f.currency)})`} aria-label={tr("Approved amount")} />
+                  <input name="approved_amount" type="text" inputMode="decimal" placeholder={`${tr("Approved amount")} (${formatMoney(Number(f.amount), f.currency)})`} aria-label={tr("Approved amount")} enterKeyHint="next" />
                   <input name="bank_reference" type="text" maxLength={120} placeholder={tr("Bank reference")} aria-label={tr("Bank reference")} />
                 </>
               )}

@@ -151,7 +151,7 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Se
                         </select>
                       </td>
                       <td>
-                        <input name={`min${i + 1}`} type="text" inputMode="decimal" defaultValue={s ? String(Number(s.min_amount)) : ""} aria-label={tr("From amount")} />
+                        <input name={`min${i + 1}`} type="text" inputMode="decimal" defaultValue={s ? String(Number(s.min_amount)) : ""} aria-label={tr("From amount")} enterKeyHint="next" />
                       </td>
                       <td>
                         <input name={`label${i + 1}`} type="text" maxLength={80} defaultValue={s?.label ?? ""} placeholder={i === 0 ? tr("e.g. Budget check") : undefined} aria-label={tr("Name of the step")} />

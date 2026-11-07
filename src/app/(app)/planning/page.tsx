@@ -126,6 +126,7 @@ export default async function PlanningPage({ searchParams }: { searchParams: Sea
                           defaultValue={Number(r.order_qty) > 0 ? String(Number(r.order_qty)) : ""}
                           aria-label={`${tr("Quantity")} ${r.name}`}
                           style={{ width: 90 }}
+                          enterKeyHint="done"
                         />
                         <span className="small muted">{r.unit}</span>
                       </div>

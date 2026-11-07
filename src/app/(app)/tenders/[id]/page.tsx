@@ -143,7 +143,7 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
             <form action={setTenderStatus} className="inline-form">
               <input type="hidden" name="id" value={t.id} />
               <input type="hidden" name="status" value="submitted" />
-              <input name="our_price" type="text" inputMode="decimal" defaultValue={t.our_price ?? ""} placeholder={tr("Our bid price")} aria-label={tr("Our bid price")} required />
+              <input name="our_price" type="text" inputMode="decimal" defaultValue={t.our_price ?? ""} placeholder={tr("Our bid price")} aria-label={tr("Our bid price")} required enterKeyHint="done" />
               <SubmitButton className="btn btn-primary btn-small" pendingText="…">
                 {tr("Mark as submitted")}
               </SubmitButton>
@@ -185,7 +185,7 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
                 </div>
                 <div className="field">
                   <label htmlFor="winning_price">{tr("Winning price")}</label>
-                  <input id="winning_price" name="winning_price" type="text" inputMode="decimal" />
+                  <input id="winning_price" name="winning_price" type="text" inputMode="decimal" enterKeyHint="next" />
                 </div>
                 <div className="field" style={{ gridColumn: "1 / -1" }}>
                   <label htmlFor="note">{tr("Why we lost")}</label>
@@ -265,7 +265,7 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
             opportunities={oppChoices as { id: string; number: string; title: string }[]}
             base={company.base_currency}
           />
-          <SubmitButton>{tr("Save")}</SubmitButton>
+          <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>
         </form>
       </details>
     </>

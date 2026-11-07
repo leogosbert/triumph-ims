@@ -65,11 +65,11 @@ export default async function PayrollSettingsPage({ searchParams }: { searchPara
                     <label htmlFor={`band_from_${i}`}>
                       {tr("From amount")} ({base})
                     </label>
-                    <input id={`band_from_${i}`} name={`band_from_${i}`} type="text" inputMode="decimal" defaultValue={b ? String(b.from) : ""} />
+                    <input id={`band_from_${i}`} name={`band_from_${i}`} type="text" inputMode="decimal" defaultValue={b ? String(b.from) : ""} enterKeyHint="next" />
                   </div>
                   <div className="field">
                     <label htmlFor={`band_rate_${i}`}>{tr("Rate %")}</label>
-                    <input id={`band_rate_${i}`} name={`band_rate_${i}`} type="text" inputMode="decimal" defaultValue={b ? String(b.rate) : ""} />
+                    <input id={`band_rate_${i}`} name={`band_rate_${i}`} type="text" inputMode="decimal" defaultValue={b ? String(b.rate) : ""} enterKeyHint="next" />
                   </div>
                 </div>
               ))}
@@ -102,7 +102,7 @@ export default async function PayrollSettingsPage({ searchParams }: { searchPara
                     {tr(f.label)}
                     {f.unit && ` (${f.unit})`}
                   </label>
-                  <input id={f.key} name={f.key} type="text" inputMode="decimal" defaultValue={String(s[f.key])} required />
+                  <input id={f.key} name={f.key} type="text" inputMode="decimal" defaultValue={String(s[f.key])} required enterKeyHint="done" />
                 </div>
               ))}
             </div>

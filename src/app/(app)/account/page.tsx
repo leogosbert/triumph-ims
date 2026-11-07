@@ -116,7 +116,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
             </div>
             <div className="field">
               <label htmlFor="phone">{tr("Phone")}</label>
-              <input id="phone" name="phone" type="tel" autoComplete="tel" defaultValue={profile.phone ?? ""} />
+              <input id="phone" name="phone" type="tel" autoComplete="tel" defaultValue={profile.phone ?? ""} enterKeyHint="done" />
             </div>
           </div>
           <div className="field">

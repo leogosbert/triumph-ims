@@ -218,7 +218,7 @@ export async function InvoiceMoneyCards({
                       {tr("Amount (")}
                       {inv.currency})
                     </label>
-                    <input name="amount" type="text" inputMode="decimal" required placeholder={String(Math.round(balance))} />
+                    <input name="amount" type="text" inputMode="decimal" required placeholder={String(Math.round(balance))} enterKeyHint="next" />
                   </div>
                   <div className="field">
                     <label>{tr("Date")}</label>

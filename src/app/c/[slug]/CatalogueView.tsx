@@ -174,6 +174,7 @@ export function CatalogueView({ slug, products, currency }: { slug: string; prod
                       value={picked[p.id]}
                       onChange={(e) => setPicked((cur) => ({ ...cur, [p.id]: e.target.value }))}
                       aria-label={`${tr("Quantity")}: ${p.name}`}
+                      enterKeyHint="next"
                     />
                     <small>{p.unit ?? ""}</small>
                     <button type="button" onClick={() => toggle(p.id)} aria-label={tr("Remove")}>
@@ -198,7 +199,7 @@ export function CatalogueView({ slug, products, currency }: { slug: string; prod
             </label>
             <label>
               {tr("Phone or WhatsApp")}
-              <input name="phone" type="tel" maxLength={20} autoComplete="tel" placeholder="+255" />
+              <input name="phone" type="tel" maxLength={20} autoComplete="tel" placeholder="+255" enterKeyHint="next" />
             </label>
             <label className="cat-wide">
               {tr("Message")}

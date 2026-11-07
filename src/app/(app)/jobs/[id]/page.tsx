@@ -302,7 +302,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
                 </div>
                 <div className="field">
                   <label htmlFor="line-qty">{tr("Quantity")}</label>
-                  <input id="line-qty" name="quantity" type="text" inputMode="decimal" required />
+                  <input id="line-qty" name="quantity" type="text" inputMode="decimal" required enterKeyHint="next" />
                 </div>
                 <div className="field">
                   <label htmlFor="line-unit">{tr("Unit")}</label>
@@ -310,7 +310,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
                 </div>
                 <div className="field">
                   <label htmlFor="line-price">{tr("Price each")}</label>
-                  <input id="line-price" name="unit_price" type="text" inputMode="decimal" placeholder={tr("Leave empty for the list price")} />
+                  <input id="line-price" name="unit_price" type="text" inputMode="decimal" placeholder={tr("Leave empty for the list price")} enterKeyHint="done" />
                 </div>
               </div>
               <SubmitButton className="btn btn-small">{tr("Add")}</SubmitButton>
@@ -377,7 +377,7 @@ export default async function JobPage({ params, searchParams }: { params: Promis
               </div>
               <div className="field">
                 <label htmlFor="h-hours">{tr("Hours")}</label>
-                <input id="h-hours" name="hours" type="text" inputMode="decimal" required placeholder="2.5" />
+                <input id="h-hours" name="hours" type="text" inputMode="decimal" required placeholder="2.5" enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor="h-billable">{tr("Billable")}</label>

@@ -1,6 +1,7 @@
 import { tr } from "@/lib/tr";
 import type { ProductOption } from "@/lib/options";
 import { UNITS } from "@/lib/lists";
+import { ScanButton } from "@/components/ScanButton";
 
 /** Product drop-down plus free-text description, quantity and unit. */
 export function ProductLineFields({ products, showPrice = false }: { products: ProductOption[]; showPrice?: boolean }) {
@@ -9,14 +10,17 @@ export function ProductLineFields({ products, showPrice = false }: { products: P
       <div className="field" style={{ gridColumn: "1 / -1" }}>
         <label htmlFor="product_id">{tr("Product")}{" "}<span className="hint">{tr("· or leave empty and describe it below")}</span>
         </label>
-        <select id="product_id" name="product_id" defaultValue="">
-          <option value="">{tr("— Not in the catalogue —")}</option>
-          {products.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name} ({p.sku})
-            </option>
-          ))}
-        </select>
+        <div className="scan-field">
+          <select id="product_id" name="product_id" defaultValue="">
+            <option value="">{tr("— Not in the catalogue —")}</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id} data-sku={p.sku}>
+                {p.name} ({p.sku})
+              </option>
+            ))}
+          </select>
+          <ScanButton target="product_id" />
+        </div>
       </div>
       <div className="field" style={{ gridColumn: "1 / -1" }}>
         <label htmlFor="description">{tr("Description")}{" "}<span className="hint">{tr("· filled from the product if left empty")}</span>
@@ -25,7 +29,7 @@ export function ProductLineFields({ products, showPrice = false }: { products: P
       </div>
       <div className="field">
         <label htmlFor="quantity">{tr("Quantity")}</label>
-        <input id="quantity" name="quantity" type="text" inputMode="decimal" defaultValue="1" required />
+        <input id="quantity" name="quantity" type="text" inputMode="decimal" defaultValue="1" required enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="unit">{tr("Unit")}</label>
@@ -43,11 +47,11 @@ export function ProductLineFields({ products, showPrice = false }: { products: P
           <div className="field">
             <label htmlFor="unit_price">{tr("Unit price")}{" "}<span className="hint">{tr("· empty = catalogue price")}</span>
             </label>
-            <input id="unit_price" name="unit_price" type="text" inputMode="decimal" />
+            <input id="unit_price" name="unit_price" type="text" inputMode="decimal" enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="discount_pct">{tr("Discount %")}</label>
-            <input id="discount_pct" name="discount_pct" type="text" inputMode="decimal" defaultValue="0" />
+            <input id="discount_pct" name="discount_pct" type="text" inputMode="decimal" defaultValue="0" enterKeyHint="next" />
           </div>
         </>
       )}

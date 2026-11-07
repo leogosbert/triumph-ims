@@ -62,15 +62,15 @@ export default async function SupplierQuotePage({
             <div className="field">
               <label htmlFor="exchange_rate">{tr("Exchange rate")}{" "}<span className="hint">· {company.base_currency}{" "}{tr("per 1 unit (ignored for")}{" "}{company.base_currency})</span>
               </label>
-              <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmt(inv.exchange_rate)} />
+              <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmt(inv.exchange_rate)} enterKeyHint="next" />
             </div>
             <div className="field">
               <label htmlFor="freight">{tr("Freight / delivery charge (their currency)")}</label>
-              <input id="freight" name="freight" type="text" inputMode="decimal" defaultValue={fmt(inv.freight)} />
+              <input id="freight" name="freight" type="text" inputMode="decimal" defaultValue={fmt(inv.freight)} enterKeyHint="next" />
             </div>
             <div className="field">
               <label htmlFor="lead_time_days">{tr("Lead time (days)")}</label>
-              <input id="lead_time_days" name="lead_time_days" type="text" inputMode="numeric" defaultValue={fmt(inv.lead_time_days)} />
+              <input id="lead_time_days" name="lead_time_days" type="text" inputMode="numeric" defaultValue={fmt(inv.lead_time_days)} enterKeyHint="next" />
             </div>
             <div className="field">
               <label htmlFor="payment_terms">{tr("Payment terms")}</label>
@@ -131,6 +131,7 @@ export default async function SupplierQuotePage({
                     placeholder={tr("price / unit")}
                     defaultValue={fmt(prices.get(l.id))}
                     style={{ width: 140 }}
+                    enterKeyHint="done"
                   />
                 </div>
               </li>

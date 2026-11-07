@@ -1,5 +1,6 @@
 import { tr } from "@/lib/tr";
 import type { FieldDef, Section } from "@/lib/fields";
+import { ScanButton } from "@/components/ScanButton";
 
 type Values = Record<string, unknown>;
 
@@ -45,14 +46,25 @@ function Input({ f, value, disabled }: { f: FieldDef; value: unknown; disabled: 
           {...common}
           type="text"
           inputMode={f.type === "integer" ? "numeric" : "decimal"}
+          enterKeyHint="next"
+          autoComplete="off"
           defaultValue={value === null || value === undefined ? "" : Number(value).toLocaleString("en-GB")}
         />
       );
     case "email":
       return <input {...common} type="email" defaultValue={asText(value)} />;
     case "tel":
-      return <input {...common} type="tel" defaultValue={asText(value)} />;
+      return <input {...common} type="tel" defaultValue={asText(value)} enterKeyHint="next" />;
     default:
+      // A code that can be read from a barcode (SKU): the camera Scan button sits beside it.
+      if (f.scan && !disabled) {
+        return (
+          <div className="scan-field">
+            <input {...common} type="text" defaultValue={asText(value)} autoComplete="off" />
+            <ScanButton target={id} />
+          </div>
+        );
+      }
       return <input {...common} type="text" defaultValue={asText(value)} />;
   }
 }

@@ -60,11 +60,11 @@ export default async function TeamRatesPage({ searchParams }: { searchParams: Se
                   </div>
                   <div className="field">
                     <label htmlFor={`b-${p.id}`}>{tr("Charged per hour")}</label>
-                    <input id={`b-${p.id}`} name="bill_rate" type="text" inputMode="decimal" defaultValue={r?.bill_rate ?? ""} />
+                    <input id={`b-${p.id}`} name="bill_rate" type="text" inputMode="decimal" defaultValue={r?.bill_rate ?? ""} enterKeyHint="next" />
                   </div>
                   <div className="field">
                     <label htmlFor={`c-${p.id}`}>{tr("Cost per hour")}</label>
-                    <input id={`c-${p.id}`} name="cost_rate" type="text" inputMode="decimal" defaultValue={r?.cost_rate ?? ""} />
+                    <input id={`c-${p.id}`} name="cost_rate" type="text" inputMode="decimal" defaultValue={r?.cost_rate ?? ""} enterKeyHint="done" />
                   </div>
                 </div>
                 <SubmitButton className="btn btn-small">{tr("Save")}</SubmitButton>

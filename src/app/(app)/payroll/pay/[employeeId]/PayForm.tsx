@@ -79,6 +79,7 @@ export function PayForm({
         inputMode="decimal"
         value={amounts[key]}
         onChange={(e) => setAmounts((a) => ({ ...a, [key]: e.target.value }))}
+        enterKeyHint="next"
       />
     </div>
   );
@@ -147,7 +148,7 @@ export function PayForm({
         {method === "mobile_money" && (
           <div className="field">
             <label htmlFor="mobile_number">{t("Mobile money number")}</label>
-            <input id="mobile_number" name="mobile_number" type="tel" maxLength={30} defaultValue={initial.mobile_number} placeholder="07XX XXX XXX" />
+            <input id="mobile_number" name="mobile_number" type="tel" maxLength={30} defaultValue={initial.mobile_number} placeholder="07XX XXX XXX" enterKeyHint="done" />
           </div>
         )}
       </section>

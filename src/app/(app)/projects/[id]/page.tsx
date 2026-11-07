@@ -218,7 +218,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
                   <label htmlFor="ms-amount">
                     {tr("Amount")} ({cur})
                   </label>
-                  <input id="ms-amount" name="amount" type="text" inputMode="decimal" />
+                  <input id="ms-amount" name="amount" type="text" inputMode="decimal" enterKeyHint="done" />
                 </div>
               </div>
               <SubmitButton className="btn btn-small btn-primary">{tr("Add milestone")}</SubmitButton>
@@ -321,7 +321,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
           <form action={saveProject}>
             <input type="hidden" name="id" value={project.id} />
             <ProjectFields p={project} clients={[]} people={people} currency={cur} editing />
-            <SubmitButton>{tr("Save")}</SubmitButton>
+            <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>
           </form>
         </details>
       )}

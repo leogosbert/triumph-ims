@@ -99,7 +99,7 @@ export default async function CashflowPage({ searchParams }: { searchParams: Sea
             <label htmlFor="amount">
               {tr("Amount")} ({base})
             </label>
-            <input id="amount" name="amount" type="text" inputMode="decimal" required />
+            <input id="amount" name="amount" type="text" inputMode="decimal" required enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="as_of">{tr("Date")}</label>

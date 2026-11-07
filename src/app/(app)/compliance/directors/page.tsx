@@ -45,7 +45,7 @@ function DirectorFields({ v }: { v: Partial<Director> }) {
         <label htmlFor={`share_percent_${k}`}>
           {tr("Share %")} <span className="hint">· {tr("empty while not decided")}</span>
         </label>
-        <input id={`share_percent_${k}`} name="share_percent" type="number" min={0} max={100} step="0.001" defaultValue={v.share_percent ?? ""} />
+        <input id={`share_percent_${k}`} name="share_percent" type="number" min={0} max={100} step="0.001" defaultValue={v.share_percent ?? ""} inputMode="decimal" enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor={`id_type_${k}`}>{tr("ID")}</label>
@@ -71,7 +71,7 @@ function DirectorFields({ v }: { v: Partial<Director> }) {
       </div>
       <div className="field">
         <label htmlFor={`shares_held_${k}`}>{tr("Number of shares")}</label>
-        <input id={`shares_held_${k}`} name="shares_held" type="number" min={0} step="1" defaultValue={v.shares_held ?? ""} />
+        <input id={`shares_held_${k}`} name="shares_held" type="number" min={0} step="1" defaultValue={v.shares_held ?? ""} inputMode="decimal" enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor={`appointed_on_${k}`}>{tr("Appointed on")}</label>
@@ -79,7 +79,7 @@ function DirectorFields({ v }: { v: Partial<Director> }) {
       </div>
       <div className="field">
         <label htmlFor={`phone_${k}`}>{tr("Phone")}</label>
-        <input id={`phone_${k}`} name="phone" type="tel" maxLength={40} defaultValue={v.phone ?? ""} />
+        <input id={`phone_${k}`} name="phone" type="tel" maxLength={40} defaultValue={v.phone ?? ""} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor={`email_${k}`}>{tr("Email")}</label>
@@ -99,7 +99,7 @@ function DirectorFields({ v }: { v: Partial<Director> }) {
       )}
       <div className="field">
         <label htmlFor={`sort_${k}`}>{tr("Order")}</label>
-        <input id={`sort_${k}`} name="sort" type="number" min={0} max={999} defaultValue={v.sort ?? 0} />
+        <input id={`sort_${k}`} name="sort" type="number" min={0} max={999} defaultValue={v.sort ?? 0} inputMode="numeric" enterKeyHint="next" />
       </div>
       <div className="field" style={{ gridColumn: "1 / -1" }}>
         <label htmlFor={`notes_${k}`}>{tr("Notes")}</label>

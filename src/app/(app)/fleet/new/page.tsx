@@ -31,7 +31,7 @@ export default async function NewVehiclePage({ searchParams }: { searchParams: S
       <Notice {...notice} />
       <form action={createVehicle} className="card">
         <VehicleFields drivers={drivers} />
-        <SubmitButton>{tr("Add vehicle")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Add vehicle")}</SubmitButton>
       </form>
     </>
   );

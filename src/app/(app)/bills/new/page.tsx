@@ -84,7 +84,7 @@ export default async function NewBillPage({ searchParams }: { searchParams: Sear
             notes: null,
           }}
         />
-        <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Saving…")}>{tr("Save bill")}</SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block save-bar" pendingText={tr("Saving…")}>{tr("Save bill")}</SubmitButton>
       </form>
     </>
   );

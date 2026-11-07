@@ -34,7 +34,7 @@ export default async function NewEquipmentPage({ searchParams }: { searchParams:
       <form action={createEquipment} className="card">
         {clientId && <input type="hidden" name="back_client" value={clientId} />}
         <EquipmentFields clients={clients} products={products} clientId={clientId} />
-        <SubmitButton>{tr("Add equipment")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Add equipment")}</SubmitButton>
       </form>
     </>
   );

@@ -180,6 +180,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Sear
                           defaultValue={b != null ? String(Number(b)) : ""}
                           aria-label={`${tr("Budget")} ${tr(label)}`}
                           style={{ width: 130 }}
+                          enterKeyHint="next"
                         />
                       </td>
                       <td>{started ? short(a) : "—"}</td>
@@ -194,7 +195,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Sear
           </div>
           <div className="field" style={{ marginTop: 8 }}>
             <label htmlFor="same">{tr("Or the same amount every month")}</label>
-            <input id="same" name="same" type="text" inputMode="decimal" placeholder={tr("e.g. 15,000,000")} />
+            <input id="same" name="same" type="text" inputMode="decimal" placeholder={tr("e.g. 15,000,000")} enterKeyHint="done" />
           </div>
           <p className="small muted">{tr("Leave a month empty for no budget. Amounts are in")} {base}.</p>
           <SubmitButton>{tr("Save budget")}</SubmitButton>

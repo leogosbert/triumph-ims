@@ -26,7 +26,7 @@ export default async function NewSupplierPage({ searchParams }: { searchParams: 
       <form action={saveSupplier}>
         <input type="hidden" name="id" value="" />
         <RecordFields sections={SUPPLIER_SECTIONS} values={{ currency: company.base_currency }} />
-        <SubmitButton className="btn btn-primary btn-block" pendingText={tr("Adding…")}>{tr("Add supplier")}</SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block save-bar" pendingText={tr("Adding…")}>{tr("Add supplier")}</SubmitButton>
       </form>
     </>
   );

@@ -1,5 +1,6 @@
 import { tr } from "@/lib/tr";
 import Link from "next/link";
+import { ScanButton } from "@/components/ScanButton";
 
 /** Search box, an optional filter, and a "show archived" switch for list pages. */
 export function ListToolbar({
@@ -8,17 +9,21 @@ export function ListToolbar({
   filter,
   addHref,
   addLabel,
+  scan = false,
 }: {
   q: string;
   archived: boolean;
   filter?: { name: string; label: string; value: string; options: readonly string[] };
   addHref?: string;
   addLabel?: string;
+  /** A camera Scan button beside the search box (product lists), where the phone can read barcodes. */
+  scan?: boolean;
 }) {
   return (
     <form className="card toolbar" method="get" role="search">
       <div className="toolbar-row">
-        <input type="search" name="q" defaultValue={q} placeholder={tr("Search…")} aria-label={tr("Search")} />
+        <input id={scan ? "list-q" : undefined} type="search" name="q" defaultValue={q} placeholder={tr("Search…")} aria-label={tr("Search")} enterKeyHint="search" />
+        {scan && <ScanButton target="list-q" submit />}
         <button className="btn" type="submit">{tr("Search")}</button>
       </div>
       <div className="toolbar-row small">

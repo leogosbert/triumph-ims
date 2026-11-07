@@ -35,7 +35,7 @@ export function RequestForm({ token, shownAt }: { token: string; shownAt: number
       </label>
       <label className="field">
         <span>{tr("Phone (optional)")}</span>
-        <input type="tel" name="phone" maxLength={20} autoComplete="tel" />
+        <input type="tel" name="phone" maxLength={20} autoComplete="tel" enterKeyHint="next" />
       </label>
       <label className="field">
         <span>{tr("What is the meeting about?")}</span>

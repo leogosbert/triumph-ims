@@ -99,7 +99,7 @@ export function JobFields({
       </div>
       <div className="field">
         <label htmlFor="price">{tr("Agreed price")}</label>
-        <input id="price" name="price" type="text" inputMode="decimal" defaultValue={v.price ?? ""} />
+        <input id="price" name="price" type="text" inputMode="decimal" defaultValue={v.price ?? ""} enterKeyHint="next" />
         <span className="hint small muted">{tr("Leave empty to bill the materials, labour and hours used.")}</span>
       </div>
       <div className="field">

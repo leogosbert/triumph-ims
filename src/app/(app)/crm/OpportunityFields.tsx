@@ -60,7 +60,7 @@ export function OpportunityFields({
       </div>
       <div className="field">
         <label htmlFor="contact_phone">{tr("Phone")}</label>
-        <input id="contact_phone" name="contact_phone" type="tel" maxLength={40} defaultValue={v.contact_phone ?? ""} />
+        <input id="contact_phone" name="contact_phone" type="tel" maxLength={40} defaultValue={v.contact_phone ?? ""} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="contact_email">{tr("Email")}</label>
@@ -78,7 +78,7 @@ export function OpportunityFields({
       </div>
       <div className="field">
         <label htmlFor="value">{tr("Expected value")}</label>
-        <input id="value" name="value" type="text" inputMode="decimal" defaultValue={v.value ? String(v.value) : ""} placeholder="0" />
+        <input id="value" name="value" type="text" inputMode="decimal" defaultValue={v.value ? String(v.value) : ""} placeholder="0" enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="currency">{tr("Currency")}</label>

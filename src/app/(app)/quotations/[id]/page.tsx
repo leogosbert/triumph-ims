@@ -500,15 +500,15 @@ export default async function QuotationPage({
                     <input type="hidden" name="line_id" value={l.id} />
                     <div>
                       <label htmlFor={`q-${l.id}`}>{tr("Qty")}</label>
-                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} />
+                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} enterKeyHint="next" />
                     </div>
                     <div>
                       <label htmlFor={`p-${l.id}`}>{tr("Unit price")}</label>
-                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} />
+                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} enterKeyHint="next" />
                     </div>
                     <div>
                       <label htmlFor={`d-${l.id}`}>{tr("Disc. %")}</label>
-                      <input id={`d-${l.id}`} name="discount_pct" type="text" inputMode="decimal" defaultValue={fmtNum(l.discount_pct)} />
+                      <input id={`d-${l.id}`} name="discount_pct" type="text" inputMode="decimal" defaultValue={fmtNum(l.discount_pct)} enterKeyHint="done" />
                     </div>
                     <SubmitButton className="btn btn-small" pendingText="…">{tr("Update")}</SubmitButton>
                   </form>
@@ -636,7 +636,7 @@ export default async function QuotationPage({
               <div className="field">
                 <label htmlFor="exchange_rate">{tr("Exchange rate")}{" "}<span className="hint">· {company.base_currency}{" "}{tr("per 1 unit")}</span>
                 </label>
-                <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(q.exchange_rate)} />
+                <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(q.exchange_rate)} enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor="issue_date">{tr("Issue date")}</label>
@@ -670,7 +670,7 @@ export default async function QuotationPage({
               </div>
               <div className="field">
                 <label htmlFor="vat_rate">{tr("VAT %")}</label>
-                <input id="vat_rate" name="vat_rate" type="text" inputMode="decimal" defaultValue={fmtNum(q.vat_rate)} />
+                <input id="vat_rate" name="vat_rate" type="text" inputMode="decimal" defaultValue={fmtNum(q.vat_rate)} enterKeyHint="next" />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
                 <label htmlFor="notes">{tr("Notes to the client")}{" "}<span className="hint">{tr("· printed on the quotation")}</span>
@@ -682,7 +682,7 @@ export default async function QuotationPage({
                 <textarea id="terms" name="terms" defaultValue={q.terms ?? ""} />
               </div>
             </div>
-            {editable && <SubmitButton>{tr("Save details")}</SubmitButton>}
+            {editable && <SubmitButton className="btn btn-primary save-bar">{tr("Save details")}</SubmitButton>}
           </fieldset>
         </form>
       </section>

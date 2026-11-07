@@ -230,7 +230,7 @@ export default async function OpportunityPage({ params, searchParams }: { params
             people={people.filter((p) => hasRole(p.roles, "sales", "management") || p.id === o.owner_id)}
             base={company.base_currency}
           />
-          <SubmitButton>{tr("Save")}</SubmitButton>
+          <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>
         </form>
       </details>
     </>

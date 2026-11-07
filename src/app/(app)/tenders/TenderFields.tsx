@@ -108,15 +108,15 @@ export function TenderFields({
       </div>
       <div className="field">
         <label htmlFor="bid_security">{tr("Bid security")}</label>
-        <input id="bid_security" name="bid_security" type="text" inputMode="decimal" defaultValue={num(v.bid_security)} />
+        <input id="bid_security" name="bid_security" type="text" inputMode="decimal" defaultValue={num(v.bid_security)} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="estimated_value">{tr("Estimated value")}</label>
-        <input id="estimated_value" name="estimated_value" type="text" inputMode="decimal" defaultValue={num(v.estimated_value)} />
+        <input id="estimated_value" name="estimated_value" type="text" inputMode="decimal" defaultValue={num(v.estimated_value)} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="our_price">{tr("Our bid price")}</label>
-        <input id="our_price" name="our_price" type="text" inputMode="decimal" defaultValue={num(v.our_price)} />
+        <input id="our_price" name="our_price" type="text" inputMode="decimal" defaultValue={num(v.our_price)} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="owner_id">{tr("Responsible")}</label>

@@ -99,7 +99,7 @@ export function OrderCosts({
               </div>
               <div className="field">
                 <label htmlFor={`amt-${back}`}>{tr("Amount")}</label>
-                <input id={`amt-${back}`} name="amount" type="text" inputMode="decimal" required />
+                <input id={`amt-${back}`} name="amount" type="text" inputMode="decimal" required enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor={`ccy-${back}`}>{tr("Currency")}</label>
@@ -112,7 +112,7 @@ export function OrderCosts({
               <div className="field">
                 <label htmlFor={`rate-${back}`}>{tr("Exchange rate")}{" "}<span className="hint">{tr("· if not")}{" "}{base}</span>
                 </label>
-                <input id={`rate-${back}`} name="exchange_rate" type="text" inputMode="decimal" defaultValue="1" />
+                <input id={`rate-${back}`} name="exchange_rate" type="text" inputMode="decimal" defaultValue="1" enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor={`date-${back}`}>{tr("Date")}</label>

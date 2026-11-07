@@ -60,15 +60,15 @@ export function ProjectFields({
       </div>
       <div className="field">
         <label htmlFor="budget_amount">{tr("Budget (amount)")}</label>
-        <input id="budget_amount" name="budget_amount" type="text" inputMode="decimal" defaultValue={p.budget_amount ?? ""} />
+        <input id="budget_amount" name="budget_amount" type="text" inputMode="decimal" defaultValue={p.budget_amount ?? ""} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="budget_hours">{tr("Budget (hours)")}</label>
-        <input id="budget_hours" name="budget_hours" type="text" inputMode="decimal" defaultValue={p.budget_hours ?? ""} />
+        <input id="budget_hours" name="budget_hours" type="text" inputMode="decimal" defaultValue={p.budget_hours ?? ""} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="default_rate">{tr("Hourly rate charged")}</label>
-        <input id="default_rate" name="default_rate" type="text" inputMode="decimal" defaultValue={p.default_rate ?? ""} />
+        <input id="default_rate" name="default_rate" type="text" inputMode="decimal" defaultValue={p.default_rate ?? ""} enterKeyHint="next" />
         <p className="hint">{tr("Leave empty to use each person's own rate.")}</p>
       </div>
       <div className="field">

@@ -40,15 +40,15 @@ export function BillFields({ v, base }: { v: BillValues; base: string }) {
       <div className="field">
         <label htmlFor="exchange_rate">{tr("Exchange rate")}{" "}<span className="hint">· {base}{" "}{tr("per 1 unit")}</span>
         </label>
-        <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={String(v.exchange_rate)} />
+        <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={String(v.exchange_rate)} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="subtotal">{tr("Amount before VAT")}</label>
-        <input id="subtotal" name="subtotal" type="text" inputMode="decimal" defaultValue={fmt(v.subtotal)} required />
+        <input id="subtotal" name="subtotal" type="text" inputMode="decimal" defaultValue={fmt(v.subtotal)} required enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="vat_amount">{tr("VAT amount")}</label>
-        <input id="vat_amount" name="vat_amount" type="text" inputMode="decimal" defaultValue={fmt(v.vat_amount) || "0"} />
+        <input id="vat_amount" name="vat_amount" type="text" inputMode="decimal" defaultValue={fmt(v.vat_amount) || "0"} enterKeyHint="next" />
       </div>
       <div className="field" style={{ gridColumn: "1 / -1" }}>
         <label htmlFor="notes">{tr("Notes")}</label>

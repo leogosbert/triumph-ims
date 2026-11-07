@@ -1,0 +1,351 @@
+/* =====================================================================
+   Phone comfort (UI batch 30: items 2, 4, 5, 6, 7).
+   - The round "+" button on lists (NewFab)
+   - Pull down to refresh (PullToRefresh)
+   - Touch targets of at least 44px on phones
+   - The Save bar that stays in view on long forms (.save-bar)
+   - Phone-friendly fields: full-width dates, the camera Scan button (ScanButton)
+   ===================================================================== */
+
+/* ---------- 2. One big "+" on phone lists ---------- */
+.new-fab {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .new-fab {
+    position: fixed;
+    right: 18px;
+    bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom));
+    z-index: 21;
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    text-decoration: none;
+    box-shadow:
+      0 12px 26px -8px color-mix(in srgb, var(--brand) 70%, rgba(11, 31, 58, 0.6)),
+      0 2px 6px rgba(11, 31, 58, 0.25);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.12s ease-out;
+  }
+  :root[data-look="glass"] .new-fab {
+    background: linear-gradient(135deg, var(--acc1, var(--brand)), var(--acc2, var(--brand-dark)));
+    box-shadow:
+      0 14px 30px -10px var(--acc1, var(--brand)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 0 0 1px rgba(255, 255, 255, 0.14);
+  }
+  .new-fab:active {
+    transform: scale(0.92);
+  }
+  .new-fab:focus-visible {
+    outline: 3px solid var(--text);
+    outline-offset: 3px;
+  }
+  /* The list's last row can scroll clear of the button. */
+  main.page:has(.page-head a.btn-primary[href$="/new"], .toolbar a.btn-primary[href$="/new"]) {
+    padding-bottom: 88px;
+  }
+}
+@media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+  .new-fab {
+    animation: ufab-in 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards;
+  }
+}
+@keyframes ufab-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+/* ---------- 4. Pull down to refresh ---------- */
+/* While it is on a screen, the browser's own pull (a full reload) stays out of the way. */
+@media (max-width: 1023px) {
+  html:has(.ptr),
+  html:has(.ptr) body {
+    overscroll-behavior-y: contain;
+  }
+}
+.ptr {
+  position: fixed;
+  left: 50%;
+  top: calc(env(safe-area-inset-top) + 58px);
+  z-index: 19; /* under the top bar (20), so the ball rolls out from beneath it */
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(calc(var(--ptr, 0px) - 44px));
+}
+.ptr-on {
+  opacity: 1;
+}
+.ptr-ball {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 18px var(--shadow, rgba(11, 31, 58, 0.18));
+}
+:root[data-look="glass"] .ptr-ball {
+  background: var(--g-field, var(--card));
+  border-color: var(--g-edge, var(--line));
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.ptr-ready .ptr-ball {
+  color: var(--brand);
+}
+:root[data-theme="dark"] .ptr-ready .ptr-ball {
+  color: #fff;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ptr:not(.ptr-on) {
+    transition:
+      transform 0.2s ease-out,
+      opacity 0.2s ease-out;
+  }
+  .ptr-busy .ptr-ball svg {
+    animation: uptr-spin 0.7s linear infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ptr-busy .ptr-ball svg {
+    animation: uptr-pulse 1.2s ease-in-out infinite;
+  }
+}
+@keyframes uptr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes uptr-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (min-width: 1024px) {
+  .ptr {
+    display: none;
+  }
+}
+
+/* ---------- 5. Touch targets: 44px on phones (laptops keep their compact look) ---------- */
+@media (max-width: 1023px) {
+  .btn-small,
+  .seg button,
+  .seg.seg-sm button,
+  .tabs-row a,
+  .tabs-row > a,
+  .back-row .back-link,
+  .password-toggle,
+  .demo-seg,
+  .upd-pill,
+  .as-chip,
+  .msheet-chips button,
+  .st-jump a,
+  a.my-chip {
+    min-height: 44px;
+  }
+  .toast-close,
+  .install-x,
+  .msheet-x,
+  .csheet-x,
+  .tour-x,
+  .tour-toast-x {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  /* Small round controls keep their size; an invisible ring makes them easy to hit. */
+  .tick,
+  .fswitch {
+    position: relative;
+  }
+  .tick::after,
+  .fswitch::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+  }
+  /* Checkboxes and radios: a bigger box, and the whole label row is the target. */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    accent-color: var(--brand);
+  }
+  label.check {
+    min-height: 44px;
+  }
+  /* Links that open a record from a list: the whole row height. */
+  .list > li > a:only-child,
+  .rec-list a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
+/* ---------- 6. Save bar that stays in view on long forms ---------- */
+/* On the main Save button (or its row) of a long form: it sticks to the bottom while the form
+   scrolls past and settles back in place at the end, so nothing below it is ever hidden. */
+.save-bar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 6;
+}
+button.save-bar,
+.save-bar > .btn {
+  box-shadow: 0 10px 24px -8px rgba(11, 31, 58, 0.4);
+}
+div.save-bar {
+  padding: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 10px 24px -10px rgba(11, 31, 58, 0.35);
+}
+:root[data-look="glass"] button.save-bar,
+:root[data-look="glass"] .save-bar > .btn {
+  box-shadow: 0 12px 28px -10px color-mix(in srgb, var(--brand) 80%, rgba(3, 10, 25, 0.6));
+}
+:root[data-look="glass"] div.save-bar {
+  background: var(--g-field, var(--card));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+@media (max-width: 1023px) {
+  /* Above the floating bottom bar. */
+  .save-bar {
+    bottom: calc(var(--nav-h) + 18px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------- 7. Phone-friendly fields ---------- */
+/* Dates and times open the phone's own picker. They are already full width (globals.css); on
+   iPhones the native look ignores the width and centres the text, so it is turned off there. */
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
+  width: 100%;
+  min-height: 46px;
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--field);
+  color: var(--text);
+}
+:root[data-look="glass"] :is(input[type="time"], input[type="datetime-local"], input[type="month"]) {
+  background: var(--g-field, var(--field));
+  border-color: var(--g-edge, var(--line));
+}
+@media (max-width: 1023px) {
+  .field > :is(input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"]) {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    min-width: 0;
+    min-height: 48px;
+  }
+  :is(input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"])::-webkit-date-and-time-value {
+    text-align: left;
+  }
+}
+
+/* A field with a Scan button beside it. */
+.scan-field {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.scan-field > :is(input, select) {
+  flex: 1;
+  min-width: 0;
+}
+.scan-btn {
+  flex: none;
+  gap: 6px;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+.toolbar-row .scan-btn {
+  min-height: 48px;
+  border-radius: 14px;
+}
+@media (max-width: 420px) {
+  .toolbar-row .scan-btn .scan-btn-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+.scan-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  display: grid;
+  place-items: end center;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  background: rgba(3, 10, 25, 0.72);
+}
+.scan-box {
+  position: relative;
+  width: min(100%, 440px);
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 22px;
+  background: #0b1424;
+  color: #fff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+.scan-video {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #000;
+}
+.scan-frame {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: calc(12px + 18%);
+  height: calc((min(100vw - 32px, 440px) - 24px) * 0.75 * 0.4);
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.25);
+  clip-path: inset(-3px);
+  pointer-events: none;
+}
+.scan-msg {
+  margin: 0;
+  text-align: center;
+  font-size: 0.92rem;
+  color: #dbe5f5;
+}
+:root .scan-sheet .scan-box .btn {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+@media (min-width: 1024px) {
+  .scan-sheet {
+    place-items: center;
+  }
+}

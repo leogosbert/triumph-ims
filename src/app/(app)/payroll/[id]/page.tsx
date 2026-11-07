@@ -240,23 +240,23 @@ export default async function PayRunPage({ params, searchParams }: { params: Pro
                 <div className="grid grid-2">
                   <div className="field">
                     <label htmlFor={`ot-${l.id}`}>{tr("Overtime hours")}</label>
-                    <input id={`ot-${l.id}`} name="overtime_hours" type="text" inputMode="decimal" defaultValue={plain(l.overtime_hours)} />
+                    <input id={`ot-${l.id}`} name="overtime_hours" type="text" inputMode="decimal" defaultValue={plain(l.overtime_hours)} enterKeyHint="next" />
                   </div>
                   <div className="field">
                     <label htmlFor={`bonus-${l.id}`}>
                       {tr("Bonus")} ({base})
                     </label>
-                    <input id={`bonus-${l.id}`} name="bonus" type="text" inputMode="decimal" defaultValue={plain(l.bonus)} />
+                    <input id={`bonus-${l.id}`} name="bonus" type="text" inputMode="decimal" defaultValue={plain(l.bonus)} enterKeyHint="next" />
                   </div>
                   <div className="field">
                     <label htmlFor={`ded-${l.id}`}>
                       {tr("Other deductions")} ({base}){l.deduction_label && ` · ${l.deduction_label}`}
                     </label>
-                    <input id={`ded-${l.id}`} name="other_deductions" type="text" inputMode="decimal" defaultValue={plain(l.other_deductions)} />
+                    <input id={`ded-${l.id}`} name="other_deductions" type="text" inputMode="decimal" defaultValue={plain(l.other_deductions)} enterKeyHint="next" />
                   </div>
                   <div className="field">
                     <label htmlFor={`unpaid-${l.id}`}>{tr("Unpaid days")}</label>
-                    <input id={`unpaid-${l.id}`} name="unpaid_days" type="text" inputMode="decimal" defaultValue={plain(l.unpaid_days)} />
+                    <input id={`unpaid-${l.id}`} name="unpaid_days" type="text" inputMode="decimal" defaultValue={plain(l.unpaid_days)} enterKeyHint="done" />
                   </div>
                 </div>
                 <SubmitButton className="btn btn-primary btn-small">{tr("Save")}</SubmitButton>
@@ -303,7 +303,7 @@ export default async function PayRunPage({ params, searchParams }: { params: Pro
                           <label htmlFor={`amt-${item.kind}`}>
                             {tr("Amount")} ({base})
                           </label>
-                          <input id={`amt-${item.kind}`} name="amount" type="text" inputMode="decimal" defaultValue={plain(item.amount)} required />
+                          <input id={`amt-${item.kind}`} name="amount" type="text" inputMode="decimal" defaultValue={plain(item.amount)} required enterKeyHint="next" />
                         </div>
                         <div className="field">
                           <label htmlFor={`on-${item.kind}`}>{tr("Date paid")}</label>

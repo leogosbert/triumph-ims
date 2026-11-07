@@ -27,7 +27,7 @@ export function PayForm({ code, balance, currency, allowPartial, methods }: { co
     >
       <label className="field">
         <span>{t("Phone number that will pay")}</span>
-        <input type="tel" inputMode="tel" autoComplete="tel" required placeholder="0754 123 456" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <input type="tel" inputMode="tel" autoComplete="tel" required placeholder="0754 123 456" value={phone} onChange={(e) => setPhone(e.target.value)} enterKeyHint="next" />
       </label>
       {allowPartial ? (
         <label className="field">

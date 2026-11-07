@@ -170,13 +170,13 @@ export default async function HireDetailPage({ params, searchParams }: { params:
                   </div>
                   <div className="field">
                     <label htmlFor="quantity">{tr("Quantity")}</label>
-                    <input id="quantity" name="quantity" type="text" inputMode="decimal" required defaultValue="1" />
+                    <input id="quantity" name="quantity" type="text" inputMode="decimal" required defaultValue="1" enterKeyHint="next" />
                   </div>
                   <div className="field">
                     <label htmlFor="rate">
                       {tr("Rate")} ({h.currency} / {period})
                     </label>
-                    <input id="rate" name="rate" type="text" inputMode="decimal" required />
+                    <input id="rate" name="rate" type="text" inputMode="decimal" required enterKeyHint="done" />
                   </div>
                 </div>
                 <SubmitButton className="btn btn-small">{tr("Add item")}</SubmitButton>
@@ -253,7 +253,7 @@ export default async function HireDetailPage({ params, searchParams }: { params:
                 <label htmlFor="deposit">
                   {tr("Deposit")} ({h.currency})
                 </label>
-                <input id="deposit" name="deposit" type="text" inputMode="decimal" defaultValue={h.deposit ?? ""} />
+                <input id="deposit" name="deposit" type="text" inputMode="decimal" defaultValue={h.deposit ?? ""} enterKeyHint="next" />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
                 <label htmlFor="notes">{tr("Notes")}</label>

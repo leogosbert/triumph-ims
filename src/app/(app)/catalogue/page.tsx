@@ -133,7 +133,7 @@ export default async function CataloguePage({ searchParams }: { searchParams: Se
           </div>
           <div className="field">
             <label htmlFor="whatsapp">{tr("WhatsApp number")}</label>
-            <input id="whatsapp" name="whatsapp" type="tel" maxLength={20} defaultValue={s?.whatsapp ?? ""} placeholder="255712345678" />
+            <input id="whatsapp" name="whatsapp" type="tel" maxLength={20} defaultValue={s?.whatsapp ?? ""} placeholder="255712345678" enterKeyHint="next" />
           </div>
           <div className="field">
             <span className="label">{tr("Show on the page")}</span>

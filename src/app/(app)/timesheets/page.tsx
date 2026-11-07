@@ -276,7 +276,7 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: S
           </div>
           <div className="field">
             <label htmlFor="hours">{tr("Hours")}</label>
-            <input id="hours" name="hours" type="text" inputMode="decimal" required placeholder={tr("e.g. 7.5")} />
+            <input id="hours" name="hours" type="text" inputMode="decimal" required placeholder={tr("e.g. 7.5")} enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="target">{tr("Job or project")}</label>

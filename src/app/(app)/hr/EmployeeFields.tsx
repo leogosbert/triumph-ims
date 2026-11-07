@@ -62,7 +62,7 @@ export function EmployeeFields({ e = {}, logins }: { e?: Partial<Employee>; logi
       {date("contract_end", "Contract ends")}
       <div className="field">
         <label htmlFor="annual_leave_days">{tr("Annual leave days")}</label>
-        <input id="annual_leave_days" name="annual_leave_days" type="text" inputMode="decimal" defaultValue={e.annual_leave_days ?? 28} />
+        <input id="annual_leave_days" name="annual_leave_days" type="text" inputMode="decimal" defaultValue={e.annual_leave_days ?? 28} enterKeyHint="next" />
       </div>
       {text("phone", "Phone", 40, { type: "tel", inputMode: "tel" })}
       {text("email", "Email", 120, { type: "email", inputMode: "email" })}

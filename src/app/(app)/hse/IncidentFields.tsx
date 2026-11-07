@@ -82,7 +82,7 @@ export function IncidentFields({ v = {}, options, investigation = false }: { v?:
         </div>
         <div className="field">
           <label htmlFor="lost_days">{tr("Days lost")}</label>
-          <input id="lost_days" name="lost_days" type="text" inputMode="decimal" defaultValue={v.lost_days ? String(v.lost_days) : ""} placeholder="0" />
+          <input id="lost_days" name="lost_days" type="text" inputMode="decimal" defaultValue={v.lost_days ? String(v.lost_days) : ""} placeholder="0" enterKeyHint="next" />
         </div>
         {investigation && (
           <>

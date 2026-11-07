@@ -9,10 +9,19 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { cleanSearch } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { daysUntil, fmtQty, storeOptions, type OnHand } from "@/lib/stock";
+import { ListSort } from "@/components/lists/ListSort";
+import { readSort, sortLinks, sortRows, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Stock" };
 
 type Product = { id: string; sku: string; name: string; unit: string; reorder_level: number | null; category: string | null };
+
+// Items are worked out per store on the server, so these sort the loaded items.
+const SORTS: SortOption[] = [
+  { key: "name", label: "Name", dir: "asc" },
+  { key: "qty", label: "Quantity", dir: "desc" },
+  { key: "sku", label: "SKU", dir: "asc" },
+];
 
 export default async function StockPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
@@ -23,6 +32,7 @@ export default async function StockPage({ searchParams }: { searchParams: Search
   const store = typeof sp.store === "string" ? sp.store : "";
   const q = cleanSearch(typeof sp.q === "string" ? sp.q : "").toLowerCase();
   const view = sp.view === "all" ? "all" : "instock";
+  const sort = readSort(sp, SORTS, "name");
 
   let ohq = supabase.from("stock_on_hand").select("product_id, warehouse_id, batch_no, expiry_date, quantity").eq("company_id", company.id);
   if (store) ohq = ohq.eq("warehouse_id", store);
@@ -94,6 +104,8 @@ export default async function StockPage({ searchParams }: { searchParams: Search
       </div>
 
       <form method="get" className="card toolbar">
+        {sort.explicit && <input type="hidden" name="sort" value={sort.key} />}
+        {sort.explicit && <input type="hidden" name="dir" value={sort.dir} />}
         <div className="toolbar-row">
           <input type="search" name="q" defaultValue={q} placeholder={tr("Search product or SKU…")} aria-label={tr("Search")} />
           <button className="btn" type="submit">{tr("Search")}</button>
@@ -166,6 +178,7 @@ export default async function StockPage({ searchParams }: { searchParams: Search
 
       <h2>{tr("Stores")}</h2>
       <p className="muted small" style={{ marginTop: -4 }}>{tr("Tap a store to see its items. The gauge shows each item's stock against its reorder level.")}</p>
+      {products.length > 1 && <ListSort links={sortLinks("/stock", sp, SORTS, sort)} />}
       {products.length === 0 ? (
         <p className="card muted">{tr("No products yet.")}</p>
       ) : (
@@ -173,6 +186,7 @@ export default async function StockPage({ searchParams }: { searchParams: Search
           const here = byStore.get(st.id) ?? new Map<string, number>();
           let items = products.filter((p) => (view === "all" ? true : (here.get(p.id) ?? 0) !== 0));
           if (q) items = items.filter((p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+          if (sort.explicit) items = sortRows(items, (p) => (sort.key === "qty" ? (here.get(p.id) ?? 0) : sort.key === "sku" ? p.sku : p.name), sort.dir);
           const lowHere = items.filter((p) => p.reorder_level != null && Number(p.reorder_level) > 0 && (here.get(p.id) ?? 0) <= Number(p.reorder_level)).length;
           const units = items.reduce((sum, p) => sum + Math.max(0, here.get(p.id) ?? 0), 0);
           const scaleMax = Math.max(1, ...items.map((p) => here.get(p.id) ?? 0));

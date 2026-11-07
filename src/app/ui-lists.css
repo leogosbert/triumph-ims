@@ -1,0 +1,417 @@
+/* =====================================================================
+   List screens: sort bar, filter chips, swipe rows, tables as cards.
+   Used by src/components/lists/*. Works in both looks (Glass, Classic),
+   light and dark, and stays put for people who prefer less motion.
+   ===================================================================== */
+
+/* ---------- Sort by (laptop: heading links; phone: a select) ---------- */
+.lsort {
+  margin: -4px 0 8px;
+}
+.lsort-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.lsort-heads {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+  padding: 0 4px;
+}
+.lsort-heads .lsort-label {
+  margin-right: 6px;
+}
+.lsort-head,
+.sort-th {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lsort-head:hover,
+.sort-th:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--brand) 7%, transparent);
+}
+.lsort-head[aria-current="true"] {
+  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 10%, transparent);
+}
+[data-theme="dark"] .lsort-head[aria-current="true"] {
+  color: color-mix(in srgb, var(--brand) 45%, #fff);
+}
+.lsort-arrow {
+  font-size: 0.8em;
+  opacity: 0.55;
+}
+.lsort-head[aria-current="true"] .lsort-arrow,
+th[aria-sort="ascending"] .lsort-arrow,
+th[aria-sort="descending"] .lsort-arrow {
+  opacity: 1;
+}
+th[aria-sort] .sort-th {
+  min-height: 0;
+  padding: 0 4px;
+  margin: 0 -4px;
+  color: inherit;
+  font: inherit;
+}
+th.num[aria-sort] .sort-th {
+  justify-content: flex-end;
+}
+th[aria-sort="ascending"] .sort-th,
+th[aria-sort="descending"] .sort-th {
+  color: var(--text);
+}
+.lsort-phone {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+.lsort-phone label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  margin: 0;
+}
+.lsort-phone select {
+  flex: 1;
+  min-height: 44px;
+  width: auto;
+}
+.lsort-dir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong, var(--line));
+  background: var(--card);
+  color: var(--text);
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+:root[data-look="glass"] .lsort-dir {
+  background: var(--g-surface);
+  border-color: var(--g-edge);
+}
+@media (max-width: 700px) {
+  .lsort-heads {
+    display: none;
+  }
+  .lsort-phone {
+    display: flex;
+  }
+  .lsort {
+    margin: 0 0 10px;
+  }
+}
+
+/* ---------- Filter chips (they are .tabs-row, so the pill glide still works) ---------- */
+@media (max-width: 700px) {
+  .chip-row a {
+    min-height: 44px;
+  }
+}
+
+/* ---------- Swipe rows on .rec-list ---------- */
+.rec-list li.sw {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.sw-track {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+  touch-action: pan-y;
+}
+.sw-track > a {
+  height: 100%;
+}
+/* The row's coloured edge (overdue, waiting) still sits on its link. */
+.rec-list li.sw:has(.badge.tone-bad) > .sw-track > a {
+  box-shadow: inset 3px 0 0 var(--err);
+}
+.rec-list li.sw:has(.badge.tone-warn) > .sw-track > a {
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
+/* Laptop: the actions show over the row's right end while it is hovered or has keyboard focus. */
+.rec-list li.sw .sw-acts {
+  position: absolute;
+  top: 50%;
+  right: 40px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 6px 18px -8px rgba(11, 31, 58, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity 0.12s;
+}
+.rec-list li.sw:hover .sw-acts,
+.rec-list li.sw:focus-within .sw-acts {
+  opacity: 1;
+  pointer-events: auto;
+}
+.rec-list li.sw .sw-acts .sw-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.rec-list li.sw .sw-acts .sw-act::after {
+  content: none;
+}
+.rec-list li.sw .sw-acts .sw-act:hover {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+  background: color-mix(in srgb, var(--brand) 6%, var(--card));
+}
+.rec-list li.sw .sw-acts .sw-act:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.rec-list li.sw .sw-acts .sw-call {
+  color: var(--ok, #15803d);
+}
+.rec-list li.sw .sw-acts .sw-pay {
+  color: var(--brand);
+}
+[data-theme="dark"] .rec-list li.sw .sw-acts .sw-pay {
+  color: color-mix(in srgb, var(--brand) 45%, #fff);
+}
+/* "Open" is the row itself on a laptop. */
+@media (min-width: 701px) {
+  .rec-list li.sw .sw-acts .sw-act.sw-phone {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rec-list li.sw .sw-acts {
+    transition: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .rec-list li.sw {
+    display: block;
+    overflow: hidden;
+  }
+  /* Behind the row, on the right; shown by sliding the row left. */
+  .rec-list li.sw .sw-acts {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 0;
+    padding: 0 8px;
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    pointer-events: auto;
+    background: color-mix(in srgb, var(--brand) 9%, var(--card));
+  }
+  .rec-list li.sw:hover .sw-acts,
+  .rec-list li.sw:focus-within .sw-acts {
+    opacity: 0;
+  }
+  .rec-list li.sw.sw-drag .sw-acts,
+  .rec-list li.sw.sw-open .sw-acts {
+    opacity: 1;
+  }
+  .rec-list li.sw .sw-acts .sw-act,
+  .rec-list li.sw .sw-acts .sw-act:hover {
+    min-height: 44px;
+    min-width: 64px;
+    border: 0;
+    color: #fff;
+    background: var(--brand);
+  }
+  .rec-list li.sw .sw-acts .sw-call,
+  .rec-list li.sw .sw-acts .sw-call:hover {
+    background: var(--ok, #15803d);
+    color: #fff;
+  }
+  .rec-list li.sw .sw-acts .sw-pay,
+  .rec-list li.sw .sw-acts .sw-pay:hover,
+  [data-theme="dark"] .rec-list li.sw .sw-acts .sw-pay {
+    background: var(--brand-dark, var(--brand));
+    color: #fff;
+  }
+  .sw-track {
+    transition: transform 0.2s ease-out;
+  }
+  .sw-drag .sw-track {
+    transition: none;
+  }
+  .sw-drag .sw-track,
+  .sw-open .sw-track {
+    background: var(--card);
+  }
+  .sw-open .sw-track {
+    transform: translateX(calc(-1 * var(--sw-w, 150px)));
+  }
+}
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
+  .sw-track {
+    transition: none;
+  }
+}
+
+/* ---------- Tables that become cards on a phone ----------
+   <table class="tcards"> with data-label on each <td>. Mark the name cell .tc-main and the
+   main amount .tc-amt; other cells show as "label … value" lines. Wider screens keep the table. */
+.tc-phone {
+  display: none;
+}
+@media (max-width: 700px) {
+  table.tcards,
+  table.tcards tbody,
+  table.tcards tfoot,
+  table.tcards tr,
+  table.tcards td {
+    display: block;
+  }
+  table.tcards {
+    width: 100%;
+    min-width: 0 !important;
+    border: 0;
+    font-size: 0.9rem;
+  }
+  table.tcards thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  table.tcards tbody tr,
+  table.tcards tfoot tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    align-items: baseline;
+    padding: 12px 14px;
+    margin: 0 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--card);
+  }
+  table.tcards tfoot tr {
+    background: color-mix(in srgb, var(--brand) 6%, var(--card));
+  }
+  :root[data-look="glass"] table.tcards tbody tr {
+    background: var(--g-surface);
+    border-color: var(--g-border, var(--g-edge));
+  }
+  table.tcards.tcards td {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    position: static;
+    background: none;
+    text-align: right;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  table.tcards.tcards td[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    max-width: 50%;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 400;
+    text-align: left;
+  }
+  table.tcards.tcards tfoot td {
+    border: 0;
+    background: none;
+  }
+  table.tcards.tcards td.tc-main {
+    grid-column: 1;
+    display: block;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  table.tcards.tcards td.tc-main::before {
+    content: none;
+  }
+  table.tcards.tcards td.tc-main .small,
+  table.tcards.tcards td.tc-main .muted {
+    font-weight: 400;
+  }
+  table.tcards.tcards td.tc-amt {
+    grid-column: 2;
+    grid-row: 1;
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  table.tcards.tcards td.tc-amt::before {
+    display: block;
+    max-width: none;
+    font-weight: 400;
+    text-align: right;
+  }
+  table.tcards.tcards td:empty {
+    display: none;
+  }
+  table.tcards .badge {
+    font-size: 0.78rem;
+  }
+  /* Form fields in a card row take the room beside their label. */
+  table.tcards.tcards td > :is(input, select, textarea) {
+    flex: 1;
+    min-width: 0;
+    max-width: 62%;
+  }
+  table.tcards .tc-phone {
+    display: inline;
+  }
+  /* The surrounding scroll box is not needed any more. */
+  :is(.table-wrap, .scroll-x, .bl-wrap, .card):has(> table.tcards) {
+    overflow-x: visible;
+  }
+  :root[data-look="glass"] table.tcards tbody tr:hover > td,
+  table.tcards tbody tr:hover > td {
+    background: none;
+  }
+}

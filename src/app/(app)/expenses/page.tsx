@@ -9,6 +9,9 @@ import { formatMoney } from "@/lib/money";
 import { namesFor } from "@/lib/people";
 import { can } from "@/lib/roles";
 import { BackLink } from "@/components/BackLink";
+import { FilterChips } from "@/components/lists/FilterChips";
+import { ListSort } from "@/components/lists/ListSort";
+import { listHref, readSort, sortLinks, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Expenses" };
 
@@ -31,6 +34,13 @@ type Row = {
   created_by: string | null;
 };
 
+const SORTS: SortOption[] = [
+  { key: "date", label: "Date", col: "spent_on", dir: "desc" },
+  { key: "amount", label: "Amount", col: "amount", dir: "desc" },
+  { key: "payee", label: "Paid to", col: "payee", dir: "asc" },
+];
+const SHOW = ["all", "mine", "noreceipt"] as const;
+
 export default async function ExpensesPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const sp = (await searchParams) ?? {};
@@ -39,6 +49,9 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
   const cat = typeof sp.cat === "string" ? sp.cat : "";
   const { supabase, company, roles, user } = await getAppContext();
   const manage = can(roles, "manageExpenses");
+  const sort = readSort(sp, SORTS, "date");
+  // People who are not managers only ever see their own, so "Mine" is for managers.
+  const show = SHOW.find((s) => s === sp.show && (s !== "mine" || manage)) ?? "all";
   const base = company.base_currency;
 
   if (!stage13Ready(company)) {
@@ -56,10 +69,11 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
     .eq("company_id", company.id)
     .gte("spent_on", m.start)
     .lt("spent_on", m.next)
-    .order("spent_on", { ascending: false })
+    .order(sort.opt.col ?? "spent_on", { ascending: sort.ascending, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(2000);
-  if (!manage) q = q.eq("created_by", user.id);
+  if (!manage || show === "mine") q = q.eq("created_by", user.id);
+  if (show === "noreceipt") q = q.is("receipt_path", null);
   if (cat) q = q.eq("category_id", cat);
   const [{ data, error }, { data: catData }] = await Promise.all([
     q,
@@ -147,6 +161,9 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
       {categories.length > 0 && (
         <form method="get" className="inline-form" style={{ margin: "8px 0" }}>
           <input type="hidden" name="m" value={m.month} />
+          {show !== "all" && <input type="hidden" name="show" value={show} />}
+          {sort.explicit && <input type="hidden" name="sort" value={sort.key} />}
+          {sort.explicit && <input type="hidden" name="dir" value={sort.dir} />}
           <select name="cat" defaultValue={cat} aria-label={tr("Spending category")}>
             <option value="">{tr("All categories")}</option>
             {categories.map((c) => (
@@ -166,8 +183,20 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
         </form>
       )}
 
+      <FilterChips
+        list="expenses"
+        label="Show"
+        current={show}
+        explicit={typeof sp.show === "string"}
+        chips={[
+          { key: "all", label: manage ? "All" : "All mine", href: listHref("/expenses", sp, { show: null }) },
+          ...(manage ? [{ key: "mine", label: "Mine", href: listHref("/expenses", sp, { show: "mine" }) }] : []),
+          { key: "noreceipt", label: "No receipt photo", href: listHref("/expenses", sp, { show: "noreceipt" }) },
+        ]}
+      />
+      {rows.length > 1 && <ListSort links={sortLinks("/expenses", sp, SORTS, sort)} />}
       {rows.length === 0 ? (
-        <p className="card muted">{tr("No expenses recorded for this month. Record rent, fuel, airtime and other spending with “+ Expense”.")}</p>
+        <p className="card muted">{show === "all" ? tr("No expenses recorded for this month. Record rent, fuel, airtime and other spending with “+ Expense”.") : tr("Nothing here for this month.")}</p>
       ) : (
         <ul className="rec-list">
           {rows.map((r) => (

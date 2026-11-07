@@ -8,15 +8,19 @@ export function ListToolbar({
   filter,
   addHref,
   addLabel,
+  keep,
 }: {
   q: string;
   archived: boolean;
   filter?: { name: string; label: string; value: string; options: readonly string[] };
   addHref?: string;
   addLabel?: string;
+  /** Other params to keep when searching, for example a chosen sort ({ sort: "price", dir: "asc" }). */
+  keep?: Record<string, string>;
 }) {
   return (
     <form className="card toolbar" method="get" role="search">
+      {keep && Object.entries(keep).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
       <div className="toolbar-row">
         <input type="search" name="q" defaultValue={q} placeholder={tr("Search…")} aria-label={tr("Search")} />
         <button className="btn" type="submit">{tr("Search")}</button>

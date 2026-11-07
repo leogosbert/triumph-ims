@@ -8,8 +8,17 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney, marginPercent } from "@/lib/money";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
+import { ListSort } from "@/components/lists/ListSort";
+import { readSort, sortKeep, sortLinks, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Products" };
+
+const SORTS: SortOption[] = [
+  { key: "name", label: "Name", col: "name", dir: "asc" },
+  { key: "sku", label: "SKU", col: "sku", dir: "asc" },
+  { key: "price", label: "Price", col: "selling_price", dir: "desc" },
+  { key: "newest", label: "Newest", col: "created_at", dir: "desc" },
+];
 
 type Row = {
   id: string;
@@ -34,6 +43,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
   const archived = sp.archived === "1";
   const { supabase, company, roles, features } = await getAppContext();
   const showCosts = can(roles, "seeCosts");
+  const sort = readSort(sp, SORTS, "name");
 
   let query = supabase
     .from("products")
@@ -41,6 +51,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
       count: "exact",
     })
     .eq("company_id", company.id)
+    .order(sort.opt.col ?? "name", { ascending: sort.ascending, nullsFirst: false })
     .order("name")
     .limit(LIST_LIMIT);
   if (!archived) query = query.eq("active", true);
@@ -85,7 +96,9 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
         filter={{ name: "category", label: "Categories", value: category, options: CATEGORIES }}
         addHref={can(roles, "editProducts") ? "/products/new" : undefined}
         addLabel="New product"
+        keep={sortKeep(sort)}
       />
+      {rows.length > 1 && <ListSort links={sortLinks("/products", sp, SORTS, sort)} />}
       {rows.length === 0 ? (
         <p className="card muted">
           {q || category ? tr("No products match your search.") : tr("No products yet.")}{" "}

@@ -95,7 +95,7 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
           <p className="muted">{tr("No companies yet.")}</p>
         ) : (
           <div className="bl-wrap">
-            <table className="bl-table">
+            <table className="bl-table tcards">
               <thead>
                 <tr>
                   <th>{tr("Company")}</th>
@@ -110,7 +110,7 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
                   const st = ACCOUNT_STATUS[r.status] ?? ACCOUNT_STATUS.trial;
                   return (
                     <tr key={r.company_id}>
-                      <td>
+                      <td className="tc-main">
                         <Link href={`/admin/billing/${r.company_id}`}>
                           <strong>{r.company_name}</strong>
                         </Link>{" "}
@@ -123,12 +123,12 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
                           </div>
                         )}
                       </td>
-                      <td>
+                      <td data-label={tr("Account")}>
                         <span className={`badge tone-${st.tone}`}>{tr(st.label)}</span>
                         {r.founding && <div className="small muted">{tr("Founding client")}</div>}
                       </td>
-                      <td className="num">{r.members}</td>
-                      <td className="num">
+                      <td className="num" data-label={tr("People")}>{r.members}</td>
+                      <td className="num tc-amt" data-label={tr("Still owed")}>
                         {formatMoney(r.balance, r.currency)}
                         {Number(r.overdue_invoices) > 0 && (
                           <div className="small">
@@ -138,7 +138,7 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
                           </div>
                         )}
                       </td>
-                      <td className="small">{r.next_invoice_on ? formatDate(r.next_invoice_on) : r.trial_ends_on ? `${tr("Trial ends")} ${formatDate(r.trial_ends_on)}` : "—"}</td>
+                      <td className="small" data-label={tr("Next invoice")}>{r.next_invoice_on ? formatDate(r.next_invoice_on) : r.trial_ends_on ? `${tr("Trial ends")} ${formatDate(r.trial_ends_on)}` : "—"}</td>
                     </tr>
                   );
                 })}

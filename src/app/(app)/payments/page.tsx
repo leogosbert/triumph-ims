@@ -7,8 +7,17 @@ import { type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { BackLink } from "@/components/BackLink";
+import { ListSort } from "@/components/lists/ListSort";
+import { readSort, sortLinks, sortRows, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Payments received" };
+
+const SORTS: SortOption[] = [
+  { key: "date", label: "Date", col: "received_on", dir: "desc" },
+  { key: "amount", label: "Amount", col: "amount", dir: "desc" },
+  { key: "client", label: "Client", dir: "asc" },
+  { key: "method", label: "Method", col: "method", dir: "asc" },
+];
 
 type Row = {
   id: string;
@@ -31,6 +40,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
   const m = monthRange(typeof sp.m === "string" ? sp.m : null);
   const { supabase, company, roles } = await getAppContext();
   if (!can(roles, "seeInvoices")) noAccess();
+  const sort = readSort(sp, SORTS, "date");
 
   const { data, error } = await supabase
     .from("payments")
@@ -38,10 +48,12 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
     .eq("company_id", company.id)
     .gte("received_on", m.start)
     .lt("received_on", m.next)
+    .order(sort.opt.col ?? "received_on", { ascending: sort.opt.col ? sort.ascending : false })
     .order("received_on", { ascending: false })
     .limit(500);
   if (error) throw new Error(error.message);
-  const rows = (data ?? []) as unknown as Row[];
+  const loaded = (data ?? []) as unknown as Row[];
+  const rows = sort.key === "client" ? sortRows(loaded, (r) => r.client?.name, sort.dir) : loaded;
   const total = rows.filter((r) => !r.voided_at).reduce((s, r) => s + n(r.amount) * n(r.exchange_rate), 0);
 
   return (
@@ -65,6 +77,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
           <div className="l">{tr("Payments")}</div>
         </div>
       </div>
+      {rows.length > 1 && <ListSort links={sortLinks("/payments", sp, SORTS, sort)} />}
       {rows.length === 0 ? (
         <p className="card muted">{tr("No payments recorded in")}{" "}{tr(String(m.label ?? ""))}{tr(". Record payments on the invoice they pay.")}</p>
       ) : (

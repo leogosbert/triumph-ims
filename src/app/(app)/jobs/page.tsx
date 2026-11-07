@@ -9,6 +9,9 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { namesFor } from "@/lib/people";
 import { StatusBadge } from "@/lib/sales";
 import { canInvoiceService, canPlanService, canSeeAllService, formatWhen, JOB_KINDS, JOB_PRIORITIES, JOB_STATUS, OPEN_JOB } from "@/lib/services";
+import { FilterChips } from "@/components/lists/FilterChips";
+import { ListSort } from "@/components/lists/ListSort";
+import { readSort, sortLinks, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Service jobs" };
 
@@ -34,6 +37,14 @@ const VIEWS: [string, string][] = [
   ["all", "All"],
 ];
 
+const SORTS: SortOption[] = [
+  { key: "when", label: "Scheduled", col: "scheduled_for", dir: "asc" },
+  { key: "due", label: "Due by", col: "due_by", dir: "asc" },
+  { key: "newest", label: "Newest", col: "created_at", dir: "desc" },
+  { key: "title", label: "Title", col: "title", dir: "asc" },
+  { key: "status", label: "Status", col: "status", dir: "asc" },
+];
+
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const notice = await readNotice(searchParams);
@@ -42,11 +53,14 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
   const all = canSeeAllService(roles);
   const view = typeof sp.view === "string" && VIEWS.some(([v]) => v === sp.view) ? sp.view : all ? "open" : "mine";
 
+  // Open work comes soonest first, finished work latest first (as before), until the person picks a sort.
+  const sort = readSort(sp, SORTS, "when");
+  const soonFirst = sort.explicit ? sort.ascending : view === "open" || view === "mine";
   let q = supabase
     .from("service_jobs")
     .select("id, number, title, kind, priority, status, site, scheduled_for, due_by, assigned_to, client:clients(name)")
     .eq("company_id", company.id)
-    .order("scheduled_for", { ascending: view === "open" || view === "mine", nullsFirst: false })
+    .order(sort.opt.col ?? "scheduled_for", { ascending: soonFirst, nullsFirst: false })
     .limit(300);
   if (view === "open") q = q.in("status", OPEN_JOB);
   if (view === "mine") q = q.contains("assigned_to", [user.id]).in("status", OPEN_JOB);
@@ -103,13 +117,14 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
           )}
         </div>
       )}
-      <nav className="tabs-row" aria-label={tr("Show")}>
-        {VIEWS.filter(([v]) => all || v === "mine" || v === "done" || v === "all").map(([v, label]) => (
-          <Link key={v} href={`/jobs?view=${v}`} aria-current={view === v ? "page" : undefined}>
-            {tr(label)}
-          </Link>
-        ))}
-      </nav>
+      <FilterChips
+        list="jobs"
+        label="Show"
+        current={view}
+        explicit={typeof sp.view === "string"}
+        chips={VIEWS.filter(([v]) => all || v === "mine" || v === "done" || v === "all").map(([v, label]) => ({ key: v, label, href: `/jobs?view=${v}` }))}
+      />
+      {jobs.length > 1 && <ListSort links={sortLinks("/jobs", sp, SORTS, { ...sort, dir: soonFirst ? "asc" : "desc" })} />}
       {jobs.length === 0 ? (
         <EmptyState
           icon="tools"

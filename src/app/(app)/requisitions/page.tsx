@@ -11,6 +11,9 @@ import { namesFor } from "@/lib/people";
 import { can, hasRole } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { REQUEST_STATUS } from "@/lib/stock";
+import { FilterChips } from "@/components/lists/FilterChips";
+import { ListSort } from "@/components/lists/ListSort";
+import { readSort, sortLinks, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Purchase requests" };
 
@@ -30,7 +33,15 @@ const VIEWS: Record<string, { label: string; statuses: string[] }> = {
   approve: { label: "To approve", statuses: ["submitted"] },
   order: { label: "To order", statuses: ["approved"] },
   done: { label: "Done", statuses: ["ordered", "rejected", "cancelled"] },
+  mine: { label: "Mine", statuses: ["draft", "submitted", "approved", "ordered", "rejected", "cancelled"] },
 };
+
+const SORTS: SortOption[] = [
+  { key: "newest", label: "Newest", col: "created_at", dir: "desc" },
+  { key: "needed", label: "Needed by", col: "needed_by", dir: "asc" },
+  { key: "number", label: "Number", col: "number", dir: "desc" },
+  { key: "status", label: "Status", col: "status", dir: "asc" },
+];
 
 export default async function RequisitionsPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
@@ -38,15 +49,24 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
   const notice = await readNotice(searchParams);
   const { supabase, company, roles, user } = await getAppContext();
   if (!can(roles, "requestPurchases")) noAccess();
-  const tabs = ["open", ...(hasRole(roles, "management") ? ["approve"] : []), ...(can(roles, "seeAllRequests") ? ["order"] : []), "done"];
+  const tabs = [
+    "open",
+    ...(hasRole(roles, "management") ? ["approve"] : []),
+    ...(can(roles, "seeAllRequests") ? ["order", "mine"] : []),
+    "done",
+  ];
   const view = typeof sp.view === "string" && tabs.includes(sp.view) ? sp.view : "open";
-  const { data, error } = await supabase
+  const sort = readSort(sp, SORTS, "newest");
+  let query = supabase
     .from("requisitions")
     .select("id, number, status, reason, needed_by, created_by, created_at, lines:requisition_lines(count)")
     .eq("company_id", company.id)
     .in("status", VIEWS[view].statuses)
+    .order(sort.opt.col ?? "created_at", { ascending: sort.ascending, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(500);
+  if (view === "mine") query = query.eq("created_by", user.id);
+  const { data, error } = await query;
   if (isMissingTable(error)) return <NotReady title="Purchase requests" />;
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as unknown as Row[];
@@ -66,13 +86,14 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
           : tr("Ask for goods the business should buy. Management approves and procurement orders them.")}
       </p>
       <Notice {...notice} />
-      <nav className="tabs-row" aria-label={tr("Show")}>
-        {tabs.map((k) => (
-          <Link key={k} href={k === "open" ? "/requisitions" : `/requisitions?view=${k}`} aria-current={view === k ? "page" : undefined}>
-            {tr(VIEWS[k].label)}
-          </Link>
-        ))}
-      </nav>
+      <FilterChips
+        list="requisitions"
+        label="Show"
+        current={view}
+        explicit={typeof sp.view === "string"}
+        chips={tabs.map((k) => ({ key: k, label: VIEWS[k].label, href: k === "open" ? "/requisitions" : `/requisitions?view=${k}` }))}
+      />
+      {rows.length > 1 && <ListSort links={sortLinks("/requisitions", sp, SORTS, sort)} />}
       {rows.length === 0 ? (
         <EmptyState icon="inbox" text="No purchase requests here." action={{ href: "/requisitions/new", label: "Request a purchase" }} />
       ) : (

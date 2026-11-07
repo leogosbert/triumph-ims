@@ -22,7 +22,7 @@ function Table({ rows, first, empty }: { rows: Row[]; first: string; empty: stri
   if (rows.length === 0) return <p className="muted small">{tr(empty)}</p>;
   return (
     <div className="scroll-x">
-      <table className="adm-table">
+      <table className="adm-table tcards">
         <thead>
           <tr>
             <th>{tr(first)}</th>
@@ -34,10 +34,10 @@ function Table({ rows, first, empty }: { rows: Row[]; first: string; empty: stri
         <tbody>
           {rows.map((r, i) => (
             <tr key={i}>
-              <td>{r.label || <span className="muted">{tr("Closed company")}</span>}</td>
-              <td>{formatDate(r.requested_at)}</td>
-              <td>{formatDate(r.delete_after)}</td>
-              <td>
+              <td className="tc-main">{r.label || <span className="muted">{tr("Closed company")}</span>}</td>
+              <td data-label={tr("Requested")}>{formatDate(r.requested_at)}</td>
+              <td data-label={tr("Delete after")}>{formatDate(r.delete_after)}</td>
+              <td data-label={tr("Status")}>
                 <span className={`badge ${STATUS[r.status].tone}`}>{tr(STATUS[r.status].label)}</span>
                 {r.stuck && <span className="badge tone-bad adm-mini">{tr("Not finished: retrying")}</span>}
               </td>

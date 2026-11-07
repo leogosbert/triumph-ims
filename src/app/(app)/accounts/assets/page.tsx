@@ -11,8 +11,17 @@ import { formatMoney } from "@/lib/money";
 import { todayTz } from "@/lib/services";
 import { postDepreciation } from "../actions";
 import { BackLink, amt, ledgerContext } from "../shared";
+import { SortTh } from "@/components/lists/SortTh";
+import { readSort, sortLinks, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Fixed assets" };
+
+const SORTS: SortOption[] = [
+  { key: "number", label: "Asset", col: "number", dir: "asc" },
+  { key: "bought", label: "Bought on", col: "bought_on", dir: "desc" },
+  { key: "cost", label: "Cost", col: "cost", dir: "desc" },
+  { key: "dep", label: "Depreciation so far", col: "accumulated_dep", dir: "desc" },
+];
 
 export default async function AssetsPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
@@ -21,12 +30,15 @@ export default async function AssetsPage({ searchParams }: { searchParams: Searc
   const { supabase, company } = await ledgerContext();
   const base = company.base_currency;
   const disposed = sp.view === "disposed";
+  const sort = readSort(sp, SORTS, "number");
+  const heads = sortLinks("/accounts/assets", sp, SORTS, sort);
 
   const { data, error } = await supabase
     .from("fixed_assets")
     .select("id, number, name, category, bought_on, cost, residual_value, life_months, accumulated_dep, status, disposed_on, disposal_amount, location")
     .eq("company_id", company.id)
     .eq("status", disposed ? "disposed" : "active")
+    .order(sort.opt.col ?? "number", { ascending: sort.ascending })
     .order("number");
   if (isMissingTable(error)) return <NotReady title="Fixed assets" />;
   if (error) throw new Error(error.message);
@@ -77,20 +89,20 @@ export default async function AssetsPage({ searchParams }: { searchParams: Searc
       ) : (
         <section className="card">
           <div className="scroll-x">
-            <table className="compare rep-table">
+            <table className="compare rep-table tcards">
               <thead>
                 <tr>
-                  <th>{tr("Asset")}</th>
-                  <th>{tr("Bought on")}</th>
-                  <th className="num">{tr("Cost")}</th>
-                  <th className="num">{tr("Depreciation so far")}</th>
+                  <SortTh link={heads[0]} />
+                  <SortTh link={heads[1]} />
+                  <SortTh link={heads[2]} className="num" />
+                  <SortTh link={heads[3]} className="num" />
                   <th className="num">{disposed ? tr("Sold for") : tr("Book value")}</th>
                 </tr>
               </thead>
               <tbody>
                 {assets.map((a) => (
                   <tr key={a.id}>
-                    <td>
+                    <td className="tc-main">
                       <Link href={`/accounts/assets/${a.id}`}>
                         <span className="muted small">{a.number}</span> {a.name}
                       </Link>
@@ -100,22 +112,22 @@ export default async function AssetsPage({ searchParams }: { searchParams: Searc
                         {a.disposed_on && ` · ${formatDate(a.disposed_on)}`}
                       </div>
                     </td>
-                    <td>{formatDate(a.bought_on)}</td>
-                    <td className="num">{amt(Number(a.cost), base)}</td>
-                    <td className="num">{amt(Number(a.accumulated_dep), base)}</td>
-                    <td className="num">{amt(disposed ? Number(a.disposal_amount ?? 0) : Number(a.cost) - Number(a.accumulated_dep), base)}</td>
+                    <td data-label={tr("Bought on")}>{formatDate(a.bought_on)}</td>
+                    <td className="num" data-label={tr("Cost")}>{amt(Number(a.cost), base)}</td>
+                    <td className="num" data-label={tr("Depreciation so far")}>{amt(Number(a.accumulated_dep), base)}</td>
+                    <td className="num tc-amt" data-label={disposed ? tr("Sold for") : tr("Book value")}>{amt(disposed ? Number(a.disposal_amount ?? 0) : Number(a.cost) - Number(a.accumulated_dep), base)}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr>
-                  <td>
+                  <td className="tc-main">
                     {tr("Total")} ({assets.length})
                   </td>
                   <td></td>
-                  <td className="num">{amt(cost, base)}</td>
-                  <td className="num">{amt(dep, base)}</td>
-                  <td className="num">{amt(disposed ? tot((a) => Number(a.disposal_amount ?? 0)) : cost - dep, base)}</td>
+                  <td className="num" data-label={tr("Cost")}>{amt(cost, base)}</td>
+                  <td className="num" data-label={tr("Depreciation so far")}>{amt(dep, base)}</td>
+                  <td className="num tc-amt" data-label={disposed ? tr("Sold for") : tr("Book value")}>{amt(disposed ? tot((a) => Number(a.disposal_amount ?? 0)) : cost - dep, base)}</td>
                 </tr>
               </tfoot>
             </table>

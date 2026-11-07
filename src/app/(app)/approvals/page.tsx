@@ -127,7 +127,7 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Se
               {tr("Amounts in")} {base}.
             </p>
             <div className="scroll-x">
-              <table className="compare">
+              <table className="compare tcards">
                 <thead>
                   <tr>
                     <th>#</th>
@@ -139,8 +139,11 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Se
                 <tbody>
                   {rows.map((s, i) => (
                     <tr key={i}>
-                      <td>{i + 1}</td>
-                      <td>
+                      <td className="tc-main">
+                        <span className="tc-phone">{tr("Step")} </span>
+                        {i + 1}
+                      </td>
+                      <td data-label={tr("Who approves")}>
                         <select name={`role${i + 1}`} defaultValue={s?.role ?? ""} aria-label={tr("Who approves")}>
                           <option value="">—</option>
                           {STEP_ROLES.map((r) => (
@@ -150,10 +153,10 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Se
                           ))}
                         </select>
                       </td>
-                      <td>
+                      <td data-label={tr("From amount")}>
                         <input name={`min${i + 1}`} type="text" inputMode="decimal" defaultValue={s ? String(Number(s.min_amount)) : ""} aria-label={tr("From amount")} enterKeyHint="next" />
                       </td>
-                      <td>
+                      <td data-label={tr("Name of the step")}>
                         <input name={`label${i + 1}`} type="text" maxLength={80} defaultValue={s?.label ?? ""} placeholder={i === 0 ? tr("e.g. Budget check") : undefined} aria-label={tr("Name of the step")} />
                       </td>
                     </tr>

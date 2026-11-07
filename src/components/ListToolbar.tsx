@@ -10,6 +10,7 @@ export function ListToolbar({
   addHref,
   addLabel,
   scan = false,
+  keep,
 }: {
   q: string;
   archived: boolean;
@@ -18,9 +19,12 @@ export function ListToolbar({
   addLabel?: string;
   /** A camera Scan button beside the search box (product lists), where the phone can read barcodes. */
   scan?: boolean;
+  /** Other params to keep when searching, for example a chosen sort ({ sort: "price", dir: "asc" }). */
+  keep?: Record<string, string>;
 }) {
   return (
     <form className="card toolbar" method="get" role="search">
+      {keep && Object.entries(keep).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
       <div className="toolbar-row">
         <input id={scan ? "list-q" : undefined} type="search" name="q" defaultValue={q} placeholder={tr("Search…")} aria-label={tr("Search")} enterKeyHint="search" />
         {scan && <ScanButton target="list-q" submit />}

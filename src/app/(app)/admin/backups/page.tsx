@@ -123,7 +123,7 @@ export default async function AdminBackupsPage({ searchParams }: { searchParams:
       <section className="card">
         <h2>{tr("Every company")}</h2>
         <div className="scroll-x">
-          <table className="adm-table">
+          <table className="adm-table tcards">
             <thead>
               <tr>
                 <th>{tr("Company")}</th>
@@ -136,18 +136,18 @@ export default async function AdminBackupsPage({ searchParams }: { searchParams:
             <tbody>
               {d.companies.map((c) => (
                 <tr key={c.id}>
-                  <td>
+                  <td className="tc-main">
                     <Link href={`/admin/companies/${c.id}`}>{c.name}</Link>
                   </td>
-                  <td>
+                  <td data-label={tr("Last automatic copy")}>
                     {c.last_auto_at ? formatDateTime(c.last_auto_at) : <span className="muted">{tr("None yet")}</span>}
                     {c.overdue && <span className="badge tone-bad adm-mini">{tr("Overdue")}</span>}
                   </td>
-                  <td>
+                  <td data-label={tr("Copies")}>
                     {c.copies} · {formatBytes(Number(c.bytes || 0))}
                   </td>
-                  <td>{c.last_check_at ? formatDateTime(c.last_check_at) : <span className="muted">–</span>}</td>
-                  <td>
+                  <td data-label={tr("Last good check")}>{c.last_check_at ? formatDateTime(c.last_check_at) : <span className="muted">–</span>}</td>
+                  <td data-label={tr("Problems")}>
                     {c.failed_checks > 0 && (
                       <span className="badge tone-bad adm-mini">
                         {c.failed_checks} {tr("failed checks")}

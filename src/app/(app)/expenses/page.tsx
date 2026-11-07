@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -167,7 +168,11 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
       )}
 
       {rows.length === 0 ? (
-        <p className="card muted">{tr("No expenses recorded for this month. Record rent, fuel, airtime and other spending with “+ Expense”.")}</p>
+        <EmptyState
+          icon="cash"
+          text="No expenses recorded for this month. Record rent, fuel, airtime and other spending here."
+          action={{ href: "/expenses/new", label: "Record an expense" }}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => (

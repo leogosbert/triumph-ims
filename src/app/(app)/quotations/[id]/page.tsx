@@ -1,4 +1,6 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
+import { checkAttrs } from "@/lib/patterns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -500,11 +502,11 @@ export default async function QuotationPage({
                     <input type="hidden" name="line_id" value={l.id} />
                     <div>
                       <label htmlFor={`q-${l.id}`}>{tr("Qty")}</label>
-                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} enterKeyHint="next" />
+                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} enterKeyHint="next" {...checkAttrs("qty", tr)} />
                     </div>
                     <div>
                       <label htmlFor={`p-${l.id}`}>{tr("Unit price")}</label>
-                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} enterKeyHint="next" />
+                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} enterKeyHint="next" {...checkAttrs("amount", tr)} />
                     </div>
                     <div>
                       <label htmlFor={`d-${l.id}`}>{tr("Disc. %")}</label>
@@ -515,7 +517,7 @@ export default async function QuotationPage({
                   <form action={removeQuoteLine}>
                     <input type="hidden" name="quotation_id" value={q.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
+                    <UndoSubmit done="Line removed">{tr("Remove")}</UndoSubmit>
                   </form>
                 </div>
               )}

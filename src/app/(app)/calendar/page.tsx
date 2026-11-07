@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import Link from "next/link";
 import { primeLang, tr } from "@/lib/tr";
 import { Notice } from "@/components/Notice";
@@ -179,7 +180,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
                     <form action={removeEntry} style={{ marginTop: 4 }}>
                       <input type="hidden" name="id" value={it.entry_id} />
                       <input type="hidden" name="back" value={here} />
-                      <SubmitButton className="btn btn-small">{tr("Remove")}</SubmitButton>
+                      <UndoSubmit className="btn btn-small" done="Entry removed">{tr("Remove")}</UndoSubmit>
                     </form>
                   )}
                 </li>

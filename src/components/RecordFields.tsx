@@ -1,6 +1,7 @@
 import { tr } from "@/lib/tr";
 import type { FieldDef, Section } from "@/lib/fields";
 import { ScanButton } from "@/components/ScanButton";
+import { PATTERNS, type PatternKey } from "@/lib/patterns";
 
 type Values = Record<string, unknown>;
 
@@ -9,9 +10,21 @@ function asText(v: unknown) {
   return String(v);
 }
 
+/** The live check for a text field (FieldChecks shows its title under the field when it doesn't match). */
+function checkFor(f: FieldDef): PatternKey | null {
+  if (f.check !== undefined) return f.check;
+  if (f.key === "tin") return "tin";
+  if (f.type === "tel") return "phone";
+  if (f.type === "money" || f.type === "number") return "amount";
+  if (f.type === "integer") return "whole";
+  return null;
+}
+
 function Input({ f, value, disabled }: { f: FieldDef; value: unknown; disabled: boolean }) {
   const id = `f-${f.key}`;
   const common = { id, name: f.key, disabled, required: f.required };
+  const check = f.type === "textarea" || f.type === "select" || f.type === "bool" ? null : checkFor(f);
+  const checked = check ? { pattern: PATTERNS[check].pattern, title: tr(PATTERNS[check].title) } : {};
   switch (f.type) {
     case "textarea":
       return <textarea {...common} defaultValue={asText(value)} />;
@@ -44,6 +57,7 @@ function Input({ f, value, disabled }: { f: FieldDef; value: unknown; disabled: 
       return (
         <input
           {...common}
+          {...checked}
           type="text"
           inputMode={f.type === "integer" ? "numeric" : "decimal"}
           enterKeyHint="next"
@@ -54,18 +68,18 @@ function Input({ f, value, disabled }: { f: FieldDef; value: unknown; disabled: 
     case "email":
       return <input {...common} type="email" defaultValue={asText(value)} />;
     case "tel":
-      return <input {...common} type="tel" defaultValue={asText(value)} enterKeyHint="next" />;
+      return <input {...common} {...checked} type="tel" defaultValue={asText(value)} enterKeyHint="next" />;
     default:
       // A code that can be read from a barcode (SKU): the camera Scan button sits beside it.
       if (f.scan && !disabled) {
         return (
           <div className="scan-field">
-            <input {...common} type="text" defaultValue={asText(value)} autoComplete="off" />
+            <input {...common} {...checked} type="text" defaultValue={asText(value)} autoComplete="off" />
             <ScanButton target={id} />
           </div>
         );
       }
-      return <input {...common} type="text" defaultValue={asText(value)} />;
+      return <input {...common} {...checked} type="text" defaultValue={asText(value)} />;
   }
 }
 

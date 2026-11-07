@@ -98,7 +98,7 @@ export default async function SupplierPage({
         contacts={supplier.email ? [{ id: supplier.id, name: supplier.contact_person ?? supplier.name, email: supplier.email, position: null, phone: supplier.phone ?? null }] : []}
       />
 
-      <form action={saveSupplier}>
+      <form action={saveSupplier} data-guard>
         <input type="hidden" name="id" value={supplier.id} />
         <fieldset className="plain" disabled={!editable}>
           <RecordFields sections={SUPPLIER_SECTIONS} values={supplier} readOnly={!editable} />

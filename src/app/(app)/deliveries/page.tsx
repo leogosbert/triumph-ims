@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -65,7 +66,11 @@ export default async function DeliveriesPage({ searchParams }: { searchParams: S
         ))}
       </nav>
       {rows.length === 0 ? (
-        <p className="card muted">{tr("No deliveries here. Delivery notes are usually created from an accepted quotation.")}</p>
+        <EmptyState
+          icon="truck"
+          text="No deliveries here. Delivery notes are usually created from an accepted quotation."
+          action={can(roles, "editDeliveries") ? { href: "/deliveries/new", label: "Create a delivery note" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => (

@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -73,7 +74,7 @@ export default async function RequisitionsPage({ searchParams }: { searchParams:
         ))}
       </nav>
       {rows.length === 0 ? (
-        <p className="card muted">{tr("Nothing here.")}</p>
+        <EmptyState icon="inbox" text="No purchase requests here." action={{ href: "/requisitions/new", label: "Request a purchase" }} />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => (

@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -77,7 +78,11 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
         <button className="btn" type="submit">{tr("Search")}</button>
       </form>
       {rows.length === 0 ? (
-        <p className="card muted">{tr("No purchase orders here.")}</p>
+        <EmptyState
+          icon={q ? "search" : "purchasing"}
+          text={q ? "No purchase orders match your search." : "No purchase orders here."}
+          action={!q && can(roles, "editPurchasing") ? { href: "/purchase-orders/new", label: "Create a purchase order" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {

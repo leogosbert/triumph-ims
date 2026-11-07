@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -88,7 +89,11 @@ export default async function QuotationsPage({ searchParams }: { searchParams: S
         <button className="btn" type="submit">{tr("Search")}</button>
       </form>
       {rows.length === 0 ? (
-        <p className="card muted">{tr("No quotations here.")}</p>
+        <EmptyState
+          icon={q ? "search" : "doc"}
+          text={q ? "No quotations match your search." : "No quotations here."}
+          action={!q && can(roles, "editSales") ? { href: "/quotations/new", label: "Create a quotation" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {

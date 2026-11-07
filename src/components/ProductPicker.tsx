@@ -2,6 +2,7 @@ import { tr } from "@/lib/tr";
 import type { ProductOption } from "@/lib/options";
 import { UNITS } from "@/lib/lists";
 import { ScanButton } from "@/components/ScanButton";
+import { checkAttrs } from "@/lib/patterns";
 
 /** Product drop-down plus free-text description, quantity and unit. */
 export function ProductLineFields({ products, showPrice = false }: { products: ProductOption[]; showPrice?: boolean }) {
@@ -29,7 +30,7 @@ export function ProductLineFields({ products, showPrice = false }: { products: P
       </div>
       <div className="field">
         <label htmlFor="quantity">{tr("Quantity")}</label>
-        <input id="quantity" name="quantity" type="text" inputMode="decimal" defaultValue="1" required enterKeyHint="next" />
+        <input id="quantity" name="quantity" type="text" inputMode="decimal" defaultValue="1" required enterKeyHint="next" {...checkAttrs("qty", tr)} />
       </div>
       <div className="field">
         <label htmlFor="unit">{tr("Unit")}</label>
@@ -47,7 +48,7 @@ export function ProductLineFields({ products, showPrice = false }: { products: P
           <div className="field">
             <label htmlFor="unit_price">{tr("Unit price")}{" "}<span className="hint">{tr("· empty = catalogue price")}</span>
             </label>
-            <input id="unit_price" name="unit_price" type="text" inputMode="decimal" enterKeyHint="next" />
+            <input id="unit_price" name="unit_price" type="text" inputMode="decimal" enterKeyHint="next" {...checkAttrs("amount", tr)} />
           </div>
           <div className="field">
             <label htmlFor="discount_pct">{tr("Discount %")}</label>

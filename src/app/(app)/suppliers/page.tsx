@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { ListToolbar } from "@/components/ListToolbar";
@@ -63,7 +64,11 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
         addLabel="New supplier"
       />
       {rows.length === 0 ? (
-        <p className="card muted">{q || currency ? tr("No suppliers match your search.") : tr("No suppliers yet.")}</p>
+        <EmptyState
+          icon={q || currency ? "search" : "purchasing"}
+          text={q || currency ? "No suppliers match your search." : "No suppliers yet."}
+          action={!q && !currency && can(roles, "editSuppliers") ? { href: "/suppliers/new", label: "Add your first supplier" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((s) => (

@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -84,7 +85,11 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Sea
         </Link>
       </nav>
       {projects.length === 0 ? (
-        <p className="card muted">{tr("No projects yet. Add a project to record hours and milestones against it and invoice the client.")}</p>
+        <EmptyState
+          icon="report"
+          text="No projects yet. Add a project to record hours and milestones against it and invoice the client."
+          action={canKeepProjects(roles) ? { href: "/projects/new", label: "Add your first project" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {projects.map((p) => {

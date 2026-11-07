@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { ListToolbar } from "@/components/ListToolbar";
@@ -59,13 +60,16 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
         addLabel="New client"
       />
       {rows.length === 0 ? (
-        <p className="card muted">
-          {q || industry ? tr("No clients match your search.") : tr("No clients yet.")}{" "}
+        <EmptyState
+          icon={q || industry ? "search" : "clients"}
+          text={q || industry ? "No clients match your search." : "No clients yet."}
+          action={!q && !industry && can(roles, "editClients") ? { href: "/clients/new", label: "Add your first client" } : undefined}
+        >
           {can(roles, "importData") && !q && !industry && (
-            <>{tr("You can")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
+            <>{tr("Or")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
             </>
           )}
-        </p>
+        </EmptyState>
       ) : (
         <ul className="rec-list">
           {rows.map((c) => (

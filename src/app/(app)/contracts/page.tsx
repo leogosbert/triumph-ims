@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -78,7 +79,11 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
         </div>
       )}
       {rows.length === 0 ? (
-        <p className="card muted">{view === "current" ? tr("No current contracts.") : tr("No ended contracts.")}</p>
+        <EmptyState
+          icon="doc"
+          text={view === "current" ? "No current contracts." : "No ended contracts."}
+          action={view === "current" && can(roles, "seeCrm") ? { href: "/contracts/new", label: "Add a contract" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {

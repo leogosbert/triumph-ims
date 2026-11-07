@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -116,7 +117,11 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
         </nav>
       )}
       {rows.length === 0 ? (
-        <p className="card muted">{tr("No invoices here. Invoices are usually created from an accepted quotation or a delivered delivery note.")}</p>
+        <EmptyState
+          icon={search ? "search" : "receipt"}
+          text={search ? "No invoices match your search." : "No invoices here. Invoices are usually created from an accepted quotation or a delivered delivery note."}
+          action={!search && can(roles, "editInvoices") ? { href: "/invoices/new", label: "Create an invoice" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {

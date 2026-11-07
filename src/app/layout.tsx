@@ -10,6 +10,9 @@ import { NavProgress } from "@/components/NavProgress";
 import { SubmitterValue } from "@/components/SubmitterValue";
 import { SavedFlash } from "@/components/SavedFlash";
 import { EnterNext } from "@/components/EnterNext";
+import { Toaster } from "@/components/Toaster";
+import { FieldChecks } from "@/components/FieldChecks";
+import { UnsavedGuard } from "@/components/UnsavedGuard";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { onAdminHost } from "@/lib/hosts-server";
@@ -29,6 +32,7 @@ import "./ui-nav.css";
 import "./ui-look.css";
 import "./ui-home.css";
 import "./ui-phone.css";
+import "./ui-feedback.css";
 
 // IBM Plex is bundled in src/app/fonts (SIL Open Font License), so builds never depend on downloading Google Fonts.
 const sans = localFont({
@@ -129,6 +133,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SubmitterValue />
         <SavedFlash />
         <EnterNext />
+        {/* UI feedback (ui-feedback.css): pop-ups, live field checks, unsaved-changes warning. */}
+        <Toaster />
+        <FieldChecks />
+        <UnsavedGuard />
         <LangProvider>
           <AdminHostProvider admin={adminHost}>
             {children}

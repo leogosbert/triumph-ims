@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -110,10 +111,11 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         ))}
       </nav>
       {jobs.length === 0 ? (
-        <p className="card muted">
-          {view === "mine" ? tr("No open jobs for you. Jobs you are assigned to show here.") : tr("No jobs here.")}{" "}
-          {canPlanService(roles) && view === "open" && <Link href="/jobs/new">{tr("Create the first job")}</Link>}
-        </p>
+        <EmptyState
+          icon="tools"
+          text={view === "mine" ? "No open jobs for you. Jobs you are assigned to show here." : "No jobs here."}
+          action={canPlanService(roles) && view === "open" ? { href: "/jobs/new", label: "Create the first job" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {jobs.map((j) => {

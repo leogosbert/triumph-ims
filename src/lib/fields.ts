@@ -1,3 +1,4 @@
+import type { PatternKey } from "./patterns";
 import { CATEGORIES, CURRENCIES, INCOTERMS, INDUSTRIES, ITEM_TYPE_LABELS, PAYMENT_TERMS, TAX_STATUSES, UNITS, VENDOR_STATUSES } from "./lists";
 
 export type FieldType = "text" | "textarea" | "email" | "tel" | "money" | "number" | "integer" | "select" | "bool";
@@ -14,6 +15,8 @@ export type FieldDef = {
   wide?: boolean;
   /** Text that can be read with the camera (a barcode on the item): shows a Scan button where the phone can. */
   scan?: boolean;
+  /** Live check (src/lib/patterns.ts). By default a TIN, phone, amount or count gets one; null for none. */
+  check?: PatternKey | null;
 };
 
 export type Section = { title: string; fields: FieldDef[] };

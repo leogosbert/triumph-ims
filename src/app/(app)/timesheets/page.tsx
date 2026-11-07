@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -353,7 +354,7 @@ export default async function TimesheetsPage({ searchParams }: { searchParams: S
                       <form action={removeHours}>
                         <input type="hidden" name="id" value={l.id} />
                         <input type="hidden" name="week" value={week} />
-                        <SubmitButton className="btn btn-small">{tr("Remove")}</SubmitButton>
+                        <UndoSubmit className="btn btn-small" done="Hours removed">{tr("Remove")}</UndoSubmit>
                       </form>
                     )}
                   </li>

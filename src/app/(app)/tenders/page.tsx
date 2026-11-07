@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -94,9 +95,11 @@ export default async function TendersPage({ searchParams }: { searchParams: Sear
         </div>
       </div>
       {rows.length === 0 ? (
-        <p className="card muted">
-          {view === "open" ? tr("No open tenders. Add one with “+ Tender” when you see an advert or receive an invitation.") : tr("No results recorded yet.")}
-        </p>
+        <EmptyState
+          icon="doc"
+          text={view === "open" ? "No open tenders. Add one when you see an advert or receive an invitation." : "No results recorded yet."}
+          action={view === "open" ? { href: "/tenders/new", label: "Add a tender" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((t) => {

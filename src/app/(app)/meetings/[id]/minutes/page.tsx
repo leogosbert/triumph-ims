@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { primeLang, tr } from "@/lib/tr";
@@ -269,7 +270,7 @@ export default async function MinutesPage({ params, searchParams }: { params: Pr
                         <form action={deletePoint} style={{ marginTop: 6 }}>
                           <input type="hidden" name="meeting_id" value={id} />
                           <input type="hidden" name="point_id" value={p.id} />
-                          <SubmitButton className="btn btn-small">{tr("Remove")}</SubmitButton>
+                          <UndoSubmit className="btn btn-small" done="Point removed">{tr("Remove")}</UndoSubmit>
                         </form>
                       </details>
                     )}

@@ -5,6 +5,7 @@ import { GUIDE, type GuideTopic } from "@/lib/guide";
 import { moreMenuFor } from "@/lib/roleNav";
 import { formatMoney } from "@/lib/money";
 import { cleanSearch } from "@/lib/records";
+import { docQuery } from "@/lib/command-bar";
 import { can, hasRole, type Role } from "@/lib/roles";
 import { tr } from "@/lib/tr";
 import { words } from "@/lib/ai/knowledge";
@@ -107,6 +108,9 @@ export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | 
   if (q.length < 2) return [];
   const { supabase, company, roles } = ctx;
   const like = `%${q}%`;
+  // "PO-1042", "Q-12", "INV-5": the app numbers documents PREFIX-YEAR-0001, so also look for that.
+  const doc = docQuery(q);
+  const num = (cols: string) => (doc ? `${cols},${doc.patterns.map((p) => `number.ilike.${p}`).join(",")}` : cols);
   const none = Promise.resolve({ data: null });
   const [clients, suppliers, products, rfqs, quotes, pos, dns, invoices] = await Promise.all([
     supabase.from("clients").select("id, name, code, industry").eq("company_id", company.id).or(`name.ilike.${like},code.ilike.${like},tin.ilike.${like}`).limit(per + 2),
@@ -120,14 +124,14 @@ export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | 
       .or(`name.ilike.${like},sku.ilike.${like},mfr_part_no.ilike.${like},brand.ilike.${like}`)
       .limit(per + 4),
     can(roles, "seeSales")
-      ? supabase.from("rfqs").select("id, number, title, status, client:clients(name)").eq("company_id", company.id).or(`number.ilike.${like},title.ilike.${like},client_ref.ilike.${like}`).limit(per)
+      ? supabase.from("rfqs").select("id, number, title, status, client:clients(name)").eq("company_id", company.id).or(num(`number.ilike.${like},title.ilike.${like},client_ref.ilike.${like}`)).limit(per)
       : none,
     can(roles, "seeSales")
       ? supabase
           .from("quotations")
           .select("id, number, revision, status, total, currency, client:clients(name)")
           .eq("company_id", company.id)
-          .or(`number.ilike.${like},client_ref.ilike.${like}`)
+          .or(num(`number.ilike.${like},client_ref.ilike.${like}`))
           .order("created_at", { ascending: false })
           .limit(per)
       : none,
@@ -136,16 +140,16 @@ export async function findRecords(ctx: Pick<SearchCtx, "supabase" | "company" | 
           .from("purchase_orders")
           .select("id, number, status, total, currency, supplier:suppliers(name)")
           .eq("company_id", company.id)
-          .or(`number.ilike.${like},supplier_ref.ilike.${like}`)
+          .or(num(`number.ilike.${like},supplier_ref.ilike.${like}`))
           .limit(per)
       : none,
-    can(roles, "seeDeliveries") ? supabase.from("deliveries").select("id, number, status, client:clients(name)").eq("company_id", company.id).ilike("number", like).limit(per) : none,
+    can(roles, "seeDeliveries") ? supabase.from("deliveries").select("id, number, status, client:clients(name)").eq("company_id", company.id).or(num(`number.ilike.${like}`)).limit(per) : none,
     can(roles, "seeInvoices")
       ? supabase
           .from("invoices")
           .select("id, number, status, total, currency, client:clients(name)")
           .eq("company_id", company.id)
-          .or(`number.ilike.${like},client_ref.ilike.${like}`)
+          .or(num(`number.ilike.${like},client_ref.ilike.${like}`))
           .limit(per)
       : none,
   ]);

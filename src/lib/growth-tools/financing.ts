@@ -2,9 +2,9 @@
 
 export const FIN_STATUS: Record<string, { label: string; tone: string }> = {
   draft: { label: "Draft", tone: "off" },
-  submitted: { label: "With the bank", tone: "info" },
+  submitted: { label: "With the bank", tone: "warn" },
   approved: { label: "Approved", tone: "ok" },
-  disbursed: { label: "Money received", tone: "warn" },
+  disbursed: { label: "Money received", tone: "info" },
   repaid: { label: "Repaid", tone: "ok" },
   declined: { label: "Declined", tone: "bad" },
   cancelled: { label: "Cancelled", tone: "off" },

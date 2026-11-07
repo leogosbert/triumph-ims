@@ -5,8 +5,8 @@ export const SRFQ_STATUS: Record<string, { label: string; tone: string }> = {
 };
 
 export const INVITE_STATUS: Record<string, { label: string; tone: string }> = {
-  invited: { label: "Waiting for price", tone: "off" },
-  quoted: { label: "Price received", tone: "info" },
+  invited: { label: "Waiting for price", tone: "warn" },
+  quoted: { label: "Price received", tone: "ok" },
   declined: { label: "Declined", tone: "bad" },
 };
 
@@ -16,8 +16,8 @@ export const PO_STATUS: Record<string, { label: string; tone: string }> = {
   approved: { label: "Approved", tone: "info" },
   sent: { label: "Sent to supplier", tone: "info" },
   confirmed: { label: "Confirmed by supplier", tone: "info" },
-  partially_received: { label: "Partly received", tone: "warn" },
+  partially_received: { label: "Partly received", tone: "info" },
   received: { label: "Received", tone: "ok" },
-  closed: { label: "Closed", tone: "off" },
+  closed: { label: "Closed", tone: "ok" },
   cancelled: { label: "Cancelled", tone: "off" },
 };

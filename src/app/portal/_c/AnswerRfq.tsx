@@ -82,6 +82,7 @@ export function AnswerRfq({ rfq, currency }: { rfq: RfqDetail; currency: string 
                     autoComplete="off"
                     value={prices[l.id]?.unit_price ?? ""}
                     onChange={(e) => setPrices((p) => ({ ...p, [l.id]: { ...p[l.id], unit_price: e.target.value } }))}
+                    enterKeyHint="next"
                   />
                 </label>
                 <label className="small">
@@ -106,7 +107,7 @@ export function AnswerRfq({ rfq, currency }: { rfq: RfqDetail; currency: string 
           </div>
           <div className="field">
             <label htmlFor="ar-lead">{tr("Lead time (days)")}</label>
-            <input id="ar-lead" name="lead_time_days" type="number" min={0} max={730} defaultValue={rfq.lead_time_days ?? ""} />
+            <input id="ar-lead" name="lead_time_days" type="number" min={0} max={730} defaultValue={rfq.lead_time_days ?? ""} inputMode="numeric" enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="ar-valid">{tr("Prices valid until")}</label>
@@ -116,7 +117,7 @@ export function AnswerRfq({ rfq, currency }: { rfq: RfqDetail; currency: string 
             <label htmlFor="ar-freight">
               {tr("Freight")} <span className="hint">{tr("optional")}</span>
             </label>
-            <input id="ar-freight" name="freight" type="text" inputMode="decimal" defaultValue={Number(rfq.freight) ? num(rfq.freight) : ""} />
+            <input id="ar-freight" name="freight" type="text" inputMode="decimal" defaultValue={Number(rfq.freight) ? num(rfq.freight) : ""} enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="ar-terms">{tr("Payment terms")}</label>

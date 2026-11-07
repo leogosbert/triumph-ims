@@ -1,28 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTr } from "@/lib/tr-client";
+import { showToast } from "@/lib/toast";
 
 /**
- * Result of the last action. Problems stay on the page until dealt with;
- * "done" messages appear as a small pop-up at the bottom and fade after a few seconds.
+ * Result of the last action (from ?msg= / ?error=). Problems stay on the page as a banner until
+ * dealt with, so they are not missed; "done" messages ("Saved", "Sent to client") become a small
+ * pop-up (<Toaster>, root layout) that hides after about 3 seconds.
  */
 export function Notice({ msg, error }: { msg?: string; error?: string }) {
   const tr = useTr();
-  const [state, setState] = useState<"open" | "leaving" | "closed">("open");
 
   useEffect(() => {
-    setState("open");
-    if (!msg || error) return;
-    const t = setTimeout(() => setState("leaving"), 6000);
-    return () => clearTimeout(t);
-  }, [msg, error]);
-
-  useEffect(() => {
-    if (state !== "leaving") return;
-    const t = setTimeout(() => setState("closed"), 260);
-    return () => clearTimeout(t);
-  }, [state]);
+    if (msg && !error) showToast({ text: tr(msg) });
+  }, [msg, error, tr]);
 
   if (error) {
     return (
@@ -32,19 +24,6 @@ export function Notice({ msg, error }: { msg?: string; error?: string }) {
         </span>
         <span>{tr(error)}</span>
       </p>
-    );
-  }
-  if (msg && state !== "closed") {
-    return (
-      <div className={`toast${state === "leaving" ? " leaving" : ""}`} role="status">
-        <span className="toast-icon" aria-hidden>
-          ✓
-        </span>
-        <span className="toast-text">{tr(msg)}</span>
-        <button type="button" className="toast-close" onClick={() => setState("leaving")} aria-label={tr("Close")}>
-          ×
-        </button>
-      </div>
     );
   }
   return null;

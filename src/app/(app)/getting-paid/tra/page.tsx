@@ -12,6 +12,7 @@ import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { primeLang, tr } from "@/lib/tr";
+import { checkAttrs } from "@/lib/patterns";
 import { cancelCreditNote, registerVfd, retryFiscal, saveFiscalSettings, sendFiscalQueue } from "../actions";
 import { FeatureOff, GetPaidTabs, Ready } from "../parts";
 
@@ -99,7 +100,7 @@ export default async function TraPage({ searchParams }: { searchParams: SearchPa
               </div>
               <div className="field">
                 <label htmlFor="tin">{tr("Company TIN")}</label>
-                <input id="tin" name="tin" type="text" inputMode="numeric" placeholder="123-456-789" defaultValue={s?.tin ?? ""} />
+                <input id="tin" name="tin" type="text" inputMode="numeric" placeholder="123-456-789" defaultValue={s?.tin ?? ""} {...checkAttrs("tin", tr)} />
               </div>
               <div className="field">
                 <label htmlFor="vrn">{tr("VRN (if registered for VAT)")}</label>

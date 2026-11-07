@@ -1,4 +1,6 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
+import { checkAttrs } from "@/lib/patterns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -153,7 +155,7 @@ export default async function ClientPage({
                   <form action={removeContact}>
                     <input type="hidden" name="client_id" value={client.id} />
                     <input type="hidden" name="contact_id" value={ct.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText={tr("Removing…")}>{tr("Remove")}</SubmitButton>
+                    <UndoSubmit done="Contact removed" pendingText={tr("Removing…")}>{tr("Remove")}</UndoSubmit>
                   </form>
                 )}
               </li>
@@ -188,7 +190,7 @@ export default async function ClientPage({
                 </div>
                 <div className="field">
                   <label htmlFor="c-phone">{tr("Phone / WhatsApp")}</label>
-                  <input id="c-phone" name="phone" type="tel" />
+                  <input id="c-phone" name="phone" type="tel" enterKeyHint="next" {...checkAttrs("phone", tr)} />
                 </div>
                 <div className="field" style={{ gridColumn: "1 / -1" }}>
                   <label htmlFor="c-email">{tr("Email")}</label>
@@ -207,7 +209,7 @@ export default async function ClientPage({
       )}
       <PortalAccess supabase={supabase} companyId={company.id} role={roles} features={features} party="client" partyId={client.id} contacts={contacts} />
 
-      <form action={saveClient}>
+      <form action={saveClient} data-guard>
         <input type="hidden" name="id" value={client.id} />
         <fieldset className="plain" disabled={!editable}>
           <RecordFields
@@ -216,7 +218,7 @@ export default async function ClientPage({
             readOnly={!editable}
             lockedKeys={can(roles, "setCreditLimit") ? [] : ["credit_limit"]}
           />
-          {editable && <SubmitButton className="btn btn-primary btn-block">{tr("Save changes")}</SubmitButton>}
+          {editable && <SubmitButton className="btn btn-primary btn-block save-bar">{tr("Save changes")}</SubmitButton>}
         </fieldset>
       </form>
 

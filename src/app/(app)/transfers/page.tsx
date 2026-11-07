@@ -10,6 +10,9 @@ import { can } from "@/lib/roles";
 import { StatusBadge } from "@/lib/sales";
 import { TRANSFER_STATUS, storeOptions } from "@/lib/stock";
 import { BackLink } from "@/components/BackLink";
+import { FilterChips } from "@/components/lists/FilterChips";
+import { ListSort } from "@/components/lists/ListSort";
+import { readSort, sortLinks, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Stock transfers" };
 
@@ -26,6 +29,12 @@ type Row = {
   lines: { count: number }[];
 };
 
+const SORTS: SortOption[] = [
+  { key: "newest", label: "Newest", col: "created_at", dir: "desc" },
+  { key: "number", label: "Number", col: "number", dir: "desc" },
+  { key: "status", label: "Status", col: "status", dir: "asc" },
+];
+
 export default async function TransfersPage({ searchParams }: { searchParams: SearchParams }) {
   await primeLang();
   const sp = (await searchParams) ?? {};
@@ -33,10 +42,12 @@ export default async function TransfersPage({ searchParams }: { searchParams: Se
   const { supabase, company, roles } = await getAppContext();
   if (!can(roles, "seeStock")) noAccess();
   const view = sp.view === "done" ? "done" : "open";
+  const sort = readSort(sp, SORTS, "newest");
   let q = supabase
     .from("stock_transfers")
     .select("id, number, status, reason, created_at, sent_at, received_at, from_warehouse_id, to_warehouse_id, lines:stock_transfer_lines(count)")
     .eq("company_id", company.id)
+    .order(sort.opt.col ?? "created_at", { ascending: sort.ascending })
     .order("created_at", { ascending: false })
     .limit(500);
   q = view === "open" ? q.in("status", ["draft", "in_transit"]) : q.in("status", ["received", "cancelled"]);
@@ -59,14 +70,17 @@ export default async function TransfersPage({ searchParams }: { searchParams: Se
       </div>
       <p className="muted small">{tr("Move stock from one store to another. Batches and expiry dates go with the goods.")}</p>
       <Notice {...notice} />
-      <nav className="tabs-row" aria-label={tr("Show")}>
-        <Link href="/transfers" aria-current={view === "open" ? "page" : undefined}>
-          {tr("Open")}
-        </Link>
-        <Link href="/transfers?view=done" aria-current={view === "done" ? "page" : undefined}>
-          {tr("Done")}
-        </Link>
-      </nav>
+      <FilterChips
+        list="transfers"
+        label="Show"
+        current={view}
+        explicit={typeof sp.view === "string"}
+        chips={[
+          { key: "open", label: "Open", href: "/transfers" },
+          { key: "done", label: "Done", href: "/transfers?view=done" },
+        ]}
+      />
+      {rows.length > 1 && <ListSort links={sortLinks("/transfers", sp, SORTS, sort)} />}
       {rows.length === 0 ? (
         <p className="card muted">{view === "open" ? tr("No transfers being prepared or on the way.") : tr("No finished transfers yet.")}</p>
       ) : (

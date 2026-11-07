@@ -2,16 +2,16 @@ import { todayTz } from "@/lib/sales";
 
 export const INVOICE_STATUS: Record<string, { label: string; tone: string }> = {
   draft: { label: "Draft", tone: "off" },
-  issued: { label: "Unpaid", tone: "info" },
-  partly_paid: { label: "Part paid", tone: "warn" },
+  issued: { label: "Unpaid", tone: "warn" },
+  partly_paid: { label: "Part paid", tone: "info" },
   paid: { label: "Paid", tone: "ok" },
   cancelled: { label: "Cancelled", tone: "off" },
   overdue: { label: "Overdue", tone: "bad" },
 };
 
 export const BILL_STATUS: Record<string, { label: string; tone: string }> = {
-  open: { label: "Unpaid", tone: "info" },
-  partly_paid: { label: "Part paid", tone: "warn" },
+  open: { label: "Unpaid", tone: "warn" },
+  partly_paid: { label: "Part paid", tone: "info" },
   paid: { label: "Paid", tone: "ok" },
   cancelled: { label: "Cancelled", tone: "off" },
   overdue: { label: "Overdue", tone: "bad" },

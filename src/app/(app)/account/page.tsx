@@ -1,5 +1,6 @@
 import "@/app/settings-ui.css";
 import { primeLang, tr } from "@/lib/tr";
+import { checkAttrs } from "@/lib/patterns";
 import { Notice } from "@/components/Notice";
 import { NewPasswordField } from "@/components/NewPasswordField";
 import { SecurityPanel } from "@/components/SecurityPanel";
@@ -116,7 +117,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
             </div>
             <div className="field">
               <label htmlFor="phone">{tr("Phone")}</label>
-              <input id="phone" name="phone" type="tel" autoComplete="tel" defaultValue={profile.phone ?? ""} />
+              <input id="phone" name="phone" type="tel" autoComplete="tel" defaultValue={profile.phone ?? ""} enterKeyHint="done" {...checkAttrs("phone", tr)} />
             </div>
           </div>
           <div className="field">

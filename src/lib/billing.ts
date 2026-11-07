@@ -71,7 +71,7 @@ export type AccountStatus = "trial" | "active" | "grace" | "read_only" | "suspen
 export const ACCOUNT_STATUS: Record<AccountStatus, { label: string; tone: "info" | "ok" | "warn" | "bad" | "off"; help: string }> = {
   trial: { label: "Free trial", tone: "info", help: "Everything you enter now is kept when you start paying." },
   active: { label: "Active", tone: "ok", help: "Thank you. Your subscription is up to date." },
-  grace: { label: "Payment overdue", tone: "warn", help: "An invoice is past its due date. Please pay to keep full access." },
+  grace: { label: "Payment overdue", tone: "bad", help: "An invoice is past its due date. Please pay to keep full access." },
   read_only: { label: "Read-only", tone: "bad", help: "Pay the overdue invoice to add and change records again. You can still view, print and export." },
   suspended: { label: "Suspended", tone: "bad", help: "Only management can sign in, to pay or export. Your data is safe." },
   free: { label: "Free account", tone: "ok", help: "LeMo Tech has given your company free use." },

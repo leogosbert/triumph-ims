@@ -27,7 +27,7 @@ const MATCH: Record<string, { label: string; tone: string }> = {
   over: { label: "Billed more than received", tone: "bad" },
   to_bill: { label: "Received, not billed", tone: "warn" },
   part: { label: "Billed less than received", tone: "info" },
-  waiting: { label: "Waiting for goods", tone: "off" },
+  waiting: { label: "Waiting for goods", tone: "warn" },
   ok: { label: "Matches", tone: "ok" },
 };
 

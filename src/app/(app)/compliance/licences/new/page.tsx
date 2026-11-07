@@ -63,7 +63,7 @@ export default async function NewLicencePage({ searchParams }: { searchParams: S
             <option value="active">{tr("Active (we hold it)")}</option>
           </select>
         </div>
-        <SubmitButton className="btn btn-primary btn-block">{tr("Add the licence")}</SubmitButton>
+        <SubmitButton className="btn btn-primary btn-block save-bar">{tr("Add the licence")}</SubmitButton>
       </form>
     </>
   );

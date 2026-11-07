@@ -54,7 +54,7 @@ export default async function NewContractPage({ searchParams }: { searchParams: 
           tenders={(tenders ?? []) as { id: string; number: string; title: string }[]}
           base={company.base_currency}
         />
-        <SubmitButton>{tr("Add contract")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Add contract")}</SubmitButton>
       </form>
     </>
   );

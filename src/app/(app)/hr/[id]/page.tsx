@@ -283,7 +283,7 @@ export default async function EmployeePage({ params, searchParams }: { params: P
             <form action={saveEmployee} style={{ marginTop: 12 }}>
               <input type="hidden" name="id" value={e.id} />
               <EmployeeFields e={e} logins={logins} />
-              <SubmitButton>{tr("Save")}</SubmitButton>
+              <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>
             </form>
           </details>
           {active ? (

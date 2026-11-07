@@ -1,4 +1,5 @@
 import { primeLang, tr } from "@/lib/tr";
+import { checkAttrs } from "@/lib/patterns";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { NotReady } from "@/components/NotReady";
@@ -133,7 +134,7 @@ export default async function TransferPage({ params, searchParams }: { params: P
               </div>
               <div className="field">
                 <label htmlFor="quantity">{tr("Quantity")}</label>
-                <input id="quantity" name="quantity" type="text" inputMode="decimal" required />
+                <input id="quantity" name="quantity" type="text" inputMode="decimal" required enterKeyHint="next" {...checkAttrs("qty", tr)} />
               </div>
               <div className="field">
                 <label htmlFor="note">{tr("Note")}</label>

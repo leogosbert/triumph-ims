@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -9,8 +10,19 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can } from "@/lib/roles";
 import { BackLink } from "@/components/BackLink";
+import { FilterChips } from "@/components/lists/FilterChips";
+import { ListSort } from "@/components/lists/ListSort";
+import { readSort, sortLinks, sortRows, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Contracts" };
+
+// Contracts are all loaded at once, so these sort the loaded rows.
+const SORTS: SortOption[] = [
+  { key: "end", label: "End date", dir: "asc" },
+  { key: "client", label: "Client", dir: "asc" },
+  { key: "value", label: "Value", dir: "desc" },
+  { key: "start", label: "Start date", dir: "desc" },
+];
 
 type Row = {
   id: string;
@@ -33,7 +45,7 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
   const notice = await readNotice(searchParams);
   const { supabase, company, roles } = await getAppContext();
   if (!can(roles, "seeContracts")) noAccess();
-  const view = sp.view === "ended" ? "ended" : "current";
+  const view = sp.view === "ended" ? "ended" : sp.view === "ending" ? "ending" : "current";
   const { data, error } = await supabase
     .from("contracts")
     .select("id, number, title, kind, start_date, end_date, currency, value_cap, remind_days, cancelled_at, client:clients(name), prices:contract_prices(count)")
@@ -46,8 +58,17 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
   const isCurrent = (r: Row) => !r.cancelled_at && (daysUntil(r.end_date) ?? 0) >= 0;
   const current = all.filter(isCurrent);
   const ended = all.filter((r) => !isCurrent(r)).reverse();
-  const rows = view === "current" ? current : ended;
   const ending = current.filter((r) => (daysUntil(r.end_date) ?? 999) <= r.remind_days);
+  const shown = view === "current" ? current : view === "ending" ? ending : ended;
+  const sort = readSort(sp, SORTS, "end");
+  const get: Record<string, (r: Row) => string | number | null> = {
+    end: (r) => r.end_date,
+    client: (r) => r.client?.name ?? null,
+    value: (r) => (r.value_cap === null ? null : Number(r.value_cap)),
+    start: (r) => r.start_date,
+  };
+  // Ended contracts keep their latest-first order until the person picks a sort.
+  const rows = sort.explicit ? sortRows(shown, get[sort.key], sort.dir) : shown;
 
   return (
     <>
@@ -64,21 +85,29 @@ export default async function ContractsPage({ searchParams }: { searchParams: Se
       </div>
       <p className="muted small">{tr("Framework agreements and supply contracts with agreed prices. Quotations for the client can use these prices in one tap.")}</p>
       <Notice {...notice} />
-      <nav className="tabs-row" aria-label={tr("Show")}>
-        <Link href="/contracts" aria-current={view === "current" ? "page" : undefined}>
-          {tr("Current")} ({current.length})
-        </Link>
-        <Link href="/contracts?view=ended" aria-current={view === "ended" ? "page" : undefined}>
-          {tr("Ended")} ({ended.length})
-        </Link>
-      </nav>
+      <FilterChips
+        list="contracts"
+        label="Show"
+        current={view}
+        explicit={typeof sp.view === "string"}
+        chips={[
+          { key: "current", label: `${tr("Current")} (${current.length})`, href: "/contracts" },
+          ...(ending.length ? [{ key: "ending", label: `${tr("Ending soon")} (${ending.length})`, href: "/contracts?view=ending" }] : []),
+          { key: "ended", label: `${tr("Ended")} (${ended.length})`, href: "/contracts?view=ended" },
+        ]}
+      />
+      {rows.length > 1 && <ListSort links={sortLinks("/contracts", sp, SORTS, sort)} />}
       {view === "current" && ending.length > 0 && (
         <div className="banner warn small">
           {ending.length} {tr("contract(s) ending soon: time to agree the renewal.")}
         </div>
       )}
       {rows.length === 0 ? (
-        <p className="card muted">{view === "current" ? tr("No current contracts.") : tr("No ended contracts.")}</p>
+        <EmptyState
+          icon="doc"
+          text={view === "current" ? "No current contracts." : "No ended contracts."}
+          action={view === "current" && can(roles, "seeCrm") ? { href: "/contracts/new", label: "Add a contract" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {

@@ -111,7 +111,7 @@ export default async function RemindersPage({ searchParams }: { searchParams: Se
               </div>
               <div className="field">
                 <label htmlFor="min_balance">{tr("Do not remind below")}</label>
-                <input id="min_balance" name="min_balance" type="text" inputMode="decimal" defaultValue={String(s.min_balance ?? 0)} />
+                <input id="min_balance" name="min_balance" type="text" inputMode="decimal" defaultValue={String(s.min_balance ?? 0)} enterKeyHint="next" />
               </div>
             </div>
             <div className="field">

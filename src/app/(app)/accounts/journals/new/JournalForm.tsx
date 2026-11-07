@@ -132,6 +132,7 @@ export function JournalForm({
                   inputMode="decimal"
                   value={l.d}
                   onChange={(e) => set(l.key, { d: e.target.value, c: e.target.value ? "" : l.c })}
+                  enterKeyHint="next"
                 />
               </div>
               <div className="field">
@@ -142,6 +143,7 @@ export function JournalForm({
                   inputMode="decimal"
                   value={l.c}
                   onChange={(e) => set(l.key, { c: e.target.value, d: e.target.value ? "" : l.d })}
+                  enterKeyHint="done"
                 />
               </div>
             </div>

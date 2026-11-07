@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -10,16 +11,33 @@ import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
 import { StatusBadge, todayTz } from "@/lib/sales";
 import { BackLink } from "@/components/BackLink";
+import { FilterChips } from "@/components/lists/FilterChips";
+import { ListSort } from "@/components/lists/ListSort";
+import { SwipeRow, type RowAction } from "@/components/lists/SwipeRow";
+import { readSort, sortLinks, sortRows, weekAhead, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Invoices" };
 
 const TABS = [
   { key: "unpaid", label: "Unpaid" },
   { key: "overdue", label: "Overdue" },
+  { key: "week", label: "Due this week" },
+  { key: "mine", label: "Mine" },
   { key: "draft", label: "Drafts" },
   { key: "paid", label: "Paid" },
   { key: "all", label: "All" },
 ];
+
+const SORTS: SortOption[] = [
+  { key: "due", label: "Due date", col: "due_date", dir: "asc" },
+  { key: "date", label: "Date", col: "issue_date", dir: "desc" },
+  { key: "newest", label: "Newest", col: "created_at", dir: "desc" },
+  { key: "amount", label: "Amount", col: "total", dir: "desc" },
+  { key: "client", label: "Client", dir: "asc" },
+  { key: "status", label: "Status", col: "status", dir: "asc" },
+];
+/** Each chip's natural order when the person has not picked one. */
+const TAB_SORT: Record<string, string> = { unpaid: "due", overdue: "due", week: "due", paid: "date" };
 
 type Row = {
   id: string;
@@ -38,32 +56,52 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
+  // ?from=&to= (issue date, both optional): set by tapping a month on the home chart.
+  const day = (v: unknown) => {
+    if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return null;
+    const d = new Date(`${v}T00:00:00Z`);
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v ? v : null;
+  };
+  const from = day(sp.from);
+  const to = day(sp.to);
+  const range = from || to ? `&from=${from ?? ""}&to=${to ?? ""}` : "";
+  // A date range on its own lists every invoice in it, paid or not.
+  const tab = TABS.find((t) => t.key === sp.tab) ?? (range ? TABS[TABS.length - 1] : TABS[0]);
   const search = cleanSearch(typeof sp.q === "string" ? sp.q : "");
-  const { supabase, company, roles } = await getAppContext();
+  const { supabase, company, roles, user } = await getAppContext();
   if (!can(roles, "seeInvoices")) noAccess();
+  const sort = readSort(sp, SORTS, search ? "newest" : (TAB_SORT[tab.key] ?? "newest"));
+  // Sorts the database can do; "client" orders the loaded rows by name below.
+  const order = { col: sort.opt.col ?? "created_at", ascending: sort.opt.col ? sort.ascending : false };
+  const week = weekAhead(todayTz());
 
   let q = supabase
     .from("invoices")
     .select("id, number, status, issue_date, due_date, currency, total, amount_paid, created_at, client:clients(name)")
     .eq("company_id", company.id)
     .limit(LIST_LIMIT);
-  if (tab.key === "unpaid") q = q.in("status", ["issued", "partly_paid"]).order("due_date", { ascending: true });
-  else if (tab.key === "overdue") q = q.in("status", ["issued", "partly_paid"]).lt("due_date", todayTz()).order("due_date");
-  else if (tab.key === "draft") q = q.eq("status", "draft").order("created_at", { ascending: false });
-  else if (tab.key === "paid") q = q.eq("status", "paid").order("issue_date", { ascending: false });
-  else q = q.order("created_at", { ascending: false });
+  if (tab.key === "unpaid") q = q.in("status", ["issued", "partly_paid"]);
+  else if (tab.key === "overdue") q = q.in("status", ["issued", "partly_paid"]).lt("due_date", todayTz());
+  else if (tab.key === "week") q = q.in("status", ["issued", "partly_paid"]).gte("due_date", week.from).lte("due_date", week.to);
+  else if (tab.key === "mine") q = q.eq("created_by", user.id);
+  else if (tab.key === "draft") q = q.eq("status", "draft");
+  else if (tab.key === "paid") q = q.eq("status", "paid");
+  if (from) q = q.gte("issue_date", from);
+  if (to) q = q.lte("issue_date", to);
+  q = q.order(order.col, { ascending: order.ascending, nullsFirst: false }).order("created_at", { ascending: false });
   const { data, error } = await (search
     ? supabase
         .from("invoices")
         .select("id, number, status, issue_date, due_date, currency, total, amount_paid, created_at, client:clients(name)")
         .eq("company_id", company.id)
         .or(`number.ilike.%${search}%,client_ref.ilike.%${search}%`)
-        .order("created_at", { ascending: false })
+        .order(order.col, { ascending: order.ascending, nullsFirst: false })
         .limit(LIST_LIMIT)
     : q);
   if (error) throw new Error(error.message);
-  const rows = (data ?? []) as unknown as Row[];
+  const loaded = (data ?? []) as unknown as Row[];
+  const rows = sort.key === "client" ? sortRows(loaded, (r) => r.client?.name, sort.dir) : loaded;
+  const canPay = can(roles, "editInvoices");
   const openTotal = rows
     .filter((r) => r.status === "issued" || r.status === "partly_paid")
     .reduce((s, r) => s + n(r.total) - n(r.amount_paid), 0);
@@ -84,25 +122,42 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
           <button className="btn" type="submit">{tr("Search")}</button>
         </div>
       </form>
-      {!search && (
-        <nav className="tabs-row" aria-label={tr("Filter")}>
-          {TABS.map((t) => (
-            <Link key={t.key} href={`/invoices?tab=${t.key}`} aria-current={t.key === tab.key ? "page" : undefined}>
-              {tr(String(t.label ?? ""))}
-            </Link>
-          ))}
-        </nav>
+      {!search && range && (
+        <p className="inv-range small">
+          <span>
+            {tr("Issued")} {from ? formatDate(from) : "…"} – {to ? formatDate(to) : "…"}
+          </span>
+          <Link href={`/invoices?tab=${tab.key}`} className="btn btn-small">
+            {tr("Clear dates")}
+          </Link>
+        </p>
       )}
+      {!search && (
+        <FilterChips
+          list="invoices"
+          current={tab.key}
+          explicit={typeof sp.tab === "string"}
+          chips={TABS.map((t) => ({ key: t.key, label: t.label, href: `/invoices?tab=${t.key}${range}` }))}
+        />
+      )}
+      {rows.length > 1 && <ListSort links={sortLinks("/invoices", sp, SORTS, sort)} />}
       {rows.length === 0 ? (
-        <p className="card muted">{tr("No invoices here. Invoices are usually created from an accepted quotation or a delivered delivery note.")}</p>
+        <EmptyState
+          icon={search ? "search" : "receipt"}
+          text={search ? "No invoices match your search." : "No invoices here. Invoices are usually created from an accepted quotation or a delivered delivery note."}
+          action={!search && can(roles, "editInvoices") ? { href: "/invoices/new", label: "Create an invoice" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {
             const shown = shownStatus(r.status, r.due_date);
             const late = shown === "overdue" ? daysOverdue(r.due_date) : 0;
             const owed = n(r.total) - n(r.amount_paid);
+            const actions: RowAction[] = [];
+            if (canPay && (r.status === "issued" || r.status === "partly_paid")) actions.push({ label: "Record payment", href: `/invoices/${r.id}#payments`, tone: "pay" });
+            else if (r.status !== "draft" && r.status !== "cancelled") actions.push({ label: "PDF", href: `/invoices/${r.id}/pdf`, newTab: true });
             return (
-              <li key={r.id}>
+              <SwipeRow key={r.id} href={`/invoices/${r.id}`} actions={actions}>
                 <Link href={`/invoices/${r.id}`}>
                   <div className="main">
                     <div className="title">{r.client?.name}</div>
@@ -118,7 +173,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
                     <StatusBadge map={INVOICE_STATUS} status={shown} />
                   </div>
                 </Link>
-              </li>
+              </SwipeRow>
             );
           })}
         </ul>

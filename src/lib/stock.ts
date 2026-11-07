@@ -4,7 +4,7 @@ type Supabase = Awaited<ReturnType<typeof createClient>>;
 
 export const DELIVERY_STATUS: Record<string, { label: string; tone: string }> = {
   draft: { label: "Being prepared", tone: "off" },
-  dispatched: { label: "On the way", tone: "warn" },
+  dispatched: { label: "On the way", tone: "info" },
   delivered: { label: "Delivered", tone: "ok" },
   failed: { label: "Failed", tone: "bad" },
   cancelled: { label: "Cancelled", tone: "off" },
@@ -36,7 +36,7 @@ export function daysUntil(iso: string) {
 
 export const TRANSFER_STATUS: Record<string, { label: string; tone: string }> = {
   draft: { label: "Being prepared", tone: "off" },
-  in_transit: { label: "On the way", tone: "warn" },
+  in_transit: { label: "On the way", tone: "info" },
   received: { label: "Received", tone: "ok" },
   cancelled: { label: "Cancelled", tone: "off" },
 };

@@ -115,7 +115,7 @@ export default async function InboxSetupPage({ searchParams }: { searchParams: S
               </div>
               <div className="field">
                 <label htmlFor="s-wa-phone">{tr("WhatsApp business number")}</label>
-                <input id="s-wa-phone" name="whatsapp_display_phone" type="tel" maxLength={40} defaultValue={s?.whatsapp_display_phone ?? ""} placeholder="+255 7xx xxx xxx" />
+                <input id="s-wa-phone" name="whatsapp_display_phone" type="tel" maxLength={40} defaultValue={s?.whatsapp_display_phone ?? ""} placeholder="+255 7xx xxx xxx" enterKeyHint="next" />
               </div>
             </div>
             <div className="field">

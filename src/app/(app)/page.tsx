@@ -1,14 +1,18 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { Suspense } from "react";
+import { SkeletonCard } from "@/components/Skeleton";
 import { Carousel } from "@/components/Carousel";
-import { CountUp } from "@/components/CountUp";
+import { MoneyFig } from "@/components/MoneyFig";
+import { HomeCustomise, HomeFlow, HomeHeroTiles, HomeKeyFigures, HomePrefsProvider, type HomeSectionMeta, type HomeSectionNode } from "@/components/home/HomePrefs";
+import { layoutKey } from "@/lib/homeLayout";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { displayName, getAppContext } from "@/lib/context";
 import { readNotice, withNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { can, onlyRoles } from "@/lib/roles";
-import { AgingChart, BarList, ControlTower, KpiGrid, SalesChart } from "@/components/Dashboard";
+import { AgingChart, BarList, ControlTower, SalesChart } from "@/components/Dashboard";
 import { loadDashboard } from "@/lib/dashboard";
 import { backupTowerItem } from "@/lib/backups";
 import { Icon, type IconName } from "@/components/Icon";
@@ -20,6 +24,7 @@ import { TourInvite } from "@/components/tour/TourButton";
 import { isLevel, levelRank, type Level } from "@/lib/levels";
 import { AdminSummary } from "@/components/AdminSummary";
 import { ComplianceCard } from "@/components/ComplianceCard";
+import { canSeeCompliance } from "@/lib/compliance/model";
 
 export const metadata = { title: "Home" };
 
@@ -116,8 +121,6 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       : Promise.resolve(null),
   ]);
   if (overdue) dash.tower.attention.unshift({ ...overdue, label: tr(overdue.label) });
-  const heroKpis = dash.kpis.slice(0, 2);
-  const restKpis = dash.kpis.slice(2);
   const actions = quickActions(roles, t);
   const today = new Intl.DateTimeFormat(t.locale, { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Dar_es_Salaam" }).format(new Date());
   const base = company.base_currency;
@@ -138,6 +141,8 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     ];
   }
   const remaining = checklist.filter((c) => !c.done).length;
+  // Grey loading shapes only where the card will most likely appear (it hides itself when the features are off).
+  const adminCardLikely = ["hr_people", "hse", "quality", "timesheet_approval"].some((k) => features.on(k));
 
   const needsOnboarding = isManager && company.onboarding_done === false && !company.is_demo;
   // Stage 12: "Take a 2-minute tour" for managers in the first 14 days after onboarding
@@ -162,52 +167,96 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     };
   }
 
-  const shortMoney = (v: number) => {
-    const x = Math.abs(v);
-    return x >= 1e9 ? `${(v / 1e9).toFixed(1)}B` : x >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : x >= 1e3 ? `${Math.round(v / 1e3)}K` : String(Math.round(v));
-  };
+  // The line under the greeting: only what this person's roles cover, and nothing that is zero.
+  const waitingCount = approvals.length + poApprovals.length;
+  const summaryParts: { key: string; href: string; text: React.ReactNode }[] = [];
+  if (waitingCount > 0) {
+    summaryParts.push({
+      key: "approvals",
+      href: poApprovals.length === 0 ? "/quotations?tab=approval" : approvals.length === 0 ? "/purchase-orders?tab=approval" : "#waiting",
+      text: `${waitingCount} ${waitingCount === 1 ? tr("approval waiting") : tr("approvals waiting")}`,
+    });
+  }
+  const dnToday = dash.summary.deliveriesToday ?? 0;
+  if (dnToday > 0) {
+    summaryParts.push({ key: "deliveries", href: "/deliveries", text: `${dnToday} ${dnToday === 1 ? tr("delivery today") : tr("deliveries today")}` });
+  }
+  const dueWeek = dash.summary.dueThisWeek ?? 0;
+  if (dueWeek > 0) {
+    summaryParts.push({
+      key: "due",
+      href: "/invoices?tab=unpaid",
+      text: (
+        <>
+          <MoneyFig value={dueWeek} currency={base} short /> {tr("due this week")}
+        </>
+      ),
+    });
+  }
 
-  return (
-    <>
-      <section className="hero">
-        <div className="hero-date">{today}</div>
-        <h1>
-          {greeting(t)}, {firstName}
-        </h1>
-        {heroKpis.length > 0 && (
-          <div className="hero-kpis">
-            {heroKpis.map((k) => (
-              <Link key={k.label} href={k.href ?? "/"}>
-                <span className="num">{k.money ? `${base} ${shortMoney(k.value)}` : `${k.value.toLocaleString("en-GB")}${k.suffix ?? ""}`}</span>
-                <span>{tr(String(k.label ?? ""))}</span>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-      <div className="hero-overlap">
-        <Notice {...notice} />
-        <ControlTower tower={dash.tower} t={t} />
-        {features.on("ai_assistant") && (
-          <form action="/assistant" className="as-home" role="search">
-            <span className="as-orb as-orb-sm" aria-hidden="true" />
-            <input name="q" maxLength={500} placeholder={tr("Ask the assistant, for example: who owes us money?")} aria-label={tr("Ask the assistant")} />
-            <button type="submit" className="btn btn-primary btn-small">
-              {tr("Ask")}
-            </button>
-          </form>
-        )}
-      </div>
+  // Sections each person can order or hide (Customise). Default order = the order they had before.
+  const canApprove = can(roles, "approveQuotes") || can(roles, "approvePOs");
+  const sectionMeta: HomeSectionMeta[] = [
+    { id: "tower", label: t["home.tower"] },
+    ...(features.on("ai_assistant") ? [{ id: "ask", label: "Ask the assistant" }] : []),
+    { id: "tips", label: "Tips and suggestions", locked: true },
+    ...(canApprove ? [{ id: "approvals", label: t["home.waiting"] }] : []),
+    ...(actions.length > 0 ? [{ id: "quick", label: t["home.quickActions"] }] : []),
+    { id: "stats", label: "Statistics" },
+    ...(isManager && remaining > 0 ? [{ id: "setup", label: t["home.setup"] }] : []),
+  ].map((s) => ({ ...s, label: tr(String(s.label ?? "")) }));
 
-      {needsOnboarding && <OnboardingCard />}
-      {isManager && welcomeLevel && <FirstStepsCard level={welcomeLevel} />}
-      {invitedToTour && <TourInvite tour={level} company={company.id} />}
-      {growth && <GrowthCard level={level} featureRecs={growth.featureRecs} featureLevel={growth.featureLevel} levelRec={growth.levelRec} />}
-      <AdminSummary />
-      <ComplianceCard />
+  const statSlides = [
+    dash.kpis.length > 2 && <HomeKeyFigures key="kpis" currency={base} />,
+    dash.months && dash.months.some((m) => m.sales > 0) && (
+      <SalesChart key="sales" months={dash.months} currency={base} t={t} drill={can(roles, "seeInvoices")} />
+    ),
+    dash.aging && <AgingChart key="aging" aging={dash.aging} currency={base} title={t["c.aging"]} />,
+    dash.industries && dash.industries.length > 0 && (
+      <BarList key="ind" title={t["c.industry"]} sub={t["c.thisYear"]} rows={dash.industries} currency={base} href="/profit" />
+    ),
+    dash.clients && dash.clients.length > 0 && (
+      <BarList key="cli" title={t["c.topClients"]} sub={t["c.thisYear"]} rows={dash.clients} currency={base} href="/profit" />
+    ),
+  ].filter(Boolean);
 
-      {(approvals.length > 0 || poApprovals.length > 0) && (
-        <section className="card">
+  const sectionNodes: HomeSectionNode[] = [
+    { id: "tower", overlap: true, node: <ControlTower tower={dash.tower} t={t} /> },
+    {
+      id: "ask",
+      overlap: true,
+      node: features.on("ai_assistant") && (
+        <form action="/assistant" className="as-home" role="search">
+          <span className="as-orb as-orb-sm" aria-hidden="true" />
+          <input name="q" maxLength={500} placeholder={tr("Ask the assistant, for example: who owes us money?")} aria-label={tr("Ask the assistant")} />
+          <button type="submit" className="btn btn-primary btn-small">
+            {tr("Ask")}
+          </button>
+        </form>
+      ),
+    },
+    {
+      id: "tips",
+      node: (
+        <>
+          {needsOnboarding && <OnboardingCard />}
+          {isManager && welcomeLevel && <FirstStepsCard level={welcomeLevel} />}
+          {invitedToTour && <TourInvite tour={level} company={company.id} />}
+          {growth && <GrowthCard level={level} featureRecs={growth.featureRecs} featureLevel={growth.featureLevel} levelRec={growth.levelRec} />}
+          {/* These two fetch their own data: the rest of the screen shows without waiting for them. */}
+          <Suspense fallback={adminCardLikely ? <SkeletonCard tiles={3} lines={0} /> : null}>
+            <AdminSummary />
+          </Suspense>
+          <Suspense fallback={features.on("compliance") && canSeeCompliance(roles) ? <SkeletonCard lines={2} /> : null}>
+            <ComplianceCard />
+          </Suspense>
+        </>
+      ),
+    },
+    {
+      id: "approvals",
+      node: (approvals.length > 0 || poApprovals.length > 0) && (
+        <section className="card" id="waiting">
           <h2>{t["home.waiting"]}</h2>
           <ul className="waitlist">
             {approvals.map((q) => (
@@ -234,9 +283,11 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
             ))}
           </ul>
         </section>
-      )}
-
-      {actions.length > 0 && (
+      ),
+    },
+    {
+      id: "quick",
+      node: actions.length > 0 && (
         <section className="quick">
           <h2>{t["home.quickActions"]}</h2>
           <div className="quick-grid">
@@ -250,35 +301,20 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
             ))}
           </div>
         </section>
-      )}
-
-      {(() => {
-        const slides = [
-          restKpis.length > 0 && (
-            <section className="card stat-slide" key="kpis">
-              <h2>{tr("Key figures")}</h2>
-              <KpiGrid kpis={restKpis} currency={base} />
-            </section>
-          ),
-          dash.months && dash.months.some((m) => m.sales > 0) && <SalesChart key="sales" months={dash.months} currency={base} t={t} />,
-          dash.aging && <AgingChart key="aging" aging={dash.aging} currency={base} title={t["c.aging"]} />,
-          dash.industries && dash.industries.length > 0 && (
-            <BarList key="ind" title={t["c.industry"]} sub={t["c.thisYear"]} rows={dash.industries} currency={base} href="/profit" />
-          ),
-          dash.clients && dash.clients.length > 0 && (
-            <BarList key="cli" title={t["c.topClients"]} sub={t["c.thisYear"]} rows={dash.clients} currency={base} href="/profit" />
-          ),
-        ].filter(Boolean);
-        return slides.length > 0 ? (
-          <section className="stats-block">
-            <h2>{tr("Statistics")}</h2>
-            <Carousel label={tr("Statistics")}>{slides}</Carousel>
-          </section>
-        ) : null;
-      })()}
-      <CountUp selector=".hero-kpis .num, .stat .n" />
-
-      {isManager && remaining > 0 && (
+      ),
+    },
+    {
+      id: "stats",
+      node: statSlides.length > 0 && (
+        <section className="stats-block">
+          <h2>{tr("Statistics")}</h2>
+          <Carousel label={tr("Statistics")}>{statSlides}</Carousel>
+        </section>
+      ),
+    },
+    {
+      id: "setup",
+      node: isManager && remaining > 0 && (
         <section className="card">
           <h2>{t["home.setup"]}</h2>
           <p className="muted small">
@@ -295,7 +331,39 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
             ))}
           </ul>
         </section>
-      )}
-    </>
+      ),
+    },
+  ];
+
+  return (
+    <HomePrefsProvider
+      storageKey={layoutKey(company.id, user.id)}
+      kpis={dash.kpis.map((k) => ({ ...k, label: tr(String(k.label ?? "")) }))}
+      sections={sectionMeta}
+      countUp=".hero-kpis .money-amt, .hero-kpis .kpi-val, .stat .money-amt, .stat .kpi-val"
+    >
+      <section className="hero">
+        <div className="hero-top">
+          <div className="hero-date">{today}</div>
+          <HomeCustomise />
+        </div>
+        <h1>
+          {greeting(t)}, {firstName}
+        </h1>
+        {summaryParts.length > 0 && (
+          <p className="hero-summary">
+            {summaryParts.map((s, i) => (
+              <span key={s.key}>
+                {i > 0 && ", "}
+                <Link href={s.href}>{s.text}</Link>
+              </span>
+            ))}
+            .
+          </p>
+        )}
+        <HomeHeroTiles currency={base} />
+      </section>
+      <HomeFlow notice={<Notice {...notice} />} hasNotice={Boolean(notice.error)} sections={sectionNodes} />
+    </HomePrefsProvider>
   );
 }

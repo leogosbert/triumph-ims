@@ -35,7 +35,7 @@ export default async function PortalCompany() {
             </div>
             <div className="field">
               <label htmlFor="sp-phone">{tr("Phone")}</label>
-              <input id="sp-phone" name="phone" type="tel" maxLength={40} defaultValue={p.phone ?? ""} />
+              <input id="sp-phone" name="phone" type="tel" maxLength={40} defaultValue={p.phone ?? ""} enterKeyHint="next" />
             </div>
             <div className="field">
               <label htmlFor="sp-city">{tr("City")}</label>

@@ -1,0 +1,259 @@
+/* UI feedback: pop-ups (Toaster), undo, loading shapes, empty lists, live field checks.
+   Works in Glass and Classic, light and dark. Animations stop with prefers-reduced-motion. */
+
+/* ---------- Pop-ups ("Saved", "Line removed · Undo") ---------- */
+/* Phones: above the bottom bar. Laptops: top right, under the top bar. */
+.toaster {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--nav-h) + 22px + env(safe-area-inset-bottom));
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.toaster:empty {
+  display: none;
+}
+.toaster .toast {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  max-width: 440px;
+  min-height: 48px;
+  overflow: hidden;
+  padding: 6px 6px 6px 12px;
+  border-radius: 14px;
+  pointer-events: auto;
+}
+.toaster .toast-info .toast-icon {
+  background: #a9bcdd;
+  font-size: 0.95rem;
+}
+.toast-action {
+  flex: none;
+  min-width: 64px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.toast-action:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+.toast-action:focus-visible,
+.toaster .toast-close:focus-visible {
+  outline: 2px solid #7fb2ff;
+  outline-offset: 2px;
+}
+/* The undo window running out. */
+.toast-timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: #14b8a6;
+  transform-origin: left;
+  animation: toast-timer linear forwards;
+}
+@keyframes toast-timer {
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (min-width: 1024px) {
+  .toaster {
+    left: auto;
+    right: 24px;
+    bottom: auto;
+    top: 80px;
+    width: 400px;
+    align-items: stretch;
+  }
+  .toaster .toast {
+    width: 100%;
+    max-width: none;
+  }
+}
+@media (max-width: 1023px) {
+  .toaster .toast-close {
+    width: 44px;
+    height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toaster .toast,
+  .toaster .toast.leaving {
+    animation: none;
+  }
+  .toaster .toast.leaving {
+    opacity: 0;
+  }
+  /* No moving bar: a still line says the same. */
+  .toast-timer {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* A row waiting out its 5 seconds before it is removed. */
+[data-undo-pending] {
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+[data-undo-pending] :is(button, .btn)[aria-disabled="true"] {
+  cursor: progress;
+}
+
+/* ---------- Loading shapes ---------- */
+.skel {
+  display: block;
+  max-width: 100%;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--soft) 0%, var(--line) 45%, var(--soft) 90%);
+  background-size: 300% 100%;
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+}
+:root[data-theme="dark"] .skel {
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.11) 45%, rgba(255, 255, 255, 0.05) 90%);
+}
+@keyframes skel-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+    background-position: 50% 0;
+  }
+}
+.skel-card {
+  display: grid;
+  gap: 10px;
+}
+.skel-card .skel-head {
+  margin-bottom: 4px;
+}
+.skel-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
+}
+.skel-tile {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.skel-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 120px;
+}
+.skel-chart .skel {
+  flex: 1;
+}
+
+/* ---------- Empty lists ---------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 20px;
+  text-align: center;
+}
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand) 10%, transparent);
+  color: var(--brand);
+}
+:root[data-theme="dark"] .empty-icon {
+  background: rgba(255, 255, 255, 0.07);
+  color: #9ec1ff;
+}
+.empty-text {
+  max-width: 44ch;
+  margin: 0;
+  color: var(--muted);
+}
+.empty-state .btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.empty-more {
+  color: var(--muted);
+}
+
+/* ---------- Live field checks ---------- */
+/* :user-invalid is the browser's own "left wrong" state; [aria-invalid] is set by FieldChecks
+   (kept as separate rules: an unknown selector in a list would drop the whole rule). */
+:is(input, select, textarea):user-invalid {
+  border-color: var(--err);
+}
+:is(input, select, textarea)[aria-invalid="true"] {
+  border-color: var(--err);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--err) 14%, transparent);
+}
+.field-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--err);
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+.field-hint::before {
+  content: "!";
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--err);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+:root[data-theme="dark"] .field-hint {
+  color: #ff9b8f;
+}
+:root[data-theme="dark"] .field-hint::before {
+  background: #ff9b8f;
+  color: #1a0d0b;
+}
+:root[data-theme="dark"] :is(input, select, textarea)[aria-invalid="true"] {
+  border-color: #ff9b8f;
+}
+
+/* Phones: on lists with the round "+" button (ui-phone.css), pop-ups sit above it instead of covering it. */
+@media (max-width: 1023px) {
+  body:has(.new-fab) .toaster {
+    bottom: calc(var(--nav-h) + 96px + env(safe-area-inset-bottom));
+  }
+}

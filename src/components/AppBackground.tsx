@@ -11,7 +11,8 @@ export function AppBackground({ kind, section, onlyGlass }: { kind: BackgroundPr
   if (kind === "plain") return null;
   return (
     <div className="app-bg" data-bg={kind} aria-hidden="true">
-      {kind === "photos" && <PhotoScene section={section} onlyGlass={onlyGlass} />}
+      {/* Soft blur: the same section photo, still and heavily blurred under a stronger wash (src/app/ui-look.css). */}
+      {(kind === "photos" || kind === "soft") && <PhotoScene section={section} onlyGlass={onlyGlass} />}
       {kind === "architecture" && <ArchitectureScene />}
       {kind === "aurora" && (
         <>

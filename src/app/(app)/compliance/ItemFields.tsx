@@ -87,13 +87,13 @@ export function ItemFields({
             <label htmlFor="due_day">
               {tr("Due on day")} <span className="hint">· {tr("31 = last day of the month")}</span>
             </label>
-            <input id="due_day" name="due_day" type="number" min={1} max={31} defaultValue={v.due_day ?? ""} />
+            <input id="due_day" name="due_day" type="number" min={1} max={31} defaultValue={v.due_day ?? ""} inputMode="numeric" enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="due_offset_months">
               {tr("Months after the period")} <span className="hint">· {tr("1 = the following month, 0 = the last month of the period")}</span>
             </label>
-            <input id="due_offset_months" name="due_offset_months" type="number" min={-11} max={12} defaultValue={v.due_offset_months ?? 1} />
+            <input id="due_offset_months" name="due_offset_months" type="number" min={-11} max={12} defaultValue={v.due_offset_months ?? 1} inputMode="numeric" enterKeyHint="next" />
           </div>
           <div className="field">
             <label htmlFor="calendar_from">

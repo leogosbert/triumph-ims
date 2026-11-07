@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { ListToolbar } from "@/components/ListToolbar";
@@ -8,8 +9,18 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { formatMoney } from "@/lib/money";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
+import { ListSort } from "@/components/lists/ListSort";
+import { SwipeRow } from "@/components/lists/SwipeRow";
+import { readSort, sortKeep, sortLinks, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Clients" };
+
+const SORTS: SortOption[] = [
+  { key: "name", label: "Name", col: "name", dir: "asc" },
+  { key: "code", label: "Client ID", col: "code", dir: "asc" },
+  { key: "credit", label: "Credit limit", col: "credit_limit", dir: "desc" },
+  { key: "newest", label: "Newest", col: "created_at", dir: "desc" },
+];
 
 type Row = {
   id: string;
@@ -30,11 +41,14 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
   const industry = typeof sp.industry === "string" ? sp.industry : "";
   const archived = sp.archived === "1";
   const { supabase, company, roles } = await getAppContext();
+  const sort = readSort(sp, SORTS, "name");
+  const canQuote = can(roles, "editSales");
 
   let query = supabase
     .from("clients")
     .select("id, code, name, industry, region, currency, credit_limit, active", { count: "exact" })
     .eq("company_id", company.id)
+    .order(sort.opt.col ?? "name", { ascending: sort.ascending, nullsFirst: false })
     .order("name")
     .limit(LIST_LIMIT);
   if (!archived) query = query.eq("active", true);
@@ -57,19 +71,28 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
         filter={{ name: "industry", label: "Industries", value: industry, options: INDUSTRIES }}
         addHref={can(roles, "editClients") ? "/clients/new" : undefined}
         addLabel="New client"
+        keep={sortKeep(sort)}
       />
+      {rows.length > 1 && <ListSort links={sortLinks("/clients", sp, SORTS, sort)} />}
       {rows.length === 0 ? (
-        <p className="card muted">
-          {q || industry ? tr("No clients match your search.") : tr("No clients yet.")}{" "}
+        <EmptyState
+          icon={q || industry ? "search" : "clients"}
+          text={q || industry ? "No clients match your search." : "No clients yet."}
+          action={!q && !industry && can(roles, "editClients") ? { href: "/clients/new", label: "Add your first client" } : undefined}
+        >
           {can(roles, "importData") && !q && !industry && (
-            <>{tr("You can")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
+            <>{tr("Or")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
             </>
           )}
-        </p>
+        </EmptyState>
       ) : (
         <ul className="rec-list">
           {rows.map((c) => (
-            <li key={c.id}>
+            <SwipeRow
+              key={c.id}
+              href={`/clients/${c.id}`}
+              actions={canQuote && c.active ? [{ label: "Quote", href: `/quotations/new?client=${c.id}`, tone: "pay" }] : []}
+            >
               <Link href={`/clients/${c.id}`}>
                 <div className="main">
                   <div className="title">
@@ -92,7 +115,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Sear
                   )}
                 </div>
               </Link>
-            </li>
+            </SwipeRow>
           ))}
         </ul>
       )}

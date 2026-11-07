@@ -83,7 +83,7 @@ export default async function ReceivePoPage({ params, searchParams }: { params: 
                     <div className="grid grid-2" style={{ marginTop: 8 }}>
                       <div className="field">
                         <label htmlFor={`qty_${l.id}`}>{tr("Quantity received")}</label>
-                        <input id={`qty_${l.id}`} name={`qty_${l.id}`} type="text" inputMode="decimal" defaultValue={fmtQty(open)} />
+                        <input id={`qty_${l.id}`} name={`qty_${l.id}`} type="text" inputMode="decimal" defaultValue={fmtQty(open)} enterKeyHint="next" />
                       </div>
                       <div className="field">
                         <label htmlFor={`cond_${l.id}`}>{tr("Condition")}</label>

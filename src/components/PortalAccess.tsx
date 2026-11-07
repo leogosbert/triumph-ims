@@ -188,7 +188,7 @@ export async function PortalAccess({
                 <label htmlFor={`pi-phone-${partyId}`}>
                   {tr("Phone")} <span className="hint">{tr("optional")}</span>
                 </label>
-                <input id={`pi-phone-${partyId}`} name="phone" type="tel" maxLength={40} />
+                <input id={`pi-phone-${partyId}`} name="phone" type="tel" maxLength={40} enterKeyHint="done" />
               </div>
             </div>
             <SubmitButton className="btn btn-primary" pendingText={tr("Inviting…")}>

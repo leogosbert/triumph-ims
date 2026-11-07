@@ -15,9 +15,9 @@ export const MEETING_KINDS: Record<string, string> = {
 
 export const MEETING_STATUS: Record<string, { label: string; tone: string }> = {
   planned: { label: "Planned", tone: "info" },
-  live: { label: "Live now", tone: "ok" },
-  held: { label: "Held", tone: "off" },
-  cancelled: { label: "Cancelled", tone: "bad" },
+  live: { label: "Live now", tone: "info" },
+  held: { label: "Held", tone: "ok" },
+  cancelled: { label: "Cancelled", tone: "off" },
 };
 
 export const MINUTES_STATUS: Record<string, { label: string; tone: string }> = {
@@ -66,7 +66,7 @@ export const PROPOSAL_LABEL: Record<string, string> = {
 export const PROPOSAL_STATUS: Record<string, { label: string; tone: string }> = {
   pending: { label: "Waiting for approval", tone: "warn" },
   applied: { label: "Approved and made", tone: "ok" },
-  rejected: { label: "Rejected", tone: "off" },
+  rejected: { label: "Rejected", tone: "bad" },
 };
 
 export const INVITATION_STATUS: Record<string, { label: string; tone: string }> = {

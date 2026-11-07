@@ -71,7 +71,7 @@ export default async function RatesPage({ searchParams }: { searchParams: Search
               <label htmlFor="rate">
                 {base}{" "}{tr("per 1 unit")}{" "}<span className="hint">{tr("· e.g. 2600 for USD")}</span>
               </label>
-              <input id="rate" name="rate" type="text" inputMode="decimal" required />
+              <input id="rate" name="rate" type="text" inputMode="decimal" required enterKeyHint="done" />
             </div>
           </div>
           <SubmitButton pendingText={tr("Saving…")}>{tr("Save rate")}</SubmitButton>

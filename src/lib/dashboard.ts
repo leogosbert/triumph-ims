@@ -8,7 +8,23 @@ type Supabase = Awaited<ReturnType<typeof createClient>>;
 
 export type TowerItem = { label: string; count: number; href: string; detail?: string };
 export type Tower = { critical: TowerItem[]; attention: TowerItem[]; normal: TowerItem[] };
-export type Kpi = { label: string; value: number; money?: boolean; suffix?: string; href?: string; alert?: boolean };
+/**
+ * A home figure. `key` is stable (it names the tile in each person's home layout). `trend` is a small
+ * monthly series for a sparkline (oldest first) and `change` the percent against last month's pace.
+ */
+export type Kpi = {
+  key: string;
+  label: string;
+  value: number;
+  money?: boolean;
+  suffix?: string;
+  href?: string;
+  alert?: boolean;
+  trend?: number[];
+  change?: number | null;
+};
+/** Counts for the line under the greeting; null when this person's roles don't cover it. */
+export type DaySummary = { deliveriesToday: number | null; dueThisWeek: number | null };
 export type MonthBar = { month: string; label: string; sales: number; profit: number };
 export type NamedValue = { label: string; value: number };
 
@@ -83,7 +99,7 @@ export async function loadDashboard(supabase: Supabase, companyId: string, role:
     stockFallback ? supabase.from("stock_on_hand").select("product_id, expiry_date, quantity").eq("company_id", companyId).limit(20000) : none,
     stockFallback ? supabase.from("products").select("id, reorder_level").eq("company_id", companyId).eq("active", true).gt("reorder_level", 0).limit(5000) : none,
     deliveries
-      ? supabase.from("deliveries").select("id, status, updated_at").eq("company_id", companyId).in("status", ["draft", "dispatched", "delivered", "failed"]).limit(5000)
+      ? supabase.from("deliveries").select("id, status, updated_at, planned_date").eq("company_id", companyId).in("status", ["draft", "dispatched", "delivered", "failed"]).limit(5000)
       : none,
     finance
       ? supabase
@@ -172,7 +188,7 @@ export async function loadDashboard(supabase: Supabase, companyId: string, role:
   }
 
   // ----- Deliveries -----
-  const dnRows = (dns.data ?? []) as { id: string; status: string; updated_at: string }[];
+  const dnRows = (dns.data ?? []) as { id: string; status: string; updated_at: string; planned_date: string | null }[];
   if (deliveries) {
     const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
     push("critical", { label: t["d.failed"], count: dnRows.filter((d) => d.status === "failed" && d.updated_at >= weekAgo).length, href: "/deliveries?tab=problems" });
@@ -253,6 +269,14 @@ export async function loadDashboard(supabase: Supabase, companyId: string, role:
     clientsTop = top(byClient, 5);
   }
   const thisMonth = months[months.length - 1];
+  const lastMonth = months[months.length - 2];
+  // Month so far against the same share of last month (the daily figures would need a heavier query).
+  const pace = (cur: number, prev: number): number | null => {
+    const [y, m, d] = today.split("-").map(Number);
+    const share = d / new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const expected = prev * share;
+    return expected > 0 ? Math.round(((cur - expected) / expected) * 100) : null;
+  };
 
   const ninety = addDays(today, -90);
   const decided = qRows.filter((q) => q.decided_at && q.decided_at.slice(0, 10) >= ninety && ["accepted", "rejected"].includes(q.status));
@@ -261,22 +285,45 @@ export async function loadDashboard(supabase: Supabase, companyId: string, role:
 
   const kpis: Kpi[] = [];
   if (profit) {
-    kpis.push({ label: t["k.sales"], value: thisMonth.sales, money: true, href: "/profit" });
-    kpis.push({ label: t["k.profit"], value: thisMonth.profit, money: true, href: "/profit" });
+    kpis.push({
+      key: "sales",
+      label: t["k.sales"],
+      value: thisMonth.sales,
+      money: true,
+      href: "/profit",
+      trend: months.map((x) => x.sales),
+      change: pace(thisMonth.sales, lastMonth.sales),
+    });
+    kpis.push({
+      key: "profit",
+      label: t["k.profit"],
+      value: thisMonth.profit,
+      money: true,
+      href: "/profit",
+      trend: months.map((x) => x.profit),
+      change: pace(thisMonth.profit, lastMonth.profit),
+    });
   }
   if (finance) {
-    kpis.push({ label: t["k.owed"], value: aging.reduce((a, b) => a + b, 0), money: true, href: "/receivables", alert: aging[3] + aging[4] > 0 });
-    kpis.push({ label: t["k.weOwe"], value: billRows.reduce((s, b) => s + openBase(b), 0), money: true, href: "/payables" });
+    kpis.push({ key: "owed", label: t["k.owed"], value: aging.reduce((a, b) => a + b, 0), money: true, href: "/receivables", alert: aging[3] + aging[4] > 0 });
+    kpis.push({ key: "weOwe", label: t["k.weOwe"], value: billRows.reduce((s, b) => s + openBase(b), 0), money: true, href: "/payables" });
   }
-  if (costs && stock) kpis.push({ label: t["k.stock"], value: stockValue, money: true, href: "/stock" });
+  if (costs && stock) kpis.push({ key: "stock", label: t["k.stock"], value: stockValue, money: true, href: "/stock" });
   if (sales) {
-    kpis.push({ label: t["k.won"], value: wonMonth.length, href: "/quotations?tab=accepted" });
-    kpis.push({ label: t["k.winRate"], value: decided.length ? Math.round((won.length / decided.length) * 100) : 0, suffix: "%", href: "/quotations?tab=accepted" });
+    kpis.push({ key: "won", label: t["k.won"], value: wonMonth.length, href: "/quotations?tab=accepted" });
+    kpis.push({ key: "winRate", label: t["k.winRate"], value: decided.length ? Math.round((won.length / decided.length) * 100) : 0, suffix: "%", href: "/quotations?tab=accepted" });
   }
+
+  const weekEnd = addDays(today, 6);
+  const summary: DaySummary = {
+    deliveriesToday: deliveries ? dnRows.filter((d) => ["draft", "dispatched"].includes(d.status) && d.planned_date === today).length : null,
+    dueThisWeek: finance ? invRows.filter((i) => i.due_date && i.due_date >= today && i.due_date <= weekEnd).reduce((s, i) => s + openBase(i), 0) : null,
+  };
 
   return {
     tower,
     kpis,
+    summary,
     months: profit ? months : null,
     aging: finance ? aging : null,
     industries: profit ? industries : null,

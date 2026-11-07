@@ -65,18 +65,18 @@ export function RequestFields({
         <label htmlFor="amount">
           {tr("Amount to borrow")} ({currency})
         </label>
-        <input id="amount" name="amount" type="text" inputMode="decimal" defaultValue={v(start.amount)} required={edit} placeholder={amountHint ?? ""} />
+        <input id="amount" name="amount" type="text" inputMode="decimal" defaultValue={v(start.amount)} required={edit} placeholder={amountHint ?? ""} enterKeyHint="next" />
         {amountHint && !edit && <span className="hint">{tr("Empty: the cost of the goods")} ({amountHint})</span>}
       </div>
       <div className="field">
         <label htmlFor="tenor_days">{tr("Tenor (days)")}</label>
-        <input id="tenor_days" name="tenor_days" type="number" min={7} max={365} defaultValue={start.tenor_days ?? 90} />
+        <input id="tenor_days" name="tenor_days" type="number" min={7} max={365} defaultValue={start.tenor_days ?? 90} inputMode="numeric" enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="interest_rate">
           {tr("Interest rate (% a year)")} <span className="hint">{tr("optional")}</span>
         </label>
-        <input id="interest_rate" name="interest_rate" type="text" inputMode="decimal" defaultValue={v(start.interest_rate)} />
+        <input id="interest_rate" name="interest_rate" type="text" inputMode="decimal" defaultValue={v(start.interest_rate)} enterKeyHint="next" />
       </div>
       <div className="field">
         <label htmlFor="lpo_number">{tr("LPO number")}</label>
@@ -90,7 +90,7 @@ export function RequestFields({
         <label htmlFor="lpo_amount">
           {tr("LPO value")} ({currency})
         </label>
-        <input id="lpo_amount" name="lpo_amount" type="text" inputMode="decimal" defaultValue={v(start.lpo_amount)} />
+        <input id="lpo_amount" name="lpo_amount" type="text" inputMode="decimal" defaultValue={v(start.lpo_amount)} enterKeyHint="next" />
       </div>
       <div className="field" style={{ gridColumn: "1 / -1" }}>
         <label htmlFor="lpo_document_id">{tr("Copy of the LPO")}</label>
@@ -118,7 +118,7 @@ export function RequestFields({
       )}
       <div className="field">
         <label htmlFor="remind_days">{tr("Remind before repayment (days)")}</label>
-        <input id="remind_days" name="remind_days" type="number" min={0} max={60} defaultValue={start.remind_days ?? 7} />
+        <input id="remind_days" name="remind_days" type="number" min={0} max={60} defaultValue={start.remind_days ?? 7} inputMode="numeric" enterKeyHint="next" />
       </div>
       <div className="field" style={{ gridColumn: "1 / -1" }}>
         <label htmlFor="notes">{tr("Notes")}</label>

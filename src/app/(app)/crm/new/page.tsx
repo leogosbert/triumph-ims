@@ -45,7 +45,7 @@ export default async function NewOpportunityPage({ searchParams }: { searchParam
             <input type="checkbox" name="stage" value="qualified" /> {tr("Already qualified (real need and budget confirmed)")}
           </label>
         </div>
-        <SubmitButton>{tr("Add opportunity")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Add opportunity")}</SubmitButton>
       </form>
     </>
   );

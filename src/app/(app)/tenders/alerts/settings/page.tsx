@@ -19,7 +19,7 @@ const SOURCE_STATUS: Record<string, { label: string; tone: string }> = {
   ok: { label: "Read", tone: "ok" },
   empty: { label: "Nothing found", tone: "warn" },
   blocked: { label: "Not allowed", tone: "bad" },
-  failed: { label: "Failed", tone: "warn" },
+  failed: { label: "Failed", tone: "bad" },
 };
 
 type Source = {
@@ -88,7 +88,7 @@ export default async function AlertSettingsPage({ searchParams }: { searchParams
         </div>
         <div className="field">
           <label htmlFor="min_score">{tr("Lowest score in the daily digest")}</label>
-          <input id="min_score" name="min_score" type="number" min={0} max={100} defaultValue={s?.min_score ?? 40} />
+          <input id="min_score" name="min_score" type="number" min={0} max={100} defaultValue={s?.min_score ?? 40} inputMode="numeric" enterKeyHint="next" />
         </div>
         <label className="row" style={{ gap: 8 }}>
           <input type="checkbox" name="digest_on" defaultChecked={s?.digest_on ?? true} /> {tr("Send the daily digest to management and sales (from 7:00)")}
@@ -175,7 +175,7 @@ export default async function AlertSettingsPage({ searchParams }: { searchParams
             </div>
             <div className="field">
               <label htmlFor="s_hours">{tr("Read every (hours)")}</label>
-              <input id="s_hours" name="interval_hours" type="number" min={6} max={168} defaultValue={24} />
+              <input id="s_hours" name="interval_hours" type="number" min={6} max={168} defaultValue={24} inputMode="numeric" enterKeyHint="done" />
             </div>
             <SubmitButton className="btn btn-small" pendingText="…">
               {tr("Add page")}

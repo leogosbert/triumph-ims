@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -232,13 +233,13 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
                   <form action={updateDeliveryLine} className="inline-form">
                     <input type="hidden" name="delivery_id" value={d.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <input name="quantity" type="text" inputMode="decimal" defaultValue={fmtQty(l.quantity)} aria-label={tr("Quantity")} style={{ width: 90 }} />
+                    <input name="quantity" type="text" inputMode="decimal" defaultValue={fmtQty(l.quantity)} aria-label={tr("Quantity")} style={{ width: 90 }} enterKeyHint="done" />
                     <SubmitButton className="btn btn-small" pendingText="…">{tr("Update")}</SubmitButton>
                   </form>
                   <form action={removeDeliveryLine}>
                     <input type="hidden" name="delivery_id" value={d.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
+                    <UndoSubmit done="Line removed">{tr("Remove")}</UndoSubmit>
                   </form>
                 </div>
               )}
@@ -315,7 +316,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
                   </div>
                   <div className="field">
                     <label htmlFor="contact_phone">{tr("Contact phone")}</label>
-                    <input id="contact_phone" name="contact_phone" type="tel" defaultValue={d.contact_phone ?? ""} />
+                    <input id="contact_phone" name="contact_phone" type="tel" defaultValue={d.contact_phone ?? ""} enterKeyHint="next" />
                   </div>
                   <div className="field" style={{ gridColumn: "1 / -1" }}>
                     <label htmlFor="notes">{tr("Notes for the driver and client")}</label>

@@ -119,7 +119,7 @@ export const PAYROLL_STATUS: Record<string, { label: string; tone: string }> = {
   draft: { label: "Draft", tone: "off" },
   approved: { label: "Approved", tone: "warn" },
   paid: { label: "Paid", tone: "ok" },
-  cancelled: { label: "Cancelled", tone: "bad" },
+  cancelled: { label: "Cancelled", tone: "off" },
 };
 
 /** How an employee is paid (employee_pay.pay_method). */

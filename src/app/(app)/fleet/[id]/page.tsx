@@ -118,17 +118,17 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
             </div>
             <div className="field">
               <label htmlFor="odometer_km">{tr("Kilometres reading")}</label>
-              <input id="odometer_km" name="odometer_km" type="text" inputMode="numeric" />
+              <input id="odometer_km" name="odometer_km" type="text" inputMode="numeric" enterKeyHint="next" />
             </div>
             <div className="field">
               <label htmlFor="litres">{tr("Litres")}</label>
-              <input id="litres" name="litres" type="text" inputMode="decimal" />
+              <input id="litres" name="litres" type="text" inputMode="decimal" enterKeyHint="next" />
             </div>
             <div className="field">
               <label htmlFor="amount">
                 {tr("Amount paid")} ({base})
               </label>
-              <input id="amount" name="amount" type="text" inputMode="decimal" />
+              <input id="amount" name="amount" type="text" inputMode="decimal" enterKeyHint="next" />
             </div>
             <div className="field">
               <label htmlFor="note">{tr("Note")}</label>
@@ -208,7 +208,7 @@ export default async function VehiclePage({ params, searchParams }: { params: Pr
           <form action={saveVehicle} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={vehicle.id} />
             <VehicleFields v={vehicle} drivers={drivers} editing />
-            <SubmitButton>{tr("Save")}</SubmitButton>
+            <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>
           </form>
         </details>
       )}

@@ -1,0 +1,511 @@
+/* =====================================================================
+   Home screen and records (UI batch 30, worker "home"): items 23–28.
+   Bigger money figures, trend lines, chart drill-in, the day summary,
+   the personal home layout (Customise) and the status step line.
+   Loaded after the other sheets, so equal-weight rules here win.
+   ===================================================================== */
+
+/* ---------- 23. Money figures: a bold number, the currency smaller beside it ---------- */
+.money-fig {
+  white-space: nowrap;
+}
+.money-fig .money-cur {
+  font-size: 0.55em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.78;
+  margin-right: 0.05em;
+}
+.money-fig .money-amt {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+/* Banner chips: bigger figures. `.hero-kpis a span:last-child` (the label rule) also reaches spans
+   inside the figure, so the figure's own spans are set back here. */
+.hero-kpis a .num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.hero-kpis a .num .money-fig,
+.hero-kpis a .num .money-amt,
+.hero-kpis a .num .kpi-val {
+  font-size: 1em;
+  color: inherit;
+}
+.hero-kpis a .num .money-cur {
+  font-size: 0.55em;
+  color: inherit;
+}
+.hero-kpis a .kpi-trend .trend {
+  font-size: 0.72rem;
+}
+.hero-kpis a .kpi-trend .trend span {
+  font-size: inherit;
+  color: inherit;
+}
+@media (min-width: 1024px) {
+  .hero-kpis a .num {
+    font-size: 1.95rem;
+  }
+}
+
+/* Key figures tiles (home). */
+.stats-block .stat .n {
+  font-weight: 700;
+}
+.stat-slide .stat .n {
+  font-size: 1.3rem;
+}
+@media (max-width: 380px) {
+  .stat-slide .stat .n {
+    font-size: 1.15rem;
+  }
+}
+
+/* Invoice: the amount in the banner and the grand total. `.head-amount span` styles the small
+   caption ("Balance due"); the figure's spans are set back to the figure's size. */
+.head-amount:has(.money-fig) {
+  font-weight: 700;
+}
+.head-amount .money-fig,
+.head-amount .money-fig span {
+  order: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+.head-amount .money-fig .money-cur {
+  font-size: 0.5em;
+  font-weight: 600;
+}
+.head-amount .money-fig .money-amt {
+  font-size: 1.12em;
+  font-weight: 700;
+}
+.totals .grand .grand-fig .money-amt {
+  font-size: 1.25rem;
+}
+
+/* ---------- 26. Trend lines ---------- */
+.kpi-trend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 5px 0 3px;
+  min-height: 22px;
+}
+.spark {
+  display: block;
+  flex: 0 0 auto;
+  color: var(--chart-1, var(--brand));
+  overflow: visible;
+}
+.spark-line {
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.spark-area {
+  fill: currentColor;
+  opacity: 0.12;
+}
+.spark-dot {
+  fill: currentColor;
+}
+.trend {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.trend-up {
+  color: var(--ok);
+}
+.trend-down {
+  color: var(--err);
+}
+.trend-flat {
+  color: var(--muted);
+}
+/* On the dark banner: light line, light green / light red. */
+.hero-kpis .spark {
+  color: rgba(255, 255, 255, 0.85);
+}
+.hero-kpis .trend-up {
+  color: #86efac;
+}
+.hero-kpis .trend-down {
+  color: #fecaca;
+}
+.hero-kpis .trend-flat {
+  color: #dbe5f3;
+}
+
+/* ---------- 27. Tap a month on the chart ---------- */
+.chart-drill {
+  cursor: pointer;
+}
+.chart-hit {
+  fill: transparent;
+  stroke: transparent;
+}
+.chart-drill:hover .chart-hit {
+  fill: color-mix(in srgb, var(--chart-1, var(--brand)) 9%, transparent);
+}
+.chart-drill:focus {
+  outline: none;
+}
+.chart-drill:focus-visible .chart-hit {
+  fill: color-mix(in srgb, var(--chart-1, var(--brand)) 9%, transparent);
+  stroke: var(--chart-1, var(--brand));
+  stroke-width: 1.5;
+}
+.chart-tip {
+  margin: 4px 0 0;
+}
+/* The invoices list filtered by issue date. */
+.inv-range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0 0 12px;
+  padding: 8px 8px 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft);
+  color: var(--text);
+  font-weight: 500;
+}
+@media (max-width: 639px) {
+  .inv-range .btn {
+    min-height: 44px;
+  }
+}
+
+/* ---------- 28. Greeting and day summary ---------- */
+.hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.hero-summary {
+  margin: 6px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #dbe5f3;
+}
+.hero-summary a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.4);
+  text-underline-offset: 3px;
+}
+.hero-summary a:hover {
+  text-decoration-color: #fff;
+}
+.hero-summary .money-cur {
+  font-size: 0.75em;
+}
+.hero-summary .money-amt {
+  font-weight: 600;
+}
+.hero-summary a:focus-visible,
+.hero-customise:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---------- 25. Personal home: Customise ---------- */
+.hero-customise {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 44px;
+  margin: -4px -6px -4px 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #dbe5f3;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.hero-customise:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+/* No section sits on the banner's edge: close it up instead of leaving an empty band. */
+.hero:has(+ .home-flat) {
+  padding-bottom: 22px;
+  margin-bottom: 16px;
+}
+@media (min-width: 1024px) {
+  .hero:has(+ .home-flat) {
+    padding-bottom: 26px;
+  }
+}
+.home-flat:empty {
+  display: none;
+}
+.home-flat {
+  margin-top: 16px;
+}
+
+.hc-dialog {
+  width: min(460px, calc(100% - 32px));
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 30px 60px -20px rgba(3, 10, 25, 0.55);
+}
+:root[data-look="glass"] .hc-dialog {
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+}
+.hc-dialog::backdrop {
+  background: rgba(5, 12, 25, 0.5);
+}
+.hc-body {
+  padding: 16px 18px 18px;
+}
+.hc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.hc-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.hc-body h3 {
+  margin: 16px 0 2px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.hc-body > p {
+  margin: 4px 0 0;
+}
+.hc-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.hc-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+.hc-list li:last-child {
+  border-bottom: 0;
+}
+.hc-list li.is-hidden .hc-name {
+  color: var(--muted);
+}
+.hc-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+.hc-note {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+.hc-tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.hc-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+.hc-btn:hover:not(:disabled) {
+  background: var(--soft);
+}
+.hc-btn:disabled {
+  color: var(--line-strong);
+  cursor: default;
+}
+.hc-close {
+  margin-right: -10px;
+}
+.hc-switch {
+  position: relative;
+  width: 56px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.hc-switch > span {
+  position: absolute;
+  left: 6px;
+  top: 12px;
+  width: 44px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+.hc-switch > span::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.hc-switch[aria-checked="true"] > span {
+  background: var(--brand);
+}
+.hc-switch[aria-checked="true"] > span::after {
+  transform: translateX(24px);
+}
+.hc-switch:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hc-switch > span,
+  .hc-switch > span::after {
+    transition:
+      background 0.15s,
+      transform 0.15s ease-out;
+  }
+}
+.hc-btn:focus-visible,
+.hc-switch:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+:root[data-theme="dark"] .hc-btn:focus-visible,
+:root[data-theme="dark"] .hc-switch:focus-visible {
+  outline-color: var(--chart-1, #9db8e8);
+}
+.hc-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 16px;
+}
+.hc-foot .btn {
+  min-height: 44px;
+}
+
+/* ---------- 24. Status step line on records ---------- */
+.status-steps {
+  margin: 0 0 14px;
+}
+.status-steps ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 4px;
+}
+.status-steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.status-steps li + li::before {
+  content: "→";
+  margin: 0 2px 0 0;
+  color: var(--line-strong);
+  font-weight: 400;
+}
+.status-steps .ss-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line-strong);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.status-steps .ss-done {
+  color: var(--text);
+}
+.status-steps .ss-done .ss-dot {
+  border-color: transparent;
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.status-steps .ss-now {
+  color: var(--text);
+  font-weight: 700;
+}
+.status-steps .ss-now .ss-dot {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 22%, transparent);
+}
+:root[data-theme="dark"] .status-steps .ss-now .ss-dot {
+  border-color: var(--chart-1, var(--brand));
+}
+.status-steps .ss-stopped {
+  color: var(--err);
+  font-weight: 600;
+}
+.status-steps .ss-stopped .ss-dot {
+  border-color: transparent;
+  background: var(--err-bg);
+  color: var(--err);
+}
+/* Inside the order progress card, under the bar. */
+.progress-card .status-steps {
+  margin: 10px 0 4px;
+}
+@media (max-width: 520px) {
+  .status-steps li {
+    font-size: 0.76rem;
+  }
+}

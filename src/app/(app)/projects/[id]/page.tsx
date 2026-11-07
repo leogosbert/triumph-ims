@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -191,7 +192,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
                       <form action={removeMilestone}>
                         <input type="hidden" name="project_id" value={project.id} />
                         <input type="hidden" name="milestone_id" value={m.id} />
-                        <SubmitButton className="btn btn-small">{tr("Remove")}</SubmitButton>
+                        <UndoSubmit className="btn btn-small" done="Milestone removed">{tr("Remove")}</UndoSubmit>
                       </form>
                     )}
                   </div>
@@ -218,7 +219,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
                   <label htmlFor="ms-amount">
                     {tr("Amount")} ({cur})
                   </label>
-                  <input id="ms-amount" name="amount" type="text" inputMode="decimal" />
+                  <input id="ms-amount" name="amount" type="text" inputMode="decimal" enterKeyHint="done" />
                 </div>
               </div>
               <SubmitButton className="btn btn-small btn-primary">{tr("Add milestone")}</SubmitButton>
@@ -321,7 +322,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
           <form action={saveProject}>
             <input type="hidden" name="id" value={project.id} />
             <ProjectFields p={project} clients={[]} people={people} currency={cur} editing />
-            <SubmitButton>{tr("Save")}</SubmitButton>
+            <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>
           </form>
         </details>
       )}

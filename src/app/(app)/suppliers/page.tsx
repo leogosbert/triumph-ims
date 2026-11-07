@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { ListToolbar } from "@/components/ListToolbar";
@@ -7,8 +8,18 @@ import { CURRENCIES } from "@/lib/lists";
 import { readNotice, type SearchParams } from "@/lib/messages";
 import { cleanSearch, LIST_LIMIT } from "@/lib/records";
 import { can } from "@/lib/roles";
+import { ListSort } from "@/components/lists/ListSort";
+import { SwipeRow } from "@/components/lists/SwipeRow";
+import { readSort, sortKeep, sortLinks, type SortOption } from "@/lib/list-view";
 
 export const metadata = { title: "Suppliers" };
+
+const SORTS: SortOption[] = [
+  { key: "name", label: "Name", col: "name", dir: "asc" },
+  { key: "code", label: "Supplier ID", col: "code", dir: "asc" },
+  { key: "lead", label: "Lead time", col: "lead_time_days", dir: "asc" },
+  { key: "newest", label: "Newest", col: "created_at", dir: "desc" },
+];
 
 type Row = {
   id: string;
@@ -20,6 +31,7 @@ type Row = {
   currency: string;
   lead_time_days: number | null;
   active: boolean;
+  phone: string | null;
 };
 
 export default async function SuppliersPage({ searchParams }: { searchParams: SearchParams }) {
@@ -31,11 +43,13 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
   const archived = sp.archived === "1";
   const { supabase, company, roles } = await getAppContext();
   if (!can(roles, "seeSuppliers")) noAccess();
+  const sort = readSort(sp, SORTS, "name");
 
   let query = supabase
     .from("suppliers")
-    .select("id, code, name, country, city, brands, currency, lead_time_days, active", { count: "exact" })
+    .select("id, code, name, country, city, brands, currency, lead_time_days, active, phone", { count: "exact" })
     .eq("company_id", company.id)
+    .order(sort.opt.col ?? "name", { ascending: sort.ascending, nullsFirst: false })
     .order("name")
     .limit(LIST_LIMIT);
   if (!archived) query = query.eq("active", true);
@@ -61,13 +75,23 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
         filter={{ name: "currency", label: "Currencies", value: currency, options: CURRENCIES }}
         addHref={can(roles, "editSuppliers") ? "/suppliers/new" : undefined}
         addLabel="New supplier"
+        keep={sortKeep(sort)}
       />
+      {rows.length > 1 && <ListSort links={sortLinks("/suppliers", sp, SORTS, sort)} />}
       {rows.length === 0 ? (
-        <p className="card muted">{q || currency ? tr("No suppliers match your search.") : tr("No suppliers yet.")}</p>
+        <EmptyState
+          icon={q || currency ? "search" : "purchasing"}
+          text={q || currency ? "No suppliers match your search." : "No suppliers yet."}
+          action={!q && !currency && can(roles, "editSuppliers") ? { href: "/suppliers/new", label: "Add your first supplier" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((s) => (
-            <li key={s.id}>
+            <SwipeRow
+              key={s.id}
+              href={`/suppliers/${s.id}`}
+              actions={s.phone ? [{ label: "Call", href: `tel:${s.phone.replace(/[^\d+]/g, "")}`, tone: "call" }] : []}
+            >
               <Link href={`/suppliers/${s.id}`}>
                 <div className="main">
                   <div className="title">
@@ -84,7 +108,7 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Se
                   {s.lead_time_days !== null && <div className="small">{s.lead_time_days}{" "}{tr("days")}</div>}
                 </div>
               </Link>
-            </li>
+            </SwipeRow>
           ))}
         </ul>
       )}

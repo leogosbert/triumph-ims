@@ -274,6 +274,8 @@ export async function ClientCrm({
                   min={0}
                   max={90}
                   defaultValue={3}
+                  inputMode="numeric"
+                  enterKeyHint="next"
                 />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>

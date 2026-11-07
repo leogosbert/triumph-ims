@@ -115,14 +115,14 @@ export function isMissingTable(error: { code?: string; message?: string } | null
 export const OPP_BADGE: Record<string, { label: string; tone: string }> = {
   lead: { label: "Lead", tone: "off" },
   qualified: { label: "Qualified", tone: "info" },
-  quoted: { label: "Quoted", tone: "info" },
-  negotiation: { label: "Negotiation", tone: "warn" },
+  quoted: { label: "Quoted", tone: "warn" },
+  negotiation: { label: "Negotiation", tone: "info" },
   won: { label: "Won", tone: "ok" },
   lost: { label: "Lost", tone: "bad" },
 };
 export const TENDER_BADGE: Record<string, { label: string; tone: string }> = {
-  preparing: { label: "Preparing", tone: "warn" },
-  submitted: { label: "Submitted", tone: "info" },
+  preparing: { label: "Preparing", tone: "info" },
+  submitted: { label: "Submitted", tone: "warn" },
   won: { label: "Won", tone: "ok" },
   lost: { label: "Lost", tone: "bad" },
   no_bid: { label: "Not bidding", tone: "off" },

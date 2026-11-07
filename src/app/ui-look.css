@@ -1,0 +1,532 @@
+/* =====================================================================
+   LeMoSp "look" pass (UI batch 30, items 19-22, 29, 30). Loaded after every other stylesheet, so it
+   only adjusts tokens and a few shared pieces; both styles (Glass, Classic) and both themes.
+
+   1. One colour meaning (status tokens, badges, KPI tiles, charts)
+   2. Darker, richer dark mode (surface and text tokens, field edges)
+   3. The company's own colours (buttons, nav pills, focus rings, links), safe with light brands
+   4. Calmer backgrounds: Plain and Soft blur
+   5. One icon style (sizes and alignment)
+   6. Small motion: saved highlight, check-mark pop, one press feedback, nothing over ~250 ms
+   ===================================================================== */
+
+/* ---------- 1. One colour meaning everywhere ----------
+   green  = paid / done            .tone-ok    --success
+   amber  = waiting                .tone-warn  --warning
+   red    = overdue / a problem    .tone-bad   --danger
+   blue   = in progress            .tone-info  --progress (= --info)
+   grey   = draft / cancelled      .tone-off   --neutral
+   The status maps in src/lib/* use only these five tones. Build on polish.css's --success / --warning /
+   --danger / --info; the names below say what each one means. */
+:root {
+  --progress: var(--info);
+  --progress-bg: var(--info-bg);
+  --progress-line: var(--info-line);
+  --neutral: var(--muted);
+  --neutral-bg: var(--off-bg);
+  --neutral-line: var(--line-strong);
+
+  /* Charts that show a status use the status colours; others never borrow them. */
+  --chart-paid: var(--success);
+  --chart-waiting: #d97706;
+  --chart-overdue: #dc2626;
+  --chart-progress: #2563eb;
+  --chart-draft: #94a3b8;
+
+  /* Series colours: the company colour first, then hues that do not read as a status. */
+  --chart-2: #0891b2;
+  --chart-3: #7c3aed;
+  --chart-4: #64748b;
+  --chart-5: #db2777;
+  --chart-6: #65a30d;
+  --chart-7: #f59e0b;
+  --chart-8: #e11d48;
+}
+:root[data-theme="dark"] {
+  --chart-waiting: #fbbf24;
+  --chart-overdue: #f87171;
+  --chart-progress: #60a5fa;
+  --chart-draft: #64748b;
+  --chart-2: #22d3ee;
+  --chart-3: #a78bfa;
+  --chart-4: #94a3b8;
+  --chart-5: #f472b6;
+  --chart-6: #a3e635;
+  --chart-7: #fbbf24;
+  --chart-8: #fb7185;
+}
+
+.badge.tone-off {
+  background: var(--neutral-bg);
+  color: var(--neutral);
+}
+.tower-row.tone-info {
+  color: var(--progress);
+}
+.text-ok {
+  color: var(--success);
+}
+/* A toast says "done": the green tick. */
+.toast-icon {
+  background: var(--success-solid, #22c55e);
+  color: #06210f;
+}
+
+/* KPI tiles: the top edge is the company colour; only a tile that needs attention turns amber.
+   (Before, every 2nd/3rd/4th tile wore teal/amber/violet, which looked like a status.) */
+.stat-grid > :nth-child(n) {
+  --k: var(--chart-1);
+}
+.stat-grid > .stat.alert,
+.stat.alert {
+  --k: var(--warning);
+}
+
+/* ---------- 2. Darker, richer dark mode ---------- */
+:root[data-theme="dark"] {
+  --bg: #060c19;
+  --card: #0d1730;
+  --field: #0a1328;
+  --line: #1c2a46;
+  --line-strong: #2c3d5e;
+  --field-line: #5a6d92; /* input edges: 3.4:1 on the card */
+  --text: #eef2f9;
+  --muted: #a7b4c9;
+  --ok-bg: rgba(34, 197, 94, 0.15);
+  --ok: #6ee7a0;
+  --err-bg: rgba(239, 68, 68, 0.16);
+  --err: #fca5a5;
+  --warn-bg: rgba(245, 158, 11, 0.15);
+  --warn: #fcd34d;
+  --info-bg: rgba(96, 140, 230, 0.18);
+  --off-bg: #18233b;
+  --soft: #111d37;
+  --hover: #14223f;
+  --unread: #0f1f40;
+  --chev: #7d8fae;
+  --err-line: #6a2a31;
+  --warn-line: #5f4a17;
+  --success-line: #1f5a3a;
+  --success-solid: #4ade80;
+  --shadow: rgba(0, 0, 0, 0.45);
+}
+:root[data-look="glass"][data-theme="dark"] {
+  --g-surface: rgba(13, 23, 48, 0.74);
+  --g-strong: rgba(8, 15, 32, 0.92);
+  --g-field: rgba(6, 12, 28, 0.7);
+  --g-border: rgba(160, 185, 230, 0.12);
+  --g-edge: rgba(160, 185, 230, 0.1);
+}
+@media (max-width: 719px) {
+  :root[data-look="glass"][data-theme="dark"] {
+    --g-surface: rgba(13, 23, 48, 0.92);
+  }
+}
+/* Fields: an edge you can see (WCAG 1.4.11, 3:1). */
+:root[data-theme="dark"] :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea):not(:focus) {
+  border-color: var(--field-line);
+}
+:root[data-theme="dark"] button.tick:not(.on) {
+  border-color: var(--field-line);
+}
+/* Bars: deeper navy from the company's dark colour, not grey. */
+:root:not([data-look="glass"])[data-theme="dark"] :is(.topbar, .sidenav, .bottomnav) {
+  background: color-mix(in srgb, var(--brand-dark) 45%, #030712);
+}
+:root[data-look="glass"][data-theme="dark"] .bottomnav {
+  background: color-mix(in srgb, color-mix(in srgb, var(--brand-dark) 45%, #030712) 84%, transparent);
+}
+@media (max-width: 1023px) {
+  /* (On a laptop the Glass top bar and sidebar are frosted panels: --g-surface above.) */
+  :root[data-look="glass"][data-theme="dark"] .topbar {
+    background: color-mix(in srgb, color-mix(in srgb, var(--brand-dark) 45%, #030712) 84%, transparent);
+  }
+}
+:root[data-theme="dark"] .toast {
+  background: #13203d;
+}
+/* Fixed amber edges on a few warning cards (stock, purchasing, finance) drawn in the light colour. */
+:root[data-theme="dark"] section.card[style*="#f0d49a"] {
+  border-color: var(--warning-line) !important;
+}
+:root[data-theme="dark"] section.card[style*="#b9e0cc"] {
+  border-color: var(--success-line) !important;
+}
+
+/* ---------- 3. The company's own colours ----------
+   (app)/layout.tsx passes the company colours a second time as --brand-src / --brand-dark-src. Here
+   they are darkened only as far as needed: --brand to OKLCH lightness 0.5 at most (white text on it,
+   and it as text on white, both stay above 4.5:1), --brand-dark to 0.4 (the bars). TRIUMPH's navy
+   #123a7a and blue #1c4c9b are already darker, so they come through unchanged. */
+@supports (color: oklch(from red l c h)) {
+  .shell[style*="--brand-src"] {
+    --brand: oklch(from var(--brand-src) min(l, 0.5) c h) !important;
+  }
+  .shell[style*="--brand-dark-src"] {
+    --brand-dark: oklch(from var(--brand-dark-src) min(l, 0.4) c h) !important;
+  }
+}
+:root,
+.shell,
+.auth-wrap {
+  --brand-ink: var(--brand); /* links and rings on light surfaces */
+  --brand-light: color-mix(in srgb, var(--brand) 45%, #fff); /* the brand on dark surfaces */
+  --ring: var(--brand-ink);
+  --grad-primary: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 55%, var(--brand-dark)));
+}
+:root[data-theme="dark"],
+:root[data-theme="dark"] :is(.shell, .auth-wrap) {
+  --brand-ink: var(--brand-light);
+  --ring: var(--brand-light);
+}
+
+/* Primary buttons: the company colour in both styles (Classic used a cyan sweep). */
+.btn-primary,
+:root[data-look="glass"] .btn-primary {
+  background-color: var(--brand);
+  background-image: var(--grad-primary);
+  background-size: 100% 100%;
+  border-color: transparent;
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled),
+:root[data-look="glass"] .btn-primary:hover {
+  background-image: linear-gradient(135deg, color-mix(in srgb, var(--brand) 88%, #fff), var(--brand));
+  box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--brand) 80%, transparent);
+}
+:root[data-theme="dark"] a.btn-primary {
+  color: #fff;
+}
+
+/* Links: var(--brand) on light (globals.css), the same mix as --brand-light on dark (globals.css);
+   both now follow the safe --brand above, so they are not repeated here. */
+
+/* Focus: one ring in the company colour; white on the dark bars. */
+:is(a, button, summary, [tabindex], input[type="checkbox"], input[type="radio"]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+:root[data-look="glass"] :is(a, button, summary, [tabindex]):focus-visible {
+  outline-color: var(--ring);
+}
+:is(.topbar, .sidenav, .bottomnav, .hero) :is(a, button, summary, [tabindex]):focus-visible,
+:root[data-look="glass"] :is(.topbar, .bottomnav, .hero) :is(a, button, summary, [tabindex]):focus-visible {
+  outline-color: color-mix(in srgb, var(--brand) 30%, #fff);
+}
+@media (min-width: 1024px) {
+  /* Glass sidebar and top bar are light panels on a laptop. */
+  :root[data-look="glass"]:not([data-theme="dark"]) :is(.topbar, .sidenav) :is(a, button, summary, [tabindex]):focus-visible {
+    outline-color: var(--brand-ink);
+  }
+}
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus,
+:root[data-look="glass"] :is(input, select, textarea):focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 20%, transparent);
+}
+
+/* Active nav pill: the company blue on its navy bar (Classic), the company colour on glass. */
+.bottomnav > .nav-pill {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 70%, rgba(255, 255, 255, 0.2)), color-mix(in srgb, var(--brand) 40%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.sidenav nav > .nav-pill {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--brand) 75%, rgba(255, 255, 255, 0.12)), color-mix(in srgb, var(--brand) 30%, transparent));
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand) 35%, #fff);
+}
+.tabs-row > .nav-pill,
+:root[data-look="glass"] .tabs-row > .nav-pill {
+  background: var(--grad-primary);
+  box-shadow: 0 8px 16px -8px color-mix(in srgb, var(--brand) 70%, transparent);
+}
+:root[data-look="glass"] .bottomnav > .nav-pill {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 70%, rgba(255, 255, 255, 0.22)), color-mix(in srgb, var(--brand) 45%, transparent));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 8px 22px -10px var(--brand);
+}
+:root[data-look="glass"] .bottomnav a[aria-current="page"] svg {
+  filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--brand) 70%, transparent));
+}
+@media (min-width: 1024px) {
+  :root[data-look="glass"] .sidenav nav a[aria-current="page"] {
+    background: linear-gradient(120deg, color-mix(in srgb, var(--brand) 22%, transparent), color-mix(in srgb, var(--brand) 6%, transparent));
+  }
+  :root[data-look="glass"] .sidenav nav.has-pill > a[aria-current="page"] {
+    background: transparent;
+  }
+  :root[data-look="glass"] .sidenav nav > .nav-pill {
+    background: linear-gradient(120deg, color-mix(in srgb, var(--brand) 24%, transparent), color-mix(in srgb, var(--brand) 8%, transparent));
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--brand) 38%, transparent),
+      0 10px 28px -14px var(--brand);
+  }
+  :root[data-look="glass"][data-theme="dark"] .sidenav nav > .nav-pill {
+    background: linear-gradient(120deg, color-mix(in srgb, var(--brand) 42%, transparent), color-mix(in srgb, var(--brand) 14%, transparent));
+  }
+  :root[data-look="glass"] .sidenav nav a[aria-current="page"] .nav-ico {
+    color: #fff;
+    background: var(--grad-primary);
+    box-shadow: 0 6px 16px -6px var(--brand);
+  }
+}
+.bg-picker button[aria-pressed="true"] {
+  border-color: var(--brand-ink);
+}
+
+/* ---------- 4. Calmer backgrounds ---------- */
+/* Plain: the page colour only, and solid panels (nothing behind them to frost). */
+.shell:not(:has(> .app-bg)) {
+  background: var(--bg);
+}
+:root[data-look="glass"] .shell:not(:has(> .app-bg)) {
+  --g-surface: rgba(255, 255, 255, 0.94);
+  --g-blur: none;
+}
+:root[data-look="glass"][data-theme="dark"] .shell:not(:has(> .app-bg)) {
+  --g-surface: rgba(13, 23, 48, 0.96);
+}
+@media (min-width: 1024px) {
+  :root[data-look="glass"] .shell:not(:has(> .app-bg)) .sidenav {
+    background-image: none;
+  }
+}
+
+/* Soft blur: the section photo, still and heavily blurred under a stronger wash. */
+.app-bg[data-bg="soft"] {
+  background: var(--bg);
+  --acc1: var(--brand);
+  --acc2: color-mix(in srgb, var(--brand) 62%, #06b6d4);
+  --acc3: var(--brand-dark);
+  --photo-strength: 0.32;
+}
+:root[data-look="glass"] .app-bg[data-bg="soft"] {
+  --acc1: inherit;
+  --acc2: inherit;
+  --acc3: inherit;
+}
+[data-theme="dark"] .app-bg[data-bg="soft"] {
+  --photo-strength: 0.36;
+}
+.app-bg[data-bg="soft"] .scene-photo {
+  inset: -14%;
+  filter: saturate(0.9) blur(44px);
+  animation: scene-in 0.25s ease-out forwards;
+  will-change: opacity;
+}
+.app-bg[data-bg="soft"] .scene-photo.out {
+  animation: scene-out 0.25s ease-in forwards;
+}
+.app-bg[data-bg="soft"] :is(.scene-blob, .scene-speck, .scene-grain) {
+  display: none;
+}
+.app-bg[data-bg="soft"] .scene-wash {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 40%, transparent), color-mix(in srgb, var(--bg) 78%, transparent) 90%);
+}
+.app-bg[data-bg="soft"] .scene-fallback {
+  filter: blur(30px);
+}
+.bg-swatch.s-photos {
+  background-image:
+    linear-gradient(160deg, color-mix(in srgb, var(--brand) 35%, transparent), transparent 60%),
+    linear-gradient(20deg, #8a7a5c 0 30%, #b9a57d 30% 46%, #7c8fa8 46% 100%);
+}
+.bg-swatch.s-soft {
+  background-image:
+    radial-gradient(60% 90% at 20% 30%, color-mix(in srgb, var(--brand) 38%, transparent), transparent 75%),
+    radial-gradient(60% 90% at 85% 75%, rgba(185, 165, 125, 0.45), transparent 75%),
+    linear-gradient(180deg, color-mix(in srgb, #7c8fa8 30%, var(--bg)), var(--bg));
+}
+.bg-swatch.s-plain {
+  background: var(--bg);
+}
+@media print {
+  .app-bg {
+    display: none;
+  }
+}
+
+/* ---------- 5. One icon style ----------
+   Icon.tsx draws every icon on the 16 / 18 / 20 / 22 / 24 px steps with the same visible line
+   (about 1.65 px). Where icons sit with text they keep their size and centre on the words. */
+svg.ico {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.btn svg.ico {
+  width: 18px;
+  height: 18px;
+  margin-block: -2px;
+}
+.btn.btn-small svg.ico,
+.tabs-row a svg.ico {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- 6. Small motion ---------- */
+:root {
+  --press: 0.96;
+  --pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes ui-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* The row or card just saved (src/components/SavedFlash.tsx): a soft ring in, a short hold, out.
+   The ring fades in and out in about 0.2 s each; the hold in between is still. */
+@keyframes ui-saved {
+  0% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  12%,
+  86% {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--success) 55%, transparent),
+      0 0 0 7px color-mix(in srgb, var(--success) 14%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.ui-just-saved {
+  scroll-margin-top: 90px;
+}
+.ui-just-saved:is(.card, section, li, tr, form, details) {
+  background-color: color-mix(in srgb, var(--success) 6%, var(--card));
+}
+
+/* The tick on a checklist: the mark pops in when it is ticked (a transition, so only on a change). */
+button.tick {
+  font-size: 0;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+button.tick::after {
+  content: "✓";
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--success);
+  transform: scale(0);
+  opacity: 0;
+}
+button.tick.on::after {
+  transform: scale(1);
+  opacity: 1;
+}
+/* Touch target: the 28px circle answers taps across 44px. */
+button.tick {
+  position: relative;
+}
+button.tick::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-just-saved {
+    animation: ui-saved 1.6s ease-out;
+  }
+  .ui-just-saved :is(.badge.tone-ok, button.tick.on) {
+    animation: ui-pop 0.24s var(--pop);
+  }
+  button.tick::after {
+    transition:
+      transform 0.22s var(--pop),
+      opacity 0.12s ease-out;
+  }
+  .toast {
+    animation-duration: 0.24s;
+  }
+  .toast .toast-icon {
+    animation: ui-pop 0.24s var(--pop) 0.06s backwards;
+  }
+  .toast.leaving {
+    animation-duration: 0.2s;
+  }
+
+  /* One press feedback: everything you tap shrinks a little at once and springs back in 0.16 s. */
+  :root :is(.btn, .tabs-row > a, .seg button, .icon-btn, button.tick, a.tile, a.stat, .hero-kpis a, .bottomnav a, .msheet-list a, .msheet-list button, .bg-picker button) {
+    transition-property: transform, translate, background-color, border-color, color, box-shadow, opacity;
+    transition-duration: 0.16s;
+  }
+  :root :is(.btn, .tabs-row > a, .seg button, .icon-btn, button.tick, a.tile, a.stat, .hero-kpis a, .bottomnav a, .msheet-list a, .msheet-list button, .bg-picker button):active:not(:disabled) {
+    transform: scale(var(--press));
+    transition-duration: 0.06s;
+  }
+
+  /* Keep the small motions within about a quarter of a second. */
+  .bottomnav a[aria-current="page"] svg {
+    animation-duration: 0.24s;
+  }
+  .bell .count {
+    animation-duration: 0.24s;
+    animation-delay: 0.1s;
+  }
+  .notice-error .notice-icon {
+    animation-duration: 0.25s;
+    animation-delay: 0.05s;
+  }
+  .tower-chev {
+    transition-duration: 0.2s;
+  }
+  .msheet.open .msheet-list > li,
+  .msheet.open .msheet-chips button {
+    animation-duration: 0.22s;
+  }
+  :root .msheet-panel,
+  :root .csheet-panel {
+    transition-duration: 0.25s;
+  }
+  :root .msheet-backdrop,
+  :root .csheet-backdrop {
+    transition-duration: 0.2s;
+  }
+  :root .msheet,
+  :root .csheet {
+    transition-delay: 0.25s;
+  }
+  :root .msheet.open,
+  :root .csheet.open {
+    transition-delay: 0s;
+  }
+  :root[data-look="glass"] .sidenav .nav-ico {
+    transition-duration: 0.22s;
+  }
+  body,
+  .card,
+  .rec-list,
+  .tile {
+    transition-duration: 0.2s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No movement: the saved row simply shows its ring, a press dims instead of shrinking. */
+  .ui-just-saved {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--success) 55%, transparent),
+      0 0 0 7px color-mix(in srgb, var(--success) 14%, transparent);
+  }
+  :root :is(.btn, .tabs-row > a, .seg button, .icon-btn, button.tick, a.tile, a.stat, .hero-kpis a, .bottomnav a, .msheet-list a, .msheet-list button):active:not(:disabled) {
+    transform: none;
+    translate: none;
+    opacity: 0.78;
+  }
+  .toast,
+  .toast.leaving,
+  .toast .toast-icon {
+    animation: none;
+  }
+}

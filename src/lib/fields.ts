@@ -1,3 +1,4 @@
+import type { PatternKey } from "./patterns";
 import { CATEGORIES, CURRENCIES, INCOTERMS, INDUSTRIES, ITEM_TYPE_LABELS, PAYMENT_TERMS, TAX_STATUSES, UNITS, VENDOR_STATUSES } from "./lists";
 
 export type FieldType = "text" | "textarea" | "email" | "tel" | "money" | "number" | "integer" | "select" | "bool";
@@ -12,6 +13,10 @@ export type FieldDef = {
   required?: boolean;
   hint?: string;
   wide?: boolean;
+  /** Text that can be read with the camera (a barcode on the item): shows a Scan button where the phone can. */
+  scan?: boolean;
+  /** Live check (src/lib/patterns.ts). By default a TIN, phone, amount or count gets one; null for none. */
+  check?: PatternKey | null;
 };
 
 export type Section = { title: string; fields: FieldDef[] };
@@ -96,7 +101,7 @@ export const PRODUCT_SECTIONS: Section[] = [
     fields: [
       { key: "name", label: "Product name", type: "text", required: true, wide: true },
       { key: "item_type", label: "Type", type: "select", options: Object.keys(ITEM_TYPE_LABELS), labels: ITEM_TYPE_LABELS, required: true, hint: "only goods are used up from stock" },
-      { key: "sku", label: "SKU", type: "text", hint: "leave blank to number automatically" },
+      { key: "sku", label: "SKU", type: "text", hint: "leave blank to number automatically", scan: true },
       { key: "category", label: "Category", type: "select", options: CATEGORIES },
       { key: "subcategory", label: "Subcategory", type: "text" },
       { key: "brand", label: "Brand", type: "text" },

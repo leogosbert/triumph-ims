@@ -46,7 +46,7 @@ export default async function NewInvitationPage({ searchParams }: { searchParams
           </label>
           <label className="field">
             <span>{tr("Minutes")}</span>
-            <input type="number" name="minutes" min={5} max={600} step={5} defaultValue={60} />
+            <input type="number" name="minutes" min={5} max={600} step={5} defaultValue={60} inputMode="numeric" enterKeyHint="next" />
           </label>
         </div>
         <div className="inline-form">
@@ -103,7 +103,7 @@ export default async function NewInvitationPage({ searchParams }: { searchParams
               ))}
           </div>
         </fieldset>
-        <SubmitButton>{tr("Add to the calendar")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Add to the calendar")}</SubmitButton>
       </form>
     </>
   );

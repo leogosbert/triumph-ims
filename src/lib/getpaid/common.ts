@@ -17,7 +17,7 @@ export const FISCAL_STATUS: Record<string, { label: string; tone: string }> = {
 
 export const PAY_ORDER_STATUS: Record<string, { label: string; tone: string }> = {
   created: { label: "Started", tone: "info" },
-  pending: { label: "Waiting for the client", tone: "info" },
+  pending: { label: "Waiting for the client", tone: "warn" },
   paid: { label: "Paid", tone: "ok" },
   failed: { label: "Failed", tone: "bad" },
   cancelled: { label: "Cancelled", tone: "off" },

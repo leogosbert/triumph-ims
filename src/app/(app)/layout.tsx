@@ -2,6 +2,7 @@ import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { BottomNav, SideNav } from "@/components/BottomNav";
 import { NavPills } from "@/components/NavPills";
+import { PhoneHelpers } from "@/components/PhoneHelpers";
 import { CompanyButton, CompanySheet, type CompanyCard } from "@/components/CompanySheet";
 import { CompanyClosing } from "@/components/CompanyClosing";
 import { ClosingGate } from "@/components/ClosingGate";
@@ -20,6 +21,7 @@ import { BrandCookie } from "@/components/BrandCookie";
 import { AskBox } from "@/components/ai/AskBox";
 import { brandForCompany } from "@/lib/brands";
 import { SectionTracker } from "@/components/SectionTracker";
+import { RecentTracker } from "@/components/nav/RecentTracker";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { brandingUrl, getAppContext } from "@/lib/context";
 import type { Key } from "@/lib/i18n";
@@ -116,6 +118,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const brandStyle = {
     "--brand": company.primary_color,
     "--brand-dark": company.accent_color,
+    // The same colours again, which ui-look.css darkens just enough for white text when a company picks a light one.
+    "--brand-src": company.primary_color,
+    "--brand-dark-src": company.accent_color,
   } as React.CSSProperties;
 
   return (
@@ -187,6 +192,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         enabled={!user.is_anonymous && Boolean(profile.email ?? user.email)}
       />
       <NavPills />
+      <RecentTracker scope={`${user.id}:${company.id}`} />
+      <PhoneHelpers />
       <BottomNav
         items={bottomNav(role, t, features.on)}
         menu={moreMenuFor(roles, isManager, { on: features.on, isPlatformAdmin, features: features.list, menu: true })}

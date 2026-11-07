@@ -40,7 +40,7 @@ export default async function NewTenderPage({ searchParams }: { searchParams: Se
           opportunities={(opps ?? []) as { id: string; number: string; title: string }[]}
           base={company.base_currency}
         />
-        <SubmitButton>{tr("Add tender")}</SubmitButton>
+        <SubmitButton className="btn btn-primary save-bar">{tr("Add tender")}</SubmitButton>
       </form>
     </>
   );

@@ -1,4 +1,7 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
+import { MoneyFig } from "@/components/MoneyFig";
+import { checkAttrs } from "@/lib/patterns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -136,7 +139,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         <h1 style={{ margin: 0 }}>{inv.client?.name}</h1>
         <StatusBadge map={INVOICE_STATUS} status={shown} />
         <div className="head-amount num">
-          {formatMoney(inv.status === "issued" || inv.status === "partly_paid" ? balance : inv.total, ccy)}
+          <MoneyFig value={inv.status === "issued" || inv.status === "partly_paid" ? balance : inv.total} currency={ccy} />
           {(inv.status === "issued" || inv.status === "partly_paid") && <span>{tr("Balance due")}</span>}
         </div>
       </div>
@@ -245,7 +248,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                 <div className="grid grid-2">
                   <div className="field">
                     <label htmlFor="amount">{tr("Amount (")}{ccy})</label>
-                    <input id="amount" name="amount" type="text" inputMode="decimal" defaultValue={fmtNum(balance)} required />
+                    <input id="amount" name="amount" type="text" inputMode="decimal" defaultValue={fmtNum(balance)} required enterKeyHint="next" />
                   </div>
                   <div className="field">
                     <label htmlFor="received_on">{tr("Date received")}</label>
@@ -256,7 +259,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                     <div className="field">
                       <label htmlFor="exchange_rate">{tr("Exchange rate on the day")}{" "}<span className="hint">· {base}{" "}{tr("per 1")}{" "}{ccy}</span>
                       </label>
-                      <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(inv.exchange_rate)} />
+                      <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(inv.exchange_rate)} enterKeyHint="done" />
                     </div>
                   )}
                 </div>
@@ -317,22 +320,22 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                     <input type="hidden" name="line_id" value={l.id} />
                     <div>
                       <label htmlFor={`q-${l.id}`}>{tr("Qty")}</label>
-                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} />
+                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} enterKeyHint="next" {...checkAttrs("qty", tr)} />
                     </div>
                     <div>
                       <label htmlFor={`p-${l.id}`}>{tr("Unit price")}</label>
-                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} />
+                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} enterKeyHint="next" {...checkAttrs("amount", tr)} />
                     </div>
                     <div>
                       <label htmlFor={`d-${l.id}`}>{tr("Disc. %")}</label>
-                      <input id={`d-${l.id}`} name="discount_pct" type="text" inputMode="decimal" defaultValue={fmtNum(l.discount_pct)} />
+                      <input id={`d-${l.id}`} name="discount_pct" type="text" inputMode="decimal" defaultValue={fmtNum(l.discount_pct)} enterKeyHint="done" />
                     </div>
                     <SubmitButton className="btn btn-small" pendingText="…">{tr("Update")}</SubmitButton>
                   </form>
                   <form action={removeInvoiceLine}>
                     <input type="hidden" name="invoice_id" value={inv.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
+                    <UndoSubmit done="Line removed">{tr("Remove")}</UndoSubmit>
                   </form>
                 </div>
               )}
@@ -357,7 +360,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
           </div>
           <div className="row grand">
             <span>{tr("Total")}</span>
-            <span>{formatMoney(inv.total, ccy)}</span>
+            <MoneyFig value={inv.total} currency={ccy} className="grand-fig" />
           </div>
           {servicesTotal > 0 && (
             <>
@@ -465,7 +468,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
               <div className="field">
                 <label htmlFor="exchange_rate">{tr("Exchange rate")}{" "}<span className="hint">· {base}{" "}{tr("per 1 unit")}</span>
                 </label>
-                <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(inv.exchange_rate)} />
+                <input id="exchange_rate" name="exchange_rate" type="text" inputMode="decimal" defaultValue={fmtNum(inv.exchange_rate)} enterKeyHint="next" />
               </div>
               <div className="field">
                 <label htmlFor="issue_date">{tr("Invoice date")}{" "}<span className="hint">{tr("· blank = the day it is issued")}</span>
@@ -488,7 +491,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
               </div>
               <div className="field">
                 <label htmlFor="vat_rate">{tr("VAT %")}</label>
-                <input id="vat_rate" name="vat_rate" type="text" inputMode="decimal" defaultValue={fmtNum(inv.vat_rate)} />
+                <input id="vat_rate" name="vat_rate" type="text" inputMode="decimal" defaultValue={fmtNum(inv.vat_rate)} enterKeyHint="next" />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
                 <label htmlFor="notes">{tr("Notes")}{" "}<span className="hint">{tr("· printed on the invoice")}</span>
@@ -500,7 +503,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                 <textarea id="terms" name="terms" defaultValue={inv.terms ?? ""} />
               </div>
             </div>
-            {editable && <SubmitButton>{tr("Save details")}</SubmitButton>}
+            {editable && <SubmitButton className="btn btn-primary save-bar">{tr("Save details")}</SubmitButton>}
           </fieldset>
         </form>
         {inv.issued_at && (

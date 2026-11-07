@@ -189,7 +189,7 @@ export default async function EquipmentDetailPage({ params, searchParams }: { pa
             <form action={saveEquipment} style={{ marginTop: 12 }}>
               <input type="hidden" name="id" value={e.id} />
               <EquipmentFields e={e} clients={clients} products={products} />
-              <SubmitButton>{tr("Save")}</SubmitButton>
+              <SubmitButton className="btn btn-primary save-bar">{tr("Save")}</SubmitButton>
             </form>
           </details>
           <form action={setEquipmentActive} className="actions-bar">

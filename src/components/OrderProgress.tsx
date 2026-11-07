@@ -1,6 +1,7 @@
 import { tr } from "@/lib/tr";
 import { JOURNEY_STATUS, type OrderJourney } from "@/lib/orders";
 import { SubmitButton } from "@/components/SubmitButton";
+import { StatusSteps } from "@/components/StatusSteps";
 
 type Step = { label: string; done: boolean };
 type Person = { id: string; name: string };
@@ -47,22 +48,13 @@ export function OrderProgress({
           {percent}% · {done} / {view.length}
         </span>
       </div>
-      <ol className="progress-bar">
+      <ol className="progress-bar" aria-hidden>
         {view.map((s, i) => (
-          <li key={s.label} className={s.done ? "done" : i === at && next ? "now" : ""} title={tr(s.label)}>
-            <span className="sr-only">
-              {tr(s.label)}: {s.done ? tr("done") : i === at ? tr("next") : tr("to do")}
-            </span>
-          </li>
+          <li key={s.label} className={s.done ? "done" : i === at && next ? "now" : ""} title={tr(s.label)} />
         ))}
       </ol>
-      <ol className="progress-steps" aria-hidden>
-        {view.map((s, i) => (
-          <li key={s.label} className={s.done ? "done" : i === at && next ? "now" : ""}>
-            {tr(s.label)}
-          </li>
-        ))}
-      </ol>
+      {/* Every step named, done / current / to come; wraps on phones instead of hiding labels. */}
+      <StatusSteps steps={view} label={tr("Order steps")} />
       <div className="progress-labels">
         <span className="muted">
           {now ? (

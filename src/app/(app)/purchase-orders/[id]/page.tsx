@@ -34,6 +34,7 @@ import { applyLandedCost } from "../../finance/actions";
 import { BranchField } from "@/components/BranchField";
 import { branchList } from "@/lib/branches";
 import { BackLink } from "@/components/BackLink";
+import { StatusSteps } from "@/components/StatusSteps";
 
 export const metadata = { title: "Purchase order" };
 
@@ -121,6 +122,22 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
   const ccy = po.currency as string;
   const today = todayTz();
   const late = po.expected_date && po.expected_date < today && ["sent", "confirmed", "partially_received"].includes(po.status);
+  // The step line at the top: from the PO's own status, plus its bills when this person may see them.
+  const after = (...s: string[]) => s.includes(po.status);
+  const liveBills = poBills.filter((b) => b.status !== "cancelled");
+  const poSteps = [
+    { label: "Drafted", done: !isDraft },
+    { label: "Approved", done: after("approved", "sent", "confirmed", "partially_received", "received", "closed") },
+    { label: "Sent", done: after("sent", "confirmed", "partially_received", "received", "closed") },
+    { label: "Confirmed", done: after("confirmed", "partially_received", "received", "closed") },
+    { label: po.status === "partially_received" ? "Partly received" : "Received", done: after("received", "closed") },
+    ...(can(roles, "seeBills")
+      ? [
+          { label: "Billed", done: liveBills.length > 0 },
+          { label: "Paid", done: liveBills.length > 0 && liveBills.every((b) => b.status === "paid") },
+        ]
+      : []),
+  ];
   const pdfHref = `/purchase-orders/${po.id}/pdf`;
   const pdfName = `${po.number} ${po.supplier?.name ?? ""}.pdf`.replace(/[^\w.\- ]+/g, "").trim();
 
@@ -156,6 +173,7 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
         )}
         {po.supplier_ref && <>{" "}{tr("· their ref")}{" "}{po.supplier_ref}</>}
       </p>
+      <StatusSteps steps={poSteps} label={tr("Purchase order progress")} stopped={po.status === "cancelled" ? "Cancelled" : null} />
       <Notice {...notice} />
       <BranchField kind="purchase_order" id={po.id} branchId={po.branch_id ?? null} branches={branches} canMove={can(roles, "manageBranches")} />
 

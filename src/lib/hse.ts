@@ -20,7 +20,7 @@ export const SEVERITIES: Record<string, { label: string; tone: string; hint: str
 export const INCIDENT_STATUS: Record<string, { label: string; tone: string }> = {
   open: { label: "Open", tone: "warn" },
   investigating: { label: "Investigating", tone: "info" },
-  closed: { label: "Closed", tone: "off" },
+  closed: { label: "Closed", tone: "ok" },
 };
 
 export const INSPECTION_KINDS: Record<string, string> = {
@@ -60,7 +60,7 @@ export const NCR_DISPOSITIONS: Record<string, string> = {
 export const NCR_STATUS: Record<string, { label: string; tone: string }> = {
   open: { label: "Open", tone: "warn" },
   action: { label: "Actions in progress", tone: "info" },
-  closed: { label: "Closed", tone: "off" },
+  closed: { label: "Closed", tone: "ok" },
 };
 
 export const ACTION_STATUS: Record<string, { label: string; tone: string }> = {

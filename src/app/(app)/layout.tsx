@@ -116,6 +116,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const brandStyle = {
     "--brand": company.primary_color,
     "--brand-dark": company.accent_color,
+    // The same colours again, which ui-look.css darkens just enough for white text when a company picks a light one.
+    "--brand-src": company.primary_color,
+    "--brand-dark-src": company.accent_color,
   } as React.CSSProperties;
 
   return (

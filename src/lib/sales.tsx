@@ -1,10 +1,10 @@
 import { tr } from "@/lib/tr";
 export const RFQ_STATUS: Record<string, { label: string; tone: string }> = {
-  new: { label: "New", tone: "info" },
-  quoting: { label: "Quoting", tone: "warn" },
-  quoted: { label: "Quoted", tone: "info" },
+  new: { label: "New", tone: "warn" },
+  quoting: { label: "Quoting", tone: "info" },
+  quoted: { label: "Quoted", tone: "warn" },
   won: { label: "Won", tone: "ok" },
-  lost: { label: "Lost", tone: "off" },
+  lost: { label: "Lost", tone: "bad" },
   cancelled: { label: "Cancelled", tone: "off" },
 };
 
@@ -12,7 +12,7 @@ export const QUOTE_STATUS: Record<string, { label: string; tone: string }> = {
   draft: { label: "Draft", tone: "off" },
   pending_approval: { label: "Waiting for approval", tone: "warn" },
   approved: { label: "Approved", tone: "info" },
-  sent: { label: "Sent to client", tone: "info" },
+  sent: { label: "Sent to client", tone: "warn" },
   accepted: { label: "Accepted", tone: "ok" },
   rejected: { label: "Rejected", tone: "bad" },
   superseded: { label: "Replaced by revision", tone: "off" },

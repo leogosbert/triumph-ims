@@ -138,14 +138,14 @@ export type ComplianceSummary = {
 
 export const ITEM_STATUS: Record<ItemStatus, { label: string; tone: string }> = {
   not_started: { label: "Not started", tone: "off" },
-  in_progress: { label: "In progress", tone: "warn" },
+  in_progress: { label: "In progress", tone: "info" },
   done: { label: "Done", tone: "ok" },
   not_applicable: { label: "Does not apply", tone: "off" },
 };
 
 export const LICENCE_STATUS: Record<LicenceStatus, { label: string; tone: string }> = {
   planned: { label: "To apply for", tone: "off" },
-  applied: { label: "Applied", tone: "info" },
+  applied: { label: "Applied", tone: "warn" },
   active: { label: "Active", tone: "ok" },
   expired: { label: "Expired", tone: "bad" },
   suspended: { label: "Suspended", tone: "bad" },

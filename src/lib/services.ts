@@ -33,8 +33,8 @@ export const JOB_PRIORITIES: Record<string, { label: string; tone: string }> = {
 
 export const JOB_STATUS: Record<string, { label: string; tone: string }> = {
   scheduled: { label: "Scheduled", tone: "info" },
-  in_progress: { label: "In progress", tone: "warn" },
-  on_hold: { label: "On hold", tone: "off" },
+  in_progress: { label: "In progress", tone: "info" },
+  on_hold: { label: "On hold", tone: "warn" },
   completed: { label: "Completed", tone: "ok" },
   invoiced: { label: "Invoiced", tone: "ok" },
   cancelled: { label: "Cancelled", tone: "off" },
@@ -53,7 +53,7 @@ export const FREQUENCIES: Record<string, string> = {
 
 export const CONTRACT_STATUS: Record<string, { label: string; tone: string }> = {
   active: { label: "Active", tone: "ok" },
-  paused: { label: "Paused", tone: "off" },
+  paused: { label: "Paused", tone: "warn" },
   ended: { label: "Ended", tone: "off" },
 };
 
@@ -64,15 +64,15 @@ export const PROJECT_BILLING: Record<string, string> = {
 };
 
 export const PROJECT_STATUS: Record<string, { label: string; tone: string }> = {
-  active: { label: "Active", tone: "ok" },
-  on_hold: { label: "On hold", tone: "off" },
-  completed: { label: "Completed", tone: "info" },
+  active: { label: "Active", tone: "info" },
+  on_hold: { label: "On hold", tone: "warn" },
+  completed: { label: "Completed", tone: "ok" },
   cancelled: { label: "Cancelled", tone: "off" },
 };
 
 export const MILESTONE_STATUS: Record<string, { label: string; tone: string }> = {
   open: { label: "Not done yet", tone: "info" },
-  done: { label: "Done", tone: "warn" },
+  done: { label: "Done", tone: "ok" },
   invoiced: { label: "Invoiced", tone: "ok" },
 };
 
@@ -83,8 +83,8 @@ export const RATE_PERIODS: Record<string, { label: string; per: string }> = {
 };
 
 export const HIRE_STATUS: Record<string, { label: string; tone: string }> = {
-  out: { label: "Out on hire", tone: "warn" },
-  returned: { label: "Returned", tone: "info" },
+  out: { label: "Out on hire", tone: "info" },
+  returned: { label: "Returned", tone: "warn" },
   invoiced: { label: "Closed", tone: "ok" },
   cancelled: { label: "Cancelled", tone: "off" },
 };

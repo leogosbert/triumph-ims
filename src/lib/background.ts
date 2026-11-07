@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { getLookPref } from "@/lib/look-server";
 
 export const BG_COOKIE = "bg";
-export const BACKGROUNDS = ["photos", "architecture", "aurora", "grid", "waves", "mountains", "plain"] as const;
+export const BACKGROUNDS = ["photos", "soft", "architecture", "aurora", "grid", "waves", "mountains", "plain"] as const;
 export type BackgroundPref = (typeof BACKGROUNDS)[number];
 
 export function isBackgroundPref(v: unknown): v is BackgroundPref {

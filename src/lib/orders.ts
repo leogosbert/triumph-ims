@@ -31,7 +31,7 @@ export type OrderJourney = {
 export const JOURNEY_STATUS: Record<OrderJourney["status"], { label: string; tone: string }> = {
   in_progress: { label: "In progress", tone: "tone-info" },
   completed: { label: "Completed", tone: "tone-ok" },
-  rejected: { label: "Lost", tone: "tone-off" },
+  rejected: { label: "Lost", tone: "tone-bad" },
   cancelled: { label: "Cancelled", tone: "tone-off" },
   superseded: { label: "Replaced by a revision", tone: "tone-off" },
 };

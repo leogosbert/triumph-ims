@@ -19,7 +19,7 @@ const SOURCE_STATUS: Record<string, { label: string; tone: string }> = {
   ok: { label: "Read", tone: "ok" },
   empty: { label: "Nothing found", tone: "warn" },
   blocked: { label: "Not allowed", tone: "bad" },
-  failed: { label: "Failed", tone: "warn" },
+  failed: { label: "Failed", tone: "bad" },
 };
 
 type Source = {

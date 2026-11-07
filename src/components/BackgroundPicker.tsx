@@ -4,6 +4,7 @@ import { setBackground } from "@/app/theme-actions";
 
 const LABELS: Record<(typeof BACKGROUNDS)[number], string> = {
   photos: "Photos",
+  soft: "Soft blur",
   architecture: "Architecture",
   aurora: "Aurora",
   grid: "Grid",

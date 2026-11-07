@@ -39,9 +39,28 @@ const PATHS = {
 
 export type IconName = keyof typeof PATHS;
 
-export function Icon({ name, size = 22, strokeWidth = 1.8 }: { name: IconName; size?: number; strokeWidth?: number }) {
+/** The size steps every icon uses: 16 inline and small chevrons, 18 in buttons and at list ends, 20 in lists and tiles, 22 in menus (the default), 24 in headers. */
+export const ICON_SIZES = [16, 18, 20, 22, 24] as const;
+
+function snapSize(size: number): number {
+  return ICON_SIZES.reduce<number>((best, s) => (Math.abs(s - size) < Math.abs(best - size) ? s : best), 22);
+}
+
+/**
+ * One line weight on screen. Paths are drawn in 24-unit space, so a small icon gets a slightly thicker
+ * stroke and every size shows about the same 1.65px line (22px: 1.8, 18px: 2.2, 16px: 2.4).
+ * A strokeWidth above 1.8 means "emphasised" (the open tab): a little heavier than the base, at any size.
+ */
+function strokeFor(size: number, asked?: number): number {
+  const base = Math.min(2.4, Math.max(1.6, (1.65 * 24) / size));
+  const w = asked !== undefined && asked > 1.8 ? Math.min(2.6, base + 0.3) : base;
+  return Math.round(w * 10) / 10;
+}
+
+export function Icon({ name, size = 22, strokeWidth }: { name: IconName; size?: number; strokeWidth?: number }) {
+  const px = snapSize(size);
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg className="ico" width={px} height={px} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeFor(px, strokeWidth)} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d={PATHS[name]} />
     </svg>
   );

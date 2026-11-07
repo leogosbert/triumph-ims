@@ -3,13 +3,13 @@ import type { Progress, RfqRow } from "@/lib/portal/types";
 
 /** Status words on the portal, in the client's or supplier's terms. */
 export const QUOTE_STATUS: Record<string, { label: string; tone: string }> = {
-  sent: { label: "Waiting for your answer", tone: "info" },
+  sent: { label: "Waiting for your answer", tone: "warn" },
   accepted: { label: "Accepted", tone: "ok" },
   rejected: { label: "Declined", tone: "off" },
 };
 export const INVOICE_STATUS: Record<string, { label: string; tone: string }> = {
-  issued: { label: "Unpaid", tone: "info" },
-  partly_paid: { label: "Part paid", tone: "warn" },
+  issued: { label: "Unpaid", tone: "warn" },
+  partly_paid: { label: "Part paid", tone: "info" },
   paid: { label: "Paid", tone: "ok" },
   overdue: { label: "Overdue", tone: "bad" },
 };

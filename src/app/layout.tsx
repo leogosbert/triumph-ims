@@ -24,6 +24,7 @@ import "./polish.css";
 import "./glass.css";
 import "./my.css";
 import "./nav.css";
+import "./ui-nav.css";
 import "./ui-look.css";
 import "./ui-home.css";
 

@@ -20,6 +20,7 @@ import { BrandCookie } from "@/components/BrandCookie";
 import { AskBox } from "@/components/ai/AskBox";
 import { brandForCompany } from "@/lib/brands";
 import { SectionTracker } from "@/components/SectionTracker";
+import { RecentTracker } from "@/components/nav/RecentTracker";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { brandingUrl, getAppContext } from "@/lib/context";
 import type { Key } from "@/lib/i18n";
@@ -190,6 +191,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         enabled={!user.is_anonymous && Boolean(profile.email ?? user.email)}
       />
       <NavPills />
+      <RecentTracker scope={`${user.id}:${company.id}`} />
       <BottomNav
         items={bottomNav(role, t, features.on)}
         menu={moreMenuFor(roles, isManager, { on: features.on, isPlatformAdmin, features: features.list, menu: true })}

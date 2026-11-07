@@ -22,7 +22,7 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
     };
   }, []);
   return (
-    <div className="card" role="alert">
+    <div className="card" role="alert" data-no-recent>
       {offline ? (
         <>
           <h1>{tr("You're offline")}</h1>

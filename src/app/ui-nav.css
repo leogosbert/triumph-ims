@@ -1,0 +1,142 @@
+/* =====================================================================
+   Getting around (UI batch 30, items 10–12): the breadcrumb trail above
+   the back link on laptops, the "Recently opened" card on My page and the
+   jump-to rows of the command bar inside the Ask box.
+   Uses the app's tokens only, so both looks and both themes follow.
+   ===================================================================== */
+
+/* ---------- Breadcrumbs (src/components/nav/Crumbs.tsx): laptops only ---------- */
+.crumbs {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .crumbs {
+    display: block;
+    margin: 0 0 6px;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .crumbs li {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 42ch;
+  }
+  .crumbs li + li::before {
+    content: "›";
+    margin: 0 7px;
+    color: var(--muted);
+    opacity: 0.7;
+  }
+  .crumbs li > * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .crumbs a {
+    color: var(--muted);
+    text-decoration: none;
+    border-radius: 4px;
+  }
+  .crumbs a:hover {
+    color: var(--brand);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .crumbs a:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .crumbs [aria-current="page"] {
+    color: var(--text);
+    font-weight: 600;
+  }
+}
+
+/* ---------- "Recently opened" on My page (src/components/nav/RecentCard.tsx) ---------- */
+.nav-recent .nav-recent-clear {
+  min-height: 32px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.nav-recent .nav-recent-clear:hover {
+  color: var(--brand);
+}
+.nav-recent .nav-recent-clear:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.nav-recent .my-lines strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-recent .my-lines a > span:first-child {
+  min-width: 0;
+}
+.nav-recent-note {
+  margin: 6px 0 0;
+}
+@media (max-width: 1023px) {
+  .nav-recent .nav-recent-clear {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ---------- Command bar rows inside the Ask box (src/components/ai/AskBox.tsx) ---------- */
+.cmd-kind {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+.cmd-enter {
+  flex: none;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+.cmd-icon {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--soft);
+  color: var(--brand);
+}
+:root[data-look="glass"] .cmd-icon {
+  background: var(--g-field, var(--soft));
+}
+@media (max-width: 1023px) {
+  .cmd-row {
+    min-height: 44px;
+  }
+}

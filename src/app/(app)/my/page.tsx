@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/format";
 import { num, thisYear, type AdminSummary, type LeaveBalance } from "@/lib/hr";
 import { joinOpen, type MeetingSummary } from "@/lib/meetings/model";
 import { moreMenuFor } from "@/lib/roleNav";
+import { RecentCard } from "@/components/nav/RecentCard";
 import { formatMoney } from "@/lib/money";
 import { monthLabel } from "@/lib/payroll";
 import { can, hasRole, ROLE_LABELS, type Role } from "@/lib/roles";
@@ -891,6 +892,8 @@ export default async function MyPage() {
               }))}
             />
           )}
+
+          <RecentCard />
 
           {shortcuts.length > 0 && (
             <section className="card my-card">

@@ -1,4 +1,5 @@
 import { primeLang, tr } from "@/lib/tr";
+import { MoneyFig } from "@/components/MoneyFig";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -136,7 +137,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         <h1 style={{ margin: 0 }}>{inv.client?.name}</h1>
         <StatusBadge map={INVOICE_STATUS} status={shown} />
         <div className="head-amount num">
-          {formatMoney(inv.status === "issued" || inv.status === "partly_paid" ? balance : inv.total, ccy)}
+          <MoneyFig value={inv.status === "issued" || inv.status === "partly_paid" ? balance : inv.total} currency={ccy} />
           {(inv.status === "issued" || inv.status === "partly_paid") && <span>{tr("Balance due")}</span>}
         </div>
       </div>
@@ -357,7 +358,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
           </div>
           <div className="row grand">
             <span>{tr("Total")}</span>
-            <span>{formatMoney(inv.total, ccy)}</span>
+            <MoneyFig value={inv.total} currency={ccy} className="grand-fig" />
           </div>
           {servicesTotal > 0 && (
             <>

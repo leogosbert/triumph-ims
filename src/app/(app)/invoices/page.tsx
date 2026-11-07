@@ -38,7 +38,17 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   await primeLang();
   const sp = (await searchParams) ?? {};
   const notice = await readNotice(searchParams);
-  const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
+  // ?from=&to= (issue date, both optional): set by tapping a month on the home chart.
+  const day = (v: unknown) => {
+    if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return null;
+    const d = new Date(`${v}T00:00:00Z`);
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v ? v : null;
+  };
+  const from = day(sp.from);
+  const to = day(sp.to);
+  const range = from || to ? `&from=${from ?? ""}&to=${to ?? ""}` : "";
+  // A date range on its own lists every invoice in it, paid or not.
+  const tab = TABS.find((t) => t.key === sp.tab) ?? (range ? TABS[TABS.length - 1] : TABS[0]);
   const search = cleanSearch(typeof sp.q === "string" ? sp.q : "");
   const { supabase, company, roles } = await getAppContext();
   if (!can(roles, "seeInvoices")) noAccess();
@@ -53,6 +63,8 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   else if (tab.key === "draft") q = q.eq("status", "draft").order("created_at", { ascending: false });
   else if (tab.key === "paid") q = q.eq("status", "paid").order("issue_date", { ascending: false });
   else q = q.order("created_at", { ascending: false });
+  if (from) q = q.gte("issue_date", from);
+  if (to) q = q.lte("issue_date", to);
   const { data, error } = await (search
     ? supabase
         .from("invoices")
@@ -84,10 +96,20 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
           <button className="btn" type="submit">{tr("Search")}</button>
         </div>
       </form>
+      {!search && range && (
+        <p className="inv-range small">
+          <span>
+            {tr("Issued")} {from ? formatDate(from) : "…"} – {to ? formatDate(to) : "…"}
+          </span>
+          <Link href={`/invoices?tab=${tab.key}`} className="btn btn-small">
+            {tr("Clear dates")}
+          </Link>
+        </p>
+      )}
       {!search && (
         <nav className="tabs-row" aria-label={tr("Filter")}>
           {TABS.map((t) => (
-            <Link key={t.key} href={`/invoices?tab=${t.key}`} aria-current={t.key === tab.key ? "page" : undefined}>
+            <Link key={t.key} href={`/invoices?tab=${t.key}${range}`} aria-current={t.key === tab.key ? "page" : undefined}>
               {tr(String(t.label ?? ""))}
             </Link>
           ))}

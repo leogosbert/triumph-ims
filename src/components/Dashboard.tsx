@@ -4,6 +4,7 @@ import type { Kpi, MonthBar, NamedValue, Tower } from "@/lib/dashboard";
 import { Icon } from "@/components/Icon";
 import { AGING } from "@/lib/finance";
 import type { Dict } from "@/lib/i18n";
+import { KpiTile } from "@/components/home/KpiTile";
 
 /** Short money for charts: 1.2M, 850K. */
 function short(v: number) {
@@ -68,29 +69,24 @@ export function KpiGrid({ kpis, currency }: { kpis: Kpi[]; currency: string }) {
   if (!kpis.length) return null;
   return (
     <div className="stat-grid">
-      {kpis.map((k) => {
-        const body = (
-          <>
-            <div className="n num">{k.money ? `${currency} ${short(k.value)}` : `${k.value.toLocaleString("en-GB")}${k.suffix ?? ""}`}</div>
-            <div className="l">{tr(String(k.label ?? ""))}</div>
-          </>
-        );
-        return k.href ? (
-          <Link key={k.label} href={k.href} className={`stat ${k.alert ? "alert" : ""}`}>
-            {body}
-          </Link>
-        ) : (
-          <div key={k.label} className="stat">
-            {body}
-          </div>
-        );
-      })}
+      {kpis.map((k) => (
+        <KpiTile key={k.key} k={k} currency={currency} variant="stat" tr={tr} />
+      ))}
     </div>
   );
 }
 
-/** Sales and gross profit, last 6 months. */
-export function SalesChart({ months, currency, t }: { months: MonthBar[]; currency: string; t: Dict }) {
+/** Last day of a "YYYY-MM" month, as YYYY-MM-DD. */
+function monthEnd(month: string) {
+  const [y, m] = month.split("-").map(Number);
+  return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+}
+
+/**
+ * Sales and gross profit, last 6 months. With `drill`, tapping a month opens that month's invoices
+ * (the invoices list filtered by issue date).
+ */
+export function SalesChart({ months, currency, t, drill = false }: { months: MonthBar[]; currency: string; t: Dict; drill?: boolean }) {
   const max = Math.max(1, ...months.map((m) => Math.max(m.sales, m.profit)));
   const W = 320;
   const H = 150;
@@ -107,8 +103,8 @@ export function SalesChart({ months, currency, t }: { months: MonthBar[]; curren
         <line x1="0" x2={W} y1={H - 20} y2={H - 20} stroke="var(--line)" />
         {months.map((m, i) => {
           const x = i * slot + slot / 2;
-          return (
-            <g key={m.month}>
+          const bars = (
+            <>
               <rect x={x - bw - 1} y={y(m.sales)} width={bw} height={H - 20 - y(m.sales)} fill="var(--chart-1)" rx="2">
                 <title>{`${m.label}: sales ${short(m.sales)}`}</title>
               </rect>
@@ -123,10 +119,18 @@ export function SalesChart({ months, currency, t }: { months: MonthBar[]; curren
               <text x={x} y={H - 6} textAnchor="middle" fontSize="10" fill="var(--muted)">
                 {tr(String(m.label ?? ""))}
               </text>
-            </g>
+            </>
+          );
+          if (!drill) return <g key={m.month}>{bars}</g>;
+          return (
+            <a key={m.month} href={`/invoices?tab=all&from=${m.month}-01&to=${monthEnd(m.month)}`} className="chart-drill" aria-label={`${tr("Open invoices for")} ${m.label}`}>
+              <rect className="chart-hit" x={i * slot + 1} y={0} width={slot - 2} height={H} rx="6" />
+              {bars}
+            </a>
           );
         })}
       </svg>
+      {drill && <p className="small muted chart-tip">{tr("Tap a month to see its invoices.")}</p>}
       <p className="small legend">
         <span className="key" style={{ background: "var(--chart-1)" }} /> {t["c.sales"]} <span className="key" style={{ background: "var(--chart-2)" }} /> {t["c.profit"]}
       </p>

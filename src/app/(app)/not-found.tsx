@@ -13,7 +13,7 @@ export default async function AppNotFound() {
   return (
     <>
       <BackLink href="/" label="Home" />
-      <div className="card">
+      <div className="card" data-no-recent>
         <h1>{tr("We couldn't find that")}</h1>
         <p className="muted">{tr("The record or screen may have been removed, the link may be old, or it belongs to another company.")}</p>
         <div className="actions">

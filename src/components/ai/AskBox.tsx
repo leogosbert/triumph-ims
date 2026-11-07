@@ -3,15 +3,20 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Icon } from "@/components/Icon";
+import { Icon, type IconName } from "@/components/Icon";
 import type { AskAnswer } from "@/lib/ai/ask";
 import { askQuestion, quickSearch, ruleStatus, searchIndex, sendWish, type QuickResults, type RuleStatus } from "@/lib/ai/ask-actions";
 import { buildIndex, FINDER_EXAMPLES, isQuestion, rank, type FinderEntry, type FinderHit, type FinderIndex, type FinderResult } from "@/lib/ai/finder";
+import { docMatches, docQuery, matchCommands, type CommandSource } from "@/lib/command-bar";
+import { readRecent, type RecentItem } from "@/lib/recent-items";
 import { useTr } from "@/lib/tr-client";
 import { AnswerView } from "./AnswerView";
 import s from "./AskBox.module.css";
 
-type Item = { href: string; title: string; sub: string; side?: string; group: string };
+type Item = { href: string; title: string; sub: string; side?: string; group: string; icon?: IconName };
+
+/** Home is on the bar, not in the menus: the command bar still jumps there. */
+const HOME: CommandSource = { id: "page:/", title: "Home", path: ["Home"], to: "/" };
 
 // ---------- recent searches (this browser only) ----------
 const RECENT = "lemosp.search.recent";
@@ -106,6 +111,9 @@ const LANG_LABEL = { en: "English", sw: "Kiswahili", mix: "Kiswahili + English" 
  * - When the app does not do something it says so, with what to do instead and "Ask for this in the app".
  * - Enter opens the best match, or asks the AI for a question; when nothing matches, the AI answers by
  *   itself after a moment. Arrow keys move through the matches, Escape closes, "/" or Ctrl+K opens it.
+ * - Command bar: a screen or action ("stock", "new invoice", "new PO") lists the screens to jump to
+ *   (from the person's own menus), and a document number ("PO-1042", "Q-12") opens that record. These
+ *   rows come first, above the answer. Opened empty, it lists the records opened last on this device.
  */
 export function AskBox({ placeholder, autoFocus = false, className, shortcut = true }: { placeholder?: string; autoFocus?: boolean; className?: string; shortcut?: boolean }) {
   const tr = useTr();
@@ -125,6 +133,7 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
   const [failed, setFailed] = useState(false);
   const [wished, setWished] = useState("");
   const [recents, setRecents] = useState<string[]>([]);
+  const [opened, setOpened] = useState<RecentItem[]>([]);
   const [live, setLive] = useState<{ code: string; s: RuleStatus | null } | null>(null);
   const [voiceLang, setVoiceLang] = useState<"sw-TZ" | "en-US">("sw-TZ");
   const [listening, setListening] = useState(false);
@@ -138,6 +147,7 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
   const wake = () => {
     setOpen(true);
     setRecents(recent());
+    setOpened(readRecent().slice(0, 5));
     loadIndex(setIndex);
   };
 
@@ -248,8 +258,25 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quick]);
 
+  // Command bar: screens to jump to (for words that are not a question) and records by their number.
+  const allRecords = quick && quick.q === text ? quick.records : [];
+  const asCommand = text.length >= 2 && !isQuestion(text);
+  const screens = useMemo<CommandSource[]>(
+    () => (index ? [{ ...HOME, title: tr(HOME.title), path: [tr("Home")] }, ...index.docs.map((d) => d.e).filter((e) => e.id.startsWith("page:"))] : []),
+    [index, tr],
+  );
+  const commands = useMemo(() => (asCommand ? matchCommands(screens, text) : []), [asCommand, screens, text]);
+  const doc = asCommand ? docQuery(text) : null;
+  const docHits = doc ? allRecords.flatMap((g) => g.hits.filter((h) => docMatches(doc, h.sub)).map((h) => ({ ...h, group: g.title }))).slice(0, 3) : [];
+  const docHrefs = new Set(docHits.map((h) => h.href));
+  const records = docHits.length ? allRecords.map((g) => ({ ...g, hits: g.hits.filter((h) => !docHrefs.has(h.href)) })).filter((g) => g.hits.length > 0) : allRecords;
+  const jump: Item[] = [
+    ...docHits.map((h) => ({ href: h.href, title: h.sub.split(" · ")[0], sub: h.title, side: h.group, group: tr("Open"), icon: "doc" as const })),
+    ...commands.map((c) => ({ href: c.href, title: c.title, sub: c.sub, group: tr("Go to"), icon: c.title.startsWith(tr("New")) ? ("plus" as const) : ("chevron" as const) })),
+  ];
+  const jumpHrefs = new Set(jump.map((j) => j.href));
+
   // Nothing in the app or the records answers a real question: the AI takes over by itself after a moment.
-  const records = quick && quick.q === text ? quick.records : [];
   const stuck =
     !!quick &&
     quick.q === text &&
@@ -259,6 +286,7 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
     !found.confident &&
     !found.missing &&
     records.length === 0 &&
+    jump.length === 0 &&
     text.split(" ").length >= 3;
   useEffect(() => {
     if (!stuck || asked.current === `ai:${text}`) return;
@@ -280,15 +308,29 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
     };
   }, []);
 
-  const best = found?.confident && !found.missing ? found.best : undefined;
+  // A screen already listed as a jump row is not shown again as the best answer (guides still are).
+  const sameScreen = !!found?.best && found.best.e.id.startsWith("page:") && jumpHrefs.has(found.best.e.to);
+  const best = found?.confident && !found.missing && !sameScreen ? found.best : undefined;
   const missing = found?.missing;
-  const related: FinderHit[] = found ? found.others.filter((h) => h.e.id !== best?.e.id && h.e.to).slice(0, 6) : [];
-  const items: Item[] = [
-    ...(best?.e.to ? [{ href: best.e.to, title: best.e.title, sub: best.e.path.join(" → "), group: "" }] : []),
-    ...related.map((h) => ({ href: h.e.to, title: h.e.title, sub: h.e.path.join(" → "), group: tr("Related") })),
-    ...records.flatMap((g) => g.hits.map((h) => ({ ...h, group: g.title }))),
-  ].slice(0, 16);
-  const firstListItem = best?.e.to ? 1 : 0;
+  const related: FinderHit[] = found ? found.others.filter((h) => h.e.id !== best?.e.id && h.e.to && !jumpHrefs.has(h.e.to)).slice(0, 6) : [];
+  // One list for the arrow keys: the records opened last (empty box), or the jump rows, then the
+  // best answer, related screens and records as before.
+  const busy = !!asking || !!answer || failed;
+  const items: Item[] =
+    text.length < 2
+      ? busy
+        ? []
+        : opened.map((r) => ({ href: r.href, title: r.title, sub: "", side: tr(r.kind), group: tr("Recently opened"), icon: "clock" as const }))
+      : [
+          ...jump,
+          ...[
+            ...(best?.e.to ? [{ href: best.e.to, title: best.e.title, sub: best.e.path.join(" → "), group: "" }] : []),
+            ...related.map((h) => ({ href: h.e.to, title: h.e.title, sub: h.e.path.join(" → "), group: tr("Related") })),
+            ...records.flatMap((g) => g.hits.map((h) => ({ ...h, group: g.title }))),
+          ].slice(0, 16),
+        ];
+  const bestAt = jump.length;
+  const firstListItem = jump.length + (best?.e.to ? 1 : 0);
 
   const close = () => {
     setOpen(false);
@@ -309,6 +351,10 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
     input.current?.focus();
   };
 
+  // Enter opens a document found by its number, or a screen named exactly ("stock", "new invoice").
+  const top = commands[0];
+  const enterTo = docHits[0]?.href ?? (top && (top.score === 100 || (top.score >= 80 && !quick?.figures)) ? top.href : undefined);
+
   const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -323,6 +369,7 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (active >= 0 && items[active]) go(items[active].href);
+      else if (enterTo) go(enterTo);
       else if (best?.e.to && !isQuestion(text) && !quick?.figures) go(best.e.to);
       else ask(text, true);
     }
@@ -356,7 +403,7 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
     }
   };
 
-  const nothing = !!found && !best && !missing && records.length === 0 && !(quick?.figures && quick.q === text);
+  const nothing = !!found && !best && !missing && records.length === 0 && jump.length === 0 && !(quick?.figures && quick.q === text);
   const showAnswer = !!asking || !!answer || failed;
   const showAlt = (e: FinderEntry) => !!e.alt && e.alt !== e.title && found?.lang !== "en";
   let lastGroup = "";
@@ -414,6 +461,7 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
                 <br />
                 <span className="muted">{tr("Ask how to do something, ask about your business or the documents you need, in English, Kiswahili or both.")}</span>
               </p>
+              {items.length > 0 && <JumpList id={id} items={items} from={0} to={items.length} active={active} onPick={close} />}
               {recents.length > 0 && (
                 <>
                   <p className={s.group}>{tr("Recent")}</p>
@@ -438,6 +486,21 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
                 {tr("Tip: press / or Ctrl+K to search from any screen.")}
               </p>
             </div>
+          )}
+
+          {text.length >= 2 && jump.length > 0 && (
+            <JumpList
+              id={id}
+              items={items}
+              from={0}
+              to={jump.length}
+              active={active}
+              onPick={() => {
+                remember(text);
+                close();
+              }}
+              enterHint={!!enterTo}
+            />
           )}
 
           {found && found.understood.length > 0 && text.length >= 2 && (
@@ -512,7 +575,7 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
               )}
 
               {best && !showAnswer && (
-                <div className={`${s.card}${active === 0 && best.e.to ? ` ${s.active}` : ""}`} id={best.e.to ? `${id}-i0` : undefined}>
+                <div className={`${s.card}${active === bestAt && best.e.to ? ` ${s.active}` : ""}`} id={best.e.to ? `${id}-i${bestAt}` : undefined}>
                   <p className={s.kind}>{tr("Best answer")}</p>
                   <h3>{best.e.title}</h3>
                   {showAlt(best.e) && <p className="small muted">{best.e.alt}</p>}
@@ -550,7 +613,7 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
                   <span>
                     {tr("Ask AI")}: <strong>“{text}”</strong>
                   </span>
-                  <span className="muted small">{best && !isQuestion(text) ? "" : "Enter"}</span>
+                  <span className="muted small">{(best && !isQuestion(text)) || enterTo ? "" : "Enter"}</span>
                 </button>
               )}
 
@@ -602,5 +665,43 @@ export function AskBox({ placeholder, autoFocus = false, className, shortcut = t
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * The jump rows of the command bar (screens, records by number) and the records opened last: links
+ * the arrow keys move through (their ids are the combobox's options), grouped under small headings.
+ * `enterHint`: the first row is what Enter opens.
+ */
+function JumpList({ id, items, from, to, active, onPick, enterHint = false }: { id: string; items: Item[]; from: number; to: number; active: number; onPick: () => void; enterHint?: boolean }) {
+  let lastGroup = "";
+  return (
+    <ul className={s.list} role="listbox">
+      {items.slice(from, to).map((it, k) => {
+        const i = from + k;
+        const head = it.group !== lastGroup ? it.group : null;
+        lastGroup = it.group;
+        return (
+          <li key={`${it.href}-${i}`} role="presentation">
+            {head && <p className={s.group}>{head}</p>}
+            <Link id={`${id}-i${i}`} role="option" aria-selected={i === active} href={it.href} className={`${s.item} cmd-row${i === active ? ` ${s.active}` : ""}`} onClick={onPick}>
+              <span className="cmd-icon" aria-hidden="true">
+                <Icon name={it.icon ?? "chevron"} size={15} strokeWidth={2.2} />
+              </span>
+              <span className={s.itemMain}>
+                <span className={s.itemTitle}>{it.title}</span>
+                {it.sub && <span className={s.itemSub}>{it.sub}</span>}
+              </span>
+              {it.side && <span className="cmd-kind">{it.side}</span>}
+              {enterHint && i === from && (
+                <kbd className="cmd-enter" aria-hidden="true">
+                  Enter
+                </kbd>
+              )}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

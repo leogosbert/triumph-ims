@@ -1,4 +1,5 @@
 import { primeLang, tr } from "@/lib/tr";
+import { checkAttrs } from "@/lib/patterns";
 import { redirect } from "next/navigation";
 import { Notice } from "@/components/Notice";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -58,7 +59,7 @@ export default async function AdjustStockPage({ searchParams }: { searchParams: 
           </div>
           <div className="field">
             <label htmlFor="quantity">{tr("Quantity")}</label>
-            <input id="quantity" name="quantity" type="text" inputMode="decimal" required />
+            <input id="quantity" name="quantity" type="text" inputMode="decimal" required {...checkAttrs("qty", tr)} />
           </div>
           <div className="field">
             <label htmlFor="batch_no">{tr("Batch no.")}{" "}<span className="hint">{tr("· if the product has batches")}</span>

@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -118,9 +119,9 @@ export default async function TenderPage({ params, searchParams }: { params: Pro
                 <form action={removeTask}>
                   <input type="hidden" name="tender_id" value={t.id} />
                   <input type="hidden" name="task_id" value={k.id} />
-                  <button type="submit" className="btn btn-small" aria-label={tr("Remove")} title={tr("Remove")}>
+                  <UndoSubmit className="btn btn-small" label={tr("Remove")} title={tr("Remove")} done="Task removed">
                     ✕
-                  </button>
+                  </UndoSubmit>
                 </form>
               )}
             </li>

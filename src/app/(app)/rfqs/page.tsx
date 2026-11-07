@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -75,7 +76,11 @@ export default async function RfqsPage({ searchParams }: { searchParams: SearchP
         <button className="btn" type="submit">{tr("Search")}</button>
       </form>
       {rows.length === 0 ? (
-        <p className="card muted">{tr("No RFQs here.")}</p>
+        <EmptyState
+          icon={q ? "search" : "inbox"}
+          text={q ? "No RFQs match your search." : "No RFQs here."}
+          action={!q && can(roles, "editSales") ? { href: "/rfqs/new", label: "Record a client RFQ" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {

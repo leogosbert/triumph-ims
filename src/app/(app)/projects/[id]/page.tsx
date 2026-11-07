@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -191,7 +192,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
                       <form action={removeMilestone}>
                         <input type="hidden" name="project_id" value={project.id} />
                         <input type="hidden" name="milestone_id" value={m.id} />
-                        <SubmitButton className="btn btn-small">{tr("Remove")}</SubmitButton>
+                        <UndoSubmit className="btn btn-small" done="Milestone removed">{tr("Remove")}</UndoSubmit>
                       </form>
                     )}
                   </div>

@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { ListToolbar } from "@/components/ListToolbar";
@@ -87,13 +88,16 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
         addLabel="New product"
       />
       {rows.length === 0 ? (
-        <p className="card muted">
-          {q || category ? tr("No products match your search.") : tr("No products yet.")}{" "}
+        <EmptyState
+          icon={q || category ? "search" : "products"}
+          text={q || category ? "No products match your search." : "No products yet."}
+          action={!q && !category && can(roles, "editProducts") ? { href: "/products/new", label: "Add your first product" } : undefined}
+        >
           {can(roles, "importData") && !q && !category && (
-            <>{tr("You can")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
+            <>{tr("Or")}{" "}<Link href="/import">{tr("import them from your spreadsheet")}</Link>.
             </>
           )}
-        </p>
+        </EmptyState>
       ) : (
         <ul className="rec-list">
           {rows.map((p) => {

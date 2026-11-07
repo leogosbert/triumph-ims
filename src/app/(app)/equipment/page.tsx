@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -120,9 +121,11 @@ export default async function EquipmentPage({ searchParams }: { searchParams: Se
         </Link>
       </nav>
       {rows.length === 0 ? (
-        <p className="card muted">
-          {client || q ? tr("No equipment matches.") : tr("No equipment yet. Record what you install at clients to be reminded of services and warranty.")}
-        </p>
+        <EmptyState
+          icon={client || q ? "search" : "tools"}
+          text={client || q ? "No equipment matches." : "No equipment yet. Record what you install at clients to be reminded of services and warranty."}
+          action={!client && !q && canPlanService(roles) ? { href: "/equipment/new", label: "Record equipment" } : undefined}
+        />
       ) : (
         sorted.map(([cid, g]) => (
           <section key={cid}>

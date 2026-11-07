@@ -1,5 +1,7 @@
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
+import { Suspense } from "react";
+import { SkeletonCard } from "@/components/Skeleton";
 import { Carousel } from "@/components/Carousel";
 import { CountUp } from "@/components/CountUp";
 import { redirect } from "next/navigation";
@@ -20,6 +22,7 @@ import { TourInvite } from "@/components/tour/TourButton";
 import { isLevel, levelRank, type Level } from "@/lib/levels";
 import { AdminSummary } from "@/components/AdminSummary";
 import { ComplianceCard } from "@/components/ComplianceCard";
+import { canSeeCompliance } from "@/lib/compliance/model";
 
 export const metadata = { title: "Home" };
 
@@ -138,6 +141,8 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     ];
   }
   const remaining = checklist.filter((c) => !c.done).length;
+  // Grey loading shapes only where the card will most likely appear (it hides itself when the features are off).
+  const adminCardLikely = ["hr_people", "hse", "quality", "timesheet_approval"].some((k) => features.on(k));
 
   const needsOnboarding = isManager && company.onboarding_done === false && !company.is_demo;
   // Stage 12: "Take a 2-minute tour" for managers in the first 14 days after onboarding
@@ -203,8 +208,13 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       {isManager && welcomeLevel && <FirstStepsCard level={welcomeLevel} />}
       {invitedToTour && <TourInvite tour={level} company={company.id} />}
       {growth && <GrowthCard level={level} featureRecs={growth.featureRecs} featureLevel={growth.featureLevel} levelRec={growth.levelRec} />}
-      <AdminSummary />
-      <ComplianceCard />
+      {/* These two fetch their own data: the rest of the screen shows without waiting for them. */}
+      <Suspense fallback={adminCardLikely ? <SkeletonCard tiles={3} lines={0} /> : null}>
+        <AdminSummary />
+      </Suspense>
+      <Suspense fallback={features.on("compliance") && canSeeCompliance(roles) ? <SkeletonCard lines={2} /> : null}>
+        <ComplianceCard />
+      </Suspense>
 
       {(approvals.length > 0 || poApprovals.length > 0) && (
         <section className="card">

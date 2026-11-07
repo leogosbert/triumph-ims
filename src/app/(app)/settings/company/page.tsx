@@ -1,4 +1,5 @@
 import { primeLang, tr } from "@/lib/tr";
+import { checkAttrs, type PatternKey } from "@/lib/patterns";
 import Link from "next/link";
 import { StepUpForm } from "@/components/ConfirmIdentity";
 import { Notice } from "@/components/Notice";
@@ -22,8 +23,9 @@ function Field(props: {
   textarea?: boolean;
   required?: boolean;
   inputMode?: "numeric" | "decimal" | "tel" | "email" | "url" | "text";
+  check?: PatternKey;
 }) {
-  const { name, label, value, hint, type = "text", textarea, required, inputMode } = props;
+  const { name, label, value, hint, type = "text", textarea, required, inputMode, check } = props;
   const hintId = hint ? `${name}-hint` : undefined;
   return (
     <div className="field">
@@ -38,6 +40,7 @@ function Field(props: {
           defaultValue={value ?? ""}
           required={required}
           inputMode={inputMode}
+          {...(check ? checkAttrs(check, tr) : {})}
           aria-describedby={hintId}
         />
       )}
@@ -114,7 +117,7 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
             <Field name="name" label={tr("Trading name")} value={c.name} required />
             <Field name="legal_name" label={tr("Registered name")} value={c.legal_name} hint={tr("as on BRELA certificate")} />
             <div className="grid grid-2">
-              <Field name="tin" label={tr("TIN")} value={c.tin} />
+              <Field name="tin" label={tr("TIN")} value={c.tin} check="tin" inputMode="numeric" />
               <Field name="vrn" label={tr("VRN")} value={c.vrn} hint={tr("if VAT registered")} />
             </div>
             <Field name="registration_no" label={tr("Registration number")} value={c.registration_no} />
@@ -124,7 +127,7 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
             <h2>{tr("Contact")}</h2>
             <Field name="address" label={tr("Address")} value={c.address} textarea />
             <div className="grid grid-2">
-              <Field name="phone" label={tr("Phone")} value={c.phone} type="tel" />
+              <Field name="phone" label={tr("Phone")} value={c.phone} type="tel" check="phone" />
               <Field name="email" label={tr("Email")} value={c.email} type="email" />
             </div>
             <Field name="website" label={tr("Website")} value={c.website} inputMode="url" />

@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -90,7 +91,7 @@ export default async function RfqPage({ params, searchParams }: { params: Promis
                     <form action={removeRfqLine}>
                       <input type="hidden" name="rfq_id" value={rfq.id} />
                       <input type="hidden" name="line_id" value={l.id} />
-                      <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
+                      <UndoSubmit done="Line removed">{tr("Remove")}</UndoSubmit>
                     </form>
                   )}
                 </div>

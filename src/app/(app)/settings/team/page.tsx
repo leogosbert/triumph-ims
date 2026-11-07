@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
 import { StepUpForm } from "@/components/ConfirmIdentity";
 import { Notice } from "@/components/Notice";
@@ -154,7 +155,7 @@ export default async function TeamPage({ searchParams }: { searchParams: SearchP
                 </div>
                 <form action={revokeInvitation}>
                   <input type="hidden" name="invitation_id" value={i.id} />
-                  <SubmitButton className="btn btn-small btn-danger" pendingText={tr("Cancelling…")}>{tr("Cancel")}</SubmitButton>
+                  <UndoSubmit done="Invitation cancelled" pendingText={tr("Cancelling…")}>{tr("Cancel")}</UndoSubmit>
                 </form>
               </li>
             ))}

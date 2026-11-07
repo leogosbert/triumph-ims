@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -72,7 +73,11 @@ export default async function BillsPage({ searchParams }: { searchParams: Search
         ))}
       </nav>
       {rows.length === 0 ? (
-        <p className="card muted">{tr("No bills here. Record a supplier's invoice from its purchase order, or with “+ Bill”.")}</p>
+        <EmptyState
+          icon="receipt"
+          text="No bills here. Record a supplier's invoice from its purchase order, or here."
+          action={can(roles, "editBills") ? { href: "/bills/new", label: "Record a bill" } : undefined}
+        />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {

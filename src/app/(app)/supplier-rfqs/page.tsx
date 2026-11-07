@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { Notice } from "@/components/Notice";
@@ -56,7 +57,7 @@ export default async function SupplierRfqsPage({ searchParams }: { searchParams:
         ))}
       </nav>
       {rows.length === 0 ? (
-        <p className="card muted">{tr("Nothing here.")}</p>
+        <EmptyState icon="purchasing" text="No supplier RFQs here." action={{ href: "/supplier-rfqs/new", label: "Ask suppliers for prices" }} />
       ) : (
         <ul className="rec-list">
           {rows.map((r) => {

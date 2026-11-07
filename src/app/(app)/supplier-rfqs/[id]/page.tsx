@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -165,7 +166,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
                 <form action={removeSrfqLine}>
                   <input type="hidden" name="srfq_id" value={r.id} />
                   <input type="hidden" name="line_id" value={l.id} />
-                  <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
+                  <UndoSubmit done="Line removed">{tr("Remove")}</UndoSubmit>
                 </form>
               )}
             </li>
@@ -241,7 +242,7 @@ export default async function SupplierRfqPage({ params, searchParams }: { params
                     <form action={removeInvite}>
                       <input type="hidden" name="srfq_id" value={r.id} />
                       <input type="hidden" name="invite_id" value={inv.id} />
-                      <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
+                      <UndoSubmit done="Supplier removed">{tr("Remove")}</UndoSubmit>
                     </form>
                   )}
                 </div>

@@ -1,4 +1,6 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
+import { checkAttrs } from "@/lib/patterns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Notice } from "@/components/Notice";
@@ -446,18 +448,18 @@ export default async function PurchaseOrderPage({ params, searchParams }: { para
                     <input type="hidden" name="line_id" value={l.id} />
                     <div>
                       <label htmlFor={`q-${l.id}`}>{tr("Qty")}</label>
-                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} />
+                      <input id={`q-${l.id}`} name="quantity" type="text" inputMode="decimal" defaultValue={fmtNum(l.quantity)} {...checkAttrs("qty", tr)} />
                     </div>
                     <div>
                       <label htmlFor={`p-${l.id}`}>{tr("Unit price")}</label>
-                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} />
+                      <input id={`p-${l.id}`} name="unit_price" type="text" inputMode="decimal" defaultValue={fmtNum(l.unit_price)} {...checkAttrs("amount", tr)} />
                     </div>
                     <SubmitButton className="btn btn-small" pendingText="…">{tr("Update")}</SubmitButton>
                   </form>
                   <form action={removePoLine}>
                     <input type="hidden" name="po_id" value={po.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
+                    <UndoSubmit done="Line removed">{tr("Remove")}</UndoSubmit>
                   </form>
                 </div>
               )}

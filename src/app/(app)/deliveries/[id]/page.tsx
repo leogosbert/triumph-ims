@@ -1,3 +1,4 @@
+import { UndoSubmit } from "@/components/UndoSubmit";
 import { primeLang, tr } from "@/lib/tr";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -238,7 +239,7 @@ export default async function DeliveryPage({ params, searchParams }: { params: P
                   <form action={removeDeliveryLine}>
                     <input type="hidden" name="delivery_id" value={d.id} />
                     <input type="hidden" name="line_id" value={l.id} />
-                    <SubmitButton className="btn btn-small btn-danger" pendingText="…">{tr("Remove")}</SubmitButton>
+                    <UndoSubmit done="Line removed">{tr("Remove")}</UndoSubmit>
                   </form>
                 </div>
               )}

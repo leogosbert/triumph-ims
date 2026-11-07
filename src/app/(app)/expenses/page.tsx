@@ -197,7 +197,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
       />
       {rows.length > 1 && <ListSort links={sortLinks("/expenses", sp, SORTS, sort)} />}
       {rows.length === 0 ? (
-        {show === "all" ? (
+        show === "all" ? (
           <EmptyState
             icon="cash"
             text="No expenses recorded for this month. Record rent, fuel, airtime and other spending here."
@@ -205,7 +205,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Sea
           />
         ) : (
           <p className="card muted">{tr("Nothing here for this month.")}</p>
-        )}
+        )
       ) : (
         <ul className="rec-list">
           {rows.map((r) => (

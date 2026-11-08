@@ -11,6 +11,7 @@ import "./admin.css";
 import { AdminAccount } from "./AdminAccount";
 import { AdminBottomNav, AdminTabs } from "./AdminTabs";
 import { platformAdmin } from "./guard";
+import { SignOutForm } from "@/components/SignOutForm";
 
 /**
  * LeMoSp ADMIN normally runs on its own web address (src/lib/hosts.ts): there the root layout
@@ -62,11 +63,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/two-step" className="btn">
               {tr("Two-step verification")}
             </Link>
-            <form action={signOut}>
+            <SignOutForm action={signOut}>
               <button type="submit" className="btn">
                 {tr("Sign out")}
               </button>
-            </form>
+            </SignOutForm>
           </div>
         </div>
       );

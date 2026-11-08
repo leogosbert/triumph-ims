@@ -7,6 +7,7 @@ import { signOut, switchCompany } from "@/app/actions";
 import { setTheme } from "@/app/theme-actions";
 import { Icon, type IconName } from "@/components/Icon";
 import { useTr } from "@/lib/tr-client";
+import { SignOutForm } from "@/components/SignOutForm";
 
 export type CompanyCard = {
   name: string;
@@ -210,11 +211,11 @@ export function CompanySheet({ card }: { card: CompanyCard }) {
             </div>
           )}
 
-          <form action={signOut}>
+          <SignOutForm action={signOut}>
             <button type="submit" className="btn btn-block btn-danger csheet-out">
               {tr("Sign out")}
             </button>
-          </form>
+          </SignOutForm>
         </div>
 
         <div className="csheet-grab" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>

@@ -20,6 +20,7 @@ import { readNotice, type SearchParams } from "@/lib/messages";
 import { ROLE_LABELS } from "@/lib/roles";
 import { Hint, SettingsHead } from "../settings/SettingsHead";
 import { changePassword, updateProfile } from "./actions";
+import { SignOutForm } from "@/components/SignOutForm";
 
 export const metadata = { title: "Account" };
 
@@ -206,9 +207,9 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
       <section className="card" id="sign-out">
         <h2>{tr("Sign out")}</h2>
         <p className="st-card-lead">{tr("Sign out on shared phones and computers when you finish.")}</p>
-        <form action={signOut}>
+        <SignOutForm action={signOut}>
           <SubmitButton className="btn btn-block btn-danger" pendingText={tr("Signing out…")}>{tr("Sign out")}</SubmitButton>
-        </form>
+        </SignOutForm>
       </section>
 
       {!user.is_anonymous && (

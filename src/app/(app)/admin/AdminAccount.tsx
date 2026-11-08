@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { signOut } from "@/app/actions";
 import { useTr } from "@/lib/tr-client";
+import { SignOutForm } from "@/components/SignOutForm";
 
 /** The signed-in admin: initials in the bar, and a small menu with the company app and Sign out. */
 export function AdminAccount({ name, companyApp, newTab, canSignOut }: { name: string; companyApp: string | null; newTab: boolean; canSignOut: boolean }) {
@@ -61,11 +62,11 @@ export function AdminAccount({ name, companyApp, newTab, canSignOut }: { name: s
           {tr("Two-step verification")}
         </a>
         {canSignOut && (
-          <form action={signOut}>
+          <SignOutForm action={signOut}>
             <button type="submit" role="menuitem">
               {tr("Sign out")}
             </button>
-          </form>
+          </SignOutForm>
         )}
       </div>
     </details>

@@ -2429,6 +2429,7 @@ export const SW: Record<string, string> = {
   "Sign in": "Ingia",
   "Sign in or create an account": "Ingia au fungua akaunti",
   "Sign out": "Toka",
+  "Sign out of LeMoSp on this device? You will need your password to come back.": "Utoke LeMoSp kwenye kifaa hiki? Utahitaji nenosiri lako kurudi.",
   "Signature": "Sahihi",
   "Signed delivery note": "Hati ya uwasilishaji iliyosainiwa",
   "Signed-in users don't have access to the app's tables yet.": "Watumiaji walioingia bado hawana ruhusa ya kufikia majedwali ya programu.",

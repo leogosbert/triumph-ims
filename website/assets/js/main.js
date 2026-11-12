@@ -18,6 +18,10 @@
   }
   window.TRIUMPH_PHOTO = photo;
 
+  /* Phones: no pinch zoom. The viewport tag covers Android; iPhone Safari ignores it for pinch, so stop its pinch
+     events here (no touchmove listener, so scrolling is unchanged). Double-tap zoom is off in site.css. */
+  ["gesturestart", "gesturechange", "gestureend"].forEach((t) => document.addEventListener(t, (e) => e.preventDefault(), { passive: false }));
+
   function wireImg(img) {
     if (img.dataset.wired) return;
     img.dataset.wired = "1";
